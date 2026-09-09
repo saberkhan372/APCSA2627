@@ -1,0 +1,911 @@
+[
+  {
+    "id": "APC",
+    "name": "AP Classroom question bank",
+    "slots": "8, 9, 21, 28, 29, 39, 54, 56, 58, 59, 64, 65, 66, 67, 68, 69",
+    "url": "https://apclassroom.collegeboard.org/",
+    "kind": "official"
+  },
+  {
+    "id": "BB",
+    "name": "Bluebook test preview",
+    "slots": "70, 71, 72",
+    "url": "https://bluebook.collegeboard.org/",
+    "kind": "official"
+  },
+  {
+    "id": "CED",
+    "name": "Fall 2025 AP CSA CED",
+    "slots": "Optional / reference",
+    "url": "https://apcentral.collegeboard.org/media/pdf/ap-computer-science-a-course-and-exam-description.pdf",
+    "kind": "official"
+  },
+  {
+    "id": "F24",
+    "name": "2024 released FRQs",
+    "slots": "19, 20, 62, 63",
+    "url": "https://apcentral.collegeboard.org/media/pdf/ap24-frq-comp-sci-a.pdf",
+    "kind": "official"
+  },
+  {
+    "id": "F25",
+    "name": "2025 released FRQs",
+    "slots": "61",
+    "url": "https://apcentral.collegeboard.org/media/pdf/ap25-frq-computer-science-a.pdf",
+    "kind": "official"
+  },
+  {
+    "id": "F26",
+    "name": "2026 released FRQs: Account, Bottle, Attendance, GameBoard",
+    "slots": "29, 43, 48, 60",
+    "url": "https://apcentral.collegeboard.org/media/pdf/ap26-frq-computer-science-a.pdf",
+    "kind": "official"
+  },
+  {
+    "id": "H01",
+    "name": "String Activity",
+    "slots": "6",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "H02",
+    "name": "String Output Lineup",
+    "slots": "7",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "H04",
+    "name": "Loop Programs",
+    "slots": "16",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "H05",
+    "name": "Duck class diagram",
+    "slots": "21, 22",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "H06",
+    "name": "Elevator Lab",
+    "slots": "28",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "H07",
+    "name": "NumberList Lab",
+    "slots": "Optional / reference",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "H08",
+    "name": "Sequential and Binary Search Lab",
+    "slots": "49, 50",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "JQR",
+    "name": "Current Java Quick Reference",
+    "slots": "4, 5, 6, 7, 9, 19, 29, 34, 36, 38, 53, 56, 58, 60, 61, 64, 65, 66, 67, 68, 69, 70, 71",
+    "url": "https://apcentral.collegeboard.org/media/pdf/ap-computer-science-a-java-quick-reference.pdf",
+    "kind": "official"
+  },
+  {
+    "id": "L01",
+    "name": "Chapter 1 Lab Exercise 5: compiler errors",
+    "slots": "1, 2",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L02",
+    "name": "Two Meanings of Plus",
+    "slots": "2, 3",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L03",
+    "name": "Area and Circumference of a Circle",
+    "slots": "3",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L04",
+    "name": "Painting a Room",
+    "slots": "3",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L05",
+    "name": "Working with Strings",
+    "slots": "6",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L06",
+    "name": "Rolling Dice",
+    "slots": "4",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L07",
+    "name": "Activities at Lake LazyDays",
+    "slots": "10",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L08",
+    "name": "Date Validation",
+    "slots": "10, 11",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L09",
+    "name": "Powers of 2",
+    "slots": "16",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L10",
+    "name": "Finding Maximum and Minimum Values",
+    "slots": "16, 17",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L11",
+    "name": "Band Booster Class",
+    "slots": "22, 23",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L12",
+    "name": "StepTracker: 2019 FRQ 2",
+    "slots": "27, 28, 61, 79",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L13",
+    "name": "Tracing References",
+    "slots": "5",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L14",
+    "name": "Changing People: parameter passing",
+    "slots": "24",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L15",
+    "name": "Counting Transactions",
+    "slots": "25",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L16",
+    "name": "Tracking Sales: Basic Arrays",
+    "slots": "31",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L17",
+    "name": "Reversing an Array",
+    "slots": "32, 33",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L18",
+    "name": "Shopping Cart using an ArrayList",
+    "slots": "41, 42, 73, 74, 75, 76, 77, 78",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L19",
+    "name": "Magic Squares",
+    "slots": "45, 46, 47",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L20",
+    "name": "Picture Lab student guide",
+    "slots": "Optional / reference",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L21",
+    "name": "Chapter 7.5 A: Inventory Auditor",
+    "slots": "34, 35",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L22",
+    "name": "Chapter 7.5 B: Weather Data Analyzer",
+    "slots": "35, 36, 37",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L23",
+    "name": "Recursion Practice In Class",
+    "slots": "52",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L24",
+    "name": "Recursion Practice homework",
+    "slots": "52",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "L25",
+    "name": "Searching and Sorting in an Integer List",
+    "slots": "50, 51",
+    "url": "",
+    "kind": "classroom"
+  },
+  {
+    "id": "W02",
+    "name": "Make numeric types visible",
+    "slots": "3",
+    "url": "",
+    "kind": "project",
+    "runTarget": "ExpressionLab",
+    "checkTarget": "ExpressionLabCheck",
+    "files": [
+      "ExpressionLab.java",
+      "ExpressionLabCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W03",
+    "name": "Control a random range",
+    "slots": "4",
+    "url": "",
+    "kind": "project",
+    "runTarget": "DiceLab",
+    "checkTarget": "DiceLabCheck",
+    "files": [
+      "DiceLab.java",
+      "DiceLabCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W06",
+    "name": "Trace references and aliases",
+    "slots": "5",
+    "url": "",
+    "kind": "project",
+    "runTarget": "AliasingLab",
+    "checkTarget": "AliasingCheck",
+    "files": [
+      "AliasingCheck.java",
+      "AliasingLab.java",
+      "Player.java",
+      "README.md",
+      "TRACE.md"
+    ]
+  },
+  {
+    "id": "W07",
+    "name": "Index a String safely",
+    "slots": "6",
+    "url": "",
+    "kind": "project",
+    "runTarget": "WordTools",
+    "checkTarget": "WordToolsCheck",
+    "files": [
+      "README.md",
+      "WordTools.java",
+      "WordToolsCheck.java"
+    ]
+  },
+  {
+    "id": "W08",
+    "name": "Compare String contents",
+    "slots": "7",
+    "url": "",
+    "kind": "project",
+    "runTarget": "StringRelations",
+    "checkTarget": "StringRelationsCheck",
+    "files": [
+      "README.md",
+      "StringRelations.java",
+      "StringRelationsCheck.java"
+    ]
+  },
+  {
+    "id": "W09",
+    "name": "Build a one-pass String algorithm",
+    "slots": "17",
+    "url": "",
+    "kind": "project",
+    "runTarget": "LetterAlgorithms",
+    "checkTarget": "LetterAlgorithmsCheck",
+    "files": [
+      "LetterAlgorithms.java",
+      "LetterAlgorithmsCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W10",
+    "name": "Retrieve, diagnose, target",
+    "slots": "8, 59",
+    "url": "",
+    "kind": "project",
+    "runTarget": "Unit1Review",
+    "checkTarget": "Unit1ReviewCheck",
+    "files": [
+      "README.md",
+      "Unit1Review.java",
+      "Unit1ReviewCheck.java"
+    ]
+  },
+  {
+    "id": "W12",
+    "name": "Selection speed-run",
+    "slots": "10",
+    "url": "",
+    "kind": "project",
+    "runTarget": "DecisionAudit",
+    "checkTarget": "DecisionAuditCheck",
+    "files": [
+      "DecisionAudit.java",
+      "DecisionAuditCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W13",
+    "name": "Compound decisions",
+    "slots": "11",
+    "url": "",
+    "kind": "project",
+    "runTarget": "Admission",
+    "checkTarget": "AdmissionCheck",
+    "files": [
+      "Admission.java",
+      "AdmissionCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W14",
+    "name": "Prove a Boolean equivalence",
+    "slots": "11",
+    "url": "",
+    "kind": "project",
+    "runTarget": "BooleanLab",
+    "checkTarget": "BooleanLabCheck",
+    "files": [
+      "BooleanLab.java",
+      "BooleanLabCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W15",
+    "name": "Negation repair shop",
+    "slots": "11",
+    "url": "",
+    "kind": "project",
+    "runTarget": "Eligibility",
+    "checkTarget": "EligibilityCheck",
+    "files": [
+      "Eligibility.java",
+      "EligibilityCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W16",
+    "name": "Trace the loop before writing it",
+    "slots": "12",
+    "url": "",
+    "kind": "project",
+    "runTarget": "LoopTrace",
+    "checkTarget": "LoopTraceCheck",
+    "files": [
+      "LoopTrace.java",
+      "LoopTraceCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W17",
+    "name": "Scan a String safely",
+    "slots": "17",
+    "url": "",
+    "kind": "project",
+    "runTarget": "StringScan",
+    "checkTarget": "StringScanCheck",
+    "files": [
+      "README.md",
+      "StringScan.java",
+      "StringScanCheck.java"
+    ]
+  },
+  {
+    "id": "W18",
+    "name": "Build and test String algorithms",
+    "slots": "17, 20",
+    "url": "",
+    "kind": "project",
+    "runTarget": "StringAlgorithms",
+    "checkTarget": "StringAlgorithmsCheck",
+    "files": [
+      "README.md",
+      "StringAlgorithms.java",
+      "StringAlgorithmsCheck.java"
+    ]
+  },
+  {
+    "id": "W19",
+    "name": "Nested iteration",
+    "slots": "18",
+    "url": "",
+    "kind": "project",
+    "runTarget": "PatternLab",
+    "checkTarget": "PatternLabCheck",
+    "files": [
+      "PatternLab.java",
+      "PatternLabCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W20",
+    "name": "Count executions, not milliseconds",
+    "slots": "18, 20",
+    "url": "",
+    "kind": "project",
+    "runTarget": "RuntimeLab",
+    "checkTarget": "RuntimeLabCheck",
+    "files": [
+      "README.md",
+      "RuntimeLab.java",
+      "RuntimeLabCheck.java"
+    ]
+  },
+  {
+    "id": "W23",
+    "name": "Design the class boundary",
+    "slots": "22",
+    "url": "",
+    "kind": "project",
+    "runTarget": "ClassDesign",
+    "checkTarget": "ClassDesignCheck",
+    "files": [
+      "ClassDesign.java",
+      "ClassDesignCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W25",
+    "name": "Construct a valid object",
+    "slots": "23",
+    "url": "",
+    "kind": "project",
+    "runTarget": "Bicycle",
+    "checkTarget": "BicycleCheck",
+    "files": [
+      "Bicycle.java",
+      "BicycleCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W26",
+    "name": "Overload without duplicating rules",
+    "slots": "23",
+    "url": "",
+    "kind": "project",
+    "runTarget": "Card",
+    "checkTarget": "CardCheck",
+    "files": [
+      "Card.java",
+      "CardCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W27",
+    "name": "Return information, not output",
+    "slots": "23",
+    "url": "",
+    "kind": "project",
+    "runTarget": "Elevator",
+    "checkTarget": "ElevatorCheck",
+    "files": [
+      "Elevator.java",
+      "ElevatorCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W29",
+    "name": "Pass references with intent",
+    "slots": "24",
+    "url": "",
+    "kind": "project",
+    "runTarget": "PlayerRoster",
+    "checkTarget": "PlayerRosterCheck",
+    "files": [
+      "Player.java",
+      "PlayerRoster.java",
+      "PlayerRosterCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W30",
+    "name": "Share state with static",
+    "slots": "25",
+    "url": "",
+    "kind": "project",
+    "runTarget": "Ticket",
+    "checkTarget": "TicketCheck",
+    "files": [
+      "README.md",
+      "Ticket.java",
+      "TicketCheck.java"
+    ]
+  },
+  {
+    "id": "W31",
+    "name": "Audit static method access",
+    "slots": "25",
+    "url": "",
+    "kind": "project",
+    "runTarget": "CounterTools",
+    "checkTarget": "CounterToolsCheck",
+    "files": [
+      "CounterTools.java",
+      "CounterToolsCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W32",
+    "name": "Resolve scope with this",
+    "slots": "26",
+    "url": "",
+    "kind": "project",
+    "runTarget": "HotelRoom",
+    "checkTarget": "HotelRoomCheck",
+    "files": [
+      "HotelRoom.java",
+      "HotelRoomCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W36",
+    "name": "Audit a data decision",
+    "slots": "30",
+    "url": "",
+    "kind": "project",
+    "runTarget": "DataConsent",
+    "checkTarget": "DataConsentCheck",
+    "files": [
+      "DataConsent.java",
+      "DataConsentCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W37",
+    "name": "Match data to a question",
+    "slots": "30, 37, 55",
+    "url": "",
+    "kind": "project",
+    "runTarget": "DatasetFit",
+    "checkTarget": "DatasetFitCheck",
+    "files": [
+      "DatasetFit.java",
+      "DatasetFitCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W38",
+    "name": "Create and index arrays safely",
+    "slots": "31",
+    "url": "",
+    "kind": "project",
+    "runTarget": "ArrayAccess",
+    "checkTarget": "ArrayAccessCheck",
+    "files": [
+      "ArrayAccess.java",
+      "ArrayAccessCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W39",
+    "name": "Traverse exactly once",
+    "slots": "32",
+    "url": "",
+    "kind": "project",
+    "runTarget": "ArrayTraversal",
+    "checkTarget": "ArrayTraversalCheck",
+    "files": [
+      "ArrayTraversal.java",
+      "ArrayTraversalCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W40",
+    "name": "Know the enhanced-for limit",
+    "slots": "32",
+    "url": "",
+    "kind": "project",
+    "runTarget": "ForEachLimits",
+    "checkTarget": "ForEachLimitsCheck",
+    "files": [
+      "ForEachLimits.java",
+      "ForEachLimitsCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W41",
+    "name": "Build the array algorithm toolkit",
+    "slots": "33",
+    "url": "",
+    "kind": "project",
+    "runTarget": "ArrayAlgorithms",
+    "checkTarget": "ArrayAlgorithmsCheck",
+    "files": [
+      "ArrayAlgorithms.java",
+      "ArrayAlgorithmsCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W42",
+    "name": "Shift without overwriting",
+    "slots": "33",
+    "url": "",
+    "kind": "project",
+    "runTarget": "ArrayShift",
+    "checkTarget": "ArrayShiftCheck",
+    "files": [
+      "ArrayShift.java",
+      "ArrayShiftCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W44",
+    "name": "Read tokens with File and Scanner",
+    "slots": "34, 39",
+    "url": "",
+    "kind": "project",
+    "runTarget": "TokenReader",
+    "checkTarget": "TokenReaderCheck",
+    "files": [
+      "README.md",
+      "TokenReader.java",
+      "TokenReaderCheck.java",
+      "tokens.txt"
+    ]
+  },
+  {
+    "id": "W45",
+    "name": "Inventory Auditor",
+    "slots": "35",
+    "url": "",
+    "kind": "project",
+    "runTarget": "InventoryAudit",
+    "checkTarget": "InventoryAuditCheck",
+    "files": [
+      "InventoryAudit.java",
+      "InventoryAuditCheck.java",
+      "README.md",
+      "inventory.txt"
+    ]
+  },
+  {
+    "id": "W46",
+    "name": "Weather Data Analyzer",
+    "slots": "36, 37, 55, 73, 74, 75, 76, 77, 78, 79",
+    "url": "",
+    "kind": "project",
+    "runTarget": "WeatherData",
+    "checkTarget": "WeatherDataCheck",
+    "files": [
+      "README.md",
+      "WeatherData.java",
+      "WeatherDataCheck.java",
+      "weather.txt"
+    ]
+  },
+  {
+    "id": "W48",
+    "name": "Cross the wrapper boundary",
+    "slots": "36, 38, 39",
+    "url": "",
+    "kind": "project",
+    "runTarget": "WrapperLab",
+    "checkTarget": "WrapperLabCheck",
+    "files": [
+      "README.md",
+      "WrapperLab.java",
+      "WrapperLabCheck.java"
+    ]
+  },
+  {
+    "id": "W49",
+    "name": "Use the five ArrayList methods",
+    "slots": "38, 41",
+    "url": "",
+    "kind": "project",
+    "runTarget": "ListMethods",
+    "checkTarget": "ListMethodsCheck",
+    "files": [
+      "ListMethods.java",
+      "ListMethodsCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W50",
+    "name": "Traverse a changing-size collection",
+    "slots": "40, 41, 55",
+    "url": "",
+    "kind": "project",
+    "runTarget": "ListTraversal",
+    "checkTarget": "ListTraversalCheck",
+    "files": [
+      "ListTraversal.java",
+      "ListTraversalCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W51",
+    "name": "Remove without skipping",
+    "slots": "40, 42, 57, 59, 62",
+    "url": "",
+    "kind": "project",
+    "runTarget": "ListRemoval",
+    "checkTarget": "ListRemovalCheck",
+    "files": [
+      "ListRemoval.java",
+      "ListRemovalCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W54",
+    "name": "Turn pixel position into row and column",
+    "slots": "44",
+    "url": "",
+    "kind": "project",
+    "runTarget": "GridBridge",
+    "checkTarget": "GridBridgeCheck",
+    "files": [
+      "GridBridge.java",
+      "GridBridgeCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W55",
+    "name": "Trace row-major traversal",
+    "slots": "45",
+    "url": "",
+    "kind": "project",
+    "runTarget": "GridTraversal",
+    "checkTarget": "GridTraversalCheck",
+    "files": [
+      "GridTraversal.java",
+      "GridTraversalCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W56",
+    "name": "Build row and column algorithms",
+    "slots": "45, 46, 47, 54, 55, 57, 63, 73, 74, 75, 76, 77, 78, 79",
+    "url": "",
+    "kind": "project",
+    "runTarget": "GridAlgorithms",
+    "checkTarget": "GridAlgorithmsCheck",
+    "files": [
+      "GridAlgorithms.java",
+      "GridAlgorithmsCheck.java",
+      "README.md"
+    ]
+  },
+  {
+    "id": "W62",
+    "name": "Choose sequential or binary search",
+    "slots": "48, 49, 50",
+    "url": "",
+    "kind": "project",
+    "runTarget": "SearchLab",
+    "checkTarget": "SearchLabCheck",
+    "files": [
+      "README.md",
+      "SearchLab.java",
+      "SearchLabCheck.java"
+    ]
+  },
+  {
+    "id": "W63",
+    "name": "Trace sorting invariants",
+    "slots": "51, 54, 57",
+    "url": "",
+    "kind": "project",
+    "runTarget": "SortTrace",
+    "checkTarget": "SortTraceCheck",
+    "files": [
+      "README.md",
+      "SortTrace.java",
+      "SortTraceCheck.java"
+    ]
+  },
+  {
+    "id": "W64",
+    "name": "Trace recursion without writing it",
+    "slots": "52, 54",
+    "url": "",
+    "kind": "project",
+    "runTarget": "RecursionTrace",
+    "checkTarget": "RecursionTraceCheck",
+    "files": [
+      "README.md",
+      "RecursionTrace.java",
+      "RecursionTraceCheck.java"
+    ]
+  },
+  {
+    "id": "W65",
+    "name": "Trace recursive search and merge sort",
+    "slots": "53, 57",
+    "url": "",
+    "kind": "project",
+    "runTarget": "RecursiveAlgorithms",
+    "checkTarget": "RecursiveAlgorithmsCheck",
+    "files": [
+      "README.md",
+      "RecursiveAlgorithms.java",
+      "RecursiveAlgorithmsCheck.java"
+    ]
+  }
+]

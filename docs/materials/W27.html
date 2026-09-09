@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Return information, not output · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W27 · project</p><h1>Return information, not output</h1></header><p class="lede">Write methods whose return values let client code make the next decision.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W27.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>Elevator</code>, then complete the starter tasks.</li><li>Run <code>ElevatorCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>Why is a method that prints the current floor less reusable than one that returns an int?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>public boolean canMoveUp() {
+  return floor &lt; topFloor;
+}</code></pre><p>A return type is a contract. Every reachable path must produce a compatible value.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Run the baseline</strong><p>Observe which query lies.</p><p class="help">Check: canMoveUp returns false on floor 1.</p></li><li><strong>Return current state</strong><p>Implement getFloor.</p><p class="help">Check: Initial and moved-floor checks pass.</p></li><li><strong>Return a condition</strong><p>Implement canMoveUp and canMoveDown.</p><p class="help">Check: Boundary checks pass.</p></li><li><strong>Use the query</strong><p>Make moveUp respect canMoveUp.</p><p class="help">Check: The elevator cannot cross the top floor.</p></li></ol></section><section><h2>AP transfer</h2><p>Write a public method isFull for a Theater whose private seatsTaken and capacity fields are ints.</p></section><section><h2>Explain your work</h2><p>Where did returning a value make the client simpler?</p></section><section><h2>Included files</h2><ul><li><code>Elevator.java</code></li><li><code>ElevatorCheck.java</code></li><li><code>README.md</code></li></ul></section><details class="code-example"><summary>Read starter: Elevator.java</summary><pre><code>public class Elevator {
+    private int floor;
+    private int topFloor;
+
+    public Elevator(int topFloor) {
+        this.floor = 1;
+        this.topFloor = topFloor;
+    }
+
+    public int getFloor() {
+        // TODO
+        return 0;
+    }
+
+    public boolean canMoveUp() {
+        // TODO
+        return false;
+    }
+
+    public boolean canMoveDown() {
+        // TODO
+        return false;
+    }
+
+    public void moveUp() {
+        floor++;
+    }
+
+    public void moveDown() {
+        floor--;
+    }
+
+    public static void main(String[] args) {
+        Elevator lift = new Elevator(4);
+        System.out.println(&quot;floor &quot; + lift.getFloor());
+        System.out.println(lift.canMoveUp());
+    }
+}
+
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-11-11"><strong>Nov 11</strong><span>Wed · 13:00-14:15</span></time><div><a href="../days/2026-11-11.html">BandBooster methods and tests</a><span class="meta">U3 · 3.4,3.5</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

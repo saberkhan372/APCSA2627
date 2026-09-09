@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Shift without overwriting · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W42 · project</p><h1>Shift without overwriting</h1></header><p class="lede">Choose traversal direction that preserves source values during rearrangement.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W42.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>ArrayShift</code>, then complete the starter tasks.</li><li>Run <code>ArrayShiftCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>When shifting elements one position right in the same array, why must traversal start at the right end?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>for (int i = values.length - 1; i &gt; 0; i--) {
+  values[i] = values[i - 1];
+}</code></pre><p>For in-place algorithms, trace which values are still needed. Traversal direction is part of correctness.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Reproduce overwrite</strong><p>Trace [1,2,3,4] left to right.</p><p class="help">Check: Array becomes repeated ones.</p></li><li><strong>Reverse direction</strong><p>Repair shiftRight.</p><p class="help">Check: All original sources preserved.</p></li><li><strong>Insert a value</strong><p>Shift then write index zero.</p><p class="help">Check: Insert checks pass.</p></li><li><strong>Draw the invariant</strong><p>Mark processed and unprocessed regions.</p><p class="help">Check: Unprocessed sources remain intact.</p></li></ol></section><section><h2>AP transfer</h2><p>Write an algorithm that removes the element at index k by shifting later elements left. State the loop start and bound.</p></section><section><h2>Explain your work</h2><p>How did the trace reveal the required traversal direction?</p></section><section><h2>Included files</h2><ul><li><code>ArrayShift.java</code></li><li><code>ArrayShiftCheck.java</code></li><li><code>README.md</code></li></ul></section><details class="code-example"><summary>Read starter: ArrayShift.java</summary><pre><code>import java.util.Arrays;
+
+public class ArrayShift {
+    public static void shiftRight(int[] values) {
+        // BUG: this direction overwrites source values.
+        for (int i = 1; i &lt; values.length; i++) {
+            values[i] = values[i - 1];
+        }
+    }
+
+    public static void insertFront(int[] values, int value) {
+        // TODO: shift, then replace index zero when it exists.
+    }
+
+    public static void main(String[] args) {
+        int[] values = {1, 2, 3, 4};
+        shiftRight(values);
+        System.out.println(Arrays.toString(values));
+    }
+}
+
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-12-16"><strong>Dec 16</strong><span>Wed · 09:30-10:45</span></time><div><a href="../days/2026-12-16.html">Array algorithms and reversal checkpoint</a><span class="meta">U4 · 4.5</span></div><span class="kind">Checkpoint</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

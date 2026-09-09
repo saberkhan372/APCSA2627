@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Read tokens with File and Scanner · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W44 · project</p><h1>Read tokens with File and Scanner</h1></header><p class="lede">Open a text file, traverse tokens with hasNext, and close the Scanner.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W44.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>TokenReader</code>, then complete the starter tasks.</li><li>Run <code>TokenReaderCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>What two different failures can occur if the file name is correct Java but the file is not in the program&#x27;s working directory?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>Scanner input = new Scanner(new File(path));
+while (input.hasNext()) {
+  String token = input.next();
+}
+input.close();</code></pre><p>The exam reference lists hasNext. Real editors may also support more specialized Scanner methods, but build exam answers from the listed subset.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Locate the working directory</strong><p>Run the unchanged project from the project folder.</p><p class="help">Check: tokens.txt is found.</p></li><li><strong>Count tokens</strong><p>Use hasNext and next.</p><p class="help">Check: Empty and multi-token files pass.</p></li><li><strong>Close the resource</strong><p>Close after traversal.</p><p class="help">Check: Resource step documented.</p></li><li><strong>Explain failure layers</strong><p>Separate compile-time from runtime file failure.</p><p class="help">Check: Both layers named.</p></li></ol></section><section><h2>AP transfer</h2><p>Write the loop that reads every whitespace-delimited token from a Scanner named input and counts tokens equal to target.</p></section><section><h2>Explain your work</h2><p>What file assumption did your editor make that the Java source did not show?</p></section><section><h2>Included files</h2><ul><li><code>README.md</code></li><li><code>TokenReader.java</code></li><li><code>TokenReaderCheck.java</code></li><li><code>tokens.txt</code></li></ul></section><details class="code-example"><summary>Read starter: TokenReader.java</summary><pre><code>import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
+public class TokenReader {
+    public static int countTokens(String path) throws FileNotFoundException {
+        Scanner input = new Scanner(new File(path));
+        // TODO: guard next() with hasNext() and count every token.
+        input.close();
+        return 0;
+    }
+
+    public static void main(String[] args) throws FileNotFoundException {
+        System.out.println(countTokens(&quot;tokens.txt&quot;));
+    }
+}
+
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2027-01-06"><strong>Jan 06</strong><span>Wed · 14:25-15:40</span></time><div><a href="../days/2027-01-06.html">TokenReader: text-file input</a><span class="meta">U4 · 4.5,4.6</span></div><span class="kind">Class</span></li><li class="day-line"><time datetime="2027-01-22"><strong>Jan 22</strong><span>Fri · 13:00-14:15</span></time><div><a href="../days/2027-01-22.html">Arrays and files checkpoint</a><span class="meta">U4 · 4.3-4.8</span></div><span class="kind">Checkpoint</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

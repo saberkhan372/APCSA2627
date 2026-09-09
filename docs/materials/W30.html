@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Share state with static · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W30 · project</p><h1>Share state with static</h1></header><p class="lede">Distinguish one value per class from one value per object.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W30.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>Ticket</code>, then complete the starter tasks.</li><li>Run <code>TicketCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>Three Ticket objects are created. How many copies of nextId exist if it is static, and how many if it is an instance variable?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>private static int nextId = 1;
+private int id;
+
+public Ticket() {
+  id = nextId;
+  nextId++;
+}</code></pre><p>Static belongs to the class. Use it for genuinely shared facts, not merely to make instance access convenient.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Observe the bug</strong><p>Create two tickets and compare ids.</p><p class="help">Check: Both placeholder ids match.</p></li><li><strong>Add shared state</strong><p>Declare and update nextId.</p><p class="help">Check: Ids become sequential.</p></li><li><strong>Count objects</strong><p>Implement getCreatedCount as a class method.</p><p class="help">Check: Count tracks all instances.</p></li><li><strong>Label ownership</strong><p>Mark each field class or instance.</p><p class="help">Check: nextId shared; id individual.</p></li></ol></section><section><h2>AP transfer</h2><p>Design fields for a LibraryBook where title differs per object but libraryName is shared. Include access modifiers and static where appropriate.</p></section><section><h2>Explain your work</h2><p>What would break if id were static too?</p></section><section><h2>Included files</h2><ul><li><code>README.md</code></li><li><code>Ticket.java</code></li><li><code>TicketCheck.java</code></li></ul></section><details class="code-example"><summary>Read starter: Ticket.java</summary><pre><code>public class Ticket {
+    private static int nextId = 1;
+    private int id;
+
+    public Ticket() {
+        // TODO: assign id and advance the shared counter.
+        id = 0;
+    }
+
+    public int getId() { return id; }
+
+    public static int getCreatedCount() {
+        // TODO
+        return 0;
+    }
+
+    public static void main(String[] args) {
+        Ticket first = new Ticket();
+        Ticket second = new Ticket();
+        System.out.println(first.getId() + &quot;, &quot; + second.getId());
+        System.out.println(&quot;created: &quot; + getCreatedCount());
+    }
+}
+
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-11-17"><strong>Nov 17</strong><span>Tue · 08:50-10:05</span></time><div><a href="../days/2026-11-17.html">Ticket static state</a><span class="meta">U3 · 3.7</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

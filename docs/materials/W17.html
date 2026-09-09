@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Scan a String safely · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W17 · project</p><h1>Scan a String safely</h1></header><p class="lede">Traverse every valid one-character substring without crossing a boundary.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W17.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>StringScan</code>, then complete the starter tasks.</li><li>Run <code>StringScanCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>For a String of length 6, list every legal i for substring(i, i + 1). What value of i would fail?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>for (int i = 0; i &lt; text.length(); i++) {
+  String current = text.substring(i, i + 1);
+  // inspect current
+}</code></pre><p>The end index is excluded, so i + 1 may equal length even though i may not.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Mark the bounds</strong><p>Write the first and last substring calls for banana.</p><p class="help">Check: First is (0,1); last is (5,6).</p></li><li><strong>Count matches</strong><p>Increment only when the one-character substring equals target.</p><p class="help">Check: Repeated and empty cases pass.</p></li><li><strong>Return the first index</strong><p>Return immediately on the first match; return -1 after the loop.</p><p class="help">Check: First, middle, and missing cases pass.</p></li><li><strong>Add a final-position test</strong><p>Test a target at text.length() - 1.</p><p class="help">Check: Prediction matches the returned index.</p></li></ol></section><section><h2>AP transfer</h2><p>Write a method body that returns the number of uppercase A characters in a String. Use only methods on the Java Quick Reference and state the safe loop bound.</p></section><section><h2>Explain your work</h2><p>Why may a substring end index equal length when a character index may not?</p></section><section><h2>Included files</h2><ul><li><code>README.md</code></li><li><code>StringScan.java</code></li><li><code>StringScanCheck.java</code></li></ul></section><details class="code-example"><summary>Read starter: StringScan.java</summary><pre><code>public class StringScan {
+    public static int countCharacter(String text, String target) {
+        // Precondition: target.length() == 1
+        return 0;
+    }
+
+    public static int firstIndexOf(String text, String target) {
+        // Precondition: target.length() == 1
+        // Return -1 when target does not occur.
+        return -1;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(countCharacter(&quot;banana&quot;, &quot;a&quot;));
+        System.out.println(firstIndexOf(&quot;banana&quot;, &quot;n&quot;));
+    }
+}
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-10-23"><strong>Oct 23</strong><span>Fri · 08:50-10:05</span></time><div><a href="../days/2026-10-23.html">String scan and removal algorithms</a><span class="meta">U2 · 2.9,2.10</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

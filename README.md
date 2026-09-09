@@ -1,0 +1,57 @@
+# AP CSA 2026-27
+
+Prepared for [saberkhan372/APCSA2627](https://github.com/saberkhan372/APCSA2627). The repository was empty when inspected on September 9, 2026. Intended Pages address after publishing: `https://saberkhan372.github.io/APCSA2627/`.
+
+This repository is a standalone static course website generated from the daily plan. It contains 75 instructional lesson pages, three explicit no-class dates, the AP exam date, 45 Java starter/check bundles, a materials library, setup directions and a reproducible standard-library Python build.
+
+## Folder guide
+
+```text
+docs/                    Ready-to-publish website; select this in GitHub Pages
+  index.html             Full dated assignment schedule
+  days/                  One page per calendar date
+  units/                 Topic and project navigation
+  materials/             Guides for each resource
+  downloads/lessons/      Daily assignment packets
+  downloads/projects/    Individual Java project ZIPs
+  assets/                Styles and optional Classroom links
+content/                 Editable course, material and lesson JSON
+projects/Wxx/            Original Java starters, checks and data fixtures
+web/                     Source styles and optional Classroom configuration
+tools/                   Build and verification scripts
+.github/workflows/       Optional manual Pages publishing workflow
+```
+
+Keep the separate `classroom-only` folder and PRIVATE ZIP outside this repository. The `Wxx` IDs identify source projects, not calendar lesson numbers.
+
+## Open locally
+
+Open `docs/index.html` directly, or run `python3 -m http.server 8765 --directory docs`. There is no npm install or backend. Every lesson and material page is static HTML and remains readable with JavaScript disabled.
+
+## Put it on GitHub Pages
+
+1. This repository contains the website package at its root. The prebuilt public website is in `docs/`.
+2. In **Settings > Pages**, choose **Deploy from a branch**, **main**, and **/docs**. The prebuilt site needs no custom build step.
+3. Alternatively, select **GitHub Actions** as the Pages source, then run **Publish course to GitHub Pages** manually. The included workflow builds, verifies and publishes only `docs/`. It does not deploy automatically on every push.
+
+All internal links are relative, so both `username.github.io/` and `username.github.io/repository-name/` work without a base-URL edit.
+
+Official instructions: https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site and https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
+
+## Update the course
+
+- Edit `content/course.json` for dates, assignments, evidence and homework.
+- Edit `content/lessons.json` for the existing Java lesson guides.
+- Edit a source in `projects/Wxx/` to revise a starter, check or fixture.
+- Add Classroom handout URLs in `web/classroom-links.js`, using the material IDs. Optionally add a single course Classroom URL for submissions.
+- Run `python3 tools/build_pages.py` and `python3 tools/verify_pages.py`, then upload the rebuilt site through your normal workflow.
+
+## Materials available elsewhere
+
+Publisher/APSI handouts are packaged separately in `APCSA-Classroom-Materials-PRIVATE.zip`, outside this repository. Upload those to Classroom or another authorized course system and enter their URLs by ID. The site labels these as Classroom handouts, without fake download links. Publicly released AP questions and the Java Quick Reference link directly to College Board. The posted Chapter 1 quiz/videos and future teacher-selected assessments are not invented or copied into the website.
+
+The repository contains no teacher solution directories, answer-key PDFs, student submissions, grade records, recordings or prior-course student export. The Java checks and worked teaching examples are intentionally student-facing; they are not private assessment keys.
+
+## Verification limits
+
+Static links, date coverage, downloads and package contents are checked by `verify_pages.py`. Java compilation was unavailable on the packaging computer; the download instructions identify each runner and check class. Browser interaction testing and live deployment were not performed.

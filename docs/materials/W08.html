@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Compare String contents · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W08 · project</p><h1>Compare String contents</h1></header><p class="lede">Choose equals or compareTo from the question being asked and reject reference equality as a content test.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W08.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>StringRelations</code>, then complete the starter tasks.</li><li>Run <code>StringRelationsCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>Let a be the literal cat and b be new String(&quot;cat&quot;). Predict a == b, a.equals(b), and a.compareTo(b). Explain why one result may surprise Processing users.</p></section><details class="code-example"><summary>Worked example</summary><pre><code>if (left.equals(right)) {
+  return 0;
+} else if (left.compareTo(right) &lt; 0) {
+  return -1;
+} else {
+  return 1;
+}</code></pre><p>Use equals for same contents and compareTo for ordering. Use == only when the question truly asks whether two references reach the same object.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Expose the identity trap</strong><p>Run a literal against a separately constructed equal String.</p><p class="help">Check: The prediction distinguishes == from equals.</p></li><li><strong>Implement sameText</strong><p>Use the content question&#x27;s method.</p><p class="help">Check: Literal and constructed cases pass.</p></li><li><strong>Normalize ordering</strong><p>Return -1, 0, or 1 from the sign of compareTo.</p><p class="help">Check: Before, equal, and after checks pass.</p></li><li><strong>Keep the preview labeled</strong><p>Identify split and Integer.parseInt as Unit 4 topics 4.6 and 4.7.</p><p class="help">Check: No preview method is required in this Unit 1 project.</p></li></ol></section><section><h2>AP transfer</h2><p>Write a three-branch expression or method that returns first, same, or second based only on the sign of left.compareTo(right). Do not assume an exact nonzero value.</p></section><section><h2>Explain your work</h2><p>What question does == answer for object variables, and why is that not the same question as equals?</p></section><section><h2>Included files</h2><ul><li><code>README.md</code></li><li><code>StringRelations.java</code></li><li><code>StringRelationsCheck.java</code></li></ul></section><details class="code-example"><summary>Read starter: StringRelations.java</summary><pre><code>public class StringRelations {
+    public static boolean sameText(String left, String right) {
+        // TODO: compare contents, not identity.
+        return left == right;
+    }
+
+    public static int order(String left, String right) {
+        // Return -1, 0, or 1 from the sign of compareTo.
+        return 0;
+    }
+
+    public static void main(String[] args) {
+        String a = &quot;cat&quot;;
+        String b = new String(&quot;cat&quot;);
+        System.out.println(sameText(a, b));
+        System.out.println(order(a, b));
+    }
+}
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-09-24"><strong>Sep 24</strong><span>Thu · 13:00-14:15</span></time><div><a href="../days/2026-09-24.html">String Output Lineup and StringRelations</a><span class="meta">U1 · 1.15</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

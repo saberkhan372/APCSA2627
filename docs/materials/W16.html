@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Trace the loop before writing it · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W16 · project</p><h1>Trace the loop before writing it</h1></header><p class="lede">Trace loop state and distinguish iteration count from final values.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W16.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>LoopTrace</code>, then complete the starter tasks.</li><li>Run <code>LoopTraceCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>For values 1, 3, 5, 7 produced by a loop, what is the next loop-control value after the final body execution? Why does that value not print?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>int sum = 0;
+int value = 1;
+while (value &lt;= 5) {
+  sum += value;
+  value++;
+}</code></pre><p>A trace table needs a row for the failed condition. Otherwise students often confuse the last body value with the final variable value.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Trace first</strong><p>Trace sumTo(3) on paper, including the failed condition.</p><p class="help">Check: Final row shows value 4 and sum 6.</p></li><li><strong>Implement sumTo</strong><p>Use a while loop and honor n &gt;= 0.</p><p class="help">Check: Empty and five-value checks pass.</p></li><li><strong>Implement countBy</strong><p>Use an inclusive for loop with a positive step.</p><p class="help">Check: Three count checks pass.</p></li><li><strong>Compare forms</strong><p>Identify initialization, test, body, and update in both loops.</p><p class="help">Check: Explain which form makes the update easiest to see.</p></li></ol></section><section><h2>AP transfer</h2><p>Without running code, give the output and final value of i for: for (int i = 2; i &lt;= 11; i += 3). Then state how many times the body executes.</p></section><section><h2>Explain your work</h2><p>Which trace-table column prevented your most likely mistake?</p></section><section><h2>Included files</h2><ul><li><code>LoopTrace.java</code></li><li><code>LoopTraceCheck.java</code></li><li><code>README.md</code></li></ul></section><details class="code-example"><summary>Read starter: LoopTrace.java</summary><pre><code>public class LoopTrace {
+    public static int sumTo(int n) {
+        // Precondition: n &gt;= 0
+        // TODO: use a while loop to return 1 + 2 + ... + n.
+        return 0;
+    }
+
+    public static int countBy(int start, int stop, int step) {
+        // Preconditions: start &lt;= stop and step &gt; 0
+        // TODO: return the number of values printed by start, start + step, ... &lt;= stop.
+        return 0;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(sumTo(5));
+        System.out.println(countBy(2, 10, 2));
+    }
+}
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-10-08"><strong>Oct 08</strong><span>Thu · 10:15-11:30</span></time><div><a href="../days/2026-10-08.html">LoopTrace and termination</a><span class="meta">U2 · 2.7</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

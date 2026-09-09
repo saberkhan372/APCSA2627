@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Nested iteration · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W19 · project</p><h1>Nested iteration</h1></header><p class="lede">Assign one responsibility to each loop and predict total executions.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W19.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>PatternLab</code>, then complete the starter tasks.</li><li>Run <code>PatternLabCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>In a five-row staircase, what does the outer loop control? What do the two inner loops control? Answer without writing code.</p></section><details class="code-example"><summary>Worked example</summary><pre><code>for (int row = 0; row &lt; size; row++) {
+  for (int dash = 0; dash &lt; row; dash++) {
+    result += &quot;-&quot;;
+  }
+  for (int star = row; star &lt; size; star++) {
+    result += &quot;*&quot;;
+  }
+}</code></pre><p>Name loops by purpose, not i/j/k, while designing. The variable names expose the output relationship.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Match loops to output</strong><p>Annotate which loop controls rows, dashes, and stars.</p><p class="help">Check: Every printed character has one responsible loop.</p></li><li><strong>Build the staircase</strong><p>Return exact newlines without adding one after the final row.</p><p class="help">Check: Size 1 and size 3 checks pass.</p></li><li><strong>Count factor pairs</strong><p>Use a &lt;= b so symmetric pairs are not counted twice.</p><p class="help">Check: Limit 2 and limit 5 checks pass.</p></li><li><strong>Count executions</strong><p>For size 5, total the two inner-loop body counts.</p><p class="help">Check: The two totals sum to 25 character writes.</p></li></ol></section><section><h2>AP transfer</h2><p>For nested loops with row from 1 through 4 and col from row through 4, list the number of inner executions per row and the total. Do not run code.</p></section><section><h2>Explain your work</h2><p>Which loop variable changed the width of each row?</p></section><section><h2>Included files</h2><ul><li><code>PatternLab.java</code></li><li><code>PatternLabCheck.java</code></li><li><code>README.md</code></li></ul></section><details class="code-example"><summary>Read starter: PatternLab.java</summary><pre><code>public class PatternLab {
+    public static String staircase(int size) {
+        // For size 3, return &quot;***\n-**\n--*&quot;.
+        return &quot;&quot;;
+    }
+
+    public static int countFactorPairs(int limit) {
+        // Count ordered pairs (a, b) with 1 &lt;= a &lt;= b &lt;= limit
+        // for which a * b is divisible by 6.
+        return 0;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(staircase(5));
+        System.out.println(countFactorPairs(5));
+    }
+}
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-10-27"><strong>Oct 27</strong><span>Tue · 14:25-15:40</span></time><div><a href="../days/2026-10-27.html">PatternLab and operation counts</a><span class="meta">U2 · 2.11,2.12</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

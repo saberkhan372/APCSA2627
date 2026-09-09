@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Build and test String algorithms · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W18 · project</p><h1>Build and test String algorithms</h1></header><p class="lede">Accumulate a new String and manage an index that sometimes advances twice.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W18.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>StringAlgorithms</code>, then complete the starter tasks.</li><li>Run <code>StringAlgorithmsCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>How many non-overlapping aa pairs are in aaaa? Commit to an answer and mark which characters each pair uses.</p></section><details class="code-example"><summary>Worked example</summary><pre><code>String result = &quot;&quot;;
+for (int i = 0; i &lt; text.length(); i++) {
+  String current = text.substring(i, i + 1);
+  if (!current.equals(target)) {
+    result += current;
+  }
+}</code></pre><p>State the invariant in words before coding. It tells you what result must mean after every iteration.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Define the invariant</strong><p>Complete: result contains every processed character except...</p><p class="help">Check: The sentence matches the specification.</p></li><li><strong>Remove a character</strong><p>Build and return a new String; do not mutate the original.</p><p class="help">Check: Typical, missing, and empty checks pass.</p></li><li><strong>Count non-overlapping pairs</strong><p>Use a while loop and advance by two after a match.</p><p class="help">Check: Pair and short-String checks pass.</p></li><li><strong>Write an original test</strong><p>Choose a case that distinguishes overlapping from non-overlapping counting.</p><p class="help">Check: Predict, run, and record the result.</p></li></ol></section><section><h2>AP transfer</h2><p>Write a method that returns a String containing only the digits from its parameter. Explain what the accumulator contains after i characters have been processed.</p></section><section><h2>Explain your work</h2><p>When did your loop advance by two, and what bug would advancing by one create?</p></section><section><h2>Included files</h2><ul><li><code>README.md</code></li><li><code>StringAlgorithms.java</code></li><li><code>StringAlgorithmsCheck.java</code></li></ul></section><details class="code-example"><summary>Read starter: StringAlgorithms.java</summary><pre><code>public class StringAlgorithms {
+    public static String removeCharacter(String text, String target) {
+        // Precondition: target.length() == 1
+        return &quot;&quot;;
+    }
+
+    public static int countDouble(String text, String target) {
+        // Precondition: target.length() == 1
+        // Count non-overlapping pairs such as &quot;aa&quot;.
+        return 0;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(removeCharacter(&quot;banana&quot;, &quot;a&quot;));
+        System.out.println(countDouble(&quot;baaaad&quot;, &quot;a&quot;));
+    }
+}
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-10-23"><strong>Oct 23</strong><span>Fri · 08:50-10:05</span></time><div><a href="../days/2026-10-23.html">String scan and removal algorithms</a><span class="meta">U2 · 2.9,2.10</span></div><span class="kind">Class</span></li><li class="day-line"><time datetime="2026-11-03"><strong>Nov 03</strong><span>Tue · 10:15-11:30</span></time><div><a href="../days/2026-11-03.html">Selection and iteration synthesis</a><span class="meta">U2 · 2.1-2.12</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

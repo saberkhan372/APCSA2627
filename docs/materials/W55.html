@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Trace row-major traversal · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W55 · project</p><h1>Trace row-major traversal</h1></header><p class="lede">Traverse every cell in row-major order with correct rectangular bounds.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W55.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>GridTraversal</code>, then complete the starter tasks.</li><li>Run <code>GridTraversalCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>For a 2-by-3 grid, how many times does the inner body run? Which expression supplies the inner bound?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>for (int row = 0; row &lt; grid.length; row++) {
+  for (int col = 0; col &lt; grid[row].length; col++) {
+    visit(grid[row][col]);
+  }
+}</code></pre><p>Never use grid.length for both bounds unless the specification guarantees square data.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Trace 2 by 3</strong><p>List row,col order.</p><p class="help">Check: (0,0) through (1,2).</p></li><li><strong>Repair inner bound</strong><p>Use current row length.</p><p class="help">Check: Rectangular check passes.</p></li><li><strong>Build row-major text</strong><p>Separate values predictably.</p><p class="help">Check: Order checks pass.</p></li><li><strong>Count visits</strong><p>Relate dimensions to executions.</p><p class="help">Check: 2×3 → 6.</p></li></ol></section><section><h2>AP transfer</h2><p>Give the row,col visit order for a 3-by-2 grid and state the final row and col values after both loops terminate.</p></section><section><h2>Explain your work</h2><p>What bug appears when square sample data hides a wrong inner bound?</p></section><section><h2>Included files</h2><ul><li><code>GridTraversal.java</code></li><li><code>GridTraversalCheck.java</code></li><li><code>README.md</code></li></ul></section><details class="code-example"><summary>Read starter: GridTraversal.java</summary><pre><code>public class GridTraversal {
+    public static String rowMajor(int[][] grid) {
+        String result = &quot;&quot;;
+        // BUG: grid.length is incorrectly used for both dimensions.
+        for (int row = 0; row &lt; grid.length; row++) {
+            for (int col = 0; col &lt; grid.length; col++) {
+                if (col &gt; 0) result += &quot; &quot;;
+                result += grid[row][col];
+            }
+            if (row &lt; grid.length - 1) result += &quot;\n&quot;;
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(rowMajor(new int[][]{{1, 2, 3}, {4, 5, 6}}));
+    }
+}
+
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2027-02-09"><strong>Feb 09</strong><span>Tue · 08:50-10:05</span></time><div><a href="../days/2027-02-09.html">GridTraversal and row/column sums</a><span class="meta">U4 · 4.12,4.13</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

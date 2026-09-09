@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Remove without skipping · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W51 · project</p><h1>Remove without skipping</h1></header><p class="lede">Remove matching elements while accounting for index shifts.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W51.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>ListRemoval</code>, then complete the starter tasks.</li><li>Run <code>ListRemovalCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>Why does incrementing i immediately after remove(i) skip the element that shifted into i?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>int i = 0;
+while (i &lt; values.size()) {
+  if (values.get(i) &lt; 0) values.remove(i);
+  else i++;
+}</code></pre><p>Forward with a conditional increment and backward traversal are both valid. Choose from the contract and explain the invariant.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Reproduce the skip</strong><p>Trace adjacent matches.</p><p class="help">Check: Shifted value is identified.</p></li><li><strong>Remove negatives</strong><p>Use conditional increment or traverse backward.</p><p class="help">Check: Adjacent and edge matches pass.</p></li><li><strong>Remove duplicates</strong><p>Compare neighbors and preserve one copy.</p><p class="help">Check: Runs of three pass.</p></li><li><strong>State the invariant</strong><p>Explain what portion is already clean.</p><p class="help">Check: Index shift appears in reasoning.</p></li></ol></section><section><h2>AP transfer</h2><p>Complete a loop that removes every String of length 0 from an ArrayList without skipping adjacent empty Strings.</p></section><section><h2>Explain your work</h2><p>Which traversal strategy do you trust more under exam time, and why?</p></section><section><h2>Included files</h2><ul><li><code>ListRemoval.java</code></li><li><code>ListRemovalCheck.java</code></li><li><code>README.md</code></li></ul></section><details class="code-example"><summary>Read starter: ListRemoval.java</summary><pre><code>import java.util.ArrayList;
+import java.util.Arrays;
+
+public class ListRemoval {
+    public static void removeNegatives(ArrayList&lt;Integer&gt; values) {
+        // BUG: incrementing after removal skips adjacent matches.
+        for (int i = 0; i &lt; values.size(); i++) {
+            if (values.get(i) &lt; 0) values.remove(i);
+        }
+    }
+
+    public static void removeConsecutiveDuplicates(ArrayList&lt;Integer&gt; values) {
+        // TODO: leave one value from each run.
+    }
+
+    public static void main(String[] args) {
+        ArrayList&lt;Integer&gt; values = new ArrayList&lt;&gt;(Arrays.asList(1, -2, -3, 2, 3));
+        removeNegatives(values);
+        System.out.println(values);
+    }
+}
+
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2027-01-26"><strong>Jan 26</strong><span>Tue · 10:15-11:30</span></time><div><a href="../days/2027-01-26.html">ListTraversal and safe removal</a><span class="meta">U4 · 4.9,4.10</span></div><span class="kind">Class</span></li><li class="day-line"><time datetime="2027-02-01"><strong>Feb 01</strong><span>Mon · 14:25-15:40</span></time><div><a href="../days/2027-02-01.html">Shopping Cart: mutation and review</a><span class="meta">U4 · 4.9,4.10</span></div><span class="kind">Project</span></li><li class="day-line"><time datetime="2027-03-16"><strong>Mar 16</strong><span>Tue · 08:50-10:05</span></time><div><a href="../days/2027-03-16.html">Unit 4 repair and consolidation</a><span class="meta">U4 · 4.1-4.17</span></div><span class="kind">Class</span></li><li class="day-line"><time datetime="2027-04-06"><strong>Apr 06</strong><span>Tue · 13:00-14:15</span></time><div><a href="../days/2027-04-06.html">Return from break and diagnostic repair</a><span class="meta">Review · 1.1-4.17</span></div><span class="kind">Review</span></li><li class="day-line"><time datetime="2027-04-14"><strong>Apr 14</strong><span>Wed · 14:25-15:40</span></time><div><a href="../days/2027-04-14.html">FRQ 3: WordChecker transfer</a><span class="meta">Review · 4.9,4.10</span></div><span class="kind">Review</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

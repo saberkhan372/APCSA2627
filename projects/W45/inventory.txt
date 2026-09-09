@@ -1,0 +1,4 @@
+pencils,4
+paper,18
+markers,7
+

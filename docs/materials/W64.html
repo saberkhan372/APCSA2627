@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Trace recursion without writing it · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W64 · project</p><h1>Trace recursion without writing it</h1></header><p class="lede">Identify base cases, recursive calls, and return values while unwinding.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W64.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>RecursionTrace</code>, then complete the starter tasks.</li><li>Run <code>RecursionTraceCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>For sumTo(3), list calls on the way down and returned values on the way back up.</p></section><details class="code-example"><summary>Worked example</summary><pre><code>public static int sumTo(int n) {
+  if (n == 0) return 0;
+  return n + sumTo(n - 1);
+}</code></pre><p>Separate call order from return order. The AP task is to analyze recursive code, not invent it from scratch.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Trace down</strong><p>List parameters until the base case.</p><p class="help">Check: Argument moves toward stopping.</p></li><li><strong>Trace up</strong><p>Record each returned value.</p><p class="help">Check: Pending operation applied once.</p></li><li><strong>Predict two methods</strong><p>Commit before running.</p><p class="help">Check: Predictions saved.</p></li><li><strong>Diagnose nontermination</strong><p>Find a call that moves away from its base case.</p><p class="help">Check: Progress failure named.</p></li></ol></section><section><h2>AP transfer</h2><p>Trace mystery(4) for a supplied recursive method and show both call and return columns.</p></section><section><h2>Explain your work</h2><p>Which half of the trace—descent or unwinding—caused more errors?</p></section><section><h2>Included files</h2><ul><li><code>README.md</code></li><li><code>RecursionTrace.java</code></li><li><code>RecursionTraceCheck.java</code></li></ul></section><details class="code-example"><summary>Read starter: RecursionTrace.java</summary><pre><code>public class RecursionTrace {
+    public static int sumTo(int n) {
+        if (n == 0) return 0;
+        return n + sumTo(n - 1);
+    }
+
+    public static String reverseDigits(int n) {
+        if (n &lt; 10) return String.valueOf(n);
+        return (n % 10) + reverseDigits(n / 10);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(sumTo(4));
+        System.out.println(reverseDigits(123));
+    }
+}
+
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2027-03-02"><strong>Mar 02</strong><span>Tue · 10:15-11:30</span></time><div><a href="../days/2027-03-02.html">Recursion call-stack tracing</a><span class="meta">U4 · 4.16</span></div><span class="kind">Class</span></li><li class="day-line"><time datetime="2027-03-08"><strong>Mar 08</strong><span>Mon · 14:25-15:40</span></time><div><a href="../days/2027-03-08.html">2D/search/sort/recursion checkpoint</a><span class="meta">U4 · 4.11-4.17</span></div><span class="kind">Checkpoint</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Count executions, not milliseconds · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W20 · project</p><h1>Count executions, not milliseconds</h1></header><p class="lede">Determine informal runtime by counting loop-body executions.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W20.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>RuntimeLab</code>, then complete the starter tasks.</li><li>Run <code>RuntimeLabCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>When n doubles from 5 to 10, predict how linearCount and squareCount change. Give counts, not elapsed time.</p></section><details class="code-example"><summary>Worked example</summary><pre><code>for (int row = 0; row &lt; n; row++) {
+  for (int col = 0; col &lt; n; col++) {
+    count++;
+  }
+}</code></pre><p>The AP task is informal counting and comparison. Hardware timing adds noise and answers a different question.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Predict n = 5</strong><p>Predict all three counts before editing.</p><p class="help">Check: Predictions are 5, 15, and 25.</p></li><li><strong>Implement each shape</strong><p>Write loops whose counters measure the intended work.</p><p class="help">Check: All six checks pass.</p></li><li><strong>Compare n = 5 and n = 10</strong><p>Record how each count changes.</p><p class="help">Check: Linear doubles; square quadruples.</p></li><li><strong>Name the scale</strong><p>Label the three methods linear, triangular/quadratic-scale, or quadratic.</p><p class="help">Check: Labels are justified by counts.</p></li></ol></section><section><h2>AP transfer</h2><p>A loop runs n times. Inside it, another loop always runs 8 times. If n doubles, by what factor does the total body count change? Explain without using formal Big-O notation.</p></section><section><h2>Explain your work</h2><p>Why is execution counting more useful here than timing the method?</p></section><section><h2>Included files</h2><ul><li><code>README.md</code></li><li><code>RuntimeLab.java</code></li><li><code>RuntimeLabCheck.java</code></li></ul></section><details class="code-example"><summary>Read starter: RuntimeLab.java</summary><pre><code>public class RuntimeLab {
+    public static int linearCount(int n) {
+        int count = 0;
+        // TODO: use one loop whose body executes n times.
+        return count;
+    }
+
+    public static int triangularCount(int n) {
+        int count = 0;
+        // TODO: nested loops where the inner loop executes row times.
+        return count;
+    }
+
+    public static int squareCount(int n) {
+        int count = 0;
+        // TODO: nested loops where both loops execute n times.
+        return count;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(linearCount(5));
+        System.out.println(triangularCount(5));
+        System.out.println(squareCount(5));
+    }
+}
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-10-27"><strong>Oct 27</strong><span>Tue · 14:25-15:40</span></time><div><a href="../days/2026-10-27.html">PatternLab and operation counts</a><span class="meta">U2 · 2.11,2.12</span></div><span class="kind">Class</span></li><li class="day-line"><time datetime="2026-11-03"><strong>Nov 03</strong><span>Tue · 10:15-11:30</span></time><div><a href="../days/2026-11-03.html">Selection and iteration synthesis</a><span class="meta">U2 · 2.1-2.12</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

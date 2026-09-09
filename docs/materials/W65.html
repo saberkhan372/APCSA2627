@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Trace recursive search and merge sort · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W65 · project</p><h1>Trace recursive search and merge sort</h1></header><p class="lede">Trace divide-and-conquer intervals and connect them to the iterative algorithms already learned.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W65.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>RecursiveAlgorithms</code>, then complete the starter tasks.</li><li>Run <code>RecursiveAlgorithmsCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>What interval replaces low=0, high=6 when mid=3 is smaller than the target in recursive binary search?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>if (low &gt; high) return -1;
+int mid = (low + high) / 2;
+if (values[mid] &lt; target)
+  return search(values, target, mid + 1, high);</code></pre><p>Divide-and-conquer changes control flow, not the core invariant. Trace intervals and subarrays instead of trying to visualize all calls at once.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Trace recursive search</strong><p>Record low, mid, high until hit/miss.</p><p class="help">Check: Interval shrinks.</p></li><li><strong>Trace merge splits</strong><p>Draw halves until size one.</p><p class="help">Check: Base subarrays visible.</p></li><li><strong>Predict merge order</strong><p>Combine two sorted halves by hand.</p><p class="help">Check: All values preserved and ordered.</p></li></ol></section><section><h2>AP transfer</h2><p>Explain one similarity and one difference between iterative and recursive binary search.</p></section><section><h2>Explain your work</h2><p>Which invariant connected the recursive version to an algorithm you already trusted?</p></section><section><h2>Included files</h2><ul><li><code>README.md</code></li><li><code>RecursiveAlgorithms.java</code></li><li><code>RecursiveAlgorithmsCheck.java</code></li></ul></section><details class="code-example"><summary>Read starter: RecursiveAlgorithms.java</summary><pre><code>import java.util.Arrays;
+
+public class RecursiveAlgorithms {
+    public static int binarySearch(int[] values, int target, int low, int high) {
+        if (low &gt; high) return -1;
+        int mid = (low + high) / 2;
+        if (values[mid] == target) return mid;
+        if (values[mid] &lt; target) {
+            return binarySearch(values, target, mid + 1, high);
+        }
+        return binarySearch(values, target, low, mid - 1);
+    }
+
+    public static int[] mergeSort(int[] values) {
+        if (values.length &lt;= 1) return values.clone();
+        int mid = values.length / 2;
+        int[] left = mergeSort(Arrays.copyOfRange(values, 0, mid));
+        int[] right = mergeSort(Arrays.copyOfRange(values, mid, values.length));
+        return merge(left, right);
+    }
+
+    private static int[] merge(int[] left, int[] right) {
+        int[] result = new int[left.length + right.length];
+        int i = 0, j = 0, k = 0;
+        while (i &lt; left.length &amp;&amp; j &lt; right.length) {
+            if (left[i] &lt;= right[j]) result[k++] = left[i++];
+            else result[k++] = right[j++];
+        }
+        while (i &lt; left.length) result[k++] = left[i++];
+        while (j &lt; right.length) result[k++] = right[j++];
+        return result;
+    }
+
+    public static void main(String[] args) {
+        int[] values = {2, 5, 8, 11, 14, 17, 20};
+        System.out.println(&quot;index &quot; + binarySearch(values, 14, 0, values.length - 1));
+        System.out.println(Arrays.toString(mergeSort(new int[]{5, 1, 4, 2})));
+    }
+}
+
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2027-03-04"><strong>Mar 04</strong><span>Thu · 08:50-10:05</span></time><div><a href="../days/2027-03-04.html">Recursive binary search and merge sort</a><span class="meta">U4 · 4.17</span></div><span class="kind">Class</span></li><li class="day-line"><time datetime="2027-03-16"><strong>Mar 16</strong><span>Tue · 08:50-10:05</span></time><div><a href="../days/2027-03-16.html">Unit 4 repair and consolidation</a><span class="meta">U4 · 4.1-4.17</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

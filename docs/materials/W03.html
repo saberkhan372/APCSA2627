@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Control a random range · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W03 · project</p><h1>Control a random range</h1></header><p class="lede">Use Math methods and transform a sample in [0.0, 1.0) into an inclusive integer range.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W03.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>DiceLab</code>, then complete the starter tasks.</li><li>Run <code>DiceLabCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>For min 20 and max 25, why is the multiplier max - min + 1 rather than max - min? Name every possible integer result.</p></section><details class="code-example"><summary>Worked example</summary><pre><code>int value = (int)(Math.random() * (max - min + 1)) + min;</code></pre><p>Keep the transformation in a separate method that accepts a known sample; deterministic inputs make the range arithmetic testable.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>State the preconditions</strong><p>Document min &lt;= max and 0.0 &lt;= sample &lt; 1.0.</p><p class="help">Check: Both preconditions appear beside the correct methods.</p></li><li><strong>Scale known samples</strong><p>Implement scaleSample before calling Math.random.</p><p class="help">Check: Minimum, middle, and near-one checks pass.</p></li><li><strong>Wrap Math.random</strong><p>Make roll call scaleSample with Math.random().</p><p class="help">Check: Repeated rolls remain within the requested range.</p></li><li><strong>Explain the interval</strong><p>Write why 1.0 is excluded from Math.random.</p><p class="help">Check: The explanation connects exclusion to max + 1 never occurring.</p></li></ol></section><section><h2>AP transfer</h2><p>Write one expression for an integer from -3 through 4 inclusive. Annotate the bucket count and the final shift.</p></section><section><h2>Explain your work</h2><p>Which part of the formula controls the number of outcomes, and which part controls the first outcome?</p></section><section><h2>Included files</h2><ul><li><code>DiceLab.java</code></li><li><code>DiceLabCheck.java</code></li><li><code>README.md</code></li></ul></section><details class="code-example"><summary>Read starter: DiceLab.java</summary><pre><code>public class DiceLab {
+    /** Precondition: min &lt;= max and 0.0 &lt;= sample &amp;&amp; sample &lt; 1.0 */
+    public static int scaleSample(double sample, int min, int max) {
+        // TODO: map the sample to the inclusive integer range.
+        return min;
+    }
+
+    /** Precondition: min &lt;= max */
+    public static int roll(int min, int max) {
+        // TODO: call scaleSample with Math.random().
+        return min;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(scaleSample(0.0, 1, 6));
+        System.out.println(scaleSample(0.5, 1, 6));
+        System.out.println(scaleSample(0.999999, 1, 6));
+    }
+}
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-09-15"><strong>Sep 15</strong><span>Tue · 10:15-11:30</span></time><div><a href="../days/2026-09-15.html">DiceLab and Rolling Dice</a><span class="meta">U1 · 1.7,1.8,1.9,1.10,1.11</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

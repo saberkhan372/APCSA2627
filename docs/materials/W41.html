@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Build the array algorithm toolkit · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W41 · project</p><h1>Build the array algorithm toolkit</h1></header><p class="lede">Implement sum, count, minimum, maximum, and sequential-match patterns.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W41.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>ArrayAlgorithms</code>, then complete the starter tasks.</li><li>Run <code>ArrayAlgorithmsCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>Why is int min = 0 incorrect for an array containing only positive values? What initialization uses actual data?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>int min = values[0];
+for (int value : values) {
+  if (value &lt; min) min = value;
+}</code></pre><p>Each standard algorithm differs mainly in its accumulator and update rule. Preconditions determine safe initialization.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>State preconditions</strong><p>Mark which methods require nonempty input.</p><p class="help">Check: Minimum does; count does not.</p></li><li><strong>Implement minimum</strong><p>Initialize from data.</p><p class="help">Check: Positive and negative arrays pass.</p></li><li><strong>Count a target</strong><p>Visit every value.</p><p class="help">Check: Absent and repeated targets pass.</p></li><li><strong>Name the pattern</strong><p>Identify accumulator and update for five algorithms.</p><p class="help">Check: Each contract maps to a pattern.</p></li></ol></section><section><h2>AP transfer</h2><p>Write a method that returns the largest even value in a nonempty array that is guaranteed to contain an even value.</p></section><section><h2>Explain your work</h2><p>Which algorithm needs the strongest precondition, and why?</p></section><section><h2>Included files</h2><ul><li><code>ArrayAlgorithms.java</code></li><li><code>ArrayAlgorithmsCheck.java</code></li><li><code>README.md</code></li></ul></section><details class="code-example"><summary>Read starter: ArrayAlgorithms.java</summary><pre><code>public class ArrayAlgorithms {
+    public static int minimum(int[] values) {
+        // Precondition: values.length &gt; 0
+        return 0;
+    }
+
+    public static int countMatches(int[] values, int target) {
+        // TODO
+        return 0;
+    }
+
+    public static void main(String[] args) {
+        int[] values = {8, 3, 3, 10};
+        System.out.println(minimum(values));
+        System.out.println(countMatches(values, 3));
+    }
+}
+
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-12-16"><strong>Dec 16</strong><span>Wed · 09:30-10:45</span></time><div><a href="../days/2026-12-16.html">Array algorithms and reversal checkpoint</a><span class="meta">U4 · 4.5</span></div><span class="kind">Checkpoint</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>

@@ -1,0 +1,1477 @@
+{
+  "W02": {
+    "title": "Make numeric types visible",
+    "outcome": "Predict expression types and values, then repair accidental integer division and casting errors.",
+    "deliverable": "ExpressionLab.java with all seven checks passing",
+    "prediction": "Predict the value and type of 7 / 2, 7 / 2.0, and (double) 7 / 2. Which operand changes the operation?",
+    "model": "int total = 7;\nint people = 2;\n\nSystem.out.println(total / people);          // 3\nSystem.out.println((double) total / people); // 3.5",
+    "explanation": "Java decides the operation from operand types. The destination variable cannot restore a fractional part that integer division already removed.",
+    "missions": [
+      [
+        "Predict before editing",
+        "Record the baseline values and types for each method.",
+        "Every prediction names both value and type."
+      ],
+      [
+        "Repair average",
+        "Change one operand so average keeps its fractional part.",
+        "Typical and exact-average checks pass."
+      ],
+      [
+        "Separate cast and remainder",
+        "Implement wholePart and remainder without mixing their meanings.",
+        "Positive and boundary checks pass."
+      ],
+      [
+        "Explain assignment conversion",
+        "Explain why double x = 7 / 2 stores 3.0.",
+        "The explanation names evaluation before assignment."
+      ]
+    ],
+    "apTransfer": "Trace int a = 11 / 4; double b = 11 / 4; double c = 11 / 4.0; and explain each stored value without running code.",
+    "reflection": "At what exact moment is the fractional part lost, and which smallest code change prevents it?",
+    "runTarget": "ExpressionLab"
+  },
+  "W03": {
+    "title": "Control a random range",
+    "outcome": "Use Math methods and transform a sample in [0.0, 1.0) into an inclusive integer range.",
+    "deliverable": "DiceLab.java with deterministic boundary checks and a random range check passing",
+    "prediction": "For min 20 and max 25, why is the multiplier max - min + 1 rather than max - min? Name every possible integer result.",
+    "model": "int value = (int)(Math.random() * (max - min + 1)) + min;",
+    "explanation": "Keep the transformation in a separate method that accepts a known sample; deterministic inputs make the range arithmetic testable.",
+    "missions": [
+      [
+        "State the preconditions",
+        "Document min <= max and 0.0 <= sample < 1.0.",
+        "Both preconditions appear beside the correct methods."
+      ],
+      [
+        "Scale known samples",
+        "Implement scaleSample before calling Math.random.",
+        "Minimum, middle, and near-one checks pass."
+      ],
+      [
+        "Wrap Math.random",
+        "Make roll call scaleSample with Math.random().",
+        "Repeated rolls remain within the requested range."
+      ],
+      [
+        "Explain the interval",
+        "Write why 1.0 is excluded from Math.random.",
+        "The explanation connects exclusion to max + 1 never occurring."
+      ]
+    ],
+    "apTransfer": "Write one expression for an integer from -3 through 4 inclusive. Annotate the bucket count and the final shift.",
+    "reflection": "Which part of the formula controls the number of outcomes, and which part controls the first outcome?",
+    "runTarget": "DiceLab"
+  },
+  "W06": {
+    "title": "Trace references and aliases",
+    "outcome": "Distinguish primitive copies from object aliases and predict mutations through shared references.",
+    "deliverable": "AliasingLab.java and Player.java with six checks and a reference trace",
+    "prediction": "After Player b = a; and b.addScore(5);, what score is visible through a? Draw the number of objects and reference arrows before answering.",
+    "model": "Player a = new Player(\"Ada\", 0);\nPlayer b = a;\n\nb.addScore(5);\nSystem.out.println(a.getScore()); // 5",
+    "explanation": "Java is pass-by-value: for an object variable, the copied value is a reference. That is why another method can reach and mutate the same object.",
+    "missions": [
+      [
+        "Trace separate objects",
+        "Draw two objects created by two new expressions.",
+        "sameObject reports false."
+      ],
+      [
+        "Create an alias",
+        "Assign one Player variable to another without calling new.",
+        "sameObject reports true."
+      ],
+      [
+        "Mutate through the alias",
+        "Change score through one name and return the score through the other.",
+        "Both mutation checks pass."
+      ],
+      [
+        "Preserve a primitive copy",
+        "Contrast int assignment with Player assignment in TRACE.md.",
+        "The primitive values diverge after one variable changes."
+      ]
+    ],
+    "apTransfer": "Trace a method that receives a Player parameter, assigns it to a local variable, and changes its score. Explain precisely what value is passed and why the caller observes the mutation.",
+    "reflection": "Which line changes the number of objects, and which line changes only the number of names reaching an object?",
+    "runTarget": "AliasingLab"
+  },
+  "W07": {
+    "title": "Index a String safely",
+    "outcome": "Use length, substring, and indexOf while reasoning explicitly about inclusive and exclusive bounds.",
+    "deliverable": "WordTools.java with all seven normal and edge-case checks passing",
+    "prediction": "For computer, mark the characters selected by substring(2, 5). Why may the end index equal length even though a character index may not?",
+    "model": "int space = text.indexOf(\" \");\nif (space == -1) {\n  return text;\n}\nreturn text.substring(0, space);",
+    "explanation": "String methods return new values because Strings are immutable. Every indexOf result must be interpreted before it is reused as an index.",
+    "missions": [
+      [
+        "Build an index row",
+        "Write indices under every character in AP CS A.",
+        "The last index is length - 1."
+      ],
+      [
+        "Handle a missing space",
+        "Implement firstWord without throwing when indexOf returns -1.",
+        "Phrase and one-word checks pass."
+      ],
+      [
+        "Validate slice bounds",
+        "Return invalid for negative, reversed, or too-large boundaries.",
+        "All boundary checks pass."
+      ],
+      [
+        "Test the empty String",
+        "Predict and run firstWord on an empty String.",
+        "The result is empty and no exception occurs."
+      ]
+    ],
+    "apTransfer": "For a String of length n, state the legal values of start and end in substring(start, end), including the zero-length cases. Then trace substring(1, 1).",
+    "reflection": "What does -1 mean when returned by indexOf, and why is it dangerous to pass directly to substring?",
+    "runTarget": "WordTools"
+  },
+  "W08": {
+    "title": "Compare String contents",
+    "outcome": "Choose equals or compareTo from the question being asked and reject reference equality as a content test.",
+    "deliverable": "StringRelations.java with all eight comparison checks passing",
+    "prediction": "Let a be the literal cat and b be new String(\"cat\"). Predict a == b, a.equals(b), and a.compareTo(b). Explain why one result may surprise Processing users.",
+    "model": "if (left.equals(right)) {\n  return 0;\n} else if (left.compareTo(right) < 0) {\n  return -1;\n} else {\n  return 1;\n}",
+    "explanation": "Use equals for same contents and compareTo for ordering. Use == only when the question truly asks whether two references reach the same object.",
+    "missions": [
+      [
+        "Expose the identity trap",
+        "Run a literal against a separately constructed equal String.",
+        "The prediction distinguishes == from equals."
+      ],
+      [
+        "Implement sameText",
+        "Use the content question's method.",
+        "Literal and constructed cases pass."
+      ],
+      [
+        "Normalize ordering",
+        "Return -1, 0, or 1 from the sign of compareTo.",
+        "Before, equal, and after checks pass."
+      ],
+      [
+        "Keep the preview labeled",
+        "Identify split and Integer.parseInt as Unit 4 topics 4.6 and 4.7.",
+        "No preview method is required in this Unit 1 project."
+      ]
+    ],
+    "apTransfer": "Write a three-branch expression or method that returns first, same, or second based only on the sign of left.compareTo(right). Do not assume an exact nonzero value.",
+    "reflection": "What question does == answer for object variables, and why is that not the same question as equals?",
+    "runTarget": "StringRelations"
+  },
+  "W09": {
+    "title": "Build a one-pass String algorithm",
+    "outcome": "Traverse one-character substrings with a safe bound and maintain a meaningful accumulator.",
+    "deliverable": "LetterAlgorithms.java with eight checks and one original edge case",
+    "prediction": "For a String of length 6, list every i used by substring(i, i + 1). What happens if the loop condition is i <= length?",
+    "model": "int count = 0;\nfor (int i = 0; i < text.length(); i++) {\n  if (text.substring(i, i + 1).equals(target)) {\n    count++;\n  }\n}",
+    "explanation": "State the accumulator meaning before coding. The loop bound then follows from the one-character substring call.",
+    "missions": [
+      [
+        "State the invariant",
+        "Complete: count equals the matches among...",
+        "The statement names the processed prefix."
+      ],
+      [
+        "Count safely",
+        "Implement countLetter with one-character substrings.",
+        "Repeated, missing, and empty cases pass."
+      ],
+      [
+        "Build a new String",
+        "Implement removeLetter without attempting to mutate text.",
+        "Removal and unchanged cases pass."
+      ],
+      [
+        "Design an edge case",
+        "Add one case involving the first or final character.",
+        "Prediction and actual result are recorded."
+      ]
+    ],
+    "apTransfer": "Write a method body that returns a String containing only uppercase A characters from its parameter. State what the accumulator means after each iteration.",
+    "reflection": "How did the substring call determine the loop's safe final value?",
+    "runTarget": "LetterAlgorithms"
+  },
+  "W10": {
+    "title": "Retrieve, diagnose, target",
+    "outcome": "Diagnose Unit 1 gaps through mixed retrieval instead of rereading completed pages.",
+    "deliverable": "Unit1Review.java checks plus a named error pattern and next practice step",
+    "prediction": "Rank these before running anything: expression tracing, random ranges, method calls, constructors/references, substring bounds, and String algorithms. Which two deserve the first check?",
+    "model": "error pattern: substring boundary\nevidence: used <= length\nnext check: trace first and final legal i",
+    "explanation": "Review is retrieval plus decision-making. Run one round, classify errors, then spend time only where the evidence points.",
+    "missions": [
+      [
+        "Round 1: predict",
+        "Write expected outputs for all six methods without an editor.",
+        "Every method has a committed prediction."
+      ],
+      [
+        "Round 2: check",
+        "Run the check class and label each miss by topic.",
+        "The report separates six skills."
+      ],
+      [
+        "Round 3: repair",
+        "Repair the two weakest methods first and rerun.",
+        "Those checks pass before unrelated polishing."
+      ]
+    ],
+    "apTransfer": "Write one mixed trace containing integer division, an object alias, and a substring call. Solve it on paper, then name the order in which you checked the three risks.",
+    "reflection": "Which error category appeared, what evidence exposed it, and what exact practice will show that it is repaired?",
+    "runTarget": "Unit1Review"
+  },
+  "W12": {
+    "title": "Selection speed-run",
+    "outcome": "Trace an ordered decision and implement boundary-safe selection.",
+    "deliverable": "DecisionAudit.java with all six checks passing",
+    "prediction": "For value 0, which branch must be tested first so that zero is not classified as even? Explain before running code.",
+    "model": "if (value < 0) {\n  return \"negative\";\n} else if (value == 0) {\n  return \"zero\";\n} else if (value % 2 == 0) {\n  return \"even\";\n} else {\n  return \"odd\";\n}",
+    "explanation": "An if/else-if chain stops at the first true condition. Put exceptional and boundary cases before broader categories.",
+    "missions": [
+      [
+        "Run the unchanged baseline",
+        "Open the folder and run DecisionAudit before editing.",
+        "Record the three baseline lines."
+      ],
+      [
+        "Complete classify",
+        "Return negative, zero, even, or odd in the required order.",
+        "Run the check class; four classification checks pass."
+      ],
+      [
+        "Complete inRange",
+        "Include both endpoints and honor the stated precondition.",
+        "The low-endpoint and above-high checks pass."
+      ],
+      [
+        "Add a boundary test",
+        "In main, add one call at a boundary not already printed.",
+        "Predict before running and compare the result."
+      ]
+    ],
+    "apTransfer": "Trace classify(0), classify(-8), and classify(13). Then write one sentence explaining why reordering the zero and even conditions changes the specified result.",
+    "reflection": "Which boundary case made the branch order visible?",
+    "runTarget": "DecisionAudit"
+  },
+  "W13": {
+    "title": "Nested and compound decisions",
+    "outcome": "Choose branch order and parentheses that preserve a written rule.",
+    "deliverable": "Admission.java with all seven checks passing",
+    "prediction": "A 14-year-old is with an adult but has no pass. Evaluate age >= 16 || (withAdult && hasPass) one operator at a time.",
+    "model": "boolean mayEnter = age >= 16 || (withAdult && hasPass);",
+    "explanation": "Translate the English rule into named pieces before compressing it. Parentheses communicate structure even when precedence would produce the same result.",
+    "missions": [
+      [
+        "Run and annotate",
+        "Run the baseline; underline the two independent ways to enter.",
+        "Explain the parentheses in plain language."
+      ],
+      [
+        "Order ticket groups",
+        "Handle invalid ages, children, seniors, students, then regular admission.",
+        "Boundary checks at 12 and 65 pass."
+      ],
+      [
+        "Implement mayEnter",
+        "Translate the exact rule without adding unrelated conditions.",
+        "All three entry checks pass."
+      ],
+      [
+        "Challenge the grouping",
+        "Temporarily remove the parentheses and explain whether Java changes the value.",
+        "Restore the clearest form before finishing."
+      ]
+    ],
+    "apTransfer": "Write a single Boolean expression for: a player qualifies if score is at least 80, or if score is at least 70 and attendance is at least 95. Then test score 75 with attendance 94 and 95.",
+    "reflection": "When is an else-if chain clearer than several independent if statements?",
+    "runTarget": "Admission"
+  },
+  "W14": {
+    "title": "Prove De Morgan's laws",
+    "outcome": "Use a truth table to prove two Boolean expressions equivalent.",
+    "deliverable": "BooleanLab.java plus a completed four-row truth table",
+    "prediction": "Negate !(hasBadge && hasCode) without putting ! in front of parentheses. Which operator changes, and why?",
+    "model": "!(a && b) == (!a || !b)\n!(a || b) == (!a && !b)",
+    "explanation": "Move the negation inward, negate each condition, and switch && with || or || with &&.",
+    "missions": [
+      [
+        "Build the truth table",
+        "List all four combinations of a and b before coding.",
+        "Both expressions match on every row."
+      ],
+      [
+        "Implement access",
+        "A badge or staff status is required, and lockdown overrides both.",
+        "Four access checks pass."
+      ],
+      [
+        "Implement the proof",
+        "Return whether the two De Morgan forms match for the supplied row.",
+        "All four equivalence checks pass."
+      ],
+      [
+        "State the transformation",
+        "Write the three moves used to push ! inward.",
+        "Negate pieces, switch operator, remove outer !."
+      ]
+    ],
+    "apTransfer": "Rewrite !(score >= 70 && submitted) without an outer negation. Then explain what the rewritten condition means in plain language.",
+    "reflection": "Which truth-table row would most quickly expose a failure to switch the operator?",
+    "runTarget": "BooleanLab"
+  },
+  "W15": {
+    "title": "Negation repair shop",
+    "outcome": "Diagnose incorrect compound negations using counterexamples.",
+    "deliverable": "Eligibility.java with all eight checks passing",
+    "prediction": "Why is day != 1 || day != 7 always true? Find the value of day that you think should make it false and evaluate both comparisons.",
+    "model": "// not Sunday AND not Saturday\nreturn day != 1 && day != 7;",
+    "explanation": "Start with the input the method is supposed to reject. Trace the actual expression before changing an operator.",
+    "missions": [
+      [
+        "Reproduce the bug",
+        "Run the unchanged starter and trace notWeekend(7).",
+        "Record the wrong true result."
+      ],
+      [
+        "Repair the range",
+        "Return true only below 0 or above 100.",
+        "Four score checks pass."
+      ],
+      [
+        "Apply De Morgan",
+        "Negate submitted && signed without an outer !.",
+        "Both requirement checks pass."
+      ],
+      [
+        "Repair notWeekend",
+        "Change the smallest possible piece and justify it.",
+        "Saturday and Wednesday checks pass."
+      ]
+    ],
+    "apTransfer": "A method should return true when x is not between 10 and 20 inclusive. Write two equivalent expressions and identify the four boundary test values you would use.",
+    "reflection": "What was the smallest counterexample that disproved the original weekend expression?",
+    "runTarget": "Eligibility"
+  },
+  "W16": {
+    "title": "Trace loops before writing them",
+    "outcome": "Trace loop state and distinguish iteration count from final values.",
+    "deliverable": "LoopTrace.java plus one complete trace table",
+    "prediction": "For values 1, 3, 5, 7 produced by a loop, what is the next loop-control value after the final body execution? Why does that value not print?",
+    "model": "int sum = 0;\nint value = 1;\nwhile (value <= 5) {\n  sum += value;\n  value++;\n}",
+    "explanation": "A trace table needs a row for the failed condition. Otherwise students often confuse the last body value with the final variable value.",
+    "missions": [
+      [
+        "Trace first",
+        "Trace sumTo(3) on paper, including the failed condition.",
+        "Final row shows value 4 and sum 6."
+      ],
+      [
+        "Implement sumTo",
+        "Use a while loop and honor n >= 0.",
+        "Empty and five-value checks pass."
+      ],
+      [
+        "Implement countBy",
+        "Use an inclusive for loop with a positive step.",
+        "Three count checks pass."
+      ],
+      [
+        "Compare forms",
+        "Identify initialization, test, body, and update in both loops.",
+        "Explain which form makes the update easiest to see."
+      ]
+    ],
+    "apTransfer": "Without running code, give the output and final value of i for: for (int i = 2; i <= 11; i += 3). Then state how many times the body executes.",
+    "reflection": "Which trace-table column prevented your most likely mistake?",
+    "runTarget": "LoopTrace"
+  },
+  "W17": {
+    "title": "Scan a String safely",
+    "outcome": "Traverse every valid one-character substring without crossing a boundary.",
+    "deliverable": "StringScan.java with all five checks passing",
+    "prediction": "For a String of length 6, list every legal i for substring(i, i + 1). What value of i would fail?",
+    "model": "for (int i = 0; i < text.length(); i++) {\n  String current = text.substring(i, i + 1);\n  // inspect current\n}",
+    "explanation": "The end index is excluded, so i + 1 may equal length even though i may not.",
+    "missions": [
+      [
+        "Mark the bounds",
+        "Write the first and last substring calls for banana.",
+        "First is (0,1); last is (5,6)."
+      ],
+      [
+        "Count matches",
+        "Increment only when the one-character substring equals target.",
+        "Repeated and empty cases pass."
+      ],
+      [
+        "Return the first index",
+        "Return immediately on the first match; return -1 after the loop.",
+        "First, middle, and missing cases pass."
+      ],
+      [
+        "Add a final-position test",
+        "Test a target at text.length() - 1.",
+        "Prediction matches the returned index."
+      ]
+    ],
+    "apTransfer": "Write a method body that returns the number of uppercase A characters in a String. Use only methods on the Java Quick Reference and state the safe loop bound.",
+    "reflection": "Why may a substring end index equal length when a character index may not?",
+    "runTarget": "StringScan"
+  },
+  "W18": {
+    "title": "Build a String algorithm",
+    "outcome": "Accumulate a new String and manage an index that sometimes advances twice.",
+    "deliverable": "StringAlgorithms.java with six provided checks and one original test",
+    "prediction": "How many non-overlapping aa pairs are in aaaa? Commit to an answer and mark which characters each pair uses.",
+    "model": "String result = \"\";\nfor (int i = 0; i < text.length(); i++) {\n  String current = text.substring(i, i + 1);\n  if (!current.equals(target)) {\n    result += current;\n  }\n}",
+    "explanation": "State the invariant in words before coding. It tells you what result must mean after every iteration.",
+    "missions": [
+      [
+        "Define the invariant",
+        "Complete: result contains every processed character except...",
+        "The sentence matches the specification."
+      ],
+      [
+        "Remove a character",
+        "Build and return a new String; do not mutate the original.",
+        "Typical, missing, and empty checks pass."
+      ],
+      [
+        "Count non-overlapping pairs",
+        "Use a while loop and advance by two after a match.",
+        "Pair and short-String checks pass."
+      ],
+      [
+        "Write an original test",
+        "Choose a case that distinguishes overlapping from non-overlapping counting.",
+        "Predict, run, and record the result."
+      ]
+    ],
+    "apTransfer": "Write a method that returns a String containing only the digits from its parameter. Explain what the accumulator contains after i characters have been processed.",
+    "reflection": "When did your loop advance by two, and what bug would advancing by one create?",
+    "runTarget": "StringAlgorithms"
+  },
+  "W19": {
+    "title": "Nested iteration patterns",
+    "outcome": "Assign one responsibility to each loop and predict total executions.",
+    "deliverable": "PatternLab.java with its staircase and factor-pair checks passing",
+    "prediction": "In a five-row staircase, what does the outer loop control? What do the two inner loops control? Answer without writing code.",
+    "model": "for (int row = 0; row < size; row++) {\n  for (int dash = 0; dash < row; dash++) {\n    result += \"-\";\n  }\n  for (int star = row; star < size; star++) {\n    result += \"*\";\n  }\n}",
+    "explanation": "Name loops by purpose, not i/j/k, while designing. The variable names expose the output relationship.",
+    "missions": [
+      [
+        "Match loops to output",
+        "Annotate which loop controls rows, dashes, and stars.",
+        "Every printed character has one responsible loop."
+      ],
+      [
+        "Build the staircase",
+        "Return exact newlines without adding one after the final row.",
+        "Size 1 and size 3 checks pass."
+      ],
+      [
+        "Count factor pairs",
+        "Use a <= b so symmetric pairs are not counted twice.",
+        "Limit 2 and limit 5 checks pass."
+      ],
+      [
+        "Count executions",
+        "For size 5, total the two inner-loop body counts.",
+        "The two totals sum to 25 character writes."
+      ]
+    ],
+    "apTransfer": "For nested loops with row from 1 through 4 and col from row through 4, list the number of inner executions per row and the total. Do not run code.",
+    "reflection": "Which loop variable changed the width of each row?",
+    "runTarget": "PatternLab"
+  },
+  "W20": {
+    "title": "Count work, not milliseconds",
+    "outcome": "Determine informal runtime by counting loop-body executions.",
+    "deliverable": "RuntimeLab.java plus a three-row growth comparison",
+    "prediction": "When n doubles from 5 to 10, predict how linearCount and squareCount change. Give counts, not elapsed time.",
+    "model": "for (int row = 0; row < n; row++) {\n  for (int col = 0; col < n; col++) {\n    count++;\n  }\n}",
+    "explanation": "The AP task is informal counting and comparison. Hardware timing adds noise and answers a different question.",
+    "missions": [
+      [
+        "Predict n = 5",
+        "Predict all three counts before editing.",
+        "Predictions are 5, 15, and 25."
+      ],
+      [
+        "Implement each shape",
+        "Write loops whose counters measure the intended work.",
+        "All six checks pass."
+      ],
+      [
+        "Compare n = 5 and n = 10",
+        "Record how each count changes.",
+        "Linear doubles; square quadruples."
+      ],
+      [
+        "Name the scale",
+        "Label the three methods linear, triangular/quadratic-scale, or quadratic.",
+        "Labels are justified by counts."
+      ]
+    ],
+    "apTransfer": "A loop runs n times. Inside it, another loop always runs 8 times. If n doubles, by what factor does the total body count change? Explain without using formal Big-O notation.",
+    "reflection": "Why is execution counting more useful here than timing the method?",
+    "runTarget": "RuntimeLab"
+  },
+  "W23": {
+    "title": "Design the class boundary",
+    "outcome": "Separate an object's state and behavior from the code that uses it.",
+    "deliverable": "ClassDesign.java with all six responsibility checks passing",
+    "prediction": "A game has score, drawScore(), saveScore(), and readMouse(). Which two responsibilities belong inside a ScoreBoard class, and which belong to the user interface?",
+    "model": "class ScoreBoard {\n  private int score;\n\n  public void addPoints(int amount) {\n    score += amount;\n  }\n}",
+    "explanation": "A class boundary is a design decision. Put behavior beside the state it changes; keep screen, keyboard, and file concerns outside unless they define the object.",
+    "missions": [
+      [
+        "Run the baseline",
+        "Record how the starter classifies two sample responsibilities.",
+        "Both are undecided before implementation."
+      ],
+      [
+        "Classify state behavior",
+        "Return model for responsibilities that store or change the object's own data.",
+        "Field and update examples pass."
+      ],
+      [
+        "Classify boundary behavior",
+        "Return interface for drawing, keyboard, or file-delivery work.",
+        "All boundary examples pass."
+      ],
+      [
+        "Write a CRC note",
+        "Name the class, its responsibilities, and one collaborator.",
+        "The collaborator is another object, not a method."
+      ]
+    ],
+    "apTransfer": "Design a class for a step tracker. List its private instance variables and public methods, then name one responsibility that should stay outside the class.",
+    "reflection": "Which responsibility was hardest to place, and what ownership rule resolved it?",
+    "runTarget": "ClassDesign"
+  },
+  "W25": {
+    "title": "Construct a valid object",
+    "outcome": "Initialize every instance variable from constructor parameters while preserving a precondition.",
+    "deliverable": "Bicycle.java with all seven constructor checks passing",
+    "prediction": "A constructor parameter and field are both named speed. What does speed = speed assign, and what syntax identifies the field?",
+    "model": "public Bicycle(String model, int speed) {\n  this.model = model;\n  this.speed = Math.max(0, speed);\n}",
+    "explanation": "A constructor establishes the object's first valid state. Use this when a parameter shadows a field.",
+    "missions": [
+      [
+        "Run the broken object",
+        "Record the ignored model and speed.",
+        "Baseline is unnamed @ 0."
+      ],
+      [
+        "Initialize fields",
+        "Use all three constructor parameters.",
+        "Normal construction passes."
+      ],
+      [
+        "Preserve the precondition",
+        "Clamp negative speed to zero.",
+        "Negative-speed check passes."
+      ],
+      [
+        "Audit initialization",
+        "Explain what value every field has after construction.",
+        "No field is left accidental."
+      ]
+    ],
+    "apTransfer": "Write a constructor for Song with private title, artist, and seconds fields. Assume seconds must be positive.",
+    "reflection": "Which constructor line establishes an invariant rather than merely copying data?",
+    "runTarget": "Bicycle"
+  },
+  "W26": {
+    "title": "Overload without duplicating rules",
+    "outcome": "Write overloaded constructors that delegate to one complete initialization path.",
+    "deliverable": "Card.java with all six constructor checks passing",
+    "prediction": "Two constructors repeat the same validation. What bug appears when the rule changes in only one copy?",
+    "model": "public Card(String rank) {\n  this(rank, \"spades\");\n}",
+    "explanation": "Overloading changes the parameter list, not the class name or return type. Constructor delegation must be the first statement.",
+    "missions": [
+      [
+        "Compare paths",
+        "Trace which fields each constructor initializes.",
+        "The incomplete path is identified."
+      ],
+      [
+        "Delegate",
+        "Use this(...) in the convenience constructor.",
+        "Default-suit check passes."
+      ],
+      [
+        "Keep validation central",
+        "Reject blank values in the complete constructor.",
+        "Both entry paths share the rule."
+      ],
+      [
+        "Explain placement",
+        "State why this(...) is first.",
+        "Java's constructor rule is named."
+      ]
+    ],
+    "apTransfer": "Write two constructors for a Timer: one accepts seconds; the other has no parameters and delegates with a default of 60.",
+    "reflection": "What duplicated rule did constructor delegation remove?",
+    "runTarget": "Card"
+  },
+  "W27": {
+    "title": "Return information, not output",
+    "outcome": "Write methods whose return values let client code make the next decision.",
+    "deliverable": "Elevator.java with all eight method checks passing",
+    "prediction": "Why is a method that prints the current floor less reusable than one that returns an int?",
+    "model": "public boolean canMoveUp() {\n  return floor < topFloor;\n}",
+    "explanation": "A return type is a contract. Every reachable path must produce a compatible value.",
+    "missions": [
+      [
+        "Run the baseline",
+        "Observe which query lies.",
+        "canMoveUp returns false on floor 1."
+      ],
+      [
+        "Return current state",
+        "Implement getFloor.",
+        "Initial and moved-floor checks pass."
+      ],
+      [
+        "Return a condition",
+        "Implement canMoveUp and canMoveDown.",
+        "Boundary checks pass."
+      ],
+      [
+        "Use the query",
+        "Make moveUp respect canMoveUp.",
+        "The elevator cannot cross the top floor."
+      ]
+    ],
+    "apTransfer": "Write a public method isFull for a Theater whose private seatsTaken and capacity fields are ints.",
+    "reflection": "Where did returning a value make the client simpler?",
+    "runTarget": "Elevator"
+  },
+  "W29": {
+    "title": "Pass references with intent",
+    "outcome": "Predict when two variables refer to one object and control whether a method returns an alias.",
+    "deliverable": "PlayerRoster.java with all seven reference checks passing",
+    "prediction": "If getCaptain returns the exact Player stored by the roster, what happens when client code calls setScore(99) on the returned reference?",
+    "model": "public Player getCaptainCopy() {\n  return new Player(captain.getName(), captain.getScore());\n}",
+    "explanation": "Passing or returning an object reference can share mutable state. Copy only when the contract requires independence.",
+    "missions": [
+      [
+        "Trace the alias",
+        "Draw roster.captain and the returned variable.",
+        "Both arrows reach one object."
+      ],
+      [
+        "Reproduce mutation",
+        "Run the unchanged baseline.",
+        "Outside change appears inside roster."
+      ],
+      [
+        "Return a copy",
+        "Implement getCaptainCopy.",
+        "Copy-mutation check passes."
+      ],
+      [
+        "State the contract",
+        "Choose alias or copy for two scenarios.",
+        "The choice follows intended ownership."
+      ]
+    ],
+    "apTransfer": "A Team method getRoster returns an ArrayList field directly. Explain one possible consequence and describe a safer alternative without writing code.",
+    "reflection": "When is returning the original reference exactly the right contract?",
+    "runTarget": "PlayerRoster"
+  },
+  "W30": {
+    "title": "Share state with static",
+    "outcome": "Distinguish one value per class from one value per object.",
+    "deliverable": "Ticket.java with all seven static-state checks passing",
+    "prediction": "Three Ticket objects are created. How many copies of nextId exist if it is static, and how many if it is an instance variable?",
+    "model": "private static int nextId = 1;\nprivate int id;\n\npublic Ticket() {\n  id = nextId;\n  nextId++;\n}",
+    "explanation": "Static belongs to the class. Use it for genuinely shared facts, not merely to make instance access convenient.",
+    "missions": [
+      [
+        "Observe the bug",
+        "Create two tickets and compare ids.",
+        "Both placeholder ids match."
+      ],
+      [
+        "Add shared state",
+        "Declare and update nextId.",
+        "Ids become sequential."
+      ],
+      [
+        "Count objects",
+        "Implement getCreatedCount as a class method.",
+        "Count tracks all instances."
+      ],
+      [
+        "Label ownership",
+        "Mark each field class or instance.",
+        "nextId shared; id individual."
+      ]
+    ],
+    "apTransfer": "Design fields for a LibraryBook where title differs per object but libraryName is shared. Include access modifiers and static where appropriate.",
+    "reflection": "What would break if id were static too?",
+    "runTarget": "Ticket"
+  },
+  "W31": {
+    "title": "Audit static method access",
+    "outcome": "Explain and repair code that confuses class context with object context.",
+    "deliverable": "CounterTools.java with all six access checks passing",
+    "prediction": "Why can a static method read a static field but not an instance field without receiving or creating an object?",
+    "model": "public static int totalOf(CounterTools item) {\n  return item.count;\n}",
+    "explanation": "Repair by changing the ownership contract, not by adding static everywhere. Ask whether the behavior logically belongs to an object or the class.",
+    "missions": [
+      [
+        "Classify members",
+        "Mark count instance and calls shared.",
+        "Ownership labels match behavior."
+      ],
+      [
+        "Implement instance query",
+        "Return this object's count.",
+        "Two-object checks remain independent."
+      ],
+      [
+        "Implement static utility",
+        "Accept an object parameter and read through it.",
+        "Utility check passes."
+      ],
+      [
+        "Explain the compile error",
+        "Write the missing-context reason.",
+        "A particular instance is named."
+      ]
+    ],
+    "apTransfer": "Explain whether each should be static: Math.abs, a BankAccount getBalance method, and a BankAccount count of all accounts.",
+    "reflection": "Which repair was tempting but would have changed the program's meaning?",
+    "runTarget": "CounterTools"
+  },
+  "W32": {
+    "title": "Resolve scope with this",
+    "outcome": "Trace name lookup across parameters, local variables, and instance variables.",
+    "deliverable": "HotelRoom.java with all eight scope checks passing",
+    "prediction": "Inside setNumber(int number), which declaration does bare number name? What does this.number name?",
+    "model": "public void setNumber(int number) {\n  if (number > 0) {\n    this.number = number;\n  }\n}",
+    "explanation": "Scope determines which names are visible. this is useful when a nearer declaration shadows a field and when clarity matters.",
+    "missions": [
+      [
+        "Reproduce shadowing",
+        "Run the baseline and locate number = number.",
+        "Room remains zero."
+      ],
+      [
+        "Repair with this",
+        "Assign validated parameter to the field.",
+        "Room number checks pass."
+      ],
+      [
+        "Keep locals local",
+        "Calculate a display label without adding a field.",
+        "No unnecessary state added."
+      ],
+      [
+        "Trace three names",
+        "Label parameter, local, and field in one method.",
+        "Each lifetime and owner is correct."
+      ]
+    ],
+    "apTransfer": "Trace what each occurrence of value means in a constructor with a private int value field, an int value parameter, and a local String valueText.",
+    "reflection": "When does this improve correctness, and when is it only a readability choice?",
+    "runTarget": "HotelRoom"
+  },
+  "W36": {
+    "title": "Audit a data decision",
+    "outcome": "Identify a data-use risk and encode a transparent consent rule.",
+    "deliverable": "DataConsent.java with six policy checks and one written tradeoff",
+    "prediction": "A fitness app collected location to draw a route. Can it automatically reuse that data to train an advertising model because the user agreed to location collection?",
+    "model": "return consented\n    && statedPurpose.equals(requestedPurpose)\n    && !containsSensitiveData;",
+    "explanation": "Technical correctness does not settle an ethical question. Make assumptions visible and test whose interests the rule protects.",
+    "missions": [
+      [
+        "Read the scenario",
+        "Name the collector, subject, stated purpose, and requested use.",
+        "All four roles are explicit."
+      ],
+      [
+        "Implement same-purpose use",
+        "Require consent and matching purpose.",
+        "Purpose checks pass."
+      ],
+      [
+        "Handle sensitivity",
+        "Reject sensitive reuse in this simplified policy.",
+        "Sensitive-data checks pass."
+      ],
+      [
+        "Write the tradeoff",
+        "Name one benefit, one harm, and missing evidence.",
+        "The analysis is not only an opinion."
+      ]
+    ],
+    "apTransfer": "A school predicts course success from attendance and device-use data. Name one stakeholder, one possible benefit, one possible harm, and one additional fact needed before deployment.",
+    "reflection": "Which assumption in the coded policy is most contestable?",
+    "runTarget": "DataConsent"
+  },
+  "W37": {
+    "title": "Match data to a question",
+    "outcome": "Decide whether a data set contains the variables and coverage needed for a claim.",
+    "deliverable": "DatasetFit.java with seven fit checks passing",
+    "prediction": "Can one week of noon temperatures answer whether mornings became warmer over ten years? Name each mismatch.",
+    "model": "boolean usable = hasNeededVariable\n    && coversPopulation\n    && coversTimePeriod;",
+    "explanation": "Start from the question, then inventory the data. Do not start from what is available and overclaim.",
+    "missions": [
+      [
+        "Name the claim",
+        "Underline population, variable, and time span.",
+        "Three requirements are visible."
+      ],
+      [
+        "Implement fit",
+        "Require all three coverage conditions.",
+        "Truth-table checks pass."
+      ],
+      [
+        "Classify a mismatch",
+        "Return variable, population, time, or usable.",
+        "Scenario checks pass."
+      ],
+      [
+        "Limit a conclusion",
+        "Rewrite one overclaim to match the data.",
+        "Claim scope shrinks to evidence."
+      ]
+    ],
+    "apTransfer": "List the minimum variables and sampling frame needed to study whether travel time affects first-period attendance at your school.",
+    "reflection": "What kind of missing data is easiest to overlook when a data set is large?",
+    "runTarget": "DatasetFit"
+  },
+  "W38": {
+    "title": "Create and index arrays safely",
+    "outcome": "Create arrays, use valid indexes, and distinguish array length from String length and ArrayList size.",
+    "deliverable": "ArrayAccess.java with eight boundary checks passing",
+    "prediction": "For int[] values = new int[5], what is the last valid index, and what exception occurs at values[5]?",
+    "model": "int last = values[values.length - 1];",
+    "explanation": "Arrays use the public field .length. Strings use .length(); ArrayList uses .size().",
+    "missions": [
+      [
+        "Mark the boundary",
+        "List every valid index for length five.",
+        "0 through 4."
+      ],
+      [
+        "Implement first and last",
+        "Return endpoints without constants.",
+        "Empty-array contract and normal checks pass."
+      ],
+      [
+        "Replace one element",
+        "Use an index only after validating it.",
+        "Valid changes; invalid request ignored."
+      ],
+      [
+        "Build the syntax table",
+        "Compare array, String, and ArrayList counts.",
+        "All three forms exact."
+      ]
+    ],
+    "apTransfer": "Write code that creates a 12-element double array, stores 3.5 in its final element, and returns that final value.",
+    "reflection": "Which boundary expression should become automatic before the exam?",
+    "runTarget": "ArrayAccess"
+  },
+  "W39": {
+    "title": "Traverse exactly once",
+    "outcome": "Write complete traversals that visit every element without crossing the boundary.",
+    "deliverable": "ArrayTraversal.java with seven traversal checks passing",
+    "prediction": "What value does i have after a loop for (int i = 0; i < values.length; i++) finishes, and why is it never used as an index in the body?",
+    "model": "int total = 0;\nfor (int i = 0; i < values.length; i++) {\n  total += values[i];\n}",
+    "explanation": "Separate the loop-control variable from the accumulated result when tracing.",
+    "missions": [
+      [
+        "Trace first",
+        "Make a row for each index and running total.",
+        "Failed condition included."
+      ],
+      [
+        "Implement sum",
+        "Visit all elements exactly once.",
+        "Empty, one, and many pass."
+      ],
+      [
+        "Count positives",
+        "Do not count zero.",
+        "Mixed and boundary cases pass."
+      ],
+      [
+        "Audit mutation",
+        "Explain whether either method changes the array.",
+        "Both are read-only."
+      ]
+    ],
+    "apTransfer": "Write a method that returns how many adjacent pairs in an int array are equal. State the correct loop bound.",
+    "reflection": "Which trace column exposed the difference between index and accumulated value?",
+    "runTarget": "ArrayTraversal"
+  },
+  "W40": {
+    "title": "Know the enhanced-for limit",
+    "outcome": "Choose indexed or enhanced-for traversal based on whether position or replacement is required.",
+    "deliverable": "ForEachLimits.java with eight traversal checks passing",
+    "prediction": "Why does for (int value : values) { value *= 2; } leave an int array unchanged?",
+    "model": "for (int i = 0; i < values.length; i++) {\n  values[i] *= 2;\n}",
+    "explanation": "Enhanced for is ideal when you only need each element value. Use an index when position, neighbors, or replacement matter.",
+    "missions": [
+      [
+        "Reproduce the non-change",
+        "Run and record the unchanged array.",
+        "Values remain 1, 2, 3."
+      ],
+      [
+        "Use enhanced for to read",
+        "Implement sum.",
+        "Read-only checks pass."
+      ],
+      [
+        "Use indexes to replace",
+        "Repair doubleValues.",
+        "All slots double."
+      ],
+      [
+        "Choose a loop",
+        "Classify four tasks by required traversal.",
+        "Reason names index/neighbor/replacement."
+      ]
+    ],
+    "apTransfer": "Can an enhanced for loop replace every String in an array with its uppercase version? Explain, then write the indexed header you would use.",
+    "reflection": "What information disappears when a traversal gives you only each element?",
+    "runTarget": "ForEachLimits"
+  },
+  "W41": {
+    "title": "Build the array algorithm toolkit",
+    "outcome": "Implement sum, count, minimum, maximum, and sequential-match patterns.",
+    "deliverable": "ArrayAlgorithms.java with ten algorithm checks passing",
+    "prediction": "Why is int min = 0 incorrect for an array containing only positive values? What initialization uses actual data?",
+    "model": "int min = values[0];\nfor (int value : values) {\n  if (value < min) min = value;\n}",
+    "explanation": "Each standard algorithm differs mainly in its accumulator and update rule. Preconditions determine safe initialization.",
+    "missions": [
+      [
+        "State preconditions",
+        "Mark which methods require nonempty input.",
+        "Minimum does; count does not."
+      ],
+      [
+        "Implement minimum",
+        "Initialize from data.",
+        "Positive and negative arrays pass."
+      ],
+      [
+        "Count a target",
+        "Visit every value.",
+        "Absent and repeated targets pass."
+      ],
+      [
+        "Name the pattern",
+        "Identify accumulator and update for five algorithms.",
+        "Each contract maps to a pattern."
+      ]
+    ],
+    "apTransfer": "Write a method that returns the largest even value in a nonempty array that is guaranteed to contain an even value.",
+    "reflection": "Which algorithm needs the strongest precondition, and why?",
+    "runTarget": "ArrayAlgorithms"
+  },
+  "W42": {
+    "title": "Shift without overwriting",
+    "outcome": "Choose traversal direction that preserves source values during rearrangement.",
+    "deliverable": "ArrayShift.java with eight shift and insert checks passing",
+    "prediction": "When shifting elements one position right in the same array, why must traversal start at the right end?",
+    "model": "for (int i = values.length - 1; i > 0; i--) {\n  values[i] = values[i - 1];\n}",
+    "explanation": "For in-place algorithms, trace which values are still needed. Traversal direction is part of correctness.",
+    "missions": [
+      [
+        "Reproduce overwrite",
+        "Trace [1,2,3,4] left to right.",
+        "Array becomes repeated ones."
+      ],
+      [
+        "Reverse direction",
+        "Repair shiftRight.",
+        "All original sources preserved."
+      ],
+      [
+        "Insert a value",
+        "Shift then write index zero.",
+        "Insert checks pass."
+      ],
+      [
+        "Draw the invariant",
+        "Mark processed and unprocessed regions.",
+        "Unprocessed sources remain intact."
+      ]
+    ],
+    "apTransfer": "Write an algorithm that removes the element at index k by shifting later elements left. State the loop start and bound.",
+    "reflection": "How did the trace reveal the required traversal direction?",
+    "runTarget": "ArrayShift"
+  },
+  "W44": {
+    "title": "Read tokens with File and Scanner",
+    "outcome": "Open a text file, traverse tokens with hasNext, and close the Scanner.",
+    "deliverable": "TokenReader.java with six file checks passing",
+    "prediction": "What two different failures can occur if the file name is correct Java but the file is not in the program's working directory?",
+    "model": "Scanner input = new Scanner(new File(path));\nwhile (input.hasNext()) {\n  String token = input.next();\n}\ninput.close();",
+    "explanation": "The exam reference lists hasNext. Real editors may also support more specialized Scanner methods, but build exam answers from the listed subset.",
+    "missions": [
+      [
+        "Locate the working directory",
+        "Run the unchanged project from the project folder.",
+        "tokens.txt is found."
+      ],
+      [
+        "Count tokens",
+        "Use hasNext and next.",
+        "Empty and multi-token files pass."
+      ],
+      [
+        "Close the resource",
+        "Close after traversal.",
+        "Resource step documented."
+      ],
+      [
+        "Explain failure layers",
+        "Separate compile-time from runtime file failure.",
+        "Both layers named."
+      ]
+    ],
+    "apTransfer": "Write the loop that reads every whitespace-delimited token from a Scanner named input and counts tokens equal to target.",
+    "reflection": "What file assumption did your editor make that the Java source did not show?",
+    "runTarget": "TokenReader"
+  },
+  "W45": {
+    "title": "Inventory Auditor",
+    "outcome": "Read inventory records line by line and report low-stock items.",
+    "deliverable": "InventoryAudit.java, passing checks, and one malformed-row note",
+    "prediction": "A line contains pencils,4. Which operations turn the text 4 into a value that can be compared with a threshold?",
+    "model": "String[] parts = line.split(\",\");\nint quantity = Integer.parseInt(parts[1]);",
+    "explanation": "File algorithms are collection algorithms with an input step. Keep parsing separate from the decision you make with the value.",
+    "missions": [
+      [
+        "Run sample data",
+        "Confirm the file is found.",
+        "Baseline reports zero."
+      ],
+      [
+        "Parse records",
+        "Split each nonblank token record.",
+        "Valid-record checks pass."
+      ],
+      [
+        "Count low stock",
+        "Use the supplied threshold.",
+        "Boundary quantity is handled."
+      ],
+      [
+        "Document malformed input",
+        "State the chosen precondition or handling rule.",
+        "Behavior is explicit."
+      ]
+    ],
+    "apTransfer": "Describe the accumulator and condition for returning the name of the lowest-stock item in a nonempty file.",
+    "reflection": "Where in the pipeline should malformed data be detected?",
+    "runTarget": "InventoryAudit"
+  },
+  "W46": {
+    "title": "Weather Data Analyzer",
+    "outcome": "Parse comma-separated weather rows and compute a conditional average.",
+    "deliverable": "WeatherData.java with seven parser and average checks passing",
+    "prediction": "Why must an average method track both total and count rather than divide by the number of lines in the file?",
+    "model": "if (parts[0].equals(target)) {\n  total += Double.parseDouble(parts[2]);\n  count++;\n}",
+    "explanation": "A conditional average is two synchronized accumulators. Dividing by the wrong count produces plausible but incorrect output.",
+    "missions": [
+      [
+        "Trace one file",
+        "Mark matching and nonmatching rows.",
+        "Count includes only target station."
+      ],
+      [
+        "Parse values",
+        "Split and parse station,value.",
+        "Decimal checks pass."
+      ],
+      [
+        "Compute average",
+        "Update total and count together.",
+        "Mixed-station average passes."
+      ],
+      [
+        "Handle no matches",
+        "Follow the stated zero-result contract.",
+        "No-match check passes."
+      ]
+    ],
+    "apTransfer": "Write the core statements for averaging only positive values read from a Scanner. You may assume input supplies doubles.",
+    "reflection": "Which wrong denominator would have produced the most believable bug?",
+    "runTarget": "WeatherData"
+  },
+  "W48": {
+    "title": "Cross the wrapper boundary",
+    "outcome": "Use Integer and Double values where collections require objects.",
+    "deliverable": "WrapperLab.java with seven boxing and parsing checks passing",
+    "prediction": "Why can ArrayList<Integer> store 7 even though 7 is an int primitive?",
+    "model": "Integer boxed = 7;\nint primitive = boxed;\nint parsed = Integer.parseInt(\"42\");",
+    "explanation": "Do not confuse new Integer values with parsing Strings. The AP subset uses Integer and Double as collection element types.",
+    "missions": [
+      [
+        "Map conversions",
+        "Draw String \u2192 int \u2192 Integer.",
+        "Parsing and boxing labeled separately."
+      ],
+      [
+        "Box and unbox",
+        "Complete roundTrip.",
+        "Positive and negative checks pass."
+      ],
+      [
+        "Parse safely under precondition",
+        "Implement addTextNumbers.",
+        "Multi-digit check passes."
+      ],
+      [
+        "Explain equality",
+        "State what intValue contributes.",
+        "Primitive value distinguished from object."
+      ]
+    ],
+    "apTransfer": "Explain the conversions in: ArrayList<Double> values = new ArrayList<>(); values.add(3.5); double x = values.get(0);",
+    "reflection": "Which conversion happens because of collection type, and which because data began as text?",
+    "runTarget": "WrapperLab"
+  },
+  "W49": {
+    "title": "Use the five ArrayList methods",
+    "outcome": "Predict how add, get, set, remove, and size change positions and values.",
+    "deliverable": "ListMethods.java with ten method checks passing",
+    "prediction": "After list.remove(1), what happens to the old elements at indexes 2 and later?",
+    "model": "Integer first = list.remove(0);\nlist.add(first);",
+    "explanation": "Trace both contents and indexes after every mutating call. Method syntax is easy; index movement causes the errors.",
+    "missions": [
+      [
+        "Trace five calls",
+        "Write the list after each supplied operation.",
+        "Indexes relabeled every row."
+      ],
+      [
+        "Rotate left",
+        "Use remove and add without a loop.",
+        "Normal and short lists pass."
+      ],
+      [
+        "Replace middle",
+        "Use set without changing size.",
+        "Odd-length check passes."
+      ],
+      [
+        "Build the method table",
+        "Record return value and size effect.",
+        "Five methods exact."
+      ]
+    ],
+    "apTransfer": "Trace [A,B,C,D] after remove(1), add(2, 'X'), and set(0, 'Z'). Give final size.",
+    "reflection": "Which method changes indexes without changing size?",
+    "runTarget": "ListMethods"
+  },
+  "W50": {
+    "title": "Traverse a changing-size collection",
+    "outcome": "Choose index or enhanced-for traversal for ArrayList queries and mutations.",
+    "deliverable": "ListTraversal.java with eight traversal checks passing",
+    "prediction": "Can an enhanced for loop replace each String element by assigning to its loop variable? Connect your answer to the earlier array lesson.",
+    "model": "for (int i = 0; i < words.size(); i++) {\n  words.set(i, words.get(i) + suffix);\n}",
+    "explanation": "The same choice rule applies: enhanced for for read-only element access; indexes for position, neighbors, and replacement.",
+    "missions": [
+      [
+        "Implement longest",
+        "Use enhanced for and preserve the first tie.",
+        "Empty and tie contract pass."
+      ],
+      [
+        "Replace strings",
+        "Use get and set by index.",
+        "All elements change."
+      ],
+      [
+        "Protect size",
+        "Confirm replacement does not add.",
+        "Size remains constant."
+      ],
+      [
+        "Compare syntax",
+        "Map array and ArrayList traversal headers.",
+        "length versus size exact."
+      ]
+    ],
+    "apTransfer": "Write a method that returns the index of the first negative Integer in an ArrayList, or -1.",
+    "reflection": "What extra capability did the indexed traversal provide?",
+    "runTarget": "ListTraversal"
+  },
+  "W51": {
+    "title": "Remove without skipping",
+    "outcome": "Remove matching elements while accounting for index shifts.",
+    "deliverable": "ListRemoval.java with ten removal checks passing",
+    "prediction": "Why does incrementing i immediately after remove(i) skip the element that shifted into i?",
+    "model": "int i = 0;\nwhile (i < values.size()) {\n  if (values.get(i) < 0) values.remove(i);\n  else i++;\n}",
+    "explanation": "Forward with a conditional increment and backward traversal are both valid. Choose from the contract and explain the invariant.",
+    "missions": [
+      [
+        "Reproduce the skip",
+        "Trace adjacent matches.",
+        "Shifted value is identified."
+      ],
+      [
+        "Remove negatives",
+        "Use conditional increment or traverse backward.",
+        "Adjacent and edge matches pass."
+      ],
+      [
+        "Remove duplicates",
+        "Compare neighbors and preserve one copy.",
+        "Runs of three pass."
+      ],
+      [
+        "State the invariant",
+        "Explain what portion is already clean.",
+        "Index shift appears in reasoning."
+      ]
+    ],
+    "apTransfer": "Complete a loop that removes every String of length 0 from an ArrayList without skipping adjacent empty Strings.",
+    "reflection": "Which traversal strategy do you trust more under exam time, and why?",
+    "runTarget": "ListRemoval"
+  },
+  "W54": {
+    "title": "Turn pixel position into row and column",
+    "outcome": "Create and access a rectangular 2D array using row-column coordinates.",
+    "deliverable": "GridBridge.java with eight coordinate checks passing",
+    "prediction": "With 100-pixel cells, what column contains x = 349? What happens at x = 400 in a four-column grid?",
+    "model": "int row = y / cellSize;\nint col = x / cellSize;\nreturn grid[row][col];",
+    "explanation": "A 2D array is an array of rows. grid.length counts rows; grid[0].length counts columns when at least one row exists.",
+    "missions": [
+      [
+        "Map positions",
+        "Convert four pixel coordinates by hand.",
+        "Quotients match row/column."
+      ],
+      [
+        "Implement row/column",
+        "Use integer division.",
+        "Interior coordinates pass."
+      ],
+      [
+        "Guard the edge",
+        "Reject negative and outside positions.",
+        "Boundary checks pass."
+      ],
+      [
+        "Label dimensions",
+        "State row and column counts.",
+        "length expressions exact."
+      ]
+    ],
+    "apTransfer": "Write a method that returns true when row and col are valid for a nonempty rectangular int[][] grid.",
+    "reflection": "Which Processing coordinate idea made the new syntax feel familiar?",
+    "runTarget": "GridBridge"
+  },
+  "W55": {
+    "title": "Trace row-major traversal",
+    "outcome": "Traverse every cell in row-major order with correct rectangular bounds.",
+    "deliverable": "GridTraversal.java with eight order and count checks passing",
+    "prediction": "For a 2-by-3 grid, how many times does the inner body run? Which expression supplies the inner bound?",
+    "model": "for (int row = 0; row < grid.length; row++) {\n  for (int col = 0; col < grid[row].length; col++) {\n    visit(grid[row][col]);\n  }\n}",
+    "explanation": "Never use grid.length for both bounds unless the specification guarantees square data.",
+    "missions": [
+      [
+        "Trace 2 by 3",
+        "List row,col order.",
+        "(0,0) through (1,2)."
+      ],
+      [
+        "Repair inner bound",
+        "Use current row length.",
+        "Rectangular check passes."
+      ],
+      [
+        "Build row-major text",
+        "Separate values predictably.",
+        "Order checks pass."
+      ],
+      [
+        "Count visits",
+        "Relate dimensions to executions.",
+        "2\u00d73 \u2192 6."
+      ]
+    ],
+    "apTransfer": "Give the row,col visit order for a 3-by-2 grid and state the final row and col values after both loops terminate.",
+    "reflection": "What bug appears when square sample data hides a wrong inner bound?",
+    "runTarget": "GridTraversal"
+  },
+  "W56": {
+    "title": "Build row and column algorithms",
+    "outcome": "Compute row sums, scan a column, and locate a target in a 2D array.",
+    "deliverable": "GridAlgorithms.java with ten 2D checks passing",
+    "prediction": "For rowSum(grid, r), which index changes and which stays fixed? Reverse the answer for scanning column c.",
+    "model": "int total = 0;\nfor (int col = 0; col < grid[row].length; col++) {\n  total += grid[row][col];\n}",
+    "explanation": "Name the fixed index before writing the loop. Many 2D errors are row/column role swaps, not nested-loop errors.",
+    "missions": [
+      [
+        "Mark fixed/changing",
+        "Annotate row sum and column scan.",
+        "Roles correct."
+      ],
+      [
+        "Implement rowSum",
+        "Traverse one selected row.",
+        "First/last rows pass."
+      ],
+      [
+        "Implement columnContains",
+        "Traverse rows at one column.",
+        "Present/absent pass."
+      ],
+      [
+        "Locate a target",
+        "Return row-major first coordinate.",
+        "Tie order documented."
+      ]
+    ],
+    "apTransfer": "Write code that returns the number of negative values in column c of a rectangular int[][] grid.",
+    "reflection": "Which word in the problem tells you which index stays fixed?",
+    "runTarget": "GridAlgorithms"
+  },
+  "W62": {
+    "title": "Choose sequential or binary search",
+    "outcome": "Implement both searches and state the precondition that makes binary search valid.",
+    "deliverable": "SearchLab.java with ten search checks passing",
+    "prediction": "Binary search runs on [8,2,9,1]. Is a -1 result evidence that the target is absent? Why or why not?",
+    "model": "while (low <= high) {\n  int mid = (low + high) / 2;\n  if (values[mid] == target) return mid;\n  if (values[mid] < target) low = mid + 1;\n  else high = mid - 1;\n}",
+    "explanation": "Sequential search needs no order. Binary search is faster only when its sorted precondition holds.",
+    "missions": [
+      [
+        "Trace intervals",
+        "Record low, mid, high for one hit and miss.",
+        "Interval strictly shrinks."
+      ],
+      [
+        "Implement binary search",
+        "Update the correct boundary.",
+        "First/middle/last/miss pass."
+      ],
+      [
+        "Compare contracts",
+        "State input requirement and worst-case idea.",
+        "Sorted precondition explicit."
+      ],
+      [
+        "Test duplicate values",
+        "Explain acceptable returned index.",
+        "Any target index meets contract."
+      ]
+    ],
+    "apTransfer": "Trace low, mid, and high while searching for 14 in [2,5,8,11,14,17,20].",
+    "reflection": "Which boundary update was easiest to reverse?",
+    "runTarget": "SearchLab"
+  },
+  "W63": {
+    "title": "Trace sorting invariants",
+    "outcome": "Identify the sorted region in selection and insertion sort and compare their moves.",
+    "deliverable": "SortTrace.java with nine pass and invariant checks",
+    "prediction": "After the first complete selection-sort pass on [4,2,3,1], which value is fixed and at what index?",
+    "model": "int minIndex = start;\nfor (int j = start + 1; j < values.length; j++) {\n  if (values[j] < values[minIndex]) minIndex = j;\n}\nswap(values, start, minIndex);",
+    "explanation": "Trace regions, not just values: sorted, current candidate, and unexamined. Merge sort is compared conceptually; recursion writing is not required.",
+    "missions": [
+      [
+        "Trace one pass",
+        "Mark minIndex after each comparison.",
+        "Final minimum correct."
+      ],
+      [
+        "Repair selection pass",
+        "Swap once after scanning.",
+        "Normal and duplicate checks pass."
+      ],
+      [
+        "Trace insertion",
+        "Show the sorted prefix and shifted values.",
+        "One insertion pass correct."
+      ],
+      [
+        "Compare moves",
+        "State selection swap versus insertion shift.",
+        "Invariants distinguished."
+      ]
+    ],
+    "apTransfer": "Trace the first two outer-loop passes of selection sort on [5,1,4,2].",
+    "reflection": "Which representation\u2014values, indexes, or regions\u2014made the sort understandable?",
+    "runTarget": "SortTrace"
+  },
+  "W64": {
+    "title": "Trace recursion without writing it",
+    "outcome": "Identify base cases, recursive calls, and return values while unwinding.",
+    "deliverable": "RecursionTrace.java with eight trace predictions verified",
+    "prediction": "For sumTo(3), list calls on the way down and returned values on the way back up.",
+    "model": "public static int sumTo(int n) {\n  if (n == 0) return 0;\n  return n + sumTo(n - 1);\n}",
+    "explanation": "Separate call order from return order. The AP task is to analyze recursive code, not invent it from scratch.",
+    "missions": [
+      [
+        "Trace down",
+        "List parameters until the base case.",
+        "Argument moves toward stopping."
+      ],
+      [
+        "Trace up",
+        "Record each returned value.",
+        "Pending operation applied once."
+      ],
+      [
+        "Predict two methods",
+        "Commit before running.",
+        "Predictions saved."
+      ],
+      [
+        "Diagnose nontermination",
+        "Find a call that moves away from its base case.",
+        "Progress failure named."
+      ]
+    ],
+    "apTransfer": "Trace mystery(4) for a supplied recursive method and show both call and return columns.",
+    "reflection": "Which half of the trace\u2014descent or unwinding\u2014caused more errors?",
+    "runTarget": "RecursionTrace"
+  },
+  "W65": {
+    "title": "Trace recursive search and merge sort",
+    "outcome": "Trace divide-and-conquer intervals and connect them to the iterative algorithms already learned.",
+    "deliverable": "RecursiveAlgorithms.java trace sheet, verified outputs, and LMS quiz",
+    "prediction": "What interval replaces low=0, high=6 when mid=3 is smaller than the target in recursive binary search?",
+    "model": "if (low > high) return -1;\nint mid = (low + high) / 2;\nif (values[mid] < target)\n  return search(values, target, mid + 1, high);",
+    "explanation": "Divide-and-conquer changes control flow, not the core invariant. Trace intervals and subarrays instead of trying to visualize all calls at once.",
+    "missions": [
+      [
+        "Trace recursive search",
+        "Record low, mid, high until hit/miss.",
+        "Interval shrinks."
+      ],
+      [
+        "Trace merge splits",
+        "Draw halves until size one.",
+        "Base subarrays visible."
+      ],
+      [
+        "Predict merge order",
+        "Combine two sorted halves by hand.",
+        "All values preserved and ordered."
+      ]
+    ],
+    "apTransfer": "Explain one similarity and one difference between iterative and recursive binary search.",
+    "reflection": "Which invariant connected the recursive version to an algorithm you already trusted?",
+    "runTarget": "RecursiveAlgorithms"
+  }
+}

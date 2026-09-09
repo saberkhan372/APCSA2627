@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Construct a valid object · AP CSA 2026-27</title><meta name="description" content="AP Computer Science A daily assignments, Java projects and course materials for E block, 2026-27."><link rel="stylesheet" href="../assets/site.css"><link rel="stylesheet" href="../assets/course.css"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="wrap"><a class="logo" href="../index.html">AP CS A <span class="logo-sub">2026-27</span></a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html" aria-current="page">Materials</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap year-main" tabindex="-1"><p><a href="../materials.html">← Materials</a></p><header class="page-heading"><p class="kicker">W25 · project</p><h1>Construct a valid object</h1></header><p class="lede">Initialize every instance variable from constructor parameters while preserving a precondition.</p><p>Complete the tasks named in your daily assignment. This page contains the full project.</p><p><a href="../downloads/projects/W25.zip" class="button">Download starter + checks</a></p><section><h2>Run the project</h2><ol><li>Unzip into its own project folder. If you have already started this project, continue your existing working copy.</li><li>Compile all Java files together. Keep any data file in the project folder.</li><li>Run <code>Bicycle</code>, then complete the starter tasks.</li><li>Run <code>BicycleCheck</code> and explain any failing case. Do not change the check file.</li></ol><p><a href="../setup.html">Eclipse and command-line setup</a></p></section><section><h2>Predict before running</h2><p>A constructor parameter and field are both named speed. What does speed = speed assign, and what syntax identifies the field?</p></section><details class="code-example"><summary>Worked example</summary><pre><code>public Bicycle(String model, int speed) {
+  this.model = model;
+  this.speed = Math.max(0, speed);
+}</code></pre><p>A constructor establishes the object&#x27;s first valid state. Use this when a parameter shadows a field.</p></details><section><h2>Project tasks</h2><ol class="missions"><li><strong>Run the broken object</strong><p>Record the ignored model and speed.</p><p class="help">Check: Baseline is unnamed @ 0.</p></li><li><strong>Initialize fields</strong><p>Use all three constructor parameters.</p><p class="help">Check: Normal construction passes.</p></li><li><strong>Preserve the precondition</strong><p>Clamp negative speed to zero.</p><p class="help">Check: Negative-speed check passes.</p></li><li><strong>Audit initialization</strong><p>Explain what value every field has after construction.</p><p class="help">Check: No field is left accidental.</p></li></ol></section><section><h2>AP transfer</h2><p>Write a constructor for Song with private title, artist, and seconds fields. Assume seconds must be positive.</p></section><section><h2>Explain your work</h2><p>Which constructor line establishes an invariant rather than merely copying data?</p></section><section><h2>Included files</h2><ul><li><code>Bicycle.java</code></li><li><code>BicycleCheck.java</code></li><li><code>README.md</code></li></ul></section><details class="code-example"><summary>Read starter: Bicycle.java</summary><pre><code>public class Bicycle {
+    private String model;
+    private int gear;
+    private int speed;
+
+    public Bicycle(String model, int gear, int speed) {
+        // TODO: initialize every field and prevent negative speed.
+        this.model = &quot;unnamed&quot;;
+        this.gear = 0;
+        this.speed = 0;
+    }
+
+    public String getModel() { return model; }
+    public int getGear() { return gear; }
+    public int getSpeed() { return speed; }
+
+    public static void main(String[] args) {
+        Bicycle bike = new Bicycle(&quot;Comet&quot;, 3, 12);
+        System.out.println(bike.getModel() + &quot; @ &quot; + bike.getSpeed());
+    }
+}
+
+</code></pre></details><section><h2>Used in these lessons</h2><ul class="day-list"><li class="day-line"><time datetime="2026-11-11"><strong>Nov 11</strong><span>Wed · 13:00-14:15</span></time><div><a href="../days/2026-11-11.html">BandBooster methods and tests</a><span class="meta">U3 · 3.4,3.5</span></div><span class="kind">Class</span></li></ul></section></main><footer><div class="wrap"><p>E block · Submit work through Classroom. Keep your source, test evidence and explanations together.</p></div></footer>
+<script src="../assets/classroom-links.js"></script><script src="../assets/course.js" defer></script></body></html>
