@@ -1,8 +1,8 @@
 # AP CSA 2026-27
 
-Prepared for [saberkhan372/APCSA2627](https://github.com/saberkhan372/APCSA2627). The repository was empty when inspected on September 9, 2026. Intended Pages address after publishing: `https://saberkhan372.github.io/APCSA2627/`.
+Course website: [AP CSA 2026–27](https://saberkhan372.github.io/APCSA2627/).
 
-This repository is a standalone static course website generated from the daily plan. It contains 75 instructional lesson pages, three explicit no-class dates, the AP exam date, 45 Java starter/check bundles, a materials library, setup directions and a reproducible standard-library Python build.
+This repository is a standalone static course website generated from the daily plan. It contains 75 instructional lesson pages, dated study notes and browser slide decks for all 75 classes, three explicit no-class dates, the AP exam date, 45 Java starter/check bundles, a materials library, setup directions and a reproducible standard-library Python build.
 
 ## Folder guide
 
@@ -10,6 +10,10 @@ This repository is a standalone static course website generated from the daily p
 docs/                    Ready-to-publish website; select this in GitHub Pages
   index.html             Full dated assignment schedule
   days/                  One page per calendar date
+  teaching.html          Notes and slides by date
+  notes/                 Study notes with examples and practice
+  slides/                Browser decks with keyboard and print controls
+  downloads/notes/        Editable Markdown study notes
   units/                 Topic and project navigation
   materials/             Guides for each resource
   downloads/lessons/      Daily assignment packets
@@ -42,9 +46,18 @@ Official instructions: https://docs.github.com/en/pages/getting-started-with-git
 
 - Edit `content/course.json` for dates, assignments, evidence and homework.
 - Edit `content/lessons.json` for the existing Java lesson guides.
+- Edit `content/teaching.json` for daily goals, examples, practice prompts, and slides. This file contains student-facing content only.
 - Edit a source in `projects/Wxx/` to revise a starter, check or fixture.
 - Add Classroom handout URLs in `web/classroom-links.js`, using the material IDs. Optionally add a single course Classroom URL for submissions.
 - Run `python3 tools/build_pages.py` and `python3 tools/verify_pages.py`, then upload the rebuilt site through your normal workflow.
+
+## Daily notes and slides
+
+Open **Notes & slides** from the main navigation, or use **Study notes** and **Class slides** on any instructional day. The 75 decks contain 656 slides. Arrow keys, Previous/Next, Home and End navigate the deck; Print includes every slide. Decks and notes also work as ordinary pages with JavaScript disabled. No presentation service, account, or external font is required.
+
+Each lesson includes a goal, key ideas, a worked example, practice, a common error, and an exit check tied to the dated assignment. The notes can be printed or downloaded as Markdown. Assessment-day examples are marked for use after the independent attempt; teachers provide the actual assessment prompts and scoring guides.
+
+Teacher agendas, scaffolds, extensions and suggested answers are delivered in a separate private pack outside this repository. The September 4 and 9 materials document the opening lessons; October 12–16 and the May 12 exam have no regular lesson deck.
 
 ## Materials available elsewhere
 
@@ -54,4 +67,4 @@ The repository contains no teacher solution directories, answer-key PDFs, studen
 
 ## Verification limits
 
-Static links, date coverage, downloads and package contents are checked by `verify_pages.py`. Java compilation was unavailable on the packaging computer; the download instructions identify each runner and check class. Browser interaction testing and live deployment were not performed.
+Static links, date coverage, downloads, agendas, deck structure and public source fields are checked by `python3 tools/verify_pages.py`. Run `node tools/test_slides.mjs` for navigation behavior checks. Java compilation was unavailable on the packaging computer; the download instructions identify each runner and check class. These automated checks do not verify browser rendering or live deployment.

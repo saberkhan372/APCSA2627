@@ -1,0 +1,2967 @@
+[
+  {
+    "goal": "Create and run a Java program, then explain a compiler error.",
+    "ideas": [
+      "A Java application begins in its main method.",
+      "Braces group a class and its methods. A statement usually ends with a semicolon.",
+      "A compiler error prevents execution. Incorrect output can come from code that compiles."
+    ],
+    "warm": "What did Processing supply when you wrote setup() and draw()? What must a plain Java application supply?",
+    "code": "public class Hello {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, Java!\");\n    }\n}",
+    "reasoning": "The filename is Hello.java because the public class is Hello. The main method contains the statement that prints one line. Match each closing brace to its opening brace before changing anything.",
+    "practice": "Run Hello. Remove one semicolon, record the first error, then restore it. Repeat with a quotation mark. Finally change only the printed text.",
+    "trap": "Do not repair every reported error at once. One missing delimiter can produce several later messages.",
+    "exit": "Which change is a syntax error: deleting a closing quote or printing the wrong greeting? Explain.",
+    "date": "2026-09-04",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Use the Chapter 1 error experiments to explain how a program becomes runnable.",
+    "ideas": [
+      "Compilation checks Java syntax and types before a program runs.",
+      "A name must follow identifier rules and cannot be a Java keyword.",
+      "n bits distinguish 2^n patterns. Main memory such as RAM is volatile."
+    ],
+    "warm": "How many bits distinguish 20 possible labels? Are total2 and 2total both valid identifiers?",
+    "code": "public static void main(String[] args) {\n    System.out.println(\"2 + 3\");\n    System.out.println(2 + 3);\n}",
+    "reasoning": "The quoted text prints literally as 2 + 3. The arithmetic expression prints 5. Both lines are syntactically valid. A compiler cannot infer that you intended different output.",
+    "practice": "Before the posted nine-question quiz, compare your Lab Exercise 5 predictions with the actual error messages. Explain one correction in your own words.",
+    "trap": "Do not call every wrong result a compiler error. Ask whether the program ran at all.",
+    "exit": "Write the conventional main header from memory and explain what RAM volatility means.",
+    "date": "2026-09-09",
+    "agenda": [
+      [
+        15,
+        "Lab Exercise 5 review"
+      ],
+      [
+        15,
+        "Posted nine-question quiz"
+      ],
+      [
+        15,
+        "Error explanations"
+      ],
+      [
+        20,
+        "Numeric-expression preview"
+      ],
+      [
+        10,
+        "Exit and next assignment"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Predict numeric types and preserve precision in an average.",
+    "ideas": [
+      "Integer division discards the fractional part toward zero.",
+      "Cast an operand before division when a fractional answer is needed.",
+      "Assignment stores the result after the expression has already been evaluated."
+    ],
+    "warm": "Predict the value and type of 9 / 4, 9 / 4.0, and (double)(9 / 4).",
+    "code": "int total = 9;\nint count = 4;\ndouble first = total / count;\ndouble second = (double) total / count;\nint remainder = total % count;",
+    "reasoning": "first stores 2.0 because 9 / 4 produces integer 2. second stores 2.25 because the cast changes an operand before division. The remainder is 1, satisfying 9 = 4 * 2 + 1.",
+    "practice": "Repair average in ExpressionLab. For Circle, use radius 3.0 and Math.PI to compute area and circumference. Read the radius with Scanner.nextDouble().",
+    "trap": "A double destination does not undo integer division. Ask students to label the type of each intermediate expression.",
+    "exit": "Why does double x = 5 / 2 store 2.0? Give the smallest change that stores 2.5.",
+    "date": "2026-09-11",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Transform a random sample into an inclusive integer range.",
+    "ideas": [
+      "Math.random() supplies a value at least 0.0 and below 1.0.",
+      "An inclusive range from min to max has max - min + 1 outcomes.",
+      "Scaling, casting, and shifting have distinct roles."
+    ],
+    "warm": "How many integers lie from 3 through 8? What must samples 0.0 and 0.999 produce?",
+    "code": "int min = 3;\nint max = 8;\ndouble sample = 0.75;\nint result = (int)(sample * (max - min + 1)) + min;",
+    "reasoning": "The width is 6. Scaling gives 4.5, casting gives 4, and shifting gives 7. A sample below 1.0 cannot enter the next bucket beyond max.",
+    "practice": "Complete scaleSample before roll. Check samples 0.0, 0.5, and 0.999 for a die from 1 through 6. Then change the upper bound to 8.",
+    "trap": "Casting Math.random() before multiplying produces zero every time. Keep the scaled product inside the cast.",
+    "exit": "Write an expression for a random integer from -2 through 2 inclusive.",
+    "date": "2026-09-15",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Trace separate objects, aliases, and reassignment.",
+    "ideas": [
+      "new creates an object and returns a reference to it.",
+      "Assigning an object variable copies a reference.",
+      "A method call can change an object that several variables reach."
+    ],
+    "warm": "How many Player objects exist after Player b = a if a already refers to one Player?",
+    "code": "Player a = new Player(\"Mira\", 2);\nPlayer b = a;\nb.addScore(3);\nb = new Player(\"Sol\", 8);\nSystem.out.println(a.getScore());",
+    "reasoning": "Both references initially reach the same Player, so addScore changes its score to 5. Reassigning b makes it reach a new object. It does not change a, and the printed value is 5.",
+    "practice": "Use the supplied Player API to trace two new expressions, one alias assignment, one mutation, and one reassignment. Label each object separately.",
+    "trap": "Avoid saying a variable contains the entire object. Also distinguish null from an object with default-valued fields.",
+    "exit": "After a = null, does b necessarily become null too? Explain.",
+    "date": "2026-09-17",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Use String indexes and substring boundaries safely.",
+    "ideas": [
+      "Character indexes run from 0 through length() - 1.",
+      "substring(start, end) includes start and excludes end.",
+      "String methods return values. They do not change the original String."
+    ],
+    "warm": "For \"planet\", what does substring(1, 4) return? Is substring(6, 6) valid?",
+    "code": "String word = \"planet\";\nString middle = word.substring(1, 4);\nint position = word.indexOf(\"x\");\nString unchanged = word;",
+    "reasoning": "middle is \"lan\" and position is -1. word still contains \"planet\". A failed search result must be handled before it is reused as an index.",
+    "practice": "Draw indexes for \"red kite\". State how firstWord should behave with a space, with no space, and with an empty String. Match safeSlice to its supplied contract.",
+    "trap": "An end index equal to length() is legal for substring. A character index equal to length() is outside the String.",
+    "exit": "State the legal relationship among start, end, and n for substring(start, end).",
+    "date": "2026-09-22",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Choose equality or ordering according to the String question.",
+    "ideas": [
+      "equals compares String contents.",
+      "== compares whether two references identify the same object.",
+      "compareTo supplies a negative, zero, or positive result for ordering."
+    ],
+    "warm": "Two separate new String(\"sun\") objects have the same text. What do == and equals report?",
+    "code": "String a = new String(\"sun\");\nString b = new String(\"sun\");\nboolean same = a.equals(b);\nint order = \"ant\".compareTo(\"bee\");",
+    "reasoning": "same is true because the character sequences match. order is negative because \"ant\" precedes \"bee\". Ordering code should test the sign, not assume every nonzero result is 1 or -1.",
+    "practice": "Predict the String Output Lineup before running it. Repair sameText and order in StringRelations. Include equal text stored in separate objects.",
+    "trap": "String literals may share objects. That can make an incorrect == test appear to work.",
+    "exit": "What does a compareTo result of zero tell you? Does it prove two variables refer to the same object?",
+    "date": "2026-09-24",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Use a mixed trace to identify the next concept to repair.",
+    "ideas": [
+      "A prediction should name both the result and the rule used.",
+      "Categorizing errors helps choose useful practice.",
+      "A successful repair must also work on a fresh input."
+    ],
+    "warm": "Which rule is at risk in each expression: 7 / 2, a == b, and text.substring(2, 5)?",
+    "code": "double average = 11 / 4;\nString text = \"robot\";\nString part = text.substring(1, 4);\nboolean match = part.equals(\"obo\");",
+    "reasoning": "average stores 2.0, part is \"obo\", and match is true. Trace expressions before assignments and check substring boundaries before naming the selected text.",
+    "practice": "Predict all six Unit1Review results, then run the checks. Choose two error categories and solve a new example in each before the AP Classroom set.",
+    "trap": "Correct answers produced by running code first do not show that a student can trace independently.",
+    "exit": "Write one error you repaired and one new input that would expose it again if it returned.",
+    "date": "2026-09-28",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Show independent understanding of Unit 1 expressions and method calls.",
+    "ideas": [
+      "Evaluate the expression before considering assignment conversion.",
+      "Use method signatures to check argument and return types.",
+      "Explain String boundaries and reference relationships explicitly."
+    ],
+    "warm": "Before beginning, identify the provided reference sheet and the response format for each section.",
+    "code": "// After submission: a new review example\ndouble result = 13 / 5;\nString label = \"orbit\".substring(1, 3);",
+    "reasoning": "For the after-submission example, result is 2.0 and label is \"rb\". Name the evaluation rule behind each answer. This example is separate from the selected assessment.",
+    "practice": "Complete 12 MC items in 26 minutes and two supplied-header code tasks in 24 minutes. Use the remaining 25 minutes for explanations and corrections.",
+    "trap": "A correction should explain a rule and show evidence, not merely copy a replacement answer.",
+    "exit": "Which rule caused your most consequential error, and how will you test your understanding of it?",
+    "date": "2026-09-30",
+    "agenda": [
+      [
+        26,
+        "Selected MC items"
+      ],
+      [
+        24,
+        "Supplied-header methods"
+      ],
+      [
+        25,
+        "Explanations and corrections"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Translate temperature categories into an ordered selection.",
+    "ideas": [
+      "An if/else-if chain selects the first true branch.",
+      "Every threshold needs tests below, at, and above it.",
+      "A final else can handle all remaining allowed values."
+    ],
+    "warm": "If a rule begins \"temperature >= 40\", what happens to 80 before a later \">= 80\" branch?",
+    "code": "if (temperature >= 80) {\n    activity = \"swimming\";\n} else if (temperature >= 60) {\n    activity = \"tennis\";\n} else if (temperature >= 40) {\n    activity = \"golf\";\n} else {\n    activity = \"skiing\";\n}",
+    "reasoning": "Descending lower bounds produce four disjoint outcomes. A value of 60 reaches tennis, while 59 reaches golf. Use the original lab for any additional allowed-temperature restrictions.",
+    "practice": "Test 39, 40, 59, 60, 79, and 80. Explain why separate independent if statements can overwrite an earlier activity.",
+    "trap": "Do not duplicate lower and upper bounds mechanically when branch order already establishes a bound.",
+    "exit": "Which two test values best expose changing >= 60 to > 60?",
+    "date": "2026-10-02",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Prove a Boolean condition and its negation cover the intended inputs.",
+    "ideas": [
+      "&& requires both conditions. || requires at least one.",
+      "Negating a conjunction changes it to a disjunction of negations.",
+      "Short-circuit evaluation can protect a later operation."
+    ],
+    "warm": "Why is day != 1 || day != 7 true for every integer day?",
+    "code": "boolean validMonth = month >= 1 && month <= 12;\nboolean invalidMonth = month < 1 || month > 12;\nboolean beginsA = text != null\n        && text.length() > 0\n        && text.substring(0, 1).equals(\"A\");",
+    "reasoning": "The invalid-month condition is the exact negation of the valid-month condition. The String guards evaluate left to right, so null or empty values stop before the substring call.",
+    "practice": "Build a four-row truth table for !(p && q) and !p || !q. Then test the Date Validation boundaries using its month-length and year assumptions.",
+    "trap": "Negating comparisons requires changing equality at the boundary: the negation of x >= 10 is x < 10.",
+    "exit": "Rewrite !(score >= 70 && submitted) without an outer negation.",
+    "date": "2026-10-06",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Trace a loop including its final failed condition.",
+    "ideas": [
+      "A loop has initialization, a condition, a body, and an update.",
+      "The last body value can differ from the final control-variable value.",
+      "Zero iterations are valid when the initial condition is false."
+    ],
+    "warm": "A loop visits 1, 3, 5, and 7 while its condition is i <= 8. What value fails the next test?",
+    "code": "int i = 1;\nint total = 0;\nwhile (i <= 8) {\n    total += i;\n    i += 2;\n}\nSystem.out.println(total + \" \" + i);",
+    "reasoning": "The accumulated sum is 16 and i finishes at 9. Include a final trace row with condition false. Declaring i before the loop makes it available afterward.",
+    "practice": "Complete sumTo and countBy in LoopTrace. Trace countBy(1, 8, 2), then test a start value already beyond the bound.",
+    "trap": "A variable declared in a for header is out of scope after that loop. Discuss its last trace value without pretending it can be printed outside its scope.",
+    "exit": "How many body executions occur for i = 2; i <= 11; i += 3?",
+    "date": "2026-10-08",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Maintain an accumulator with a precise meaning.",
+    "ideas": [
+      "A sum accumulator starts at the additive identity, zero.",
+      "A product accumulator usually starts at the multiplicative identity, one.",
+      "State what the accumulator represents after each iteration."
+    ],
+    "warm": "If power begins at 1 and doubles four times, what are its successive values?",
+    "code": "int power = 1;\nint sum = 0;\nfor (int exponent = 1; exponent <= 4; exponent++) {\n    power *= 2;\n    sum += power;\n}",
+    "reasoning": "After each iteration, power is the current power of two and sum contains all powers added so far. The final values are 16 and 30.",
+    "practice": "Write Powers of 2 without Math.pow. Complete the selected Loop Programs items. For an extrema task, explain how the first actual value initializes min and max.",
+    "trap": "Starting a product at zero keeps it zero forever. Starting a minimum at zero fails for all-positive data.",
+    "exit": "For data 6, 9, 4, what should min start at and finish at?",
+    "date": "2026-10-20",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Scan a String with a loop bound and an accumulator that match the task.",
+    "ideas": [
+      "A one-character substring at i needs i < length().",
+      "A two-character lookahead needs i + 1 < length().",
+      "Non-overlapping matches advance past every character consumed."
+    ],
+    "warm": "How many non-overlapping \"aa\" pairs appear in \"aaaa\"? How many overlapping pairs?",
+    "code": "String result = \"\";\nfor (int i = 0; i < text.length(); i++) {\n    String ch = text.substring(i, i + 1);\n    if (!ch.equals(\"x\")) {\n        result += ch;\n    }\n}",
+    "reasoning": "After i characters have been processed, result contains exactly the retained characters from that prefix. For \"axxb\", the final result is \"ab\". An empty input leaves the accumulator empty.",
+    "practice": "Complete removeCharacter and countDouble in StringAlgorithms. Mark consumed character positions for \"aaaa\", \"aaa\", and \"baab\".",
+    "trap": "Changing an index in the body and again in a for update can skip an extra character.",
+    "exit": "What is the safe condition for examining substring(i, i + 2)?",
+    "date": "2026-10-23",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Relate nested-loop bounds to output and execution counts.",
+    "ideas": [
+      "The outer loop selects a row or group.",
+      "Inner-loop work may depend on the current outer value.",
+      "Count body executions directly before comparing growth."
+    ],
+    "warm": "A triangle has rows with 1, 2, 3, and 4 symbols. How many symbols print in total?",
+    "code": "for (int row = 1; row <= 4; row++) {\n    for (int col = 1; col <= row; col++) {\n        System.out.print(\"*\");\n    }\n    System.out.println();\n}",
+    "reasoning": "The inner body runs row times for each row. The newline runs once per row. For n rows, the symbol count is the sum from 1 through n.",
+    "practice": "Implement the staircase and trace the factor-pair loops. Compare counts for n = 3 and n = 5 before running the check programs.",
+    "trap": "Two nested loops do not always mean n squared work. A constant inner bound of 8 produces 8n executions.",
+    "exit": "If the outer loop runs n times and the inner loop always runs 8 times, what happens when n doubles?",
+    "date": "2026-10-27",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Translate a method specification into branches, random ranges, and state updates.",
+    "ideas": [
+      "Read the full method contract before coding.",
+      "A random choice and a random quantity may require separate samples.",
+      "A state update must respect limits such as available capacity or stock."
+    ],
+    "warm": "For an unrelated supply model, need is 12 and available stock is 7. How much stock can be used?",
+    "code": "int available = 7;\nint requested = 12;\nint used = requested;\nif (used > available) { used = available; }\navailable -= used;",
+    "reasoning": "This original supply example caps consumption at the available amount using selection. It leaves available equal to zero. Follow Feeder’s own specification for its probabilities and food calculation.",
+    "practice": "Attempt released 2024 Feeder part (a) independently for 20 minutes. Afterward, annotate the branch, range calculation, and field update in your own response.",
+    "trap": "Do not reuse one random sample for unrelated decisions unless the specification explicitly defines that dependence.",
+    "exit": "Name one boundary case that a plausible random simulation could miss.",
+    "date": "2026-10-29",
+    "agenda": [
+      [
+        5,
+        "Prompt orientation"
+      ],
+      [
+        20,
+        "Independent Feeder attempt"
+      ],
+      [
+        20,
+        "Contract review"
+      ],
+      [
+        25,
+        "Part (b) discussion and revision"
+      ],
+      [
+        5,
+        "Exit check"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Repair a control-flow error and demonstrate transfer to a new input.",
+    "ideas": [
+      "A test should distinguish the incorrect algorithm from the intended one.",
+      "The smallest failing input often exposes the cause clearly.",
+      "A repair needs a fresh check after the original failure passes."
+    ],
+    "warm": "A String method fails only on the last adjacent pair. Which expression or bound would you inspect first?",
+    "code": "int matches = 0;\nfor (int i = 0; i + 1 < text.length(); i++) {\n    if (text.substring(i, i + 1)\n            .equals(text.substring(i + 1, i + 2))) {\n        matches++;\n    }\n}",
+    "reasoning": "This example counts overlapping equal adjacent pairs. \"aabb\" gives 2 and \"aaa\" gives 2. Its contract differs from counting non-overlapping doubles.",
+    "practice": "Finish the Feeder runner, then select Boolean logic, loop bounds, or String scans for a focused repair. Explain the repaired method before executing it.",
+    "trap": "Do not switch between overlapping and non-overlapping interpretations while evaluating the same method.",
+    "exit": "Give one input that distinguishes overlapping pair counting from non-overlapping counting.",
+    "date": "2026-11-03",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Demonstrate independent selection, loop, and String reasoning.",
+    "ideas": [
+      "Branch order determines which condition gets the first opportunity.",
+      "Loop bounds come from the indexes used in the body.",
+      "An accumulator needs correct initialization and an update that matches the contract."
+    ],
+    "warm": "Locate the selected assessment and confirm which response areas require code and which require an explanation.",
+    "code": "// After submission: independent review example\nint count = 0;\nfor (int i = 1; i <= 7; i += 2) {\n    count++;\n}",
+    "reasoning": "The body executes four times, with i equal to 1, 3, 5, and 7. The next tested value is 9. The variable declared in the header is scoped to the loop.",
+    "practice": "Complete 12 MC questions in 26 minutes and two loop/String methods in 34 minutes. Reserve 15 minutes for explanations and corrections.",
+    "trap": "Passing one normal input is not enough evidence for a loop that also permits zero or one iteration.",
+    "exit": "Which boundary case will you use to check your next loop?",
+    "date": "2026-11-05",
+    "agenda": [
+      [
+        26,
+        "Selected MC items"
+      ],
+      [
+        34,
+        "Loop and String methods"
+      ],
+      [
+        15,
+        "Explanations and corrections"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Design fields and methods around an object’s responsibilities.",
+    "ideas": [
+      "Instance fields represent the state each object must remember.",
+      "Public methods describe the allowed interactions.",
+      "A class model includes only information needed for its purpose."
+    ],
+    "warm": "A booster has a name and a sales total. Which facts vary per booster, and which actions change those facts?",
+    "code": "public class Meter {\n    private int total;\n    public Meter() { total = 0; }\n    public void add(int amount) { total += amount; }\n    public int getTotal() { return total; }\n}",
+    "reasoning": "Meter stores one fact and offers controlled ways to change and observe it. The constructor establishes the initial value. The getter returns information that any caller can use.",
+    "practice": "Translate the Duck diagram into field and method declarations. Then sketch the BandBooster interface before implementing its bodies. Identify one unnecessary field.",
+    "trap": "A noun in a scenario is not automatically a field. Ask whether the program must remember it between method calls.",
+    "exit": "Why would total normally be private while getTotal is public?",
+    "date": "2026-11-09",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Implement constructors and methods that preserve object state.",
+    "ideas": [
+      "A constructor establishes an object’s first valid state.",
+      "Mutator methods update fields that persist after the call ends.",
+      "Returning a value lets the caller decide how to use it."
+    ],
+    "warm": "After three updates of 4, 7, and 2 to an initial total of zero, what should a getter return?",
+    "code": "Meter m = new Meter();\nm.add(4);\nm.add(7);\nint before = m.getTotal();\nm.add(2);\nint after = m.getTotal();",
+    "reasoning": "before is 11 and after is 13. The getter observes state without changing it. The primitive variable before keeps its copied value even after the Meter changes.",
+    "practice": "Finish BandBooster updateSales and its runner with fictional boosters. Test initial state, repeated updates, and independence between two instances.",
+    "trap": "A local total inside updateSales disappears after the call. Persistent state belongs in the instance field.",
+    "exit": "Why does a method that only prints a total not satisfy a specification requiring an int return value?",
+    "date": "2026-11-11",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Explain mutation and reassignment when a reference is passed by value.",
+    "ideas": [
+      "A parameter receives a copy of the argument’s value.",
+      "An object reference can still reach shared mutable state.",
+      "Reassigning the parameter changes only that local reference."
+    ],
+    "warm": "If a method changes a Player’s score, can the caller see the change? What if it instead reassigns the parameter?",
+    "code": "public static void change(Player p) {\n    p.addScore(2);\n    p = new Player(\"New\", 99);\n}\n// Caller has Player a = new Player(\"Lee\", 5);\n// After change(a), inspect a.getScore().",
+    "reasoning": "The caller’s Player finishes with score 7. The new object assigned to p is separate and does not replace the caller’s reference. Java passes the reference value by value.",
+    "practice": "Trace Changing People with separate rows for the caller variable and the parameter. In the ownership project, identify any method that returns a mutable stored object directly.",
+    "trap": "Avoid the shortcut \"objects are passed by reference\". It obscures why parameter reassignment does not affect the caller variable.",
+    "exit": "What is copied when an object reference is passed to a method?",
+    "date": "2026-11-13",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Distinguish class-wide state from each object’s state.",
+    "ideas": [
+      "A static field belongs to the class.",
+      "Each object has its own instance fields.",
+      "A static method needs an object reference to access a particular instance’s fields."
+    ],
+    "warm": "Three Ticket objects have their own id values but share nextId. How many nextId fields exist?",
+    "code": "public class Badge {\n    private static int nextId = 1;\n    private int id;\n    public Badge() {\n        id = nextId;\n        nextId++;\n    }\n}",
+    "reasoning": "The first three constructed Badges receive ids 1, 2, and 3. Afterward nextId is 4. Advancing shared nextId does not overwrite ids already stored in earlier objects.",
+    "practice": "Complete Ticket and trace three constructions. Connect each field in Counting Transactions to either one account/object or the shared class state.",
+    "trap": "Making every field static may silence an access error while changing the meaning of the program.",
+    "exit": "Should getBalance be static if it returns one account’s balance? Why?",
+    "date": "2026-11-17",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Resolve shadowed field names with this.",
+    "ideas": [
+      "A parameter can shadow an instance field with the same name.",
+      "this identifies the current object.",
+      "A precondition states what the caller must ensure before a method runs."
+    ],
+    "warm": "Inside setFloor(int floor), what does the bare name floor refer to?",
+    "code": "public void setFloor(int floor) {\n    this.floor = floor;\n}\n// this.floor is the current object’s field.\n// floor on the right is the parameter.",
+    "reasoning": "The assignment copies the argument value into the current object’s field. Writing floor = floor assigns the parameter to itself and leaves the field unchanged.",
+    "practice": "Complete HotelRoom. Trace a constructor and setter where a parameter shadows a field. Explain the published precondition for one operation.",
+    "trap": "Do not add this to a local variable or use it from a static method. this identifies an instance.",
+    "exit": "If a field is size and the parameter is newSize, is this required in size = newSize?",
+    "date": "2026-11-19",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Derive persistent state and boundary tests from an interaction table.",
+    "ideas": [
+      "Store the information needed to answer future queries.",
+      "Update totals and counts together when recording an observation.",
+      "Define behavior before any observations have been recorded."
+    ],
+    "warm": "An average method has no observations yet. Why is total / count not a sufficient implementation?",
+    "code": "int total = 1200 + 800 + 1000;\nint days = 3;\ndouble average = (double) total / days;\nboolean active = 1000 >= 1000;",
+    "reasoning": "The average is 1000.0 and the threshold comparison is true. A threshold described as \"at least\" includes equality. Persistent tracking also needs counts that survive each recording call.",
+    "practice": "Write StepTracker from its interaction table. Test no recorded days, one below-threshold day, one exactly-threshold day, and repeated calls.",
+    "trap": "Do not divide total steps by active days when the method asks for the average over all recorded days.",
+    "exit": "What state must be updated for every recorded day, including an inactive one?",
+    "date": "2026-11-30",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Use tests to check constructor and mutator contracts.",
+    "ideas": [
+      "An interaction table can become a sequence of executable tests.",
+      "Test independence by creating a second instance.",
+      "A method explanation should identify the fields read and the fields changed."
+    ],
+    "warm": "How can two objects expose an accidental static field in a tracker class?",
+    "code": "StepTracker a = new StepTracker(1000);\nStepTracker b = new StepTracker(1000);\na.addDailySteps(1500);\n// Compare a.activeDays() with b.activeDays().",
+    "reasoning": "Under the original StepTracker contract, a has one active day and b has none. Their instance state must remain independent. Match all names and expected values to the supplied class specification.",
+    "practice": "Finish StepTracker, exchange boundary tests, and complete the selected Unit 3 MC questions. Explain one constructor and one mutator without the IDE.",
+    "trap": "A test that queries only the object just updated cannot expose unintended sharing across objects.",
+    "exit": "Name the fields read and changed by addDailySteps, and explain why each belongs to the object.",
+    "date": "2026-12-02",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Implement a class from a specification under independent assessment conditions.",
+    "ideas": [
+      "The class header, fields, constructor, and methods must agree.",
+      "Store sufficient state without redundant values that can drift apart.",
+      "Match the interaction examples and the stated contract."
+    ],
+    "warm": "Locate the Bottle prompt and response area. Confirm the time allocation before beginning.",
+    "code": "// After submission: unrelated class-design check\npublic class Counter {\n    private int value;\n    public Counter(int start) { value = start; }\n    public void add(int amount) { value += amount; }\n    public int getValue() { return value; }\n}",
+    "reasoning": "The Counter example shows the relationship among stored state, initialization, mutation, and observation. It is an original review example, not a Bottle solution.",
+    "practice": "Write Bottle independently, complete the selected MC items, then use the last 23 minutes to inspect examples and begin corrections.",
+    "trap": "A constructor has the class name and no return type. A method that happens to share the name but has a return type is not that constructor.",
+    "exit": "Which interaction example best tests the state transition you found hardest?",
+    "date": "2026-12-04",
+    "agenda": [
+      [
+        35,
+        "Independent Bottle response"
+      ],
+      [
+        17,
+        "Selected MC items"
+      ],
+      [
+        23,
+        "Review and corrections"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Decide whether a dataset can answer a question responsibly.",
+    "ideas": [
+      "A dataset’s sampling frame limits the population and time period it represents.",
+      "Units, missing values, and collection choices affect an analysis.",
+      "A permitted use and a useful result require separate justification."
+    ],
+    "warm": "Can a week of noon temperatures establish whether mornings warmed over ten years?",
+    "code": "Question: Compare daytime temperatures this week.\nSample A: seven noon readings from one station, Celsius\nSample B: five daily highs, Fahrenheit, two missing days\nDecision: define a comparable measurement before averaging.",
+    "reasoning": "Averages of different measurements or units are not automatically comparable. Identify the variable, unit, location, time, and missing-data convention before writing the algorithm. These samples are illustrative, not authentic observations.",
+    "practice": "Compare two non-personal datasets. Write a question, a source note, a units statement, a missing-data risk, and one limit on the conclusion.",
+    "trap": "A larger file does not remove bias if the same groups, locations, or times remain absent.",
+    "exit": "Name one additional fact you need before using a dataset for a new purpose.",
+    "date": "2026-12-08",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Create arrays and distinguish capacity, indexes, and default values.",
+    "ideas": [
+      "An array’s length is fixed after creation.",
+      "Valid indexes begin at zero and stop before length.",
+      "A new primitive array holds default values, while an object array initially holds null references."
+    ],
+    "warm": "For new int[4], what are the initial values and the final valid index?",
+    "code": "int[] counts = new int[4];\ncounts[counts.length - 1] = 7;\nString[] labels = new String[2];\n// counts is {0, 0, 0, 7}\n// labels contains two null references",
+    "reasoning": "Array length is a field accessed as counts.length. Creating an object array creates storage for references, not a String object in every slot.",
+    "practice": "Complete ArrayAccess. In Tracking Sales, predict the index used for each salesperson and begin a traversal that visits every element once.",
+    "trap": "Do not use length() for an array. Strings use length(), arrays use length, and ArrayList uses size().",
+    "exit": "Write an assignment that stores 3.5 in the final element of a 12-element double array named values.",
+    "date": "2026-12-10",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Choose indexed or enhanced-for traversal according to the operation.",
+    "ideas": [
+      "Enhanced for copies each element value into a loop variable.",
+      "Assigning that loop variable does not replace an array slot.",
+      "Use an index when replacing elements or comparing neighbors."
+    ],
+    "warm": "Does for (int n : values) { n *= 2; } double the elements of an int array?",
+    "code": "int[] values = {2, 5, 8};\nfor (int i = 0; i < values.length; i++) {\n    values[i] *= 2;\n}\nint total = 0;\nfor (int n : values) { total += n; }",
+    "reasoning": "The indexed loop replaces elements with 4, 10, and 16. The enhanced-for loop reads those values and produces total 30. Different loop forms fit different tasks.",
+    "practice": "Complete count, sum, min, and max passes. Contrast replacing a String array entry with mutating a Player reached through an array reference.",
+    "trap": "A copied object reference can still reach the same mutable object. That does not mean assignment to the loop variable replaces the slot.",
+    "exit": "Which traversal fits replacing every String with its uppercase form, and why?",
+    "date": "2026-12-14",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Reverse an array in place without losing values.",
+    "ideas": [
+      "A swap needs temporary storage for a value about to be overwritten.",
+      "Pair index i with length - 1 - i.",
+      "Each pair should be swapped once."
+    ],
+    "warm": "In an array of length 5, which index pairs swap during reversal? What happens to the middle element?",
+    "code": "for (int i = 0; i < values.length / 2; i++) {\n    int other = values.length - 1 - i;\n    int saved = values[i];\n    values[i] = values[other];\n    values[other] = saved;\n}",
+    "reasoning": "The loop visits only the first half, so it does not swap pairs back again. Empty and one-element arrays perform zero swaps. Odd and even lengths use the same index formula.",
+    "practice": "Finish the array toolkit and reverse actual elements. Test lengths 0, 1, 4, and 5. Compare an alias with a separately copied array.",
+    "trap": "Traversing the entire array performs each reversal twice and can restore the original order.",
+    "exit": "Why must an in-place right shift usually travel from the right end toward the left?",
+    "date": "2026-12-16",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Read a text file with a Scanner and a clear token contract.",
+    "ideas": [
+      "File paths are interpreted relative to the program’s working directory unless absolute.",
+      "hasNext() checks for another token before a read.",
+      "The next method must match the token’s expected type."
+    ],
+    "warm": "What differs between a missing file and a file containing \"blue\" where nextInt() expects a number?",
+    "code": "Scanner input = new Scanner(new File(\"values.txt\"));\nint total = 0;\nwhile (input.hasNext()) {\n    total += input.nextInt();\n}\ninput.close();",
+    "reasoning": "Assume every remaining token is an integer. hasNext() establishes that a token exists, not that it has the required type. Imports and a suitable throws declaration or exception handler belong in the containing program.",
+    "practice": "Complete TokenReader. Put the data file in the working directory, trace the tokens, and explain the imports, opening, read loop, and close call.",
+    "trap": "Do not treat hasNext() as validation that nextInt() will succeed on arbitrary text.",
+    "exit": "Why can a correctly spelled data filename still fail to open during execution?",
+    "date": "2027-01-06",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Separate reading, parsing, and inventory decisions.",
+    "ideas": [
+      "The record format determines how text becomes fields.",
+      "Numeric text must be parsed before numeric comparisons.",
+      "Empty-input and threshold behavior must follow an explicit contract."
+    ],
+    "warm": "A record is \"pencils,4\". Which part is text identifying the item, and which part must become a number?",
+    "code": "String record = \"pencils,4\";\nString[] fields = record.split(\",\");\nString name = fields[0];\nint quantity = Integer.parseInt(fields[1]);\nboolean low = quantity < 5;",
+    "reasoning": "The parsed quantity is 4 and low is true. This isolated record illustrates the parsing step. Use the supplied InventoryAudit fixture and contract for its actual full-file format.",
+    "practice": "Complete InventoryAudit with the packaged synthetic data. Compare token reads with complete-line reads and document behavior on an empty file.",
+    "trap": "Comparing the Strings \"12\" and \"4\" lexicographically does not compare their numeric quantities.",
+    "exit": "Why should parsing and the low-stock decision be checked separately?",
+    "date": "2027-01-08",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Compute file-based weather aggregates with the correct denominator.",
+    "ideas": [
+      "A sum and a count must describe the same set of values.",
+      "Line boundaries can represent groups such as weeks.",
+      "A maximum needs initialization compatible with all permitted temperatures."
+    ],
+    "warm": "Two lines contain 2 values and 4 values. Is dividing the total by 2 a mean over all six observations?",
+    "code": "double[] readings = {-4.0, 2.0, 8.0};\ndouble sum = 0;\ndouble maximum = readings[0];\nfor (double value : readings) {\n    sum += value;\n    if (value > maximum) { maximum = value; }\n}\ndouble mean = sum / readings.length;",
+    "reasoning": "The sum is 6.0, the mean is 2.0, and the maximum is 8.0. Initializing maximum to zero would fail for an all-negative dataset.",
+    "practice": "Complete WeatherData using the corrected W46 starter. Read each weekly line, split the numeric text, parse values, and compute weekly means and the overall maximum.",
+    "trap": "An average of weekly averages is not an overall observation mean when groups have different counts.",
+    "exit": "What two accumulators are needed to average only positive readings?",
+    "date": "2027-01-12",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Apply a tested pipeline to authentic data without overstating the result.",
+    "ideas": [
+      "Record the source, dates, location, measurement, and unit.",
+      "Adapt the parser to the selected source’s documented format.",
+      "Compare a computed result with a small hand-checked subset."
+    ],
+    "warm": "A file contains 32 and 50 in Fahrenheit. What must be settled before comparing its mean with Celsius data?",
+    "code": "Illustrative sample, not observed weather:\nDay 1: 10.0 C\nDay 2: missing\nDay 3: 16.0 C\nMean of available observations: 13.0 C",
+    "reasoning": "Only two observations contribute to the available-data mean. Treating missing as zero would produce about 8.67 C and change the meaning. Report the missing observation and the limited sample.",
+    "practice": "Use the selected cited public weather sample. Calculate one aggregate, check a small subset by hand, and state a limitation on the conclusion.",
+    "trap": "A plausible number can still describe the wrong variable, unit, time period, or population.",
+    "exit": "Write one sentence stating exactly what your computed result describes.",
+    "date": "2027-01-14",
+    "agenda": [
+      [
+        5,
+        "Entry check"
+      ],
+      [
+        10,
+        "Project mini-lesson"
+      ],
+      [
+        45,
+        "Studio work"
+      ],
+      [
+        10,
+        "Conference and tests"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Trace wrapper conversions and the basic ArrayList methods.",
+    "ideas": [
+      "ArrayList stores reference types such as Integer and String.",
+      "Boxing and unboxing connect primitives with their wrapper types.",
+      "List mutations can change size and shift later indexes."
+    ],
+    "warm": "Why can an ArrayList<Integer> accept the expression 7 even though int is a primitive?",
+    "code": "ArrayList<Integer> values = new ArrayList<Integer>();\nvalues.add(7);\nvalues.add(0, 3);\nint first = values.get(0);\nvalues.set(1, 9);\nvalues.remove(0);",
+    "reasoning": "The list changes from [] to [7], then [3,7], then [3,9], then [9]. first is primitive 3 after unboxing. set replaces a value without changing the list’s size.",
+    "practice": "Complete WrapperLab and ListMethods. Trace size and indexes after add, get, set, and remove. Contrast parseInt(\"7\") with boxing 7.",
+    "trap": "For ArrayList<Integer>, remove(1) removes index 1. It does not mean \"remove the number 1\".",
+    "exit": "Which method changes an existing value without changing list size?",
+    "date": "2027-01-20",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Demonstrate array and file-processing contracts independently.",
+    "ideas": [
+      "Array bounds come from array length.",
+      "A file-reading method must state the format it expects.",
+      "Parsing, traversal, and aggregation should agree about which observations count."
+    ],
+    "warm": "Confirm the assessment’s input-format assumptions and the required return value before starting.",
+    "code": "// After submission: unrelated trace\nint[] data = {3, 6, 9};\nint total = 0;\nfor (int i = 0; i < data.length; i++) {\n    total += data[i];\n}",
+    "reasoning": "The total is 18 and the loop visits indexes 0, 1, and 2. The array’s length supplies the exclusive upper bound.",
+    "practice": "Complete ten MC items in 22 minutes and the file-to-array task in 25 minutes. Use 28 minutes for explanations and repairs.",
+    "trap": "A read loop that assumes valid integer tokens should not be described as validating arbitrary file input.",
+    "exit": "Name one assumption your method makes about its input file and one test for that assumption.",
+    "date": "2027-01-22",
+    "agenda": [
+      [
+        22,
+        "Selected MC items"
+      ],
+      [
+        25,
+        "File-to-array method"
+      ],
+      [
+        28,
+        "Explanations and repairs"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Remove list elements without skipping shifted values.",
+    "ideas": [
+      "Removing an element shifts later elements one position left.",
+      "A forward loop must reconsider the same index after removal.",
+      "A backward loop leaves unvisited lower indexes in place."
+    ],
+    "warm": "After removing index 0 from [\"\", \"\", \"x\"], what is now at index 0?",
+    "code": "int i = 0;\nwhile (i < words.size()) {\n    if (words.get(i).length() == 0) {\n        words.remove(i);\n    } else {\n        i++;\n    }\n}",
+    "reasoning": "On removal, the next unexamined value shifts into index i, so i stays unchanged. When a value remains, increment i to move past it. The loop removes adjacent empty Strings correctly.",
+    "practice": "Complete ListTraversal and ListRemoval. Trace all matches, no matches, adjacent matches, and an empty list before running the checks.",
+    "trap": "Do not structurally change an ArrayList through ordinary remove calls inside an enhanced-for traversal.",
+    "exit": "Why does backward removal avoid skipping the next unvisited element?",
+    "date": "2027-01-26",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Compute a cart total from objects stored in a typed list.",
+    "ideas": [
+      "A list of Item references stores access to each item’s state.",
+      "Quantity contributes to a line total through multiplication.",
+      "Getters let an aggregate observe objects without duplicating their representation."
+    ],
+    "warm": "An item costs 2.50 and quantity is 3. What is its contribution to the cart total?",
+    "code": "double total = 0.0;\nfor (Item item : cart) {\n    total += item.getPrice() * item.getQuantity();\n}",
+    "reasoning": "The accumulator represents the sum of all line totals already visited. An empty cart gives total 0.0 in this example. Getter names must match the provided Item class.",
+    "practice": "Create ArrayList<Item> and three fixed products. Verify quantity-weighted totals before adding interactive input. Keep Item and Shop in correctly named source files.",
+    "trap": "Adding each unit price once ignores quantity. Avoid introducing input parsing before the core calculation is testable.",
+    "exit": "Why does an enhanced-for loop fit this total calculation?",
+    "date": "2027-01-28",
+    "agenda": [
+      [
+        5,
+        "Entry check"
+      ],
+      [
+        10,
+        "Project mini-lesson"
+      ],
+      [
+        45,
+        "Studio work"
+      ],
+      [
+        10,
+        "Conference and tests"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Preserve a cart’s order while removing every matching item.",
+    "ideas": [
+      "A collection mutation must satisfy both selection and traversal rules.",
+      "Adjacent matches expose skipped-element bugs.",
+      "State the method’s side effects and any return value separately."
+    ],
+    "warm": "If products at indexes 1 and 2 both match the removal rule, which index holds the second match after index 1 is removed?",
+    "code": "for (int i = cart.size() - 1; i >= 0; i--) {\n    if (cart.get(i).getQuantity() == 0) {\n        cart.remove(i);\n    }\n}",
+    "reasoning": "This original extension removes zero-quantity products while retaining the relative order of other products. Moving backward keeps the next lower unvisited index valid.",
+    "practice": "Add the planned remove-matching-items extension. Test consecutive matches, all matches, no matches, and an empty cart. Recompute the total after removal.",
+    "trap": "Do not confuse removing an Item from the list with changing a field inside that Item.",
+    "exit": "What should happen when every item matches the removal rule?",
+    "date": "2027-02-01",
+    "agenda": [
+      [
+        5,
+        "Entry check"
+      ],
+      [
+        10,
+        "Project mini-lesson"
+      ],
+      [
+        45,
+        "Studio work"
+      ],
+      [
+        10,
+        "Conference and tests"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Compare two lists while preserving the specified inputs.",
+    "ideas": [
+      "Read whether a method may mutate its arguments.",
+      "Comparing every candidate may require a nested traversal.",
+      "Duplicates and matching criteria come from the contract."
+    ],
+    "warm": "If a method’s contract says neither input list changes, is removing matched elements from a list a valid shortcut?",
+    "code": "ArrayList<String> left = new ArrayList<String>();\nleft.add(\"red\");\nleft.add(\"blue\");\nArrayList<String> right = new ArrayList<String>();\nright.add(\"blue\");\nboolean same = left.get(1).equals(right.get(0));",
+    "reasoning": "same is true and neither list changes. A matching algorithm can record a Boolean or count while keeping the original collections intact. Whether one match or every match counts depends on the exact specification.",
+    "practice": "Attempt released 2026 Attendance for 23 minutes. Then trace cross-list matches and compare both input lists before and after the method.",
+    "trap": "A correct numeric result does not excuse an unrequested mutation.",
+    "exit": "What test evidence would show that your method preserved both lists?",
+    "date": "2027-02-03",
+    "agenda": [
+      [
+        5,
+        "Prompt orientation"
+      ],
+      [
+        23,
+        "Independent Attendance response"
+      ],
+      [
+        15,
+        "Contract review"
+      ],
+      [
+        25,
+        "Revision and tests"
+      ],
+      [
+        7,
+        "Exit check"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Translate screen coordinates into valid row and column indexes.",
+    "ideas": [
+      "A 2D array is an array whose elements are row arrays.",
+      "In grid[row][col], the first index selects a row.",
+      "Screen x maps to a column and screen y maps to a row when cells have uniform size."
+    ],
+    "warm": "A grid has four columns of width 100. Which column contains x = 349? Is x = 400 inside it?",
+    "code": "int[][] grid = new int[2][3];\nint cellSize = 100;\nint x = 249;\nint y = 150;\nint row = y / cellSize;\nint col = x / cellSize;",
+    "reasoning": "row is 1 and col is 2, so grid[1][2] is valid. grid.length is 2. grid[0].length is 3 when the grid has at least one row.",
+    "practice": "Complete GridBridge with a 2-by-3 grid. Trace coordinate conversion and validate both bounds before accessing the cell.",
+    "trap": "Testing only square grids hides swapped bounds. Negative integer division also truncates toward zero, so x = -1 needs explicit rejection.",
+    "exit": "Which dimension supplies the column bound for a valid row r?",
+    "date": "2027-02-05",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Traverse rows and columns using the dimension that changes.",
+    "ideas": [
+      "A row traversal holds the row fixed and changes the column.",
+      "A column traversal holds the column fixed and changes the row.",
+      "A whole-grid traversal needs one loop per dimension."
+    ],
+    "warm": "For {{1,2,3},{4,5,6}}, what are row 1’s sum and column 2’s sum?",
+    "code": "int total = 0;\nfor (int row = 0; row < grid.length; row++) {\n    total += grid[row][column];\n}",
+    "reasoning": "The variable column stays fixed while row visits every row. This assumes column is valid in each visited row. It differs from a row sum, where the changing index is the column.",
+    "practice": "Complete rowSum, columnSum, and a search that returns as soon as its contract permits. Compare row-major and column-major visit orders on a 2-by-3 grid.",
+    "trap": "Using grid.length as both loop bounds is only accidentally safe for square grids.",
+    "exit": "For a row sum at row r, which index stays fixed and which bound controls the loop?",
+    "date": "2027-02-09",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Build sum helpers for a square-grid checker.",
+    "ideas": [
+      "A square grid has equal row and column counts.",
+      "A diagonal uses related row and column indexes.",
+      "Small helpers let the checker compare equivalent quantities."
+    ],
+    "warm": "In a 3-by-3 square, which coordinates form the main diagonal and the opposite diagonal?",
+    "code": "int diagonal = 0;\nint otherDiagonal = 0;\nfor (int i = 0; i < square.length; i++) {\n    diagonal += square[i][i];\n    otherDiagonal += square[i][square.length - 1 - i];\n}",
+    "reasoning": "One diagonal uses equal indexes. The other pairs i with n - 1 - i. Both loops rely on the square-grid precondition.",
+    "practice": "Write row, column, and diagonal sum helpers. For {{8,1,6},{3,5,7},{4,9,2}}, compare each required sum with the first-row total.",
+    "trap": "Equal sums alone do not establish a normal magic square’s distinct-value and value-range requirements. State which definition the lab asks the program to check.",
+    "exit": "What is the opposite-diagonal column index when row i belongs to an n-by-n square?",
+    "date": "2027-02-11",
+    "agenda": [
+      [
+        5,
+        "Entry check"
+      ],
+      [
+        10,
+        "Project mini-lesson"
+      ],
+      [
+        45,
+        "Studio work"
+      ],
+      [
+        10,
+        "Conference and tests"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Validate a grid algorithm without changing the data it is inspecting.",
+    "ideas": [
+      "Tests should isolate each required condition.",
+      "Keep a read-only checker free of unintended mutations.",
+      "A simulation update may need separate old and new grids."
+    ],
+    "warm": "If you change cells while scanning their neighbors, can later cells observe a mixture of old and new values?",
+    "code": "Original row: 1 2 3\nRule: each new cell uses its old left neighbor.\nIn-place left-to-right updates can reuse changed values.\nA separate next grid preserves the original observations.",
+    "reasoning": "The checker should only observe its input. A separate simulation example illustrates why reading one state while writing another prevents updates from contaminating later decisions.",
+    "practice": "Finish and demonstrate Magic Squares. Test a known valid square, a broken row/column/diagonal case, and the smallest supported size.",
+    "trap": "A successful check after the program silently repaired the input does not show that the original input was valid.",
+    "exit": "How can you test whether a supposedly read-only checker changed its argument?",
+    "date": "2027-02-16",
+    "agenda": [
+      [
+        5,
+        "Entry check"
+      ],
+      [
+        10,
+        "Project mini-lesson"
+      ],
+      [
+        45,
+        "Studio work"
+      ],
+      [
+        10,
+        "Conference and tests"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Translate a row-based object-grid specification into a method.",
+    "ideas": [
+      "A row task fixes the row index while visiting columns.",
+      "Object cells require the supplied accessors and comparison rules.",
+      "A row aggregate and an all-same condition need different accumulators."
+    ],
+    "warm": "For a row of numeric values 2, 5, 3, what state is sufficient for a sum? What extra fact would an all-same check track?",
+    "code": "int total = 0;\nboolean allSame = true;\nfor (int c = 0; c < values.length; c++) {\n    total += values[c];\n    if (values[c] != values[0]) { allSame = false; }\n}",
+    "reasoning": "This original numeric example separates the sum from the consistency check and assumes a nonempty row. The GameBoard prompt uses its own object API and scoring rule.",
+    "practice": "Attempt released 2026 getPointsForRow for 23 minutes. Then test an all-same-color row and a mixed-color row against the official examples.",
+    "trap": "Resetting allSame to true after a later match erases evidence of an earlier mismatch.",
+    "exit": "Once an all-same check finds a mismatch, can a later matching cell restore the all-same result?",
+    "date": "2027-02-18",
+    "agenda": [
+      [
+        5,
+        "Prompt orientation"
+      ],
+      [
+        23,
+        "Independent GameBoard response"
+      ],
+      [
+        15,
+        "Contract review"
+      ],
+      [
+        25,
+        "Revision and tests"
+      ],
+      [
+        7,
+        "Exit check"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Implement sequential search according to a return-value contract.",
+    "ideas": [
+      "Sequential search examines candidates in order.",
+      "A first-match contract permits return as soon as a match appears.",
+      "A missing target needs a specified result such as -1."
+    ],
+    "warm": "For [4,7,4,9], what index should a first-match search for 4 return?",
+    "code": "for (int i = 0; i < values.length; i++) {\n    if (values[i] == target) {\n        return i;\n    }\n}\nreturn -1;",
+    "reasoning": "Every earlier position has already failed by the time a match returns. The final -1 belongs after the loop, because a failure at one position does not prove absence from later positions.",
+    "practice": "Trace and complete searches for integers and Strings. Test first, last, missing, and duplicate targets, including an empty collection if the contract permits it.",
+    "trap": "Returning -1 inside the loop after the first mismatch stops the search too soon.",
+    "exit": "Where should the not-found return occur, and why?",
+    "date": "2027-02-22",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Trace binary search while preserving its sorted interval.",
+    "ideas": [
+      "Binary search requires sorted input under the comparison used.",
+      "The active interval contains all remaining possible positions.",
+      "Each comparison discards the midpoint and an impossible half."
+    ],
+    "warm": "Does a failed binary search on [8,2,9,1] prove the target is absent?",
+    "code": "int low = 0;\nint high = values.length - 1;\nwhile (low <= high) {\n    int mid = low + (high - low) / 2;\n    if (values[mid] == target) { return mid; }\n    if (values[mid] < target) { low = mid + 1; }\n    else { high = mid - 1; }\n}\nreturn -1;",
+    "reasoning": "The midpoint leaves the interval after a nonmatching comparison. That guarantees progress. An empty interval occurs when low exceeds high.",
+    "practice": "Trace low, mid, and high while finding 14 in [2,5,8,11,14,17,20]. Then search for an absent value and a boundary target.",
+    "trap": "Updating low to mid instead of mid + 1 can leave the same interval and prevent termination.",
+    "exit": "What input property makes it safe to discard half the candidates?",
+    "date": "2027-02-24",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Trace selection-sort passes and insertion-sort shifts.",
+    "ideas": [
+      "Selection sort places a selected minimum into the next settled position.",
+      "Insertion sort inserts one value into the already-sorted prefix.",
+      "A temporary variable protects a value while other elements shift."
+    ],
+    "warm": "After the first selection-sort pass on [4,2,3,1], what is guaranteed?",
+    "code": "Initial:             [5, 1, 4, 2]\nSelection pass 1:    [1, 5, 4, 2]\nSelection pass 2:    [1, 2, 4, 5]\nInsertion pass 1:    [1, 5, 4, 2]\nInsertion pass 2:    [1, 4, 5, 2]",
+    "reasoning": "The two algorithms can have identical early states but different next passes. Selection settles the next smallest remaining value. Insertion maintains a sorted prefix containing the values seen so far.",
+    "practice": "Use SortTrace to follow each comparison, selected index, and shift. Compare already-sorted and reverse-ordered inputs.",
+    "trap": "Do not confuse a temporarily held insertion value with a value that has been lost from the array.",
+    "exit": "What region is sorted after insertion sort has finished the pass that inserts index k?",
+    "date": "2027-02-26",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Trace separate recursive calls and their returned values.",
+    "ideas": [
+      "Each call has its own parameter and local-variable values.",
+      "The base case supplies a result without another recursive call.",
+      "Return order reverses the path of pending calls."
+    ],
+    "warm": "For sumTo(3), what calls occur before the first return if sumTo(0) is the base case?",
+    "code": "public static int sumTo(int n) {\n    if (n == 0) { return 0; }\n    return n + sumTo(n - 1);\n}",
+    "reasoning": "sumTo(0) returns 0, then the pending calls return 1, 3, and 6. The n in each addition belongs to that call’s own frame. Assume n is nonnegative.",
+    "practice": "Predict supplied RecursionTrace methods before running them. Track call order, local values, pending work, and return order. Compare printing before and after a call.",
+    "trap": "A recursive call does not change the caller’s local n. It receives its own parameter value.",
+    "exit": "Which two features must you identify before tracing a recursive method?",
+    "date": "2027-03-02",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Trace recursive search intervals and merge-sort stages.",
+    "ideas": [
+      "Recursive binary search preserves the same sorted-interval invariant as its iterative version.",
+      "Merge sort divides a collection and then combines sorted halves.",
+      "A merge needs ordered inputs before it can select the next smallest value."
+    ],
+    "warm": "If low = 0, high = 6, mid = 3, and values[mid] is below the target, what interval is passed next?",
+    "code": "Input: [7, 2, 6, 1]\nSplit: [7, 2] and [6, 1]\nSort halves: [2, 7] and [1, 6]\nMerge: 1, then 2, then 6, then 7",
+    "reasoning": "At each merge step, compare the next unused value from each sorted half. Once one half is exhausted, append the remaining ordered values from the other.",
+    "practice": "Trace RecursiveAlgorithms for a String or collection walk, recursive binary search, and merge sort. Record the subproblem passed to every recursive call.",
+    "trap": "Splitting a collection does not sort it. The merge stage relies on recursive calls having already sorted the halves.",
+    "exit": "Why can a merge choose the smaller of just the two next unused values?",
+    "date": "2027-03-04",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Explain collection algorithms through bounds and invariants.",
+    "ideas": [
+      "A 2D method must use the correct bound for each index.",
+      "Search and sort reasoning depends on a stated invariant.",
+      "Recursive tracing distinguishes call order from return order."
+    ],
+    "warm": "Locate the assessment sections and identify which responses require a trace versus a method body.",
+    "code": "// After submission: unrelated 2D review\nint negatives = 0;\nfor (int r = 0; r < grid.length; r++) {\n    if (grid[r][column] < 0) { negatives++; }\n}",
+    "reasoning": "The sample counts negative values in one fixed column, assuming that column is valid in every row. Its bound is the number of rows because r changes.",
+    "practice": "Complete 12 analysis questions in 26 minutes and a short 2D method in 24 minutes. Spend 25 minutes correcting the two weakest categories.",
+    "trap": "A correct result on a square grid is weak evidence for correct row and column bounds.",
+    "exit": "Which input would most directly test whether your 2D bounds are swapped?",
+    "date": "2027-03-08",
+    "agenda": [
+      [
+        26,
+        "Analysis questions"
+      ],
+      [
+        24,
+        "2D method"
+      ],
+      [
+        25,
+        "Targeted corrections"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Choose a collection that fits an authentic-data question.",
+    "ideas": [
+      "Use an array for a fixed sequence, a list for a changing sequence, or a grid for meaningful row/column structure.",
+      "An aggregate and a filter answer different questions.",
+      "Interpretation depends on the source and selection rules."
+    ],
+    "warm": "If two groups have 2 and 6 readings, when does averaging their means misrepresent the mean of all 8 readings?",
+    "code": "Illustrative groups:\nA: 10, 20                 mean 15\nB: 30, 30, 30, 30, 30, 30 mean 30\nMean of group means: 22.5\nMean of all readings: 26.25",
+    "reasoning": "The overall total is 210 across 8 observations. Keep sums and counts so the calculation can respect the intended unit of analysis. These values are illustrative.",
+    "practice": "Extend the authentic weather investigation with one aggregate and one filter or group comparison. Justify array, ArrayList, or 2D array and verify a small result manually.",
+    "trap": "Using a 2D array solely because it looks more advanced can introduce meaningless grouping.",
+    "exit": "State the unit of analysis for your result: observations, days, weeks, or another defined group.",
+    "date": "2027-03-10",
+    "agenda": [
+      [
+        5,
+        "Entry check"
+      ],
+      [
+        10,
+        "Project mini-lesson"
+      ],
+      [
+        45,
+        "Studio work"
+      ],
+      [
+        10,
+        "Conference and tests"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Demonstrate collection analysis and implementation independently.",
+    "ideas": [
+      "State collection preconditions before using indexes.",
+      "Preserve or change the input only as the contract requires.",
+      "Connect each accumulator and update to the desired result."
+    ],
+    "warm": "Confirm the response format, time allocation, and available reference information.",
+    "code": "// After submission: unrelated list review\nint count = 0;\nfor (Integer value : values) {\n    if (value < 0) { count++; }\n}",
+    "reasoning": "This review example reads a list of non-null Integer values and counts negatives without changing the list. A mutation task would need a different traversal plan.",
+    "practice": "Complete 18 MC items in 39 minutes and one new collection method in 26 minutes. Use the final 10 minutes for reflection.",
+    "trap": "A method that changes its input while counting may violate a read-only contract.",
+    "exit": "Which line of your method carries the greatest risk of a boundary or mutation error?",
+    "date": "2027-03-12",
+    "agenda": [
+      [
+        39,
+        "Selected MC items"
+      ],
+      [
+        26,
+        "Collection method"
+      ],
+      [
+        10,
+        "Reflection"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Repair a collection algorithm by tracing its first incorrect state.",
+    "ideas": [
+      "The first incorrect state is usually more informative than the final wrong output.",
+      "A repair should preserve the contract on cases that already worked.",
+      "Recheck both boundaries and mutation behavior."
+    ],
+    "warm": "A list-removal method misses the second of two adjacent matches. What state should you inspect immediately after the first removal?",
+    "code": "Before: [0, 0, 4]\nRemove index 0: [0, 4]\nIncorrect next index: 1, which skips the remaining 0\nCorrect forward action: recheck index 0",
+    "reasoning": "The first removal is correct. The next index choice creates the fault. Repairing the update can solve the problem without changing the removal condition.",
+    "practice": "Repair the two weakest collection algorithms. Explain data-file assumptions and retry a fresh search, sort, or recursion trace.",
+    "trap": "Do not rewrite an entire method before identifying the first failed assumption or state transition.",
+    "exit": "Which previously passing case will you rerun to check that your repair did not break it?",
+    "date": "2027-03-16",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Use a cumulative baseline to choose specific April priorities.",
+    "ideas": [
+      "Independent predictions reveal current understanding.",
+      "Classify errors by the concept that caused them.",
+      "Choose practice that targets the cause rather than repeating every topic equally."
+    ],
+    "warm": "Prepare the 21-item set, reference materials, and an error-log page. What will you record after the timed attempt?",
+    "code": "Error-log example:\nTopic: substring boundaries\nMistake: included the end index\nCorrect rule: end is excluded\nNext task: predict three slices, including an empty slice",
+    "reasoning": "A useful priority names a specific decision the student will improve. \"Review Strings\" is too broad to identify which practice would help.",
+    "practice": "Complete 21 fresh MC items in 45 minutes. Use 30 minutes to classify mistakes and choose two April priorities.",
+    "trap": "An error category should describe the cause, not merely the question number or \"carelessness\".",
+    "exit": "Name two April priorities and the first concrete practice task for each.",
+    "date": "2027-03-18",
+    "agenda": [
+      [
+        45,
+        "Independent cumulative MC"
+      ],
+      [
+        30,
+        "Error analysis and April priorities"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Use the pre-break baseline to repair one specific weakness.",
+    "ideas": [
+      "Retrieve a rule before reading a solution.",
+      "Use a counterexample to locate the exact failure.",
+      "Verify the repair on a new input before changing topics."
+    ],
+    "warm": "For \"code\", predict substring(1, 3). For [\"\", \"\", \"a\"], predict the result of removing every empty String.",
+    "code": "String word = \"code\";\nString part = word.substring(1, 3);\n// Boundaries: 0 1 2 3 4\n// Selected character indexes: 1 and 2",
+    "reasoning": "substring uses boundary positions. This simple trace checks whether the earlier misunderstanding about the excluded endpoint has actually changed.",
+    "practice": "Correct the cumulative baseline and complete one targeted method from the error log. Use this recovery lesson for unfinished core content if needed.",
+    "trap": "Reviewing an answer until it looks familiar can feel like learning without establishing independent recall.",
+    "exit": "What new example shows that your repaired rule transfers beyond the original question?",
+    "date": "2027-04-06",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Plan a supplied-class response from constructor and String contracts.",
+    "ideas": [
+      "A constructor initializes the stated object representation.",
+      "A String method must account for every allowed boundary.",
+      "Use the provided class members and signatures exactly."
+    ],
+    "warm": "Before the timed attempt, identify the Account fields, required signatures, and example interactions.",
+    "code": "// After the attempt: original String example\nString code = \"AB-42\";\nint split = code.indexOf(\"-\");\nString prefix = code.substring(0, split);\nString suffix = code.substring(split + 1);",
+    "reasoning": "For the illustrated input, prefix is \"AB\" and suffix is \"42\". If a separator is not guaranteed, a method must handle an indexOf result of -1 before slicing. Follow the actual Account preconditions.",
+    "practice": "Attempt both parts of 2026 Account in 28 minutes. Then compare each statement with its contract, correct the response, and test the boundaries.",
+    "trap": "Do not add fields or modify supplied signatures when the question asks for a method or constructor of an existing class.",
+    "exit": "Which precondition determines whether your String indexes are safe?",
+    "date": "2027-04-08",
+    "agenda": [
+      [
+        5,
+        "Prompt orientation"
+      ],
+      [
+        28,
+        "Independent Account response"
+      ],
+      [
+        15,
+        "Contract and example review"
+      ],
+      [
+        20,
+        "Revision and testing"
+      ],
+      [
+        7,
+        "Exit check"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Build a complete class from an interaction table.",
+    "ideas": [
+      "Each required interaction imposes a behavior the class must support.",
+      "Choose fields that can represent the state between calls.",
+      "Match names, parameter types, and return types before implementing bodies."
+    ],
+    "warm": "Locate the required class name and the sequence of calls in the released prompt.",
+    "code": "// After the attempt: original interaction example\nCounter c = new Counter(4);\nc.add(3);\nint observed = c.getValue();\n// Expected observed value: 7",
+    "reasoning": "The interaction implies initialization, a persistent update, and a query. A class can satisfy those behaviors with a private value field and the corresponding public methods.",
+    "practice": "Attempt the released class task in 25 minutes. Then compare representation choices and state transitions with Bottle and StepTracker.",
+    "trap": "Writing a method called like the class but giving it a return type does not create the required constructor.",
+    "exit": "Which test would reveal that a value was stored in a local variable instead of a field?",
+    "date": "2027-04-12",
+    "agenda": [
+      [
+        5,
+        "Prompt orientation"
+      ],
+      [
+        25,
+        "Independent class design"
+      ],
+      [
+        15,
+        "Contract and example review"
+      ],
+      [
+        23,
+        "Revision and testing"
+      ],
+      [
+        7,
+        "Exit check"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Trace adjacent-list and String conditions without losing the contract.",
+    "ideas": [
+      "Adjacent comparisons need room for the neighbor index.",
+      "List order can be part of the specification.",
+      "A returned collection and a mutated input are different results."
+    ],
+    "warm": "Before the timed attempt, identify the parameters, return types, and list side effects in WordChecker parts (a) and (b).",
+    "code": "// After the attempt: original adjacent example\nint equalPairs = 0;\nfor (int i = 0; i + 1 < words.size(); i++) {\n    if (words.get(i).equals(words.get(i + 1))) {\n        equalPairs++;\n    }\n}",
+    "reasoning": "The neighbor access sets the loop bound. A list with zero or one element performs zero pair comparisons. This original equal-pair example is distinct from WordChecker’s published String conditions.",
+    "practice": "Attempt both selected WordChecker parts for 30 minutes. Then trace adjacent positions, the String operation used, and any list construction or mutation.",
+    "trap": "Checking each String in isolation does not satisfy a contract about relationships between neighboring Strings.",
+    "exit": "Why is i < words.size() insufficient when the body reads words.get(i + 1)?",
+    "date": "2027-04-14",
+    "agenda": [
+      [
+        5,
+        "Prompt orientation"
+      ],
+      [
+        30,
+        "Independent WordChecker response"
+      ],
+      [
+        15,
+        "Contract review"
+      ],
+      [
+        18,
+        "Revision and testing"
+      ],
+      [
+        7,
+        "Exit check"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Choose valid neighboring cells and use helper-method contracts.",
+    "ideas": [
+      "A neighbor may exist in one direction but not another at a boundary.",
+      "Handle forced boundary choices before comparing alternatives.",
+      "A helper call supplies only the behavior its contract promises."
+    ],
+    "warm": "At the bottom row of a grid, is a cell one row below a valid candidate?",
+    "code": "For a nonempty rectangular grid:\nLast row index = grid.length - 1\nLast column index = grid[row].length - 1\nDown candidate = (row + 1, col), if a lower row exists\nRight candidate = (row, col + 1), if a later column exists",
+    "reasoning": "At an edge, one direction may be unavailable. If both are available, use the exact comparison and tie rule stated by the problem. Do not infer the rule from a drawing alone.",
+    "practice": "Attempt 2024 GridPath part (a) in 23 minutes and trace part (b). Correct bounds and helper calls. If absent for the senior retreat, use the April 22 recovery lesson.",
+    "trap": "Evaluating both neighbors before checking whether they exist can fail even when the final selection would choose a valid cell.",
+    "exit": "Which input most directly tests a boundary branch in your response?",
+    "date": "2027-04-16",
+    "agenda": [
+      [
+        5,
+        "Prompt orientation"
+      ],
+      [
+        23,
+        "Independent GridPath part (a)"
+      ],
+      [
+        17,
+        "Part (b) trace"
+      ],
+      [
+        23,
+        "Revision and testing"
+      ],
+      [
+        7,
+        "Exit check"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Manage a timed pair of method and list responses.",
+    "ideas": [
+      "Convert each contract into a short implementation plan.",
+      "Allocate time to both responses before polishing either.",
+      "Reserve a final pass for bounds, return values, and required side effects."
+    ],
+    "warm": "Label the response areas for the fresh Methods/Control and ArrayList pair and confirm the 45-minute total.",
+    "code": "After submission, review each response:\nSignature matches the prompt\nAccumulator initialization fits allowed input\nBounds match accesses\nRequired return and side effects match the contract",
+    "reasoning": "A review checklist is most useful when each item points to a line of code. Apply it to the saved independent response before looking at a complete solution.",
+    "practice": "Write the fresh pair for 45 minutes. Use 30 minutes to evaluate the specifications, identify omissions, and revise.",
+    "trap": "Do not spend the entire independent period on a nearly complete first response while leaving the second blank.",
+    "exit": "Which checklist item led to a concrete change in your response?",
+    "date": "2027-04-20",
+    "agenda": [
+      [
+        45,
+        "Independent FRQ pair"
+      ],
+      [
+        30,
+        "Contract review and revision"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Recover missed work and verify one targeted improvement.",
+    "ideas": [
+      "Use the error log to choose a narrow target.",
+      "Recover a missed core task before adding extra practice.",
+      "A fresh check should require the repaired reasoning without cues."
+    ],
+    "warm": "Choose the weaker of two current error-log categories and name the rule you expect to use today.",
+    "code": "Target: list removal\nEvidence: a consecutive match was skipped\nPractice: trace two adjacent matches and an all-match list\nFresh check: a new list with matches at both ends",
+    "reasoning": "The practice is linked to a particular failure and includes a new arrangement afterward. A useful recovery lesson establishes whether the rule now transfers.",
+    "practice": "Complete eight fresh MC items and one weak method or trace. Recover GridPath practice or unfinished core content before adding questions.",
+    "trap": "Completing more questions is not automatically progress if the same misconception remains unexplained.",
+    "exit": "What evidence from today would persuade you that the target misconception has changed?",
+    "date": "2027-04-22",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Complete the first half of a cumulative MC simulation with deliberate pacing.",
+    "ideas": [
+      "Use the reference sheet to resolve library-method details.",
+      "Trace only the state needed to answer the question.",
+      "Mark an uncertainty and return after making progress elsewhere."
+    ],
+    "warm": "Prepare the first 21 unseen items and the permitted reference. Confirm the 45-minute work period.",
+    "code": "After submission, record:\nQuestion and concept\nEvidence used to choose the answer\nReason the selected distractor was tempting\nRule or test that resolves the error",
+    "reasoning": "A useful correction explains why the alternative fails. For a trace, identify the first incorrect state. For a conceptual question, identify the assumption that distinguishes the options.",
+    "practice": "Complete 21 questions in 45 minutes and use 30 minutes for corrections and distractor explanations.",
+    "trap": "Two separate classroom halves do not measure the stamina of a continuous 90-minute section.",
+    "exit": "Which type of item consumed time without improving your answer, and what will you change next time?",
+    "date": "2027-04-26",
+    "agenda": [
+      [
+        45,
+        "Independent MC first half"
+      ],
+      [
+        30,
+        "Corrections and distractor explanations"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Complete the second MC half and compare error patterns.",
+    "ideas": [
+      "Apply the pacing adjustment chosen after the first half.",
+      "Combine concept evidence from both halves.",
+      "Keep accuracy and time-management observations distinct."
+    ],
+    "warm": "State one pacing change from April 26 before starting the second 21-item set.",
+    "code": "Comparison example:\nFirst half: three list-index errors\nSecond half: one list-index error\nNext question: did fresh explanations show better reasoning,\nor did the second set simply test different boundaries?",
+    "reasoning": "Counts alone do not establish growth when the items differ. Inspect the underlying reasoning and the kinds of cases tested. The example counts are illustrative.",
+    "practice": "Complete the second 21 unseen questions in 45 minutes. Use 30 minutes to correct and combine both halves as a concept baseline.",
+    "trap": "A higher raw score can reflect different content as well as improved understanding.",
+    "exit": "Choose one concept for final repair using evidence from both halves.",
+    "date": "2027-04-28",
+    "agenda": [
+      [
+        45,
+        "Independent MC second half"
+      ],
+      [
+        30,
+        "Corrections and combined analysis"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Simulate the Methods/Control and Class Design portion of free response.",
+    "ideas": [
+      "A supplied-class response uses the provided representation.",
+      "A class-design response must declare the needed representation.",
+      "Save time to check both signatures and state transitions."
+    ],
+    "warm": "Identify which of the two prompts supplies a class and which requires you to design one.",
+    "code": "After submission, compare:\nSupplied class: which members may my methods use?\nNew class: which private fields must I declare?\nBoth: what must be true before and after each call?",
+    "reasoning": "The difference is responsibility for the representation. Both tasks still require agreement among signatures, state, conditions, and returned information.",
+    "practice": "Write the fresh Methods/Control and Class Design pair for 50 minutes. Use 25 minutes to review the contracts and revise.",
+    "trap": "Do not spend time redefining a supplied class when only its specified methods or constructor are requested.",
+    "exit": "Which error came from the class representation, and which came from an individual method’s logic?",
+    "date": "2027-04-30",
+    "agenda": [
+      [
+        50,
+        "Independent Methods/Control and Class Design pair"
+      ],
+      [
+        25,
+        "Review and revision"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Simulate ArrayList and 2D free response with precise bounds.",
+    "ideas": [
+      "A list can change size, so mutation affects traversal.",
+      "A grid method needs the correct dimension for each index.",
+      "Required side effects are part of correctness."
+    ],
+    "warm": "Identify the allowed input shape and mutation behavior for each fresh prompt.",
+    "code": "After submission, annotate each loop:\nChanging index and its legal range\nAccess expression controlled by that index\nEffect of removal or replacement\nCondition that justifies a return",
+    "reasoning": "Connecting each bound to an actual access exposes off-by-one errors. For mutation, trace the collection immediately after the update rather than assuming indexes stayed fixed.",
+    "practice": "Write the second FRQ pair for 40 minutes. Use 35 minutes to review these responses together with the April 30 pair.",
+    "trap": "A square test case can conceal swapped grid dimensions. A list without consecutive matches can conceal a removal bug.",
+    "exit": "Give one adversarial test for each of your two responses.",
+    "date": "2027-05-04",
+    "agenda": [
+      [
+        40,
+        "Independent ArrayList and 2D pair"
+      ],
+      [
+        35,
+        "Review of both simulation days"
+      ]
+    ],
+    "independent": true,
+    "slide_kind": "independent"
+  },
+  {
+    "goal": "Practice entering and checking Java in the digital exam environment.",
+    "ideas": [
+      "Use the official Bluebook preview to learn the available interface.",
+      "The Java Quick Reference lists accessible library methods.",
+      "A plain-editor response needs a deliberate final syntax and contract check."
+    ],
+    "warm": "Locate the Java Quick Reference and the response area in the official preview.",
+    "code": "public int countPositive(int[] values) {\n    int count = 0;\n    for (int value : values) {\n        if (value > 0) { count++; }\n    }\n    return count;\n}",
+    "reasoning": "The method counts strictly positive elements and leaves the array unchanged. Check the signature, braces, comparison, and return value without relying on compiler feedback.",
+    "practice": "Use the official preview, locate the reference, and practice entering and indenting Java. Complete one short method and a targeted trace without compiler feedback.",
+    "trap": "Do not promise IDE-style execution or compiler feedback in the exam interface.",
+    "exit": "Name the three most useful checks you can perform on code without running it.",
+    "date": "2027-05-06",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Consolidate familiar rules and confirm exam reporting details.",
+    "ideas": [
+      "Use familiar retrieval rather than introducing new algorithms.",
+      "Match a method plan to its data structure and contract.",
+      "Follow the AP coordinator’s current instructions for arrival and devices."
+    ],
+    "warm": "Predict 5 / 2.0, \"orbit\".substring(1, 3), and the final valid index of a six-element array.",
+    "code": "Six familiar checks:\nExpression type before assignment\nString bounds and equality\nFields versus local variables\nList indexes after removal\nRow and column bounds\nSearch precondition or recursive base case",
+    "reasoning": "Each label names a recurring source of error. Use one short known example for each, then stop to explain any remaining uncertainty. The goal is a manageable final review.",
+    "practice": "Complete six familiar retrieval items, outline a class/list/grid response, and confirm when and where to report for the May 12 exam.",
+    "trap": "Avoid extending the final review into a rushed new topic that displaces logistics and questions.",
+    "exit": "State your exam reporting plan and the code-checking routine you will use.",
+    "date": "2027-05-10",
+    "agenda": [
+      [
+        5,
+        "Retrieval"
+      ],
+      [
+        12,
+        "Concept discussion"
+      ],
+      [
+        8,
+        "Worked example"
+      ],
+      [
+        10,
+        "Guided practice"
+      ],
+      [
+        32,
+        "Assigned project work"
+      ],
+      [
+        8,
+        "Exit and homework"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Scope a final project around one user need and one working path.",
+    "ideas": [
+      "A useful proposal names a user and a question or task.",
+      "The smallest version should produce a complete result.",
+      "Optional features should not obscure the required behavior."
+    ],
+    "warm": "Which proposal is easier to test: \"make a weather app\" or \"summarize valid daily temperatures from a cited file\"?",
+    "code": "Example scope:\nUser: a reader comparing daily temperatures\nInput: a documented text file\nRequired result: mean of valid readings and their count\nLimit: one location and one unit\nOptional later: a second group comparison",
+    "reasoning": "This proposal reuses known parsing and aggregation skills while defining a complete minimum result. It also limits the claims the program can make about its data.",
+    "practice": "Choose a weather-data tool, Shopping Cart extension, or grid simulation. Write the user, main task, smallest working version, and what is outside the initial scope.",
+    "trap": "A list of many features is not a specification of what the first working version must do.",
+    "exit": "Write one sentence that makes it possible to tell whether your smallest version works.",
+    "date": "2027-05-14",
+    "agenda": [
+      [
+        5,
+        "Entry check"
+      ],
+      [
+        10,
+        "Project mini-lesson"
+      ],
+      [
+        45,
+        "Studio work"
+      ],
+      [
+        10,
+        "Conference and tests"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Turn the proposal into a class design and acceptance tests.",
+    "ideas": [
+      "A design connects responsibilities with stored state and operations.",
+      "The data structure should match the required operations.",
+      "Acceptance tests describe observable behavior before implementation."
+    ],
+    "warm": "What makes \"it handles empty input\" a more useful test when you add an exact expected result?",
+    "code": "Weather-tool acceptance examples:\nInput 10 and 20: count 2, mean 15.0\nEmpty input: report \"No valid readings\"\nInput -5 and 5: count 2, mean 0.0\nAssumption: all supplied numeric tokens are valid",
+    "reasoning": "The examples specify behavior, including an otherwise ambiguous empty-input case. If malformed tokens are allowed, add an explicit rule and tests for them.",
+    "practice": "Specify classes, the main collection, input/output, and three acceptance tests. Build a skeleton and set two implementation milestones.",
+    "trap": "Do not write a test that simply restates the implementation instead of describing required behavior.",
+    "exit": "Which test would fail if the most important requirement were missing?",
+    "date": "2027-05-18",
+    "agenda": [
+      [
+        5,
+        "Entry check"
+      ],
+      [
+        10,
+        "Project mini-lesson"
+      ],
+      [
+        45,
+        "Studio work"
+      ],
+      [
+        10,
+        "Conference and tests"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Implement one complete path from input to result.",
+    "ideas": [
+      "A working end-to-end path reveals interface mismatches early.",
+      "Use a tiny known fixture before a large dataset.",
+      "Keep parsing, computation, and reporting responsibilities clear."
+    ],
+    "warm": "What evidence distinguishes a working path from several methods that have never been called together?",
+    "code": "First working path:\nRead a tiny known input\nCreate the required objects or collection\nRun the core operation\nDisplay or return its result\nCompare with one acceptance test",
+    "reasoning": "The first version can omit optional features while still completing the central task. A known fixture makes a mismatch diagnosable because the correct result is already understood.",
+    "practice": "Implement the first complete path. Run it with a tiny fixture and explain one design decision during a code conference.",
+    "trap": "Large realistic input can hide basic integration failures behind a plausible-looking result.",
+    "exit": "Which acceptance test now passes from a clean start, and what remains incomplete?",
+    "date": "2027-05-20",
+    "agenda": [
+      [
+        5,
+        "Entry check"
+      ],
+      [
+        10,
+        "Project mini-lesson"
+      ],
+      [
+        45,
+        "Studio work"
+      ],
+      [
+        10,
+        "Conference and tests"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Finish required behavior and use peer tests to find edge cases.",
+    "ideas": [
+      "Freeze optional scope until required behavior is correct.",
+      "A peer test should probe the public contract.",
+      "A reproducible bug report includes input, expected result, and actual result."
+    ],
+    "warm": "A peer reports \"the total is wrong\". What information would make that report reproducible?",
+    "code": "Bug report example:\nInput: prices 2.50 x 3 and 4.00 x 1\nExpected total: 11.50\nActual total: 6.50\nLikely question: did the calculation include quantity?",
+    "reasoning": "The report provides enough evidence to reproduce the behavior. The likely cause remains a hypothesis until the code or trace confirms it.",
+    "practice": "Complete required features and run peer-created boundary tests. Use the shortened 70-minute block to repair correctness issues before considering new features.",
+    "trap": "Do not add an unrelated feature to avoid investigating a known failure in the main task.",
+    "exit": "Which peer test changed your understanding of the project’s contract?",
+    "date": "2027-05-24",
+    "agenda": [
+      [
+        5,
+        "Required-feature check"
+      ],
+      [
+        10,
+        "Peer test planning"
+      ],
+      [
+        40,
+        "Implementation and repair"
+      ],
+      [
+        10,
+        "Peer retest"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Make the project reproducible for another person.",
+    "ideas": [
+      "A README should explain how to start and use the program.",
+      "Required data files and their locations are part of the handoff.",
+      "Cite authentic data and describe limits on the result."
+    ],
+    "warm": "What might fail when a classmate starts the project from a clean folder instead of your IDE session?",
+    "code": "README outline:\nPurpose and required behavior\nRequired Java version and entry point\nRun steps and data-file locations\nOne example input and expected output\nData source and known limitations",
+    "reasoning": "The README should describe the actual finished program. A clean-start test checks whether the instructions and included files are sufficient for another person to reproduce one result.",
+    "practice": "Fix remaining bugs, run from a clean launch, and write the README, data attribution, and limitations. Rehearse a five-minute demonstration.",
+    "trap": "Instructions that only say \"press Run\" do not identify the entry point, required files, or working directory.",
+    "exit": "Which step did a peer need clarified during the clean-start test?",
+    "date": "2027-05-26",
+    "agenda": [
+      [
+        5,
+        "Entry check"
+      ],
+      [
+        10,
+        "Project mini-lesson"
+      ],
+      [
+        45,
+        "Studio work"
+      ],
+      [
+        10,
+        "Conference and tests"
+      ],
+      [
+        5,
+        "Exit and next steps"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Demonstrate the program and explain a core method with evidence.",
+    "ideas": [
+      "A demonstration should show the main requirement working.",
+      "A code explanation connects statements to the contract.",
+      "A new test case provides evidence of understanding beyond a rehearsed example."
+    ],
+    "warm": "What will your audience see first that proves the program meets its central requirement?",
+    "code": "Five-minute demonstration:\nState the user need and core behavior\nRun the main example\nExplain one important method\nHandle one new test case\nState a limitation honestly",
+    "reasoning": "The demonstration should prioritize a working result and an explanation the audience can follow. The new test should stay within the project’s documented contract.",
+    "practice": "Demonstrate the project, explain a core method, and handle a new test. Use the remaining class time for revisions based on feedback.",
+    "trap": "A polished demonstration cannot substitute for explaining the program’s behavior on a new valid input.",
+    "exit": "What revision will you make before the final portfolio handoff?",
+    "date": "2027-05-28",
+    "agenda": [
+      [
+        10,
+        "Demo preparation"
+      ],
+      [
+        20,
+        "Demonstrations and questions"
+      ],
+      [
+        35,
+        "Revisions from feedback"
+      ],
+      [
+        10,
+        "Portfolio planning"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  },
+  {
+    "goal": "Build a portfolio that explains growth through specific artifacts.",
+    "ideas": [
+      "An artifact should support a claim about a skill.",
+      "Before-and-after evidence makes a repaired misconception visible.",
+      "A complete handoff includes source, run instructions, and required data."
+    ],
+    "warm": "Which is stronger evidence of learning: \"I improved at arrays\" or a corrected reversal trace with an explanation?",
+    "code": "Portfolio entry example:\nClaim: I can justify an in-place array update.\nEvidence: original and corrected reversal traces.\nExplanation: each pair swaps once using saved temporary data.\nTransfer: a separate right-shift test preserves needed values.",
+    "reasoning": "The claim, artifact, explanation, and transfer case connect progress to observable work. Use the student’s chosen work through the normal classroom process, without publishing private records.",
+    "practice": "Submit the final project and choose three artifacts covering code analysis, class design, and data processing. Explain one repaired misconception and a next learning goal.",
+    "trap": "A portfolio of final answers alone can hide the reasoning and revisions that demonstrate learning.",
+    "exit": "What is one Java idea you can now explain accurately that you misunderstood earlier?",
+    "date": "2027-06-02",
+    "agenda": [
+      [
+        10,
+        "Project handoff check"
+      ],
+      [
+        35,
+        "Portfolio selection and explanation"
+      ],
+      [
+        20,
+        "Conferences and reflection"
+      ],
+      [
+        10,
+        "Course close"
+      ]
+    ],
+    "independent": false,
+    "slide_kind": "lesson"
+  }
+]

@@ -148,3 +148,6 @@ write('setup.html',frame('Setup',setup,active='Setup'))
 write('assets/dates.js','window.COURSE_DATES = '+json.dumps([{'date':r['date'],'title':r['assignment'],'kind':r['kind']} for r in ROWS])+';')
 p=DOCS/'index.html';p.write_text(p.read_text().replace('<script src="assets/course.js"','<script src="assets/dates.js"></script><script src="assets/course.js"'))
 print(f'Built {len(list(DOCS.rglob("*.html")))} static pages, {project_count} project ZIPs and 75 lesson packets.')
+if (ROOT/'content/teaching.json').exists():
+    import runpy
+    runpy.run_path(str(ROOT/'tools/build_teaching.py'),run_name='__main__')

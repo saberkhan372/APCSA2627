@@ -114,3 +114,7 @@ if errors:
 print(f'PASS: {len(pages)} pages; {link_count} internal links; 79 calendar dates; 75 classes; {zip_count} ZIPs/{entry_count} entries; {java_count} Java source files.')
 print('PASS: no-class dates, exam conflict, homework dates, relative URLs, download integrity and public/private file boundaries.')
 print('Java compilation and live GitHub Pages deployment are separate checks; not performed by this script.')
+
+if (ROOT/'content/teaching.json').exists():
+    import runpy
+    runpy.run_path(str(ROOT/'tools/verify_teaching.py'), run_name='__main__')
