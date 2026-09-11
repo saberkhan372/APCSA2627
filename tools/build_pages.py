@@ -10,6 +10,7 @@ DOCS=ROOT/'docs'
 COURSE=json.loads((ROOT/'content/course.json').read_text())
 MATERIALS=json.loads((ROOT/'content/materials.json').read_text())
 LESSONS=json.loads((ROOT/'content/lessons.json').read_text())
+PRACTICE=json.loads((ROOT/'content/handout-practice.json').read_text()) if (ROOT/'content/handout-practice.json').exists() else {}
 BY_ID={m['id']:m for m in MATERIALS}
 ROWS=COURSE['rows']
 def e(value):return html.escape(str(value or ''),quote=True)
@@ -37,6 +38,18 @@ def lesson_line(r,prefix=''):
 def zip_project(z,key):
     for f in sorted((ROOT/'projects'/key).iterdir()):
         if f.is_file():z.write(f,f'{key}/{f.name}')
+
+def handout_practice(key):
+    if key not in PRACTICE:return ''
+    p=PRACTICE[key]
+    source=f'downloads/handouts/{p["filename"]}'
+    notes=f'downloads/handouts/{key}.md'
+    write(source,p['code'])
+    md=[f'# {p["title"]}',p['intro'],'## Start here',f'Save the program as {p["filename"]}.','```java\n'+p['code']+'```','## Tasks']
+    md += [f'{i}. {s}' for i,s in enumerate(p['steps'],1)]
+    md += ['## Check after predicting']+['- '+s for s in p['checks']]+['## Evidence',p['evidence']]
+    write(notes,'\n\n'.join(md)+'\n')
+    return '<section><h2>'+e(p['title'])+'</h2><p>'+e(p['intro'])+'</p><p>'+a('../'+source,'Download Java starter','button')+' '+a('../'+notes,'Download practice instructions')+'</p><pre><code>'+e(p['code'])+'</code></pre><ol>'+''.join('<li>'+e(s)+'</li>' for s in p['steps'])+'</ol><details class="code-example"><summary>Check after predicting</summary><ul>'+''.join('<li>'+e(s)+'</li>' for s in p['checks'])+'</ul></details><h3>Evidence</h3><p>'+e(p['evidence'])+'</p></section>'
 
 for part in ['assets','days','materials','units','downloads/projects','downloads/lessons']:(DOCS/part).mkdir(parents=True,exist_ok=True)
 for f in (ROOT/'web').iterdir():
@@ -117,7 +130,7 @@ for m in MATERIALS:
     key=m['id'];kind=m['kind'];guide=''
     if kind=='project':guide=project_guide(m)
     elif kind=='official':guide=f'<p>{a(m["url"],"Open official resource","button")}</p><p>Use the question or section named in your daily assignment.</p>'
-    else:guide=f'<section class="handout"><h2>Classroom handout</h2><p>Your teacher provides <strong>{e(m["name"])}</strong> in Classroom. Use the selections named in the daily assignment.</p><p data-classroom-resource="{key}"></p></section>'
+    else:guide=handout_practice(key)+f'<section class="handout"><h2>Classroom handout</h2><p>Your teacher provides <strong>{e(m["name"])}</strong> in Classroom. Use the selections named in the daily assignment.</p><p data-classroom-resource="{key}">{a("https://classroom.google.com/","Open Classroom dashboard","button")}</p><p class="help">Choose your AP CSA class, open Classwork, and find the handout by title.</p></section>'
     dates=[r for r in ROWS if key in r['sources']]
     uses='<section><h2>Used in these lessons</h2><ul class="day-list">'+''.join(lesson_line(r,'../') for r in dates)+'</ul></section>' if dates else '<p class="help">Optional extension or course reference.</p>'
     b=f'<p>{a("../materials.html","← Materials")}</p><header class="page-heading"><p class="kicker">{e(key)} · {e(kind)}</p><h1>{e(m["name"])}</h1></header>{guide}{uses}'

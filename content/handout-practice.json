@@ -1,0 +1,59 @@
+{
+  "L01": {
+    "title": "Compiler-error practice",
+    "intro": "Original practice for the Chapter 1 skills. Keep the already-posted Lab Exercise 5 and quiz submission instructions; this activity adds no retrospective submission.",
+    "filename": "Hello.java",
+    "code": "public class Hello {\n    public static void main(String[] args) {\n        System.out.println(\"Hello, Java!\");\n    }\n}\n",
+    "steps": [
+      "Save the baseline as Hello.java, compile it, and run it. Record the filename, public class name, main header, and exact output.",
+      "Predict the effect of deleting the print statement’s semicolon. Make only that change, compile, record the first error, and restore the baseline.",
+      "Repeat with a missing closing quotation mark, then with println changed to Println. Restore the baseline between experiments.",
+      "Change only the greeting text. Explain the difference between code that cannot compile and code that runs but prints an unintended message.",
+      "For each experiment, record the edit, your prediction, whether compilation succeeded, the observed message/output, and the repair."
+    ],
+    "checks": ["The restored baseline compiles and prints Hello, Java! on one line.", "Each experiment changes only one feature, so your explanation identifies a cause."],
+    "evidence": "Keep your experiment table and restored Hello.java with your Chapter 1 notes. Use the original Classroom assignment for any required Lab 5 submission."
+  },
+  "L02": {
+    "title": "Addition and concatenation practice",
+    "intro": "Original course practice for predicting Java output. Write all six predictions before running the program.",
+    "filename": "PlusPractice.java",
+    "code": "public class PlusPractice {\n    public static void main(String[] args) {\n        int a = 7;\n        int b = 2;\n        System.out.println(\"Total: \" + a + b);\n        System.out.println(\"Total: \" + (a + b));\n        System.out.println(a + b + \" total\");\n        System.out.println(a / b);\n        System.out.println((double) a / b);\n        System.out.println((double) (a / b));\n    }\n}\n",
+    "steps": [
+      "For each print statement, predict the exact output and label each operation as arithmetic or String concatenation.",
+      "Run the program. Beside every mismatch, write the first operation you evaluated incorrectly.",
+      "Explain why the parentheses in the second statement change the result and why the casts in the last two statements are different.",
+      "Change a to 9 and b to 4. Predict all six outputs again before running."
+    ],
+    "checks": ["With a = 7 and b = 2, the first two lines are Total: 72 and Total: 9.", "With a = 9 and b = 4, casting before division gives 2.25; casting the integer quotient afterward gives 2.0."],
+    "evidence": "A six-row prediction/observation table, two causal explanations, and your fresh predictions for the second input pair."
+  },
+  "L03": {
+    "title": "Circle calculation practice",
+    "intro": "Original course practice using a constant, numeric input, assignment, and double arithmetic. Assume the entered radius is nonnegative.",
+    "filename": "CirclePractice.java",
+    "code": "import java.util.Scanner;\n\npublic class CirclePractice {\n    public static void main(String[] args) {\n        final double PI = 3.14159;\n        Scanner input = new Scanner(System.in);\n        System.out.print(\"Radius: \");\n        double radius = input.nextDouble();\n        double area = 0.0; // TODO: replace with PI times radius squared\n        double circumference = 0.0; // TODO: replace with 2 times PI times radius\n        System.out.println(\"Area: \" + area);\n        System.out.println(\"Circumference: \" + circumference);\n        input.close();\n    }\n}\n",
+    "steps": [
+      "Complete the two calculations. Use multiplication for the square; Java’s ^ operator does not mean exponentiation.",
+      "Predict area and circumference for radii 1 and 3, using the supplied PI constant. Then run both cases.",
+      "Test radius 0 and one fractional radius. Explain why radius and the results use double.",
+      "Record each variable’s type and the unit of each result: square units for area and units for circumference."
+    ],
+    "checks": ["Radius 1: area approximately 3.14159; circumference approximately 6.28318.", "Radius 3: area approximately 28.27431; circumference approximately 18.84954.", "Radius 0: both results are 0.0. Compare decimal results within 0.00001 to allow for floating-point representation."],
+    "evidence": "Your completed source, predicted/actual values for two inputs, and a brief explanation of constants and numeric types. Follow the dated lesson for the required submission."
+  },
+  "L04": {
+    "title": "Room-paint calculation practice",
+    "intro": "Original course practice with explicit assumptions: a rectangular room, four walls, one coat, no ceiling, and no deductions for doors or windows. All dimensions are positive feet. Coverage is 350 square feet per gallon; report fractional gallons without rounding up.",
+    "filename": "PaintPractice.java",
+    "code": "import java.util.Scanner;\n\npublic class PaintPractice {\n    public static void main(String[] args) {\n        final double COVERAGE = 350.0;\n        Scanner input = new Scanner(System.in);\n        System.out.print(\"Length, width, height in feet: \");\n        double length = input.nextDouble();\n        double width = input.nextDouble();\n        double height = input.nextDouble();\n        double wallArea = 0.0; // TODO: total area of the four walls\n        double gallons = 0.0; // TODO: divide area by coverage\n        System.out.println(\"Wall area: \" + wallArea);\n        System.out.println(\"Gallons: \" + gallons);\n        input.close();\n    }\n}\n",
+    "steps": [
+      "Sketch the four walls. Two have area length times height; two have area width times height. Write one expression for their combined area.",
+      "Complete wallArea and gallons in the starter, keeping the units visible in your notes.",
+      "Predict both outputs for a 10-by-12-by-8 room and a 20-by-15-by-10 room before running the program.",
+      "Explain how using integer division could lose the fractional amount. State which assumptions would need to change to account for openings or an additional coat."
+    ],
+    "checks": ["Length 10, width 12, height 8: wall area 352.0 square feet; approximately 1.005714 gallons.", "Length 20, width 15, height 10: wall area 700.0 square feet; 2.0 gallons. Compare decimal results within 0.00001."],
+    "evidence": "For the September 11 homework, save the completed calculation and two predicted/actual output pairs with your ExpressionLab repair. These are the assumptions for this original practice version."
+  }
+}

@@ -63,3 +63,15 @@ index = (DOCS / 'teaching.html').read_text()
 for d in rows:
     assert f'notes/{d}.html' in index and f'slides/{d}.html' in index
 print(f'PASS: 75 dated note pages, 75 Markdown notes, 75 decks / {count} slides; exact class coverage, timing, controls, and student-only source fields.')
+
+practice_file = ROOT / 'content/handout-practice.json'
+if practice_file.exists():
+    practice = json.loads(practice_file.read_text())
+    assert set(practice) == {'L01', 'L02', 'L03', 'L04'}
+    for key, activity in practice.items():
+        source = DOCS / 'downloads/handouts' / activity['filename']
+        assert source.read_text() == activity['code']
+        assert (DOCS / 'downloads/handouts' / (key + '.md')).exists()
+        page = (DOCS / 'materials' / (key + '.html')).read_text()
+        assert activity['filename'] in page and 'Original' in page
+    print('PASS: four original introductory activities have matching Java starters, Markdown instructions, and material-page links.')

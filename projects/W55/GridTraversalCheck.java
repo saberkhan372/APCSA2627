@@ -1,21 +1,30 @@
 public class GridTraversalCheck {
     private static int passed, total;
-    private static void check(String label, boolean ok) {
+    private static void check(String label, int[][] grid, String expected) {
         total++;
-        if (ok) { passed++; System.out.println("PASS: " + label); }
-        else System.out.println("REVISE: " + label);
+        try {
+            String actual = GridTraversal.rowMajor(grid);
+            if (expected.equals(actual)) {
+                passed++;
+                System.out.println("PASS: " + label);
+            } else {
+                System.out.println("REVISE: " + label);
+            }
+        } catch (RuntimeException error) {
+            System.out.println("REVISE: " + label + " threw "
+                    + error.getClass().getSimpleName() + ": " + error.getMessage());
+        }
     }
     public static void main(String[] args) throws Exception {
-        check("two by three", GridTraversal.rowMajor(new int[][]{{1,2,3},{4,5,6}}).equals("1 2 3\n4 5 6"));
-        check("three by two", GridTraversal.rowMajor(new int[][]{{1,2},{3,4},{5,6}}).equals("1 2\n3 4\n5 6"));
-        check("one row", GridTraversal.rowMajor(new int[][]{{7,8}}).equals("7 8"));
-        check("one column", GridTraversal.rowMajor(new int[][]{{7},{8}}).equals("7\n8"));
-        check("one cell", GridTraversal.rowMajor(new int[][]{{9}}).equals("9"));
-        check("zero rows", GridTraversal.rowMajor(new int[][]{}).equals(""));
-        check("ragged rows supported", GridTraversal.rowMajor(new int[][]{{1},{2,3}}).equals("1\n2 3"));
-        check("negative values", GridTraversal.rowMajor(new int[][]{{-1,0}}).equals("-1 0"));
+        check("two by three", new int[][]{{1,2,3},{4,5,6}}, "1 2 3\n4 5 6");
+        check("three by two", new int[][]{{1,2},{3,4},{5,6}}, "1 2\n3 4\n5 6");
+        check("one row", new int[][]{{7,8}}, "7 8");
+        check("one column", new int[][]{{7},{8}}, "7\n8");
+        check("one cell", new int[][]{{9}}, "9");
+        check("zero rows", new int[][]{}, "");
+        check("ragged rows supported", new int[][]{{1},{2,3}}, "1\n2 3");
+        check("negative values", new int[][]{{-1,0}}, "-1 0");
         System.out.println(passed + " of " + total + " checks passed");
         if (passed != total) System.exit(1);
     }
 }
-

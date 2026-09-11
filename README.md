@@ -18,6 +18,7 @@ docs/                    Ready-to-publish website; select this in GitHub Pages
   materials/             Guides for each resource
   downloads/lessons/      Daily assignment packets
   downloads/projects/    Individual Java project ZIPs
+  downloads/handouts/    Original introductory practice instructions and starters
   assets/                Styles and optional Classroom links
 content/                 Editable course, material and lesson JSON
 projects/Wxx/            Original Java starters, checks and data fixtures
@@ -47,6 +48,7 @@ Official instructions: https://docs.github.com/en/pages/getting-started-with-git
 - Edit `content/course.json` for dates, assignments, evidence and homework.
 - Edit `content/lessons.json` for the existing Java lesson guides.
 - Edit `content/teaching.json` for daily goals, examples, practice prompts, and slides. This file contains student-facing content only.
+- Edit `content/handout-practice.json` for the four original introductory activities and their downloadable starters.
 - Edit a source in `projects/Wxx/` to revise a starter, check or fixture.
 - Add Classroom handout URLs in `web/classroom-links.js`, using the material IDs. Optionally add a single course Classroom URL for submissions.
 - Run `python3 tools/build_pages.py` and `python3 tools/verify_pages.py`, then upload the rebuilt site through your normal workflow.
@@ -63,8 +65,14 @@ Teacher agendas, scaffolds, extensions and suggested answers are delivered in a 
 
 Publisher/APSI handouts are packaged separately in `APCSA-Classroom-Materials-PRIVATE.zip`, outside this repository. Upload those to Classroom or another authorized course system and enter their URLs by ID. The site labels these as Classroom handouts, without fake download links. Publicly released AP questions and the Java Quick Reference link directly to College Board. The posted Chapter 1 quiz/videos and future teacher-selected assessments are not invented or copied into the website.
 
+L01–L04 also contain original on-site practice instructions and Java starters for compiler errors, addition/concatenation, circle calculations, and room-paint calculations. They state their own assumptions and preserve the already-posted Chapter 1 submission. Other handout pages provide an explicitly labeled Classroom dashboard link until their direct resource URLs are configured; a dashboard link does not guarantee a handout has been posted.
+
 The repository contains no teacher solution directories, answer-key PDFs, student submissions, grade records, recordings or prior-course student export. The Java checks and worked teaching examples are intentionally student-facing; they are not private assessment keys.
 
 ## Verification limits
 
-Static links, date coverage, downloads, agendas, deck structure and public source fields are checked by `python3 tools/verify_pages.py`. Run `node tools/test_slides.mjs` for navigation behavior checks. Java compilation was unavailable on the packaging computer; the download instructions identify each runner and check class. These automated checks do not verify browser rendering or live deployment.
+Static links, date coverage, downloads, agendas, deck structure and public source fields are checked by `python3 tools/verify_pages.py`. Run `node tools/test_slides.mjs` for navigation behavior checks.
+
+Run `python3 tools/verify_java.py` with a JDK on your PATH, or supply its installation directory, for example `python3 tools/verify_java.py --java-home /opt/homebrew/opt/openjdk@17`. This compiles all 45 projects into temporary folders and runs each check class, then compiles the four introductory practice starters. Unfinished starters may report `REVISE`; compilation errors, crashes, missing summaries, inconsistent counts, and timeouts fail verification. The prediction exercises can pass unchanged because their code is already complete; collect the written predictions and explanations named in their assignments.
+
+These automated checks do not verify browser rendering or live deployment. Java verification requires permission to execute the configured JDK.

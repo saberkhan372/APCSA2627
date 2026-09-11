@@ -463,11 +463,11 @@
       "The last body value can differ from the final control-variable value.",
       "Zero iterations are valid when the initial condition is false."
     ],
-    "warm": "A loop visits 1, 3, 5, and 7 while its condition is i <= 8. What value fails the next test?",
+    "warm": "Selection review: negate month >= 1 && month <= 12. Then predict which value fails the next test after a loop visits 1, 3, 5, and 7 with condition i <= 8.",
     "code": "int i = 1;\nint total = 0;\nwhile (i <= 8) {\n    total += i;\n    i += 2;\n}\nSystem.out.println(total + \" \" + i);",
     "reasoning": "The accumulated sum is 16 and i finishes at 9. Include a final trace row with condition false. Declaring i before the loop makes it available afterward.",
     "practice": "Complete sumTo and countBy in LoopTrace. Trace countBy(1, 8, 2), then test a start value already beyond the bound.",
-    "trap": "A variable declared in a for header is out of scope after that loop. Discuss its last trace value without pretending it can be printed outside its scope.",
+    "trap": "Evaluate the condition again after every update. Changing <= to < changes an equality boundary; omitting the update can prevent termination.",
     "exit": "How many body executions occur for i = 2; i <= 11; i += 3?",
     "date": "2026-10-08",
     "agenda": [
@@ -506,7 +506,7 @@
       "A product accumulator usually starts at the multiplicative identity, one.",
       "State what the accumulator represents after each iteration."
     ],
-    "warm": "If power begins at 1 and doubles four times, what are its successive values?",
+    "warm": "Reopen the October 8 worked while-loop. Trace every condition test, including the failed one, and recover the final i and total. Convert that loop to a for loop before starting Powers of 2.",
     "code": "int power = 1;\nint sum = 0;\nfor (int exponent = 1; exponent <= 4; exponent++) {\n    power *= 2;\n    sum += power;\n}",
     "reasoning": "After each iteration, power is the current power of two and sum contains all powers added so far. The final values are 16 and 30.",
     "practice": "Write Powers of 2 without Math.pow. Complete the selected Loop Programs items. For an extrema task, explain how the first actual value initializes min and max.",
@@ -515,12 +515,12 @@
     "date": "2026-10-20",
     "agenda": [
       [
-        5,
-        "Retrieval"
+        10,
+        "Rebuild the October 8 trace and convert while to for"
       ],
       [
-        12,
-        "Concept discussion"
+        10,
+        "Accumulator discussion"
       ],
       [
         8,
@@ -531,7 +531,7 @@
         "Guided practice"
       ],
       [
-        32,
+        29,
         "Assigned project work"
       ],
       [
@@ -674,33 +674,29 @@
       "The smallest failing input often exposes the cause clearly.",
       "A repair needs a fresh check after the original failure passes."
     ],
-    "warm": "A String method fails only on the last adjacent pair. Which expression or bound would you inspect first?",
+    "warm": "Quick diagnostic: negate p && q; count iterations for i = 0; i < 5; i += 2; give the bound for reading index i + 1; count an inner body with three outer iterations and four inner iterations each.",
     "code": "int matches = 0;\nfor (int i = 0; i + 1 < text.length(); i++) {\n    if (text.substring(i, i + 1)\n            .equals(text.substring(i + 1, i + 2))) {\n        matches++;\n    }\n}",
     "reasoning": "This example counts overlapping equal adjacent pairs. \"aabb\" gives 2 and \"aaa\" gives 2. Its contract differs from counting non-overlapping doubles.",
-    "practice": "Finish the Feeder runner, then select Boolean logic, loop bounds, or String scans for a focused repair. Explain the repaired method before executing it.",
+    "practice": "Use the diagnostic to select Boolean equivalence, loop bounds, String scans, or nested-loop counts. Finish the relevant Feeder or project repair, explain the rule, then solve a fresh case independently.",
     "trap": "Do not switch between overlapping and non-overlapping interpretations while evaluating the same method.",
     "exit": "Give one input that distinguishes overlapping pair counting from non-overlapping counting.",
     "date": "2026-11-03",
     "agenda": [
       [
-        5,
-        "Retrieval"
+        8,
+        "Four-question Unit 2 diagnostic"
       ],
       [
         12,
-        "Concept discussion"
-      ],
-      [
-        8,
-        "Worked example"
-      ],
-      [
-        10,
-        "Guided practice"
+        "Targeted mini-lesson from diagnostic results"
       ],
       [
         32,
-        "Assigned project work"
+        "Feeder or focused project repair"
+      ],
+      [
+        15,
+        "Fresh independent transfer case"
       ],
       [
         8,
@@ -1697,7 +1693,7 @@
       "A column traversal holds the column fixed and changes the row.",
       "A whole-grid traversal needs one loop per dimension."
     ],
-    "warm": "For {{1,2,3},{4,5,6}}, what are row 1’s sum and column 2’s sum?",
+    "warm": "Nested-loop review: a traversal visits two rows and three columns per row. How many cells does it visit? For {{1,2,3},{4,5,6}}, what are row 1’s sum and column 2’s sum?",
     "code": "int total = 0;\nfor (int row = 0; row < grid.length; row++) {\n    total += grid[row][column];\n}",
     "reasoning": "The variable column stays fixed while row visits every row. This assumes column is valid in each visited row. It differs from a row sum, where the changing index is the column.",
     "practice": "Complete rowSum, columnSum, and a search that returns as soon as its contract permits. Compare row-major and column-major visit orders on a 2-by-3 grid.",
@@ -1861,7 +1857,7 @@
     "code": "for (int i = 0; i < values.length; i++) {\n    if (values[i] == target) {\n        return i;\n    }\n}\nreturn -1;",
     "reasoning": "Every earlier position has already failed by the time a match returns. The final -1 belongs after the loop, because a failure at one position does not prove absence from later positions.",
     "practice": "Trace and complete searches for integers and Strings. Test first, last, missing, and duplicate targets, including an empty collection if the contract permits it.",
-    "trap": "Returning -1 inside the loop after the first mismatch stops the search too soon.",
+    "trap": "Returning -1 inside the loop after the first mismatch stops the search too soon. This example compares primitive ints. For String contents, use .equals(...) instead of == and follow the contract’s null guarantees.",
     "exit": "Where should the not-found return occur, and why?",
     "date": "2027-02-22",
     "agenda": [
