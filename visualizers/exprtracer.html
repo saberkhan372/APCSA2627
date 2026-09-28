@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expression and Type Tracer</title>
+<style>
+/* Palette and chrome match the course site (web/site.css). */
+:root {
+  --bg: #FAFBFA; --panel: #FFFFFF; --ink: #16211F; --muted: #46524F; --faint: #6F7C79;
+  --line: #D8E0DD; --soft: #EAF0EE;
+  --accent: #0B5570; --accent-ink: #FFFFFF; --accent-soft: #E2EDF3;
+  --same-bg: #E4F1EC; --same-line: #1F7A63; --same-ink: #145443;
+  --diff-bg: #F8E5E1; --diff-line: #A63D2F; --diff-ink: #85291E;
+  --extra-bg: #FBF0DF; --extra-line: #9A5B14; --extra-ink: #6E400C;
+  --skip-ink: #8C9794; --str: #6B4A8C;
+  --serif: "Iowan Old Style", Charter, Georgia, "Times New Roman", serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pad: clamp(1rem, 4vw, 2.75rem);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111917; --panel: #171F1E; --ink: #E6EDEA; --muted: #A9B6B2; --faint: #7B8783;
+    --line: #2A3634; --soft: #1E2827;
+    --accent: #6FBEE2; --accent-ink: #0C1A20; --accent-soft: #0C2734;
+    --same-bg: #10312A; --same-line: #5FCFAF; --same-ink: #A6E6D2;
+    --diff-bg: #3A1D18; --diff-line: #E57A68; --diff-ink: #F4B8AC;
+    --extra-bg: #33270F; --extra-line: #E0A552; --extra-ink: #F0D29A;
+    --skip-ink: #5F6B68; --str: #B497D6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111917; --panel: #171F1E; --ink: #E6EDEA; --muted: #A9B6B2; --faint: #7B8783;
+  --line: #2A3634; --soft: #1E2827;
+  --accent: #6FBEE2; --accent-ink: #0C1A20; --accent-soft: #0C2734;
+  --same-bg: #10312A; --same-line: #5FCFAF; --same-ink: #A6E6D2;
+  --diff-bg: #3A1D18; --diff-line: #E57A68; --diff-ink: #F4B8AC;
+  --extra-bg: #33270F; --extra-line: #E0A552; --extra-ink: #F0D29A;
+  --skip-ink: #5F6B68; --str: #B497D6;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 17px/1.55 var(--sans); -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1040px; margin-inline: auto; padding-inline: var(--pad); }
+main.wrap { padding-block: 2rem 4rem; }
+a { color: var(--accent); }
+.skip-link {
+  position: fixed; top: .5rem; left: .5rem; z-index: 100; transform: translateY(-160%);
+  padding: .45rem .75rem; background: var(--ink); color: var(--panel); border-radius: 2px;
+  font: .76rem var(--mono);
+}
+.skip-link:focus { transform: translateY(0); }
+.masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+.masthead .wrap { display: flex; align-items: baseline; gap: .9rem; flex-wrap: wrap; padding-block: .8rem; }
+.logo { font: 600 .92rem var(--mono); color: var(--ink); text-decoration: none; }
+.masthead nav { margin-left: auto; display: flex; gap: 1rem; flex-wrap: wrap; font: .75rem var(--mono); }
+.masthead nav a { color: var(--faint); text-decoration: none; }
+.masthead nav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.masthead nav a[aria-current="page"] { color: var(--same-line); }
+.page-heading { display: grid; gap: .6rem; margin-bottom: 1.6rem; }
+.kicker { font: .88rem var(--mono); color: var(--accent); letter-spacing: .03em; margin: 0; }
+.kicker a { color: inherit; }
+h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.16; letter-spacing: -.018em; margin: 0; }
+h1 code { font-family: var(--mono); font-weight: 600; font-size: .9em; }
+.lede { font-size: 1.1rem; color: var(--muted); margin: 0; max-width: 66ch; }
+.mono, code { font-family: var(--mono); }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+.tab {
+  appearance: none; border: 1px solid transparent; border-bottom: none; background: none;
+  font: 600 15px var(--sans); color: var(--muted); padding: 9px 14px; border-radius: 3px 3px 0 0;
+  cursor: pointer; position: relative; top: 1px;
+}
+.tab[aria-selected="true"] { background: var(--panel); color: var(--ink); border-color: var(--line); box-shadow: inset 0 3px 0 var(--same-line); }
+.tab .n { font-weight: 400; color: var(--muted); font-size: 13px; margin-left: 4px; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: clamp(14px, 3vw, 22px); }
+.panel + .panel { margin-top: 14px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.spacer { flex: 1; }
+.small { font-size: 14px; color: var(--muted); }
+
+button.btn {
+  appearance: none; font: 600 14px var(--sans); border-radius: 3px; padding: 8px 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+}
+button.btn:hover:not(:disabled) { border-color: var(--accent); }
+button.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.btn:disabled { opacity: .45; cursor: default; }
+:focus-visible { outline: 2px solid var(--same-line); outline-offset: 3px; border-radius: 2px; }
+
+/* Expression line */
+.expr {
+  font: 600 22px/1.4 var(--mono); background: var(--soft); border-radius: 8px; padding: 12px 14px;
+  overflow-x: auto; white-space: pre; margin: 10px 0 14px;
+}
+.expr .s { color: var(--str); }
+.qmeta { font-size: 14px; color: var(--muted); }
+
+/* Forms */
+label.field { display: block; font-weight: 600; font-size: 14px; margin-bottom: 10px; }
+label.field span.hint { font-weight: 400; color: var(--muted); }
+input[type="text"], textarea {
+  display: block; width: 100%; margin-top: 4px; font: 16px var(--sans); color: var(--ink);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+}
+input.num { width: 9em; font-family: var(--mono); font-size: 18px; }
+input.strin { font-family: var(--mono); font-size: 18px; }
+textarea { min-height: 3.2em; resize: vertical; }
+input:disabled, textarea:disabled { opacity: .75; }
+.formerr { color: var(--diff-ink); font-size: 14px; min-height: 1.4em; margin: 2px 0 0; }
+
+.feedback { border-radius: 10px; padding: 12px 14px; margin-top: 12px; border: 1px solid; }
+.feedback.good { background: var(--same-bg); border-color: var(--same-line); color: var(--same-ink); }
+.feedback.part { background: var(--extra-bg); border-color: var(--extra-line); color: var(--extra-ink); }
+.feedback.bad { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
+.feedback p { margin: 4px 0; }
+.feedback .tag { font-weight: 700; }
+.note { background: var(--soft); border-radius: 8px; padding: 10px 12px; font-size: 15px; margin-top: 10px; }
+.note b { font-weight: 700; }
+
+/* Explore inputs */
+.inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .inputs { grid-template-columns: 1fr; } }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.chip {
+  appearance: none; font: 13px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  border-radius: 999px; padding: 4px 10px; cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); }
+
+/* Trace */
+.trace { margin-top: 14px; }
+.trace:focus-visible { outline-offset: 6px; border-radius: 6px; }
+.gridwrap { overflow-x: auto; padding: 4px 2px 8px; }
+.grid { display: grid; gap: 4px; width: max-content; }
+.rl { font: 600 13px var(--sans); color: var(--muted); align-self: center; padding-right: 6px; text-align: right; }
+.rl code { font-size: 12px; }
+.idx { font: 12px var(--mono); color: var(--muted); text-align: center; height: 30px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.idx .ptr { color: var(--accent); font-size: 14px; line-height: 1; visibility: hidden; }
+.col-current .idx .ptr, .idx.col-current .ptr { visibility: visible; }
+.tile {
+  width: 46px; height: 58px; border: 2px solid var(--line); border-radius: 8px; background: var(--panel);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: background-color .25s, border-color .25s, transform .25s;
+}
+.tile .ch { font: 700 20px/1.1 var(--mono); }
+.tile .ch.sp { font-size: 12px; font-weight: 600; color: var(--muted); }
+.tile .cu { font: 12px var(--mono); color: var(--muted); }
+.tile.none { border-style: dashed; background: transparent; }
+.tile.none .ch { font: 12px var(--sans); color: var(--muted); }
+.st { font: 600 11px/1.15 var(--sans); text-align: center; min-height: 28px; }
+.s-same .tile:not(.none) { background: var(--same-bg); border-color: var(--same-line); }
+.st.s-same { color: var(--same-ink); }
+.s-diff .tile:not(.none) { background: var(--diff-bg); border-color: var(--diff-line); }
+.st.s-diff { color: var(--diff-ink); }
+.s-extra .tile:not(.none) { background: var(--extra-bg); border-color: var(--extra-line); }
+.st.s-extra { color: var(--extra-ink); }
+.s-skip .tile { opacity: .45; }
+.st.s-skip { color: var(--skip-ink); font-weight: 400; }
+.col-current .tile { transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent); }
+.empty-note { font-size: 13px; color: var(--muted); margin: 2px 0 0; }
+
+.tracebody { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; margin-top: 8px; }
+@media (max-width: 720px) { .tracebody { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .expr { font-size: 17px; } .op { font-size: 15px; } }
+.stepbox { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.stepcount { font-size: 13px; color: var(--muted); }
+.op { font: 700 17px/1.4 var(--mono); margin: 4px 0 6px; overflow-wrap: anywhere; }
+.expl { margin: 0; }
+.algo { list-style: none; margin: 0; padding: 10px 0; background: var(--soft); border-radius: 10px; font: 13px/1.6 var(--mono); overflow-x: auto; }
+.algo li { padding: 0 12px; white-space: pre; border-left: 4px solid transparent; }
+.algo li.on { background: var(--accent-soft); border-left-color: var(--accent); font-weight: 700; }
+.algo .cap { font: 12px var(--sans); color: var(--muted); padding: 0 12px 4px; white-space: normal; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.keys { font-size: 13px; color: var(--muted); }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--bg); }
+
+/* Result */
+.result { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.resrow { display: flex; flex-wrap: wrap; gap: 18px; align-items: baseline; }
+.big { font: 700 34px/1 var(--mono); }
+.sign { font-weight: 700; }
+.meaning { margin: 6px 0 0; }
+.nline { position: relative; display: grid; grid-template-columns: 1fr 72px 1fr; margin: 16px 0 4px; max-width: 520px; font-size: 13px; text-align: center; }
+.nline > div { border-top: 3px solid var(--line); padding-top: 6px; color: var(--muted); }
+.nline > div.on { border-top-color: var(--accent); color: var(--ink); font-weight: 700; }
+.nline > div.on::before { content: "▼"; display: block; color: var(--accent); margin-top: -26px; margin-bottom: 4px; font-size: 14px; line-height: 1; }
+.apnote { font-size: 14px; color: var(--muted); margin: 10px 0 0; max-width: 70ch; }
+
+/* Reference */
+details.ref { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.refgroup { margin-top: 8px; }
+.refgroup .gl { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+.chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.rc { font: 11px/1.2 var(--mono); border: 1px solid var(--line); border-radius: 4px; padding: 2px 4px; text-align: center; min-width: 30px; }
+.rc b { display: block; font-size: 13px; }
+.rc.hl { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.reffact { font-size: 13px; margin: 8px 0 2px; }
+
+.hidden { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .col-current .tile { transform: none; }
+}
+/* ---- Expression and Type Tracer ---- */
+:root { --t-int: #0B5570; --t-int-bg: #E2EDF3; --t-dbl: #6B4A8C; --t-dbl-bg: #EFE8F6; --t-str: #9A5B14; --t-str-bg: #FBF0DF; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --t-int: #6FBEE2; --t-int-bg: #0C2734; --t-dbl: #B497D6; --t-dbl-bg: #2A2138; --t-str: #E0A552; --t-str-bg: #33270F; } }
+:root[data-theme="dark"] { --t-int: #6FBEE2; --t-int-bg: #0C2734; --t-dbl: #B497D6; --t-dbl-bg: #2A2138; --t-str: #E0A552; --t-str-bg: #33270F; }
+
+.decls { font: 15px/1.6 var(--mono); color: var(--muted); background: var(--soft); border-radius: 8px 8px 0 0; padding: 8px 14px 0; margin: 10px 0 -14px; white-space: pre-wrap; }
+.decls + .expr { border-radius: 0 0 8px 8px; }
+.legendrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+
+.ladder { list-style: none; margin: 12px 0 0; padding: 0; overflow-x: auto; }
+.ladder li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-left: 4px solid transparent; border-radius: 4px; }
+.ladder li .ln { font: 12px var(--mono); color: var(--faint); width: 1.8em; padding-top: 10px; flex: none; text-align: right; }
+.ladder li .code { font: 600 19px/1 var(--mono); display: flex; flex-wrap: nowrap; align-items: flex-start; gap: 0; white-space: pre; padding-top: 4px; }
+.ladder li.past { opacity: .55; }
+.ladder li.now { background: var(--accent-soft); border-left-color: var(--accent); }
+.ladder li.bad { background: var(--diff-bg); border-left-color: var(--diff-line); }
+.tok { padding-top: 6px; }
+.v { display: inline-flex; flex-direction: column; align-items: center; border-radius: 4px; padding: 5px 5px 2px; margin: 0 1px; line-height: 1; }
+.v small { font: 600 10px/1.2 var(--sans); margin-top: 3px; letter-spacing: .02em; }
+.v.int { background: var(--t-int-bg); color: var(--t-int); }
+.v.double { background: var(--t-dbl-bg); color: var(--t-dbl); }
+.v.String { background: var(--t-str-bg); color: var(--t-str); }
+.v.fresh { outline: 3px solid var(--accent); outline-offset: 1px; }
+.v.lit { background: transparent; box-shadow: inset 0 0 0 1px var(--line); }
+.nm { padding-top: 6px; color: var(--ink); }
+.boom { font: 700 16px var(--mono); color: var(--diff-ink); padding-top: 6px; }
+
+.compileerr { border: 1px solid var(--diff-line); background: var(--diff-bg); color: var(--diff-ink); border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
+.compileerr .head { font-weight: 700; }
+.compileerr code { font-size: 14px; }
+.final { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 16px; margin-top: 4px; }
+.final .big { font-size: 28px; }
+
+.predictrow { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+select { font: 16px var(--sans); padding: 7px 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--ink); margin-top: 4px; display: block; }
+.quoted { display: flex; align-items: center; font: 20px var(--mono); margin-top: 4px; }
+.quoted .q { color: var(--str); padding: 0 3px; }
+.quoted .q.hidden-q { visibility: hidden; }
+.quoted input { width: 13em; margin: 0; font: 18px var(--mono); }
+textarea.declin { font: 15px var(--mono); min-height: 2.6em; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap" tabindex="-1">
+  <header class="page-heading">
+    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 1 · Expressions</p>
+    <h1>Expression and Type Tracer</h1>
+    <p class="lede">Every value in an expression has a type, and Java works one operation at a time. Watch the exact step where a fraction disappears, a number turns into text, or an int runs out of room.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Mode">
+    <button class="tab" role="tab" id="tab-predict" aria-controls="mode-predict" aria-selected="true">Predict</button>
+    <button class="tab" role="tab" id="tab-explore" aria-controls="mode-explore" aria-selected="false" tabindex="-1">Explore</button>
+    <button class="tab" role="tab" id="tab-transfer" aria-controls="mode-transfer" aria-selected="false" tabindex="-1">Transfer</button>
+  </div>
+
+  <section id="mode-predict" role="tabpanel" aria-labelledby="tab-predict">
+    <div class="panel">
+      <div class="row">
+        <span class="qmeta" id="p-count"></span>
+        <span class="spacer"></span>
+        <button class="btn" id="p-prev">← Previous</button>
+        <button class="btn" id="p-next">Next question →</button>
+      </div>
+      <div id="p-code"></div>
+      <form id="p-form" novalidate></form>
+      <div id="p-after" class="hidden">
+        <div id="p-feedback" class="feedback" role="status"></div>
+        <div class="note" id="p-tests"></div>
+        <div id="p-view"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
+    <div class="panel">
+      <label class="field">Variables <span class="hint">(optional, e.g. <code>int x = 50; int y = 20;</code>)</span>
+        <textarea class="declin" id="e-decls" rows="2" spellcheck="false"></textarea>
+      </label>
+      <label class="field">Expression or statement <span class="hint">(e.g. <code>x / y</code> or <code>double avg = (a + b) / 2;</code>)</span>
+        <input type="text" class="strin" id="e-stmt" autocomplete="off" spellcheck="false">
+      </label>
+      <div class="small">Try:</div>
+      <div class="presets" id="e-presets"></div>
+      <p class="small">Supports <code>int</code>, <code>double</code> and <code>String</code>; <code>+ - * / %</code>; casts; parentheses; <code>Math.abs</code>, <code>Math.pow</code>, <code>Math.sqrt</code>; <code>Integer.MAX_VALUE</code> and <code>Integer.MIN_VALUE</code>.</p>
+      <div id="e-view"></div>
+    </div>
+  </section>
+
+  <section id="mode-transfer" role="tabpanel" aria-labelledby="tab-transfer" class="hidden">
+    <div class="panel">
+      <p class="small" style="margin-top:0">No ladder here. Write the type of every intermediate value on paper, then check.</p>
+      <div class="row">
+        <span class="qmeta" id="t-count"></span>
+        <span class="spacer"></span>
+        <button class="btn" id="t-prev">← Previous</button>
+        <button class="btn" id="t-next">Next question →</button>
+      </div>
+      <div id="t-code"></div>
+      <form id="t-form" novalidate></form>
+      <div id="t-after" class="hidden">
+        <div id="t-feedback" class="feedback" role="status"></div>
+        <div class="note" id="t-model"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ENGINE START
+// A small Java expression evaluator for int, double and String, following the JLS:
+// compile-time type checking first, then left-to-right evaluation with 32-bit int
+// arithmetic, truncating division, and Java's Double.toString formatting.
+const INT_MAX = 2147483647, INT_MIN = -2147483648;
+
+class JavaCompileError extends Error {}
+// Valid Java this tool cannot evaluate (char, boolean, other methods). Never reported as a compile error.
+class Unsupported extends Error {}
+class JavaRuntimeError extends Error { constructor(type, msg) { super(msg); this.javaType = type; } }
+
+// Double.toString: plain decimal for 1e-3 <= |d| < 1e7, otherwise computerized scientific
+// notation; always at least one digit after the point; shortest digits that round-trip.
+function javaDouble(d) {
+  if (Number.isNaN(d)) return 'NaN';
+  if (d === Infinity) return 'Infinity';
+  if (d === -Infinity) return '-Infinity';
+  if (d === 0) return Object.is(d, -0) ? '-0.0' : '0.0';
+  const sign = d < 0 ? '-' : '';
+  const [mant, expStr] = Math.abs(d).toExponential().split('e');
+  const digits = mant.replace('.', '');
+  const exp = parseInt(expStr, 10);
+  const a = Math.abs(d);
+  if (a >= 1e-3 && a < 1e7) {
+    let intPart, frac;
+    if (exp >= 0) {
+      intPart = digits.slice(0, exp + 1).padEnd(exp + 1, '0');
+      frac = digits.slice(exp + 1);
+    } else {
+      intPart = '0';
+      frac = '0'.repeat(-exp - 1) + digits;
+    }
+    return sign + intPart + '.' + (frac || '0');
+  }
+  return sign + digits[0] + '.' + (digits.slice(1) || '0') + 'E' + exp;
+}
+function show(type, v) { return type === 'String' ? '"' + v + '"' : type === 'double' ? javaDouble(v) : String(v); }
+function asText(type, v) { return type === 'String' ? v : type === 'double' ? javaDouble(v) : String(v); }
+
+/* ---------- Tokenizer and parser ---------- */
+function tokenize(src) {
+  const toks = [];
+  let i = 0;
+  while (i < src.length) {
+    const c = src[i];
+    if (/\s/.test(c)) { i++; continue; }
+    const num = /^(\d+\.\d*|\d+)([eE][+-]?\d+)?/.exec(src.slice(i));
+    if (num) { toks.push({ k: 'num', raw: num[0], pos: i }); i += num[0].length; continue; }
+    const id = /^[A-Za-z_]\w*(\.[A-Za-z_]\w*)?/.exec(src.slice(i));
+    if (id) { toks.push({ k: 'id', raw: id[0], pos: i }); i += id[0].length; continue; }
+    if (c === '"') {
+      let j = i + 1, val = '';
+      while (j < src.length && src[j] !== '"') {
+        if (src[j] === '\\') {
+          const e = src[j + 1];
+          const map = { n: '\n', t: '\t', '"': '"', '\\': '\\' };
+          if (!(e in map)) throw new JavaCompileError(`illegal escape character in a String literal: \\${e || ''}`);
+          val += map[e]; j += 2;
+        } else val += src[j++];
+      }
+      if (j >= src.length) throw new JavaCompileError('unclosed String literal: a closing " is missing.');
+      toks.push({ k: 'str', value: val, raw: src.slice(i, j + 1), pos: i });
+      i = j + 1; continue;
+    }
+    if ('+-*/%(),=;'.includes(c)) { toks.push({ k: c, raw: c, pos: i }); i++; continue; }
+    throw new Unsupported(`this tool does not handle the character ${JSON.stringify(c)} (it supports int, double and String only).`);
+  }
+  toks.push({ k: 'end', raw: '', pos: src.length });
+  return toks;
+}
+
+let nodeId = 0;
+function parseExpression(src) {
+  const toks = tokenize(src);
+  let p = 0;
+  const peek = () => toks[p], next = () => toks[p++];
+  const expect = k => { if (peek().k !== k) throw new JavaCompileError(`expected ${k === 'end' ? 'the end of the expression' : `"${k}"`} but found ${peek().raw ? `"${peek().raw}"` : 'the end'}.`); return next(); };
+  const mk = o => ({ id: nodeId++, ...o });
+  function additive() {
+    let l = multiplicative();
+    while (peek().k === '+' || peek().k === '-') { const op = next().k; l = mk({ k: 'bin', op, l, r: multiplicative() }); }
+    return l;
+  }
+  function multiplicative() {
+    let l = unary();
+    while ('*/%'.includes(peek().k) && peek().k.length === 1) { const op = next().k; l = mk({ k: 'bin', op, l, r: unary() }); }
+    return l;
+  }
+  function unary() {
+    const t = peek();
+    if (t.k === '-' || t.k === '+') {
+      next();
+      // -2147483648 is legal only as a negated literal.
+      if (t.k === '-' && peek().k === 'num' && /^\d+$/.test(peek().raw) && Number(peek().raw) === 2147483648) {
+        return mk({ k: 'num', type: 'int', value: INT_MIN, raw: '-' + next().raw });
+      }
+      // A negative literal such as -7 reads as one value, not a separate negation step.
+      if (t.k === '-' && peek().k === 'num') {
+        const lit = primary();
+        return mk({ ...lit, value: -lit.value, raw: '-' + lit.raw });
+      }
+      return mk({ k: 'neg', op: t.k, e: unary() });
+    }
+    if (t.k === '(' && toks[p + 1].k === 'id' && (toks[p + 1].raw === 'int' || toks[p + 1].raw === 'double') && toks[p + 2].k === ')') {
+      next(); const to = next().raw; next();
+      return mk({ k: 'cast', to, e: unary() });
+    }
+    return primary();
+  }
+  function primary() {
+    const t = next();
+    if (t.k === 'num') {
+      const isInt = /^\d+$/.test(t.raw);
+      if (isInt) {
+        const v = Number(t.raw);
+        if (v > INT_MAX) throw new JavaCompileError(`integer number too large: ${t.raw}`);
+        return mk({ k: 'num', type: 'int', value: v, raw: t.raw });
+      }
+      return mk({ k: 'num', type: 'double', value: Number(t.raw), raw: t.raw });
+    }
+    if (t.k === 'str') return mk({ k: 'str', value: t.value, raw: t.raw });
+    if (t.k === '(') { const e = additive(); expect(')'); return mk({ k: 'group', e }); }
+    if (t.k === 'id') {
+      if (t.raw === 'Integer.MAX_VALUE' || t.raw === 'Integer.MIN_VALUE') return mk({ k: 'const', name: t.raw, type: 'int', value: t.raw === 'Integer.MAX_VALUE' ? INT_MAX : INT_MIN });
+      if (t.raw.startsWith('Math.')) {
+        const fn = t.raw.slice(5);
+        if (!['abs', 'pow', 'sqrt'].includes(fn)) throw new Unsupported(`this tool supports Math.abs, Math.pow and Math.sqrt, not ${t.raw}.`);
+        expect('(');
+        const args = [];
+        if (peek().k !== ')') { args.push(additive()); while (peek().k === ',') { next(); args.push(additive()); } }
+        expect(')');
+        return mk({ k: 'call', fn, args });
+      }
+      if (t.raw.includes('.')) throw new Unsupported(`this tool does not support ${t.raw}.`);
+      if (['int', 'double', 'String'].includes(t.raw)) throw new JavaCompileError(`a type name (${t.raw}) cannot be used as a value here.`);
+      return mk({ k: 'var', name: t.raw });
+    }
+    throw new JavaCompileError(t.k === 'end' ? 'the expression ends too early.' : `unexpected "${t.raw}".`);
+  }
+  const e = additive();
+  expect('end');
+  return e;
+}
+
+// "int x = 5 / 2;" or a bare expression. Returns { target: {type, name} | null, expr }.
+function parseStatement(src) {
+  const m = /^\s*(int|double|String)\s+([A-Za-z_]\w*)\s*=([\s\S]*)$/.exec(src);
+  let body = m ? m[3] : src;
+  body = body.replace(/;\s*$/, '');
+  if (/;/.test(body)) throw new Unsupported('write one statement or expression at a time.');
+  if (!body.trim()) throw new JavaCompileError('there is no expression to evaluate.');
+  return { target: m ? { type: m[1], name: m[2] } : null, expr: parseExpression(body) };
+}
+
+/* ---------- Type checking (what javac does before anything runs) ---------- */
+const NUM = t => t === 'int' || t === 'double';
+function typeOf(node, env) {
+  const t = (() => {
+    switch (node.k) {
+      case 'num': return node.type;
+      case 'str': return 'String';
+      case 'const': return 'int';
+      case 'var':
+        if (!(node.name in env)) throw new JavaCompileError(`cannot find symbol: variable ${node.name}. Declare it first.`);
+        return env[node.name].type;
+      case 'group': return typeOf(node.e, env);
+      case 'neg': {
+        const a = typeOf(node.e, env);
+        if (!NUM(a)) throw new JavaCompileError(`bad operand type String for unary operator '${node.op}'.`);
+        return a;
+      }
+      case 'cast': {
+        const a = typeOf(node.e, env);
+        if (!NUM(a)) throw new JavaCompileError(`incompatible types: String cannot be converted to ${node.to}.`);
+        return node.to;
+      }
+      case 'bin': {
+        const a = typeOf(node.l, env), b = typeOf(node.r, env);
+        if (node.op === '+' && (a === 'String' || b === 'String')) return 'String';
+        if (!NUM(a) || !NUM(b)) throw new JavaCompileError(`bad operand types for binary operator '${node.op}' (${a} and ${b}). Only + works with a String.`);
+        return a === 'double' || b === 'double' ? 'double' : 'int';
+      }
+      case 'call': {
+        const ts = node.args.map(x => typeOf(x, env));
+        const need = node.fn === 'pow' ? 2 : 1;
+        if (ts.length !== need) throw new JavaCompileError(`Math.${node.fn} takes ${need} argument${need > 1 ? 's' : ''}, not ${ts.length}.`);
+        if (!ts.every(NUM)) throw new JavaCompileError(`Math.${node.fn} needs numbers; a String cannot be converted to ${node.fn === 'abs' ? 'int' : 'double'}.`);
+        return node.fn === 'abs' ? ts[0] : 'double';
+      }
+    }
+  })();
+  node.type = t;
+  return t;
+}
+function checkAssign(target, t) {
+  if (target === t) return;
+  if (target === 'double' && t === 'int') return;
+  if (target === 'int' && t === 'double') throw new JavaCompileError('incompatible types: possible lossy conversion from double to int. Java will not silently drop the fraction; a cast is required.');
+  throw new JavaCompileError(`incompatible types: ${t} cannot be converted to ${target}.`);
+}
+
+/* ---------- Evaluation with steps ---------- */
+function toInt32(x) { return x | 0; }
+function castToInt(d) { if (Number.isNaN(d)) return 0; if (d >= INT_MAX) return INT_MAX; if (d <= INT_MIN) return INT_MIN; return Math.trunc(d); }
+function fmtN(type, v) { return type === 'double' ? javaDouble(v) : v < 0 ? '−' + (-v) : String(v); }
+
+function evaluate(node, env, steps) {
+  const record = (value, type, op, why) => { steps.push({ id: node.id, value, type, op, why }); return { value, type }; };
+  switch (node.k) {
+    case 'num': return { value: node.value, type: node.type };
+    case 'str': return { value: node.value, type: 'String' };
+    case 'const': return record(node.value, 'int', `${node.name} → ${fmtN('int', node.value)}`, node.name === 'Integer.MAX_VALUE' ? 'The largest value an int can hold.' : 'The smallest value an int can hold.');
+    case 'var': { const v = env[node.name]; return record(v.value, v.type, `${node.name} → ${show(v.type, v.value)}`, `Look up the variable ${node.name} (${v.type}).`); }
+    case 'group': { const r = evaluate(node.e, env, steps); return r; }
+    case 'neg': {
+      const a = evaluate(node.e, env, steps);
+      if (node.op === '+') return record(a.value, a.type, `+${fmtN(a.type, a.value)} → ${fmtN(a.type, a.value)}`, 'Unary plus leaves the value unchanged.');
+      const v = a.type === 'int' ? toInt32(-a.value) : -a.value;
+      const wrap = a.type === 'int' && a.value === INT_MIN;
+      return record(v, a.type, `−(${fmtN(a.type, a.value)}) → ${fmtN(a.type, v)}`, wrap ? 'The true answer 2147483648 does not fit in an int, so it wraps around to −2147483648.' : 'Negation keeps the type.');
+    }
+    case 'cast': {
+      const a = evaluate(node.e, env, steps);
+      if (node.to === 'int') {
+        const v = a.type === 'int' ? a.value : castToInt(a.value);
+        const why = a.type === 'int' ? 'It is already an int, so nothing changes.'
+          : Number.isInteger(a.value) ? `Casting to int: ${javaDouble(a.value)} becomes ${v}. The type changes; there was no fraction to lose.`
+          : `Casting to int chops off the fraction, toward zero. It does not round: ${javaDouble(a.value)} becomes ${fmtN('int', v)}.`;
+        return record(v, 'int', `(int) ${fmtN(a.type, a.value)} → ${fmtN('int', v)}`, why);
+      }
+      const v = a.value;
+      return record(v, 'double', `(double) ${fmtN(a.type, a.value)} → ${javaDouble(v)}`, a.type === 'double' ? 'It is already a double, so nothing changes.' : `Casting to double: ${a.value} becomes ${javaDouble(v)}. Same value, new type. It cannot bring back a fraction that was already lost.`);
+    }
+    case 'call': {
+      const as = node.args.map(x => evaluate(x, env, steps));
+      const shown = as.map(a => fmtN(a.type, a.value)).join(', ');
+      if (node.fn === 'abs') {
+        const a = as[0];
+        const v = a.type === 'int' ? toInt32(Math.abs(a.value)) : Math.abs(a.value);
+        return record(v, a.type, `Math.abs(${shown}) → ${fmtN(a.type, v)}`, `Math.abs returns the same type it is given (${a.type}).` + (a.type === 'int' && a.value === INT_MIN ? ' Surprise: 2147483648 does not fit in an int, so the answer wraps back to −2147483648.' : ''));
+      }
+      if (node.fn === 'sqrt') { const v = Math.sqrt(as[0].value); return record(v, 'double', `Math.sqrt(${shown}) → ${javaDouble(v)}`, 'Math.sqrt always returns a double.' + (as[0].value < 0 ? ' The square root of a negative number is NaN ("not a number").' : '')); }
+      const v = Math.pow(as[0].value, as[1].value);
+      return record(v, 'double', `Math.pow(${shown}) → ${javaDouble(v)}`, 'Math.pow always returns a double, even when the answer is a whole number.');
+    }
+    case 'bin': {
+      const a = evaluate(node.l, env, steps), b = evaluate(node.r, env, steps);
+      const op = node.op, sym = { '+': '+', '-': '−', '*': '×', '/': '÷', '%': '%' }[op];
+      if (node.type === 'String') {
+        const v = asText(a.type, a.value) + asText(b.type, b.value);
+        const conv = a.type !== 'String' ? `the ${a.type} ${fmtN(a.type, a.value)} becomes "${asText(a.type, a.value)}"` : b.type !== 'String' ? `the ${b.type} ${fmtN(b.type, b.value)} becomes "${asText(b.type, b.value)}"` : '';
+        return record(v, 'String', `${show(a.type, a.value)} + ${show(b.type, b.value)} → ${show('String', v)}`, conv ? `One side is a String, so + joins text: ${conv}.` : 'Both sides are Strings, so + joins them.');
+      }
+      if (node.type === 'double') {
+        const promo = a.type === 'int' ? `The int ${a.value} is promoted to ${javaDouble(a.value)} first. ` : b.type === 'int' ? `The int ${b.value} is promoted to ${javaDouble(b.value)} first. ` : '';
+        const v = op === '+' ? a.value + b.value : op === '-' ? a.value - b.value : op === '*' ? a.value * b.value : op === '/' ? a.value / b.value : a.value % b.value;
+        let why = promo + (op === '/' ? 'double division keeps the fraction.' : 'double arithmetic.');
+        if (op === '/' && b.value === 0) why = promo + 'Dividing a double by zero does not crash: the result is ' + javaDouble(v) + '.';
+        if (op === '%') why = promo + 'The remainder works for doubles too.';
+        return record(v, 'double', `${fmtN(a.type, a.value)} ${sym} ${fmtN(b.type, b.value)} → ${javaDouble(v)}`, why);
+      }
+      // int op int
+      const x = a.value, y = b.value;
+      if ((op === '/' || op === '%') && y === 0) {
+        steps.push({ id: node.id, error: true, op: `${fmtN('int', x)} ${sym} 0 → ArithmeticException`, why: 'Integer division by zero has no answer, so Java throws an ArithmeticException while the program runs. It compiled fine: the compiler does not check the values.' });
+        throw new JavaRuntimeError('ArithmeticException', '/ by zero');
+      }
+      let v, why, exact;
+      if (op === '/') {
+        v = toInt32(Math.trunc(x / y));
+        exact = x / y;
+        why = Number.isInteger(exact) ? 'int ÷ int gives an int. This one divides evenly.'
+          : `int ÷ int gives an int. The exact answer ${+exact.toFixed(4)} is truncated toward zero${exact < 0 ? ` (to ${fmtN('int', v)}, not ${fmtN('int', Math.floor(exact))})` : ''}. It is not rounded.`;
+      } else if (op === '%') {
+        v = x % y;
+        why = `% gives the remainder after int division: ${fmtN('int', x)} = ${fmtN('int', Math.trunc(x / y))} × ${fmtN('int', y)} + ${fmtN('int', v)}.` + (x < 0 ? ' The remainder takes the sign of the left operand.' : '');
+      } else {
+        exact = op === '+' ? x + y : op === '-' ? x - y : x * y;
+        v = op === '*' ? Math.imul(x, y) : toInt32(exact);
+        why = exact !== v
+          ? `The true answer ${exact} does not fit in an int (−2147483648 to 2147483647), so it wraps around to ${fmtN('int', v)}. No error is reported.`
+          : 'int arithmetic gives an int.';
+      }
+      return record(v, 'int', `${fmtN('int', x)} ${sym} ${fmtN('int', y)} → ${fmtN('int', v)}`, why);
+    }
+  }
+}
+
+// Declarations like "int x = 50; int y = 20;" (each value may be any expression).
+function parseDecls(src) {
+  const env = {};
+  for (const part of src.split(/[;\n]/)) {
+    if (!part.trim()) continue;
+    const m = /^\s*(int|double|String)\s+([A-Za-z_]\w*)\s*=\s*(.+?)\s*$/.exec(part);
+    if (!m) throw new JavaCompileError(`could not read the declaration "${part.trim()}". Use the form: int x = 5;`);
+    if (m[2] in env) throw new JavaCompileError(`variable ${m[2]} is already defined.`);
+    const e = parseExpression(m[3]);
+    const t = typeOf(e, env);
+    checkAssign(m[1], t);
+    const r = evaluate(e, env, []);
+    env[m[2]] = { type: m[1], value: m[1] === 'double' ? r.value : r.value };
+  }
+  return env;
+}
+
+// The whole pipeline. Returns { ok, compileError?, runtimeError?, steps, expr, target, type, value, label }.
+function runJava(declSrc, stmtSrc) {
+  nodeId = 0;
+  let env, stmt;
+  try {
+    env = parseDecls(declSrc || '');
+    stmt = parseStatement(stmtSrc);
+    const t = typeOf(stmt.expr, env);
+    if (stmt.target) {
+      if (stmt.target.name in env) throw new JavaCompileError(`variable ${stmt.target.name} is already defined.`);
+      checkAssign(stmt.target.type, t);
+    }
+  } catch (e) {
+    if (e instanceof JavaCompileError) return { ok: false, compileError: e.message, steps: [], stmt, label: 'compile-error' };
+    if (e instanceof Unsupported) return { ok: false, unsupported: e.message, steps: [], stmt, label: 'unsupported' };
+    throw e;
+  }
+  const steps = [];
+  let r;
+  try { r = evaluate(stmt.expr, env, steps); }
+  catch (e) {
+    if (e instanceof JavaRuntimeError) return { ok: false, runtimeError: e.javaType, steps, stmt, env, label: 'throws:' + e.javaType };
+    throw e;
+  }
+  let type = r.type, value = r.value;
+  if (stmt.target) {
+    const tt = stmt.target.type;
+    const why = tt === 'double' && type === 'int'
+      ? `Assignment happens last, after the right side is finished. The int ${fmtN('int', value)} is widened to ${javaDouble(value)} to fit in the double ${stmt.target.name}. Any fraction lost earlier does not come back.`
+      : `Assignment happens last: the finished value is stored in ${stmt.target.name}.`;
+    steps.push({ id: 'assign', value, type: tt, op: `${stmt.target.name} = ${show(tt, value)}`, why, assign: true });
+    type = tt;
+  }
+  return { ok: true, steps, stmt, env, type, value, label: `${type}:${asText(type, value)}` };
+}
+// ENGINE END
+
+
+/* ---------- Question sets ---------- */
+const PREDICT = [
+  { d: '', s: 'double z = 5 / 10;', tests: 'Assignment happens <b>after</b> the right side is evaluated. A double variable does not undo integer division (Quiz 2).' },
+  { d: '', s: 'int z = 50 / 10.00;', tests: 'A double cannot be stored in an int without a cast. This is a <b>compile-time</b> error, not a run-time one (Quiz 2).' },
+  { d: 'int x = 50; int y = 20; int z = 6;', s: 'x / y / z', tests: 'Operators of equal precedence run left to right, and each division truncates (Quiz 2).' },
+  { d: '', s: '(double) 7 / 2', tests: 'The cast applies to 7 only, before dividing. Cast placement matters.' },
+  { d: '', s: '(double) (7 / 2)', tests: 'Here the division happens first, so the fraction is already gone before the cast.' },
+  { d: '', s: '(int) 3.99', tests: 'Casting to int truncates. It never rounds.' },
+  { d: '', s: '-7 / 2', tests: 'Truncation goes toward zero, so negative answers move up, not down.' },
+  { d: '', s: '-7 % 3', tests: 'The remainder takes the sign of the left operand.' },
+  { d: '', s: '1 + 2 + "x"', tests: 'Left to right: the numbers add before any String appears.' },
+  { d: '', s: '"x" + 1 + 2', tests: 'Once the left side is a String, every later + joins text.' },
+  { d: 'int totsec = 3665;', s: 'totsec % 3600 / 60', tests: '% and / have the same precedence and run left to right: the seconds problem from Quiz 2.' },
+  { d: '', s: 'Math.pow(2, 3)', tests: 'Math.pow returns a double even for whole-number answers.' },
+  { d: '', s: 'Integer.MAX_VALUE + 1', tests: 'An int has a fixed range. Going past the top wraps around, with no error.' },
+  { d: '', s: '10 / 4 * 4', tests: 'Dividing then multiplying does not get you back where you started with ints.' },
+  { d: '', s: '1 / 0', tests: 'Integer division by zero compiles, but crashes when it runs.' },
+];
+const TRANSFER = [
+  { d: '', s: 'double avg = (90 + 85 + 81) / 3;' },
+  { d: '', s: '(90 + 85 + 81) / 3.0' },
+  { d: '', s: 'int n = (int) 9.99;' },
+  { d: '', s: '11 % 4' },
+  { d: '', s: '-11 / 4' },
+  { d: '', s: '"Total: " + 3 + 4' },
+  { d: '', s: '3 + 4 + " total"' },
+  { d: '', s: 'int w = 7.0 / 2;' },
+  { d: '', s: '100 / 7 * 7' },
+  { d: '', s: 'Math.abs(-4) + 0.5' },
+  { d: '', s: '(double) 1 / 3' },
+  { d: 'String s = "7";', s: 's * 2' },
+];
+const PRESETS = [
+  { label: 'ExpressionLab average', d: 'int a = 90; int b = 85; int c = 81;', s: 'double avg = (a + b + c) / 3;' },
+  { label: 'Average, fixed', d: 'int a = 90; int b = 85; int c = 81;', s: 'double avg = (a + b + c) / 3.0;' },
+  { label: 'Cast placement', d: 'int sum = 7; int n = 2;', s: '(double) sum / n' },
+  { label: 'Seconds to h:m:s', d: 'int totsec = 3665;', s: 'totsec / 3600 + ":" + totsec % 3600 / 60 + ":" + totsec % 60' },
+  { label: 'Concatenation order', d: '', s: '"Sum: " + 2 + 3' },
+  { label: 'Parentheses fix it', d: '', s: '"Sum: " + (2 + 3)' },
+  { label: 'Overflow', d: '', s: 'Integer.MAX_VALUE * 2' },
+  { label: 'Double surprise', d: '', s: '0.1 + 0.2' },
+  { label: 'Lossy assignment', d: '', s: 'int half = 7 / 2.0;' },
+];
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function renderCode(host, d, s) {
+  host.textContent = '';
+  if (d.trim()) host.append(el('div', 'decls', d.split(/;\s*/).filter(Boolean).map(x => x + ';').join('\n')));
+  host.append(el('div', 'expr', s));
+}
+function typeName(t) { return t === 'String' ? 'String' : t; }
+
+/* ---------- The ladder ---------- */
+function chip(text, type, cls = '') { return `<span class="v ${type} ${cls}">${esc(text)}<small>${typeName(type)}</small></span>`; }
+function printNode(node, done, fresh) {
+  if (done.has(node.id)) { const r = done.get(node.id); return chip(show(r.type, r.value), r.type, node.id === fresh ? 'fresh' : ''); }
+  const t = s => `<span class="tok">${esc(s)}</span>`;
+  switch (node.k) {
+    case 'num': return chip(node.raw, node.type, 'lit');
+    case 'str': return chip(node.raw, 'String', 'lit');
+    case 'var': return `<span class="nm">${esc(node.name)}</span>`;
+    case 'const': return `<span class="nm">${esc(node.name)}</span>`;
+    case 'group': return done.has(node.e.id) ? printNode(node.e, done, fresh) : t('(') + printNode(node.e, done, fresh) + t(')');
+    case 'neg': return t(node.op) + printNode(node.e, done, fresh);
+    case 'cast': return t(`(${node.to}) `) + printNode(node.e, done, fresh);
+    case 'bin': return printNode(node.l, done, fresh) + t(` ${node.op} `) + printNode(node.r, done, fresh);
+    case 'call': return t(`Math.${node.fn}(`) + node.args.map(a => printNode(a, done, fresh)).join(t(', ')) + t(')');
+  }
+}
+
+class Ladder {
+  constructor(host) {
+    this.host = host;
+    host.innerHTML = `
+      <div class="legendrow">Types: ${chip('7', 'int')} ${chip('3.5', 'double')} ${chip('"hi"', 'String')} <span>A boxed value is a literal written in the code; a highlighted one was just computed.</span></div>
+      <div class="cerr hidden"></div>
+      <div class="body">
+        <ol class="ladder" aria-label="Evaluation, one operation per line"></ol>
+        <div class="stepbox" aria-live="polite" style="margin-top:10px"><div class="stepcount"></div><div class="op"></div><p class="expl"></p></div>
+        <div class="controls"><button class="btn" data-act="reset">⟲ Reset</button><button class="btn" data-act="back">← Back</button><button class="btn primary" data-act="next">Next →</button><button class="btn" data-act="end">Show all</button><span class="keys"><kbd>←</kbd> <kbd>→</kbd> step</span></div>
+        <div class="result hidden"></div>
+      </div>`;
+    this.cerr = host.querySelector('.cerr');
+    this.body = host.querySelector('.body');
+    this.list = host.querySelector('.ladder');
+    host.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => this.act(b.dataset.act)));
+    this.body.tabIndex = 0;
+    this.body.addEventListener('keydown', e => {
+      const a = { ArrowRight: 'next', ArrowLeft: 'back', Home: 'reset', End: 'end' }[e.key];
+      if (a && !e.target.closest('input, textarea')) { e.preventDefault(); this.act(a); }
+    });
+  }
+  set(d, s, { showAll = false } = {}) {
+    this.run = runJava(d, s);
+    this.i = showAll ? this.run.steps.length : 0;
+    this.render();
+  }
+  act(a) {
+    if (!this.run || this.run.compileError || this.run.unsupported) return;
+    const n = this.run.steps.length;
+    this.i = a === 'next' ? Math.min(n, this.i + 1) : a === 'back' ? Math.max(0, this.i - 1) : a === 'reset' ? 0 : n;
+    this.render();
+  }
+  lineFor(k) {
+    const r = this.run, steps = r.steps, done = new Map();
+    for (let j = 0; j < k; j++) if (!steps[j].error && !steps[j].assign) done.set(steps[j].id, steps[j]);
+    const last = k > 0 ? steps[k - 1] : null;
+    const tgt = r.stmt.target;
+    if (last && last.error) return `<span class="boom">💥 ${esc(r.runtimeError)}</span>`;
+    if (last && last.assign) return `<span class="tok">${esc(tgt.name)} = </span>` + chip(show(last.type, last.value), last.type, 'fresh');
+    return (tgt ? `<span class="tok">${esc(tgt.type)} ${esc(tgt.name)} = </span>` : '') + printNode(r.stmt.expr, done, last ? last.id : null);
+  }
+  render() {
+    const r = this.run;
+    this.cerr.classList.toggle('hidden', !r.compileError && !r.unsupported);
+    this.body.classList.toggle('hidden', !!(r.compileError || r.unsupported));
+    if (r.unsupported) {
+      this.cerr.innerHTML = '';
+      const box = el('div', 'note');
+      box.append(el('b', null, 'Not supported here: '), r.unsupported);
+      this.cerr.append(box);
+      return;
+    }
+    if (r.compileError) {
+      this.cerr.innerHTML = '';
+      const box = el('div', 'compileerr');
+      box.append(el('div', 'head', 'Does not compile'), el('p', null, 'Compiler error: ' + r.compileError));
+      box.append(el('p', 'small', 'Java checks types before the program runs, so nothing is evaluated. Fix the code, then it can run.'));
+      this.cerr.append(box);
+      return;
+    }
+    const steps = r.steps, n = steps.length;
+    this.list.textContent = '';
+    for (let k = 0; k <= this.i; k++) {
+      const li = el('li', k === this.i ? (k > 0 && steps[k - 1].error ? 'bad' : 'now') : 'past');
+      li.append(el('span', 'ln', String(k)));
+      const code = el('span', 'code'); code.innerHTML = this.lineFor(k);
+      li.append(code);
+      this.list.append(li);
+    }
+    const box = this.host.querySelector('.stepbox');
+    const cur = this.i > 0 ? steps[this.i - 1] : null;
+    box.querySelector('.stepcount').textContent = n === 0 ? 'Nothing to compute' : `Step ${this.i} of ${n}`;
+    box.querySelector('.op').textContent = cur ? cur.op : 'Start';
+    box.querySelector('.expl').textContent = cur ? cur.why
+      : n === 0 ? 'The expression is already a single value.' : 'Java checked the types first, so this code compiles. Press Next to do the first operation, working left to right.';
+    this.host.querySelector('[data-act="back"]').disabled = this.i === 0;
+    this.host.querySelector('[data-act="reset"]').disabled = this.i === 0;
+    this.host.querySelector('[data-act="next"]').disabled = this.i === n;
+    this.host.querySelector('[data-act="end"]').disabled = this.i === n;
+    const res = this.host.querySelector('.result');
+    res.classList.toggle('hidden', this.i !== n);
+    if (this.i === n) {
+      res.textContent = '';
+      if (r.runtimeError) {
+        res.append(el('div', 'final'), el('p', 'why', `Result: the program crashes with an ${r.runtimeError} when this line runs.`));
+      } else {
+        const f = el('div', 'final');
+        f.innerHTML = `<span class="small">Result</span> <span class="big">${chip(show(r.type, r.value), r.type)}</span>`;
+        res.append(f, el('p', 'why', `System.out.println would print: ${asText(r.type, r.value)}`));
+      }
+    }
+  }
+}
+
+/* ---------- Tabs ---------- */
+const TABS = ['predict', 'explore', 'transfer'];
+function selectTab(name, focus) {
+  TABS.forEach(n => {
+    const on = n === name, tab = $('tab-' + n);
+    tab.setAttribute('aria-selected', on); tab.tabIndex = on ? 0 : -1;
+    $('mode-' + n).classList.toggle('hidden', !on);
+    if (on && focus) tab.focus();
+  });
+}
+TABS.forEach((n, i) => {
+  const tab = $('tab-' + n);
+  tab.addEventListener('click', () => selectTab(n));
+  tab.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); selectTab(TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length], true); }
+  });
+});
+
+/* ---------- Predict / Transfer ---------- */
+function buildForm(form, prefix, submitLabel, reasonPrompt) {
+  form.innerHTML = `
+    <div class="predictrow">
+      <label class="field">The result…
+        <select id="${prefix}-kind">
+          <option value="">choose…</option>
+          <option value="int">is an int</option>
+          <option value="double">is a double</option>
+          <option value="String">is a String</option>
+          <option value="compile-error">does not compile</option>
+          <option value="throws">compiles, then crashes when it runs</option>
+        </select>
+      </label>
+      <label class="field" id="${prefix}-vwrap">Value <span class="hint" id="${prefix}-vhint"></span>
+        <span class="quoted"><span class="q" id="${prefix}-q1">"</span><input type="text" id="${prefix}-val" autocomplete="off" spellcheck="false"><span class="q" id="${prefix}-q2">"</span></span>
+      </label>
+    </div>
+    <label class="field">${reasonPrompt}<textarea id="${prefix}-why" rows="2"></textarea></label>
+    <div class="row"><button class="btn primary" type="submit">${submitLabel}</button><span class="formerr" id="${prefix}-err" role="alert"></span></div>`;
+  const kind = $(prefix + '-kind');
+  const sync = () => {
+    const k = kind.value;
+    $(prefix + '-vwrap').classList.toggle('hidden', k === 'compile-error' || k === 'throws' || !k);
+    const str = k === 'String';
+    $(prefix + '-q1').classList.toggle('hidden-q', !str); $(prefix + '-q2').classList.toggle('hidden-q', !str);
+    $(prefix + '-vhint').textContent = str ? 'Type the characters exactly; spaces count.' : k === 'double' ? 'Write it the way Java prints it, e.g. 2.0' : k === 'int' ? 'A whole number' : '';
+  };
+  kind.addEventListener('change', sync);
+  sync();
+  return sync;
+}
+function readAnswer(kind, raw) {
+  if (kind === 'int') { const t = raw.trim().replace(/[−–]/g, '-'); return /^-?\d+$/.test(t) ? { kind, value: parseInt(t, 10) } : null; }
+  if (kind === 'double') { const t = raw.trim().replace(/[−–]/g, '-'); if (/^-?(Infinity|NaN)$/.test(t)) return { kind, value: Number(t), raw: t }; return /^-?\d+(\.\d*)?([eE]-?\d+)?$/.test(t) ? { kind, value: parseFloat(t), raw: t } : null; }
+  if (kind === 'String') { let t = raw; if (t.length >= 2 && t[0] === '"' && t.endsWith('"')) t = t.slice(1, -1); return { kind, value: t }; }
+  if (kind === 'compile-error' || kind === 'throws') return { kind };
+  return null;
+}
+function resultKind(r) { return r.compileError ? 'compile-error' : r.runtimeError ? 'throws' : r.type; }
+function describe(r) {
+  if (r.compileError) return 'does not compile';
+  if (r.runtimeError) return `compiles, then throws an ${r.runtimeError}`;
+  return `${show(r.type, r.value)} (${r.type === 'int' ? 'an int' : 'a ' + r.type})`;
+}
+function questionMode(prefix, items, opts) {
+  const state = items.map(() => ({ kind: '', val: '', why: '', done: false }));
+  let idx = 0;
+  const form = $(prefix + '-form');
+  const sync = buildForm(form, prefix, opts.submitLabel, opts.reasonPrompt);
+  const kind = $(prefix + '-kind'), val = $(prefix + '-val'), why = $(prefix + '-why'), err = $(prefix + '-err');
+  const after = $(prefix + '-after'), fb = $(prefix + '-feedback');
+  function show_() {
+    const it = items[idx], st = state[idx];
+    $(prefix + '-count').textContent = `Question ${idx + 1} of ${items.length}`;
+    $(prefix + '-prev').disabled = idx === 0; $(prefix + '-next').disabled = idx === items.length - 1;
+    renderCode($(prefix + '-code'), it.d, it.s);
+    kind.value = st.kind; val.value = st.val; why.value = st.why; sync();
+    [kind, val, why].forEach(x => { x.disabled = st.done; });
+    form.querySelector('[type="submit"]').disabled = st.done;
+    err.textContent = '';
+    after.classList.toggle('hidden', !st.done);
+    if (st.done) reveal(it, st);
+  }
+  function reveal(it, st) {
+    const r = runJava(it.d, it.s), a = readAnswer(st.kind, st.val), rk = resultKind(r);
+    let cls, head, extra = '';
+    if (a.kind === rk && (rk === 'compile-error' || rk === 'throws' || a.value === r.value || (rk === 'double' && (a.value === r.value || (Number.isNaN(a.value) && Number.isNaN(r.value)))))) {
+      cls = 'good'; head = `Correct: it ${describe(r)}.`;
+      if (rk === 'double' && a.raw !== javaDouble(r.value)) extra = `Java prints it as ${javaDouble(r.value)}.`;
+    } else if (a.kind === rk) { cls = 'part'; head = `Right type (${rk}), but the value is ${show(r.type, r.value)}.`; }
+    else if (rk === 'compile-error') { cls = 'bad'; head = 'Not quite: this code does not compile, so it never runs.'; }
+    else if (rk === 'throws') { cls = 'bad'; head = `Not quite: it compiles, then throws an ${r.runtimeError} when it runs.`; }
+    else if ((a.kind === 'int' || a.kind === 'double') && (rk === 'int' || rk === 'double') && a.value === r.value) { cls = 'part'; head = `Right value, wrong type: the result is ${describe(r)}.`; }
+    else { cls = 'bad'; head = `Not quite: the result is ${describe(r)}.`; }
+    fb.className = 'feedback ' + cls; fb.textContent = '';
+    const p1 = el('p'); p1.append(el('span', 'tag', head)); fb.append(p1);
+    if (extra) fb.append(el('p', null, extra));
+    fb.append(el('p', null, 'Your reasoning: “' + st.why.trim() + '”'));
+    opts.onReveal(it, r);
+  }
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const st = state[idx];
+    if (!kind.value) { err.textContent = 'Choose what happens first.'; kind.focus(); return; }
+    const a = readAnswer(kind.value, val.value);
+    if (!a) { err.textContent = kind.value === 'int' ? 'Enter a whole number, like -3 or 8.' : 'Enter a number, like 2.0 or 0.5.'; val.focus(); return; }
+    if (why.value.trim().length < 3) { err.textContent = 'Write a short reason before checking.'; why.focus(); return; }
+    Object.assign(st, { kind: kind.value, val: val.value, why: why.value, done: true });
+    show_();
+  });
+  const save = () => { const st = state[idx]; if (!st.done) Object.assign(st, { kind: kind.value, val: val.value, why: why.value }); };
+  $(prefix + '-prev').addEventListener('click', () => { save(); idx--; show_(); });
+  $(prefix + '-next').addEventListener('click', () => { save(); idx++; show_(); });
+  show_();
+}
+
+const predictLadder = new Ladder($('p-view'));
+questionMode('p', PREDICT, {
+  submitLabel: 'Check my prediction',
+  reasonPrompt: 'Why? <span class="hint">Name the type at the key step.</span>',
+  onReveal(it) { $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests; predictLadder.set(it.d, it.s); },
+});
+function modelExplanation(r) {
+  if (r.compileError) return `It does not compile. Compiler error: ${r.compileError}`;
+  const parts = r.steps.map(s => s.op.replace(/ → /, ' gives ') + '.');
+  return parts.join(' ') + (r.runtimeError ? '' : ` Final: ${describe(r)}.`);
+}
+questionMode('t', TRANSFER, {
+  submitLabel: 'Check',
+  reasonPrompt: 'Explain it <span class="hint">List each operation and the type it produces.</span>',
+  onReveal(it, r) {
+    const m = $('t-model'); m.textContent = '';
+    m.append(el('b', null, 'Model working: '), modelExplanation(r));
+    m.append(el('p', 'small', 'Compare with yours. Did you write the type after every operation?'));
+  },
+});
+
+/* ---------- Explore ---------- */
+const exploreLadder = new Ladder($('e-view'));
+const ed = $('e-decls'), es = $('e-stmt');
+function exploreUpdate() { exploreLadder.set(ed.value, es.value); }
+PRESETS.forEach(p => {
+  const c = el('button', 'chip', p.label); c.type = 'button';
+  c.addEventListener('click', () => { ed.value = p.d; es.value = p.s; exploreUpdate(); });
+  $('e-presets').append(c);
+});
+ed.value = PRESETS[0].d; es.value = PRESETS[0].s;
+ed.addEventListener('input', exploreUpdate); es.addEventListener('input', exploreUpdate);
+exploreUpdate();
+</script>
+</body>
+</html>

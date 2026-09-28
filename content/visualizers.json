@@ -16,5 +16,14 @@
       "2026-09-24",
       "2026-09-28"
     ]
+  },
+  {
+    "id": "exprtracer",
+    "title": "Expression and Type Tracer",
+    "file": "exprtracer.html",
+    "dates": [
+      "2026-09-11",
+      "2026-09-28"
+    ]
   }
 ]
