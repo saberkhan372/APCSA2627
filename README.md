@@ -69,6 +69,12 @@ L01–L04 also contain original on-site practice instructions and Java starters 
 
 The repository contains no teacher solution directories, answer-key PDFs, student submissions, grade records, recordings or prior-course student export. The Java checks and worked teaching examples are intentionally student-facing; they are not private assessment keys.
 
+## Visualizers
+
+`visualizers/` holds standalone interactive pages (no libraries, no build step) that `tools/build_pages.py` copies to `docs/visualizers/`. `content/visualizers.json` lists which dated notes pages link to each tool; `tools/verify_teaching.py` checks those links and copies.
+
+Each tool keeps its expected results in `visualizers/tests/`. `node visualizers/tests/run-engine-tests.mjs` checks the page's JavaScript against the case table. `node visualizers/tests/make-java-check.mjs` regenerates `CompareToCheck.java`, a self-contained program that checks the same table against real Java. The **Check visualizers against real Java** workflow runs both on GitHub whenever `visualizers/` changes, so no local JDK is needed; the file can also be pasted into any online Java runner.
+
 ## Verification limits
 
 Static links, date coverage, downloads, agendas, deck structure and public source fields are checked by `python3 tools/verify_pages.py`. Run `node tools/test_slides.mjs` for navigation behavior checks.

@@ -57,6 +57,14 @@ for lesson in lessons:
         assert 'After submission' in html
     count += n
 
+visualizers = json.loads((ROOT / 'content/visualizers.json').read_text())
+assert (DOCS / 'visualizers/index.html').exists(), 'Missing visualizer hub'
+for v in visualizers:
+    page = DOCS / 'visualizers' / v['file']
+    assert page.exists() and page.read_bytes() == (ROOT / 'visualizers' / v['file']).read_bytes(), f'Visualizer copy: {v["file"]}'
+    for d in v['dates']:
+        assert f'../visualizers/{v["file"]}' in (DOCS / 'notes' / f'{d}.html').read_text(), f'Visualizer link: {d}'
+
 for name in ('teaching.css', 'slides.css', 'slides.js'):
     assert (ROOT / 'web' / name).read_bytes() == (DOCS / 'assets' / name).read_bytes()
 index = (DOCS / 'teaching.html').read_text()

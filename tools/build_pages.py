@@ -55,6 +55,9 @@ for part in ['assets','days','materials','units','downloads/projects','downloads
 for f in (ROOT/'web').iterdir():
     if f.is_file():shutil.copy2(f,DOCS/'assets'/f.name)
 write('.nojekyll','')
+# Interactive visualizers are standalone pages; their tests stay out of the public site.
+(DOCS/'visualizers').mkdir(exist_ok=True)
+for f in (ROOT/'visualizers').glob('*.html'):shutil.copy2(f,DOCS/'visualizers'/f.name)
 project_count=0
 for m in MATERIALS:
     if m['kind']=='project':

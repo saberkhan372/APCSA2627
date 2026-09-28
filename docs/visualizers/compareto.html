@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>compareTo Visualizer</title>
+<style>
+/* Palette and chrome match the course site (web/site.css). */
+:root {
+  --bg: #FAFBFA; --panel: #FFFFFF; --ink: #16211F; --muted: #46524F; --faint: #6F7C79;
+  --line: #D8E0DD; --soft: #EAF0EE;
+  --accent: #0B5570; --accent-ink: #FFFFFF; --accent-soft: #E2EDF3;
+  --same-bg: #E4F1EC; --same-line: #1F7A63; --same-ink: #145443;
+  --diff-bg: #F8E5E1; --diff-line: #A63D2F; --diff-ink: #85291E;
+  --extra-bg: #FBF0DF; --extra-line: #9A5B14; --extra-ink: #6E400C;
+  --skip-ink: #8C9794; --str: #6B4A8C;
+  --serif: "Iowan Old Style", Charter, Georgia, "Times New Roman", serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pad: clamp(1rem, 4vw, 2.75rem);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111917; --panel: #171F1E; --ink: #E6EDEA; --muted: #A9B6B2; --faint: #7B8783;
+    --line: #2A3634; --soft: #1E2827;
+    --accent: #6FBEE2; --accent-ink: #0C1A20; --accent-soft: #0C2734;
+    --same-bg: #10312A; --same-line: #5FCFAF; --same-ink: #A6E6D2;
+    --diff-bg: #3A1D18; --diff-line: #E57A68; --diff-ink: #F4B8AC;
+    --extra-bg: #33270F; --extra-line: #E0A552; --extra-ink: #F0D29A;
+    --skip-ink: #5F6B68; --str: #B497D6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111917; --panel: #171F1E; --ink: #E6EDEA; --muted: #A9B6B2; --faint: #7B8783;
+  --line: #2A3634; --soft: #1E2827;
+  --accent: #6FBEE2; --accent-ink: #0C1A20; --accent-soft: #0C2734;
+  --same-bg: #10312A; --same-line: #5FCFAF; --same-ink: #A6E6D2;
+  --diff-bg: #3A1D18; --diff-line: #E57A68; --diff-ink: #F4B8AC;
+  --extra-bg: #33270F; --extra-line: #E0A552; --extra-ink: #F0D29A;
+  --skip-ink: #5F6B68; --str: #B497D6;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 17px/1.55 var(--sans); -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1040px; margin-inline: auto; padding-inline: var(--pad); }
+main.wrap { padding-block: 2rem 4rem; }
+a { color: var(--accent); }
+.skip-link {
+  position: fixed; top: .5rem; left: .5rem; z-index: 100; transform: translateY(-160%);
+  padding: .45rem .75rem; background: var(--ink); color: var(--panel); border-radius: 2px;
+  font: .76rem var(--mono);
+}
+.skip-link:focus { transform: translateY(0); }
+.masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+.masthead .wrap { display: flex; align-items: baseline; gap: .9rem; flex-wrap: wrap; padding-block: .8rem; }
+.logo { font: 600 .92rem var(--mono); color: var(--ink); text-decoration: none; }
+.masthead nav { margin-left: auto; display: flex; gap: 1rem; flex-wrap: wrap; font: .75rem var(--mono); }
+.masthead nav a { color: var(--faint); text-decoration: none; }
+.masthead nav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.masthead nav a[aria-current="page"] { color: var(--same-line); }
+.page-heading { display: grid; gap: .6rem; margin-bottom: 1.6rem; }
+.kicker { font: .88rem var(--mono); color: var(--accent); letter-spacing: .03em; margin: 0; }
+.kicker a { color: inherit; }
+h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.16; letter-spacing: -.018em; margin: 0; }
+h1 code { font-family: var(--mono); font-weight: 600; font-size: .9em; }
+.lede { font-size: 1.1rem; color: var(--muted); margin: 0; max-width: 66ch; }
+.mono, code { font-family: var(--mono); }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+.tab {
+  appearance: none; border: 1px solid transparent; border-bottom: none; background: none;
+  font: 600 15px var(--sans); color: var(--muted); padding: 9px 14px; border-radius: 3px 3px 0 0;
+  cursor: pointer; position: relative; top: 1px;
+}
+.tab[aria-selected="true"] { background: var(--panel); color: var(--ink); border-color: var(--line); box-shadow: inset 0 3px 0 var(--same-line); }
+.tab .n { font-weight: 400; color: var(--muted); font-size: 13px; margin-left: 4px; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: clamp(14px, 3vw, 22px); }
+.panel + .panel { margin-top: 14px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.spacer { flex: 1; }
+.small { font-size: 14px; color: var(--muted); }
+
+button.btn {
+  appearance: none; font: 600 14px var(--sans); border-radius: 3px; padding: 8px 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+}
+button.btn:hover:not(:disabled) { border-color: var(--accent); }
+button.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.btn:disabled { opacity: .45; cursor: default; }
+:focus-visible { outline: 2px solid var(--same-line); outline-offset: 3px; border-radius: 2px; }
+
+/* Expression line */
+.expr {
+  font: 600 22px/1.4 var(--mono); background: var(--soft); border-radius: 8px; padding: 12px 14px;
+  overflow-x: auto; white-space: pre; margin: 10px 0 14px;
+}
+.expr .s { color: var(--str); }
+.qmeta { font-size: 14px; color: var(--muted); }
+
+/* Forms */
+label.field { display: block; font-weight: 600; font-size: 14px; margin-bottom: 10px; }
+label.field span.hint { font-weight: 400; color: var(--muted); }
+input[type="text"], textarea {
+  display: block; width: 100%; margin-top: 4px; font: 16px var(--sans); color: var(--ink);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+}
+input.num { width: 9em; font-family: var(--mono); font-size: 18px; }
+input.strin { font-family: var(--mono); font-size: 18px; }
+textarea { min-height: 3.2em; resize: vertical; }
+input:disabled, textarea:disabled { opacity: .75; }
+.formerr { color: var(--diff-ink); font-size: 14px; min-height: 1.4em; margin: 2px 0 0; }
+
+.feedback { border-radius: 10px; padding: 12px 14px; margin-top: 12px; border: 1px solid; }
+.feedback.good { background: var(--same-bg); border-color: var(--same-line); color: var(--same-ink); }
+.feedback.part { background: var(--extra-bg); border-color: var(--extra-line); color: var(--extra-ink); }
+.feedback.bad { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
+.feedback p { margin: 4px 0; }
+.feedback .tag { font-weight: 700; }
+.note { background: var(--soft); border-radius: 8px; padding: 10px 12px; font-size: 15px; margin-top: 10px; }
+.note b { font-weight: 700; }
+
+/* Explore inputs */
+.inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .inputs { grid-template-columns: 1fr; } }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.chip {
+  appearance: none; font: 13px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  border-radius: 999px; padding: 4px 10px; cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); }
+
+/* Trace */
+.trace { margin-top: 14px; }
+.trace:focus-visible { outline-offset: 6px; border-radius: 6px; }
+.gridwrap { overflow-x: auto; padding: 4px 2px 8px; }
+.grid { display: grid; gap: 4px; width: max-content; }
+.rl { font: 600 13px var(--sans); color: var(--muted); align-self: center; padding-right: 6px; text-align: right; }
+.rl code { font-size: 12px; }
+.idx { font: 12px var(--mono); color: var(--muted); text-align: center; height: 30px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.idx .ptr { color: var(--accent); font-size: 14px; line-height: 1; visibility: hidden; }
+.col-current .idx .ptr, .idx.col-current .ptr { visibility: visible; }
+.tile {
+  width: 46px; height: 58px; border: 2px solid var(--line); border-radius: 8px; background: var(--panel);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: background-color .25s, border-color .25s, transform .25s;
+}
+.tile .ch { font: 700 20px/1.1 var(--mono); }
+.tile .ch.sp { font-size: 12px; font-weight: 600; color: var(--muted); }
+.tile .cu { font: 12px var(--mono); color: var(--muted); }
+.tile.none { border-style: dashed; background: transparent; }
+.tile.none .ch { font: 12px var(--sans); color: var(--muted); }
+.st { font: 600 11px/1.15 var(--sans); text-align: center; min-height: 28px; }
+.s-same .tile:not(.none) { background: var(--same-bg); border-color: var(--same-line); }
+.st.s-same { color: var(--same-ink); }
+.s-diff .tile:not(.none) { background: var(--diff-bg); border-color: var(--diff-line); }
+.st.s-diff { color: var(--diff-ink); }
+.s-extra .tile:not(.none) { background: var(--extra-bg); border-color: var(--extra-line); }
+.st.s-extra { color: var(--extra-ink); }
+.s-skip .tile { opacity: .45; }
+.st.s-skip { color: var(--skip-ink); font-weight: 400; }
+.col-current .tile { transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent); }
+.empty-note { font-size: 13px; color: var(--muted); margin: 2px 0 0; }
+
+.tracebody { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; margin-top: 8px; }
+@media (max-width: 720px) { .tracebody { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .expr { font-size: 17px; } .op { font-size: 15px; } }
+.stepbox { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.stepcount { font-size: 13px; color: var(--muted); }
+.op { font: 700 17px/1.4 var(--mono); margin: 4px 0 6px; overflow-wrap: anywhere; }
+.expl { margin: 0; }
+.algo { list-style: none; margin: 0; padding: 10px 0; background: var(--soft); border-radius: 10px; font: 13px/1.6 var(--mono); overflow-x: auto; }
+.algo li { padding: 0 12px; white-space: pre; border-left: 4px solid transparent; }
+.algo li.on { background: var(--accent-soft); border-left-color: var(--accent); font-weight: 700; }
+.algo .cap { font: 12px var(--sans); color: var(--muted); padding: 0 12px 4px; white-space: normal; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.keys { font-size: 13px; color: var(--muted); }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--bg); }
+
+/* Result */
+.result { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.resrow { display: flex; flex-wrap: wrap; gap: 18px; align-items: baseline; }
+.big { font: 700 34px/1 var(--mono); }
+.sign { font-weight: 700; }
+.meaning { margin: 6px 0 0; }
+.nline { position: relative; display: grid; grid-template-columns: 1fr 72px 1fr; margin: 16px 0 4px; max-width: 520px; font-size: 13px; text-align: center; }
+.nline > div { border-top: 3px solid var(--line); padding-top: 6px; color: var(--muted); }
+.nline > div.on { border-top-color: var(--accent); color: var(--ink); font-weight: 700; }
+.nline > div.on::before { content: "▼"; display: block; color: var(--accent); margin-top: -26px; margin-bottom: 4px; font-size: 14px; line-height: 1; }
+.apnote { font-size: 14px; color: var(--muted); margin: 10px 0 0; max-width: 70ch; }
+
+/* Reference */
+details.ref { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.refgroup { margin-top: 8px; }
+.refgroup .gl { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+.chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.rc { font: 11px/1.2 var(--mono); border: 1px solid var(--line); border-radius: 4px; padding: 2px 4px; text-align: center; min-width: 30px; }
+.rc b { display: block; font-size: 13px; }
+.rc.hl { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.reffact { font-size: 13px; margin: 8px 0 2px; }
+
+.hidden { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .col-current .tile { transform: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap" tabindex="-1">
+  <header class="page-heading">
+    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 1 · Strings</p>
+    <h1><code>compareTo</code> Visualizer</h1>
+    <p class="lede">How does Java decide which String comes first? Predict the result, then step through exactly what <code>compareTo</code> checks, and when it stops.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Mode">
+    <button class="tab" role="tab" id="tab-predict" aria-controls="mode-predict" aria-selected="true">Predict</button>
+    <button class="tab" role="tab" id="tab-explore" aria-controls="mode-explore" aria-selected="false" tabindex="-1">Explore</button>
+    <button class="tab" role="tab" id="tab-transfer" aria-controls="mode-transfer" aria-selected="false" tabindex="-1">Transfer</button>
+  </div>
+
+  <!-- PREDICT -->
+  <section id="mode-predict" role="tabpanel" aria-labelledby="tab-predict">
+    <div class="panel">
+      <div class="row">
+        <span class="qmeta" id="p-count"></span>
+        <span class="spacer"></span>
+        <button class="btn" id="p-prev">← Previous</button>
+        <button class="btn" id="p-next">Next question →</button>
+      </div>
+      <div class="expr" id="p-expr" aria-label="Java expression"></div>
+      <form id="p-form" novalidate>
+        <label class="field">What does this expression return? <span class="hint">(an int)</span>
+          <input type="text" class="num" id="p-ans" inputmode="numeric" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="field">Why? <span class="hint">One sentence: what decides the result?</span>
+          <textarea id="p-why" rows="2"></textarea>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit" id="p-submit">Check my prediction</button>
+          <span class="formerr" id="p-err" role="alert"></span>
+        </div>
+      </form>
+      <div id="p-after" class="hidden">
+        <div id="p-feedback" class="feedback" role="status"></div>
+        <div class="note" id="p-tests"></div>
+        <div id="p-trace"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPLORE -->
+  <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
+    <div class="panel">
+      <div class="inputs">
+        <label class="field">This string <span class="hint">(the one <code>compareTo</code> is called on)</span>
+          <input type="text" class="strin" id="e-a" maxlength="16" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="field">Other string <span class="hint">(the argument)</span>
+          <input type="text" class="strin" id="e-b" maxlength="16" autocomplete="off" spellcheck="false">
+        </label>
+      </div>
+      <div class="small">Try a case:</div>
+      <div class="presets" id="e-presets"></div>
+      <p class="small hidden" id="e-warn">This pilot is built for basic Latin text (letters, digits, punctuation, spaces). Other symbols still follow Java's rule, one UTF-16 code unit per index, but one visible symbol may take up two tiles.</p>
+      <div class="expr" id="e-expr" aria-label="Java expression"></div>
+      <div id="e-trace"></div>
+    </div>
+  </section>
+
+  <!-- TRANSFER -->
+  <section id="mode-transfer" role="tabpanel" aria-labelledby="tab-transfer" class="hidden">
+    <div class="panel">
+      <p class="small" style="margin-top:0">No animation here. Work it out, write your reasoning, then check it.</p>
+      <div class="row">
+        <span class="qmeta" id="t-count"></span>
+        <span class="spacer"></span>
+        <button class="btn" id="t-prev">← Previous</button>
+        <button class="btn" id="t-next">Next question →</button>
+      </div>
+      <div class="expr" id="t-expr" aria-label="Java expression"></div>
+      <form id="t-form" novalidate>
+        <label class="field">Result <span class="hint">(an int)</span>
+          <input type="text" class="num" id="t-ans" inputmode="numeric" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="field">Explain it <span class="hint">Where does the comparison stop, and what is subtracted?</span>
+          <textarea id="t-why" rows="2"></textarea>
+        </label>
+        <div class="row">
+          <button class="btn primary" type="submit">Check</button>
+          <span class="formerr" id="t-err" role="alert"></span>
+        </div>
+      </form>
+      <div id="t-after" class="hidden">
+        <div id="t-feedback" class="feedback" role="status"></div>
+        <div class="note" id="t-model"></div>
+      </div>
+      <details class="ref" id="t-ref"><summary>Code values reference</summary><div class="refbody"></div></details>
+    </div>
+  </section>
+</main>
+
+<script>
+// ENGINE START
+// Mirrors java.lang.String.compareTo: compare UTF-16 code units index by index
+// up to the shorter length; the first mismatch decides, otherwise length does.
+function traceCompareTo(a, b) {
+  const len1 = a.length, len2 = b.length, lim = Math.min(len1, len2);
+  const base = { a, b, len1, len2, lim };
+  const steps = [{ kind: 'start', line: 0, k: null }];
+  for (let k = 0; k < lim; k++) {
+    const c1 = a.charCodeAt(k), c2 = b.charCodeAt(k);
+    if (c1 === c2) {
+      steps.push({ kind: 'match', line: 2, k, c1, c2 });
+    } else {
+      const value = c1 - c2;
+      steps.push({ kind: 'mismatch', line: 2, k, c1, c2 });
+      steps.push({ kind: 'return-char', line: 3, k, c1, c2, value });
+      return { ...base, steps, value, k, rule: k === 0 ? 'first' : 'later' };
+    }
+  }
+  const value = len1 - len2;
+  steps.push({ kind: 'exhausted', line: 4, k: null });
+  steps.push({ kind: 'return-length', line: 5, k: null, value });
+  return { ...base, steps, value, k: null, rule: value === 0 ? 'identical' : 'prefix' };
+}
+
+function fmt(v) { return v < 0 ? '−' + (-v) : String(v); }
+function q(code) { return "'" + String.fromCharCode(code) + "'"; }
+function jstr(s) { return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; }
+
+// Unicode order differs from dictionary order when case differs or a non-letter is involved.
+function orderNote(c1, c2) {
+  const up = c => c >= 65 && c <= 90, low = c => c >= 97 && c <= 122;
+  if ((up(c1) && low(c2)) || (low(c1) && up(c2))) {
+    return 'This is Unicode order, not dictionary order: every uppercase letter (65–90) comes before every lowercase letter (97–122).';
+  }
+  if (!(up(c1) || low(c1)) || !(up(c2) || low(c2))) {
+    return 'Digits, spaces and punctuation are characters with their own code values, compared the same way as letters.';
+  }
+  return '';
+}
+
+// One-paragraph explanation of the whole comparison (used in Transfer and feedback).
+function explain(t) {
+  const { a, b, len1, len2, lim, value } = t;
+  if (t.rule === 'first' || t.rule === 'later') {
+    const s = t.steps[t.steps.length - 1];
+    const pre = t.k > 0 ? `Indexes 0–${t.k - 1} match. ` : '';
+    const nm = orderNote(s.c1, s.c2);
+    return `${pre}At index ${t.k}, ${q(s.c1)} (${s.c1}) and ${q(s.c2)} (${s.c2}) differ, so Java stops there and returns ${s.c1} − ${s.c2} = ${fmt(value)}. ${nm}`.trim();
+  }
+  if (t.rule === 'identical') {
+    return len1 === 0
+      ? 'Both strings are empty, so they are equal and the result is 0.'
+      : `Every character matches and both lengths are ${len1}, so the strings are equal and the result is 0.`;
+  }
+  const shorter = len1 < len2 ? a : b, longer = len1 < len2 ? b : a;
+  const pre = lim === 0
+    ? `${jstr(shorter)} is empty, so there is nothing to compare letter by letter.`
+    : `All ${lim} characters of ${jstr(shorter)} match the start of ${jstr(longer)}, so there is no mismatch.`;
+  return `${pre} Length decides: ${len1} − ${len2} = ${fmt(value)}.`;
+}
+// ENGINE END
+
+/* ---------- Curated question sets ---------- */
+const PREDICT = [
+  { a: 'apple', b: 'chocolate', tests: 'First letters differ. The result is the <b>distance</b> between the letters, not just −1.' },
+  { a: 'banana', b: 'bbnana', tests: 'The first letters match, so Java moves on until it finds a difference.' },
+  { a: 'cat', b: 'car', tests: 'Only the <b>first</b> mismatch counts. Nothing is added up across positions.' },
+  { a: 'Roberts', b: 'Roberts', tests: 'Identical strings: every position matches and the lengths are equal.' },
+  { a: 'applepie', b: 'apple', tests: 'Prefix case: the shorter string runs out before any mismatch, so length decides.' },
+  { a: 'Robe', b: 'Roberts', tests: 'Prefix case the other way round: when <em>this</em> string is the shorter one, the result is <b>negative</b>.' },
+  { a: 'pie', b: 'applepie', tests: 'Length only matters when there is <b>no</b> mismatch. Here the first letters already differ.' },
+  { a: 'Zebra', b: 'apple', tests: 'Uppercase letters have smaller code values than lowercase letters.' },
+  { a: 'Apple', b: 'apple', tests: 'Same letter, different case: lowercase is always 32 more than uppercase.' },
+  { a: '10', b: '9', tests: 'Digits in a String are characters, not numbers. <code>"10"</code> is compared character by character.' },
+  { a: '', b: 'a', tests: 'The empty string has length 0 and counts as a prefix of every string.' },
+  { a: 'hot dog', b: 'hotdog', tests: 'A space is a character too (code 32).' },
+];
+const TRANSFER = [
+  { a: 'Mister', b: 'Roberts' },
+  { a: 'dog', b: 'dot' },
+  { a: 'stars', b: 'star' },
+  { a: 'car', b: 'cartoon' },
+  { a: 'tree', b: 'tree' },
+  { a: 'Java', b: 'java' },
+  { a: '2', b: '100' },
+  { a: 'zoo', b: 'apple' },
+  { a: 'bat', b: 'Bat' },
+  { a: 'sun', b: 'sunny' },
+];
+const PRESETS = [
+  { label: 'First letter differs', a: 'apple', b: 'chocolate' },
+  { label: 'Later letter differs', a: 'banana', b: 'bbnana' },
+  { label: 'Identical', a: 'Roberts', b: 'Roberts' },
+  { label: 'Prefix (longer first)', a: 'applepie', b: 'apple' },
+  { label: 'Prefix (shorter first)', a: 'Robe', b: 'Roberts' },
+  { label: 'Upper vs lower case', a: 'Zebra', b: 'apple' },
+  { label: 'Digits', a: '10', b: '9' },
+  { label: 'Space', a: 'hot dog', b: 'hotdog' },
+  { label: 'Empty string', a: '', b: 'a' },
+];
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+function renderExpr(node, a, b) {
+  node.textContent = '';
+  node.append(el('span', 's', jstr(a)), '.compareTo(', el('span', 's', jstr(b)), ')');
+}
+function parseIntAnswer(raw) {
+  const s = raw.trim().replace(/[−–—]/g, '-').replace(/^\+/, '');
+  return /^-?\d+$/.test(s) ? parseInt(s, 10) : null;
+}
+function signWord(v) { return v < 0 ? 'negative' : v > 0 ? 'positive' : 'zero'; }
+function relation(a, b, v) {
+  if (v < 0) return `${jstr(a)} comes before ${jstr(b)}.`;
+  if (v > 0) return `${jstr(a)} comes after ${jstr(b)}.`;
+  return `${jstr(a)} and ${jstr(b)} are equal.`;
+}
+
+const REF_GROUPS = [
+  { label: 'Space', codes: [32] },
+  { label: "Digits '0'–'9' (48–57)", from: 48, to: 57 },
+  { label: "Uppercase 'A'–'Z' (65–90)", from: 65, to: 90 },
+  { label: "Lowercase 'a'–'z' (97–122)", from: 97, to: 122 },
+];
+function buildRef(body) {
+  body.textContent = '';
+  for (const g of REF_GROUPS) {
+    const wrap = el('div', 'refgroup');
+    wrap.append(el('div', 'gl', g.label));
+    const chips = el('div', 'chips');
+    const codes = g.codes || Array.from({ length: g.to - g.from + 1 }, (_, i) => g.from + i);
+    for (const c of codes) {
+      const chip = el('div', 'rc');
+      chip.dataset.code = c;
+      chip.append(el('b', null, c === 32 ? '␣' : String.fromCharCode(c)), String(c));
+      chips.append(chip);
+    }
+    wrap.append(chips);
+    body.append(wrap);
+  }
+  body.append(el('p', 'reffact', "Handy facts: lowercase = uppercase + 32, and letters that are n apart in the alphabet have codes n apart."));
+}
+
+/* ---------- Trace component ---------- */
+const ALGO = [
+  'int lim = Math.min(this.length(), other.length());',
+  'for (int k = 0; k < lim; k++) {',
+  '    if (this.charAt(k) != other.charAt(k))',
+  '        return this.charAt(k) - other.charAt(k);',
+  '}',
+  'return this.length() - other.length();',
+];
+
+class Trace {
+  constructor(host) {
+    this.host = host;
+    this.timer = null;
+    host.innerHTML = `
+      <div class="trace" tabindex="0" aria-label="Step-by-step trace. Use left and right arrow keys to step.">
+        <div class="gridwrap"><div class="grid"></div></div>
+        <p class="empty-note hidden"></p>
+        <div class="tracebody">
+          <div class="stepbox" aria-live="polite">
+            <div class="stepcount"></div>
+            <div class="op"></div>
+            <p class="expl"></p>
+          </div>
+          <div>
+            <ol class="algo" aria-label="What Java runs (simplified)"></ol>
+          </div>
+        </div>
+        <div class="controls">
+          <button class="btn" data-act="reset">⟲ Reset</button>
+          <button class="btn" data-act="back">← Back</button>
+          <button class="btn primary" data-act="next">Next →</button>
+          <button class="btn" data-act="play">▶ Play</button>
+          <span class="keys"><kbd>←</kbd> <kbd>→</kbd> step · <kbd>Home</kbd> reset</span>
+        </div>
+        <div class="result hidden"></div>
+        <details class="ref"><summary>Code values reference</summary><div class="refbody"></div></details>
+      </div>`;
+    this.root = host.querySelector('.trace');
+    this.grid = host.querySelector('.grid');
+    this.emptyNote = host.querySelector('.empty-note');
+    this.countEl = host.querySelector('.stepcount');
+    this.opEl = host.querySelector('.op');
+    this.explEl = host.querySelector('.expl');
+    this.resultEl = host.querySelector('.result');
+    this.refBody = host.querySelector('.refbody');
+    buildRef(this.refBody);
+    const algo = host.querySelector('.algo');
+    algo.append(el('li', 'cap', "Equivalent logic, simplified (the JDK's real code is optimized but returns the same values)"));
+    this.algoLines = ALGO.map(t => { const li = el('li', null, t); algo.append(li); return li; });
+    host.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => this.act(b.dataset.act)));
+    this.playBtn = host.querySelector('[data-act="play"]');
+    this.root.addEventListener('keydown', e => {
+      if (e.target.closest('input, textarea, details')) return;
+      const map = { ArrowRight: 'next', ArrowLeft: 'back', Home: 'reset', End: 'end' };
+      if (map[e.key]) { e.preventDefault(); this.act(map[e.key]); }
+    });
+  }
+
+  load(a, b) {
+    this.stop();
+    this.t = traceCompareTo(a, b);
+    this.i = 0;
+    this.buildGrid();
+    this.render();
+  }
+
+  act(what) {
+    const last = this.t.steps.length - 1;
+    if (what !== 'play') this.stop();
+    if (what === 'next') this.i = Math.min(last, this.i + 1);
+    else if (what === 'back') this.i = Math.max(0, this.i - 1);
+    else if (what === 'reset') this.i = 0;
+    else if (what === 'end') this.i = last;
+    else if (what === 'play') {
+      if (this.timer) { this.stop(); return; }
+      if (this.i === last) this.i = 0;
+      this.playBtn.textContent = '❚❚ Pause';
+      this.timer = setInterval(() => {
+        if (this.i >= this.t.steps.length - 1) { this.stop(); return; }
+        this.i++; this.render();
+        if (this.i >= this.t.steps.length - 1) this.stop();
+      }, 1100);
+    }
+    this.render();
+  }
+
+  stop() {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
+    if (this.playBtn) this.playBtn.textContent = '▶ Play';
+  }
+
+  buildGrid() {
+    const { a, b } = this.t;
+    const n = Math.max(a.length, b.length, 1);
+    this.n = n;
+    this.grid.style.gridTemplateColumns = `auto repeat(${n}, 46px)`;
+    this.grid.textContent = '';
+    this.cols = Array.from({ length: n }, () => []);
+    const add = (node, k) => { this.grid.append(node); if (k != null) this.cols[k].push(node); return node; };
+
+    add(el('div', 'rl', 'index'));
+    for (let k = 0; k < n; k++) {
+      const d = el('div', 'idx');
+      d.append(el('span', 'ptr', '▼'), el('span', null, String(k)));
+      add(d, k);
+    }
+    for (const [label, s] of [['this', a], ['other', b]]) {
+      const rl = el('div', 'rl');
+      rl.append(label, el('br'), el('code', null, jstr(s)));
+      add(rl);
+      for (let k = 0; k < n; k++) {
+        const cell = el('div', 'cell');
+        const tile = el('div', 'tile');
+        if (k < s.length) {
+          const code = s.charCodeAt(k);
+          if (code === 32) tile.append(el('span', 'ch sp', 'space'));
+          else tile.append(el('span', 'ch', s[k]));
+          tile.append(el('span', 'cu', String(code)));
+          tile.setAttribute('aria-label', `${label} index ${k}: ${code === 32 ? 'space' : s[k]}, code ${code}`);
+        } else {
+          tile.classList.add('none');
+          tile.append(el('span', 'ch', k === 0 && s.length === 0 ? 'empty' : '—'));
+          tile.setAttribute('aria-label', `${label} has no index ${k}`);
+        }
+        cell.append(tile);
+        add(cell, k);
+      }
+    }
+    add(el('div', 'rl', ''));
+    this.statusCells = [];
+    for (let k = 0; k < n; k++) this.statusCells.push(add(el('div', 'st'), k));
+
+    const notes = [];
+    if (a.length === 0) notes.push('“this” is the empty string "" (length 0).');
+    if (b.length === 0) notes.push('“other” is the empty string "" (length 0).');
+    this.emptyNote.textContent = notes.join(' ');
+    this.emptyNote.classList.toggle('hidden', notes.length === 0);
+  }
+
+  render() {
+    const t = this.t, steps = t.steps, s = steps[this.i];
+    const seen = steps.slice(0, this.i + 1);
+    const status = new Array(this.n).fill('');
+    let mismatchAt = null, exhausted = false;
+    for (const st of seen) {
+      if (st.kind === 'match') status[st.k] = 's-same';
+      if (st.kind === 'mismatch') { status[st.k] = 's-diff'; mismatchAt = st.k; }
+      if (st.kind === 'exhausted') exhausted = true;
+    }
+    for (let k = 0; k < this.n; k++) {
+      if (mismatchAt != null && k > mismatchAt && k < Math.max(t.len1, t.len2)) status[k] = 's-skip';
+      if (exhausted && k >= t.lim && k < Math.max(t.len1, t.len2)) status[k] = 's-extra';
+    }
+    const label = { 's-same': '= same', 's-diff': '≠ differs', 's-extra': 'extra', 's-skip': 'not checked', '': '' };
+    this.cols.forEach((nodes, k) => nodes.forEach(node => {
+      node.classList.remove('s-same', 's-diff', 's-extra', 's-skip', 'col-current');
+      if (status[k]) node.classList.add(status[k]);
+      if (s.k === k) node.classList.add('col-current');
+    }));
+    this.statusCells.forEach((c, k) => { c.textContent = label[status[k]]; });
+
+    // Step text
+    const { a, b, len1, len2, lim } = t;
+    this.countEl.textContent = `Step ${this.i + 1} of ${steps.length}`;
+    let op = '', ex = '';
+    switch (s.kind) {
+      case 'start':
+        op = `lim = Math.min(${len1}, ${len2}) = ${lim}`;
+        ex = lim > 0
+          ? `Java compares one index at a time, at most ${lim} time${lim === 1 ? '' : 's'}: the length of the shorter string. Press Next to start.`
+          : `${len1 === 0 && len2 === 0 ? 'Both strings are' : 'One string is'} empty, so there are no positions to compare. The loop never runs.`;
+        break;
+      case 'match':
+        op = `k = ${s.k}:  ${q(s.c1)} (${s.c1}) == ${q(s.c2)} (${s.c2})`;
+        ex = 'Same character. Nothing is decided yet, so Java keeps going.';
+        break;
+      case 'mismatch': {
+        op = `k = ${s.k}:  ${q(s.c1)} (${s.c1}) ≠ ${q(s.c2)} (${s.c2})`;
+        const more = s.k < Math.max(len1, len2) - 1;
+        ex = 'First difference! The comparison stops here.' + (more ? ` Anything after index ${s.k} is never looked at, and neither are the lengths.` : '');
+        break;
+      }
+      case 'return-char':
+        op = `return ${s.c1} − ${s.c2}   →   ${fmt(s.value)}`;
+        ex = `The result is the difference between the two code values at the first mismatch. ${orderNote(s.c1, s.c2)}`.trim();
+        break;
+      case 'exhausted':
+        op = lim > 0 ? `All ${lim} compared position${lim === 1 ? '' : 's'} matched` : 'Nothing to compare';
+        if (len1 === len2) ex = 'No difference was found, and neither string has leftover characters.';
+        else {
+          const shorter = len1 < len2 ? a : b, longer = len1 < len2 ? b : a;
+          ex = lim === 0
+            ? 'The empty string counts as a prefix of every string. Only the lengths are left to decide.'
+            : `The shorter string ran out with no mismatch: ${jstr(shorter)} is a prefix of ${jstr(longer)}. Only the lengths are left to decide.`;
+        }
+        break;
+      case 'return-length':
+        op = `return ${len1} − ${len2}   →   ${fmt(s.value)}`;
+        ex = s.value === 0
+          ? 'Same characters, same length: the strings are equal.'
+          : `The result is the difference in lengths. It is ${signWord(s.value)} because ${len1 < len2 ? '“this”' : '“other”'} is the shorter string.`;
+        break;
+    }
+    this.opEl.textContent = op;
+    this.explEl.textContent = ex;
+    this.algoLines.forEach((li, n) => li.classList.toggle('on', n === s.line));
+
+    // Reference highlights
+    this.refBody.querySelectorAll('.rc').forEach(c => {
+      const code = +c.dataset.code;
+      c.classList.toggle('hl', s.c1 != null && (code === s.c1 || code === s.c2));
+    });
+
+    // Controls
+    const last = steps.length - 1;
+    this.host.querySelector('[data-act="back"]').disabled = this.i === 0;
+    this.host.querySelector('[data-act="reset"]').disabled = this.i === 0;
+    this.host.querySelector('[data-act="next"]').disabled = this.i === last;
+
+    // Result
+    const done = s.kind === 'return-char' || s.kind === 'return-length';
+    this.resultEl.classList.toggle('hidden', !done);
+    if (done) this.renderResult();
+  }
+
+  renderResult() {
+    const { a, b, value } = this.t;
+    const r = this.resultEl;
+    r.textContent = '';
+    const row = el('div', 'resrow');
+    const left = el('div');
+    left.append(el('div', 'small', 'Exact value'), el('div', 'big', fmt(value)));
+    const right = el('div');
+    right.append(el('div', 'small', 'Sign'), el('div', 'sign', signWord(value) + (value < 0 ? ' (< 0)' : value > 0 ? ' (> 0)' : ' (= 0)')));
+    row.append(left, right);
+    r.append(row, el('p', 'meaning', `In compareTo order, ${relation(a, b, value)}`));
+    const nl = el('div', 'nline');
+    nl.setAttribute('aria-hidden', 'true');
+    [['negative: comes before', value < 0], ['0: equal', value === 0], ['positive: comes after', value > 0]]
+      .forEach(([txt, on]) => nl.append(el('div', on ? 'on' : '', txt)));
+    r.append(nl);
+    const ap = el('p', 'apnote');
+    ap.innerHTML = '<b>AP note:</b> the AP Java Quick Reference only promises the <b>sign</b>: negative if this string comes first, 0 if equal, positive if it comes after. The exact number (what the quiz asks for) comes from how Java actually implements <code>compareTo</code>, shown above.';
+    r.append(ap);
+  }
+}
+
+/* ---------- Tabs ---------- */
+const tabs = ['predict', 'explore', 'transfer'];
+function selectTab(name, focus) {
+  tabs.forEach(n => {
+    const on = n === name;
+    const tab = $('tab-' + n);
+    tab.setAttribute('aria-selected', on);
+    tab.tabIndex = on ? 0 : -1;
+    $('mode-' + n).classList.toggle('hidden', !on);
+    if (on && focus) tab.focus();
+  });
+  exploreTrace.stop(); predictTrace.stop();
+}
+tabs.forEach((n, i) => {
+  const tab = $('tab-' + n);
+  tab.addEventListener('click', () => selectTab(n));
+  tab.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      selectTab(tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length], true);
+    }
+  });
+});
+
+/* ---------- Question-set mode (Predict and Transfer share this) ---------- */
+function questionMode(prefix, items, opts) {
+  const state = items.map(() => ({ ans: '', why: '', done: false }));
+  let idx = 0;
+  const ans = $(prefix + '-ans'), why = $(prefix + '-why'), err = $(prefix + '-err');
+  const after = $(prefix + '-after'), fb = $(prefix + '-feedback');
+
+  function show() {
+    const it = items[idx], st = state[idx];
+    $(prefix + '-count').textContent = `Question ${idx + 1} of ${items.length}`;
+    $(prefix + '-prev').disabled = idx === 0;
+    $(prefix + '-next').disabled = idx === items.length - 1;
+    renderExpr($(prefix + '-expr'), it.a, it.b);
+    ans.value = st.ans; why.value = st.why;
+    ans.disabled = why.disabled = st.done;
+    $(prefix + '-form').querySelector('[type="submit"]').disabled = st.done;
+    err.textContent = '';
+    after.classList.toggle('hidden', !st.done);
+    if (st.done) reveal(it, st);
+  }
+
+  function reveal(it, st) {
+    const t = traceCompareTo(it.a, it.b);
+    const guess = parseIntAnswer(st.ans);
+    const v = t.value;
+    fb.textContent = '';
+    let cls, head;
+    if (guess === v) { cls = 'good'; head = `Correct: ${fmt(v)}.`; }
+    else if (Math.sign(guess) === Math.sign(v)) { cls = 'part'; head = `Sign correct (${signWord(v)}), but the exact value is ${fmt(v)}, not ${fmt(guess)}.`; }
+    else { cls = 'bad'; head = `Not quite. The result is ${fmt(v)} (${signWord(v)}); you predicted ${fmt(guess)} (${signWord(guess)}).`; }
+    fb.className = 'feedback ' + cls;
+    const p1 = el('p'); p1.append(el('span', 'tag', head));
+    const p2 = el('p', null, 'Your reasoning: “' + st.why.trim() + '”');
+    fb.append(p1, p2);
+    opts.onReveal(it, t);
+  }
+
+  $(prefix + '-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const st = state[idx];
+    const g = parseIntAnswer(ans.value);
+    if (g === null) { err.textContent = 'Enter a whole number, like -2, 0 or 3.'; ans.focus(); return; }
+    if (why.value.trim().length < 3) { err.textContent = 'Write a short reason before checking.'; why.focus(); return; }
+    st.ans = ans.value; st.why = why.value; st.done = true;
+    show();
+    fb.focus?.();
+  });
+  $(prefix + '-prev').addEventListener('click', () => { saveDraft(); idx--; show(); });
+  $(prefix + '-next').addEventListener('click', () => { saveDraft(); idx++; show(); });
+  function saveDraft() { const st = state[idx]; if (!st.done) { st.ans = ans.value; st.why = why.value; } }
+  show();
+}
+
+/* ---------- Wire up ---------- */
+const predictTrace = new Trace($('p-trace'));
+const exploreTrace = new Trace($('e-trace'));
+
+questionMode('p', PREDICT, {
+  onReveal(it, t) {
+    $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests;
+    predictTrace.load(it.a, it.b);
+  },
+});
+
+buildRef(document.querySelector('#t-ref .refbody'));
+questionMode('t', TRANSFER, {
+  onReveal(it, t) {
+    const m = $('t-model');
+    m.textContent = '';
+    m.append(el('b', null, 'Model explanation: '), explain(t));
+    m.append(el('p', 'small', 'Compare with yours. Did you say where the comparison stopped and what was subtracted?'));
+  },
+});
+
+const ea = $('e-a'), eb = $('e-b');
+function exploreUpdate() {
+  renderExpr($('e-expr'), ea.value, eb.value);
+  const odd = /[^\x20-\x7E]/.test(ea.value + eb.value);
+  $('e-warn').classList.toggle('hidden', !odd);
+  exploreTrace.load(ea.value, eb.value);
+}
+PRESETS.forEach(p => {
+  const c = el('button', 'chip', p.label);
+  c.type = 'button';
+  c.addEventListener('click', () => { ea.value = p.a; eb.value = p.b; exploreUpdate(); });
+  $('e-presets').append(c);
+});
+ea.value = 'apple'; eb.value = 'chocolate';
+ea.addEventListener('input', exploreUpdate);
+eb.addEventListener('input', exploreUpdate);
+exploreUpdate();
+</script>
+</body>
+</html>
