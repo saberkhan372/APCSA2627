@@ -76,6 +76,27 @@ public class ExprCheck {
     static String c62() { double d = 7; return typed(d / 2); }
     static String c63() { double big = Integer.MAX_VALUE + 1; return typed(big); }
     static String c64() { return typed(1.0 * Integer.MAX_VALUE + 1); }
+    static String c65() { int x = 1 / 0; return typed(x); }
+    static String c66() { return typed("a\r"); }
+    static String c67() { return typed(010 + 1); }
+    static String c68() { return typed((double) (-4 % 2)); }
+    static String c69() { return typed(4.9e-324 * 1); }
+    static String c70() { return typed(-010); }
+    static String c71() { return typed(00 + 1); }
+    static String c72() { return typed(1e-323 * 1); }
+    static String c73() { return typed(2e-323 * 1); }
+    static String c74() { return typed(4.9e-324 * 3); }
+    static String c75() { return typed(1.7976931348623157E308 * 1); }
+    static String c76() { return typed(1e23 * 1); }
+    static String c77() { return typed(2e-3 * 1); }
+    static String c78() { return typed((double) (int) -0.5); }
+    static String c79() { return typed((double) -0); }
+    static String c80() { return typed((double) (0 * -1)); }
+    static String c81() { return typed("" + (-4 % 2)); }
+    static String c82() { return typed("tab\there"); }
+    static String c83() { return typed("\101"); }
+    static String c84() { return typed("\s"); }
+    static String c85() { return typed("it\'s"); }
 
     // {declarations, statement, expected}
     static final String[][] VALID = {
@@ -144,6 +165,27 @@ public class ExprCheck {
         {"double d = 7;", "d / 2", "double:3.5"},
         {"", "double big = Integer.MAX_VALUE + 1;", "double:-2.147483648E9"},
         {"", "1.0 * Integer.MAX_VALUE + 1", "double:2.147483648E9"},
+        {"int x = 1 / 0;", "x", "throws:ArithmeticException"},
+        {"", "\"a\\r\"", "String:a\r"},
+        {"", "010 + 1", "int:9"},
+        {"", "(double) (-4 % 2)", "double:0.0"},
+        {"", "4.9e-324 * 1", "double:4.9E-324"},
+        {"", "-010", "int:-8"},
+        {"", "00 + 1", "int:1"},
+        {"", "1e-323 * 1", "double:9.9E-324"},
+        {"", "2e-323 * 1", "double:2.0E-323"},
+        {"", "4.9e-324 * 3", "double:1.5E-323"},
+        {"", "1.7976931348623157E308 * 1", "double:1.7976931348623157E308"},
+        {"", "1e23 * 1", "double:1.0E23"},
+        {"", "2e-3 * 1", "double:0.002"},
+        {"", "(double) (int) -0.5", "double:0.0"},
+        {"", "(double) -0", "double:0.0"},
+        {"", "(double) (0 * -1)", "double:0.0"},
+        {"", "\"\" + (-4 % 2)", "String:0"},
+        {"", "\"tab\\there\"", "String:tab\there"},
+        {"", "\"\\101\"", "String:A"},
+        {"", "\"\\s\"", "String: "},
+        {"", "\"it\\'s\"", "String:it's"},
     };
     // {declarations, statement, source that javac must reject}
     static final String[][] REJECT = {
@@ -158,6 +200,38 @@ public class ExprCheck {
         {"", "(int) \"5\"", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static String run() { return typed((int) \"5\"); } }"},
         {"", "x + 1", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static String run() { return typed(x + 1); } }"},
         {"", "Math.pow(2)", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static String run() { return typed(Math.pow(2)); } }"},
+        {"int x = 1 / 0;", "\"a\" - 1", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static String run() { int x = 1 / 0; return typed(\"a\" - 1); } }"},
+        {"", "1e309", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static String run() { return typed(1e309); } }"},
+        {"", "1e-400", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static String run() { return typed(1e-400); } }"},
+        {"", "-1e309", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static String run() { return typed(-1e309); } }"},
+        {"", "\"\\q\"", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static String run() { return typed(\"\\q\"); } }"},
+        {"", "int new = 5;", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static String run() { int new = 5; return typed(new); } }"},
+        {"int class = 1;", "1", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static String run() { int class = 1; return typed(1); } }"},
+    };
+    // {declarations, statement, source that javac must accept: valid Java the tool marks unsupported}
+    static final String[][] ACCEPT = {
+        {"", "\"\" + 'a'", "public class Snip { static Object run() { return (\"\" + 'a'\n); } }"},
+        {"int x = 3;", "x++", "public class Snip { static Object run() { int x = 3; return (x++\n); } }"},
+        {"int x = 3;", "x += 1", "public class Snip { static Object run() { int x = 3; return (x += 1\n); } }"},
+        {"int x = 3;", "x = 5", "public class Snip { static Object run() { int x = 3; return (x = 5\n); } }"},
+        {"int x = 1 / 0;", "x++", "public class Snip { static Object run() { int x = 1 / 0; return (x++\n); } }"},
+        {"", "5 > 3", "public class Snip { static Object run() { return (5 > 3\n); } }"},
+        {"", "true", "public class Snip { static Object run() { return (true\n); } }"},
+        {"", "(long) 5", "public class Snip { static Object run() { return ((long) 5\n); } }"},
+        {"", "0x1F", "public class Snip { static Object run() { return (0x1F\n); } }"},
+        {"", "1_000", "public class Snip { static Object run() { return (1_000\n); } }"},
+        {"", "3L", "public class Snip { static Object run() { return (3L\n); } }"},
+        {"", "2.5f", "public class Snip { static Object run() { return (2.5f\n); } }"},
+        {"", ".5", "public class Snip { static Object run() { return (.5\n); } }"},
+        {"", "\"\\u0041\"", "public class Snip { static Object run() { return (\"\\u0041\"\n); } }"},
+        {"String s = \"hi\";", "s.length()", "public class Snip { static Object run() { String s = \"hi\"; return (s.length()\n); } }"},
+        {"", "\"abc\".length()", "public class Snip { static Object run() { return (\"abc\".length()\n); } }"},
+        {"", "new String(\"a\")", "public class Snip { static Object run() { return (new String(\"a\")\n); } }"},
+        {"", "(String) \"a\"", "public class Snip { static Object run() { return ((String) \"a\"\n); } }"},
+        {"", "Math.max(1, 2)", "public class Snip { static Object run() { return (Math.max(1, 2)\n); } }"},
+        {"", "5 // five", "public class Snip { static Object run() { return (5 // five\n); } }"},
+        {"", "boolean b = true;", "public class Snip { static Object run() { boolean b = true\n; return b; } }"},
+        {"boolean b = true;", "b", "public class Snip { static Object run() { boolean b = true; return (b\n); } }"},
     };
 
     static String run(int i) {
@@ -227,6 +301,27 @@ public class ExprCheck {
             case 62: return c62();
             case 63: return c63();
             case 64: return c64();
+            case 65: return c65();
+            case 66: return c66();
+            case 67: return c67();
+            case 68: return c68();
+            case 69: return c69();
+            case 70: return c70();
+            case 71: return c71();
+            case 72: return c72();
+            case 73: return c73();
+            case 74: return c74();
+            case 75: return c75();
+            case 76: return c76();
+            case 77: return c77();
+            case 78: return c78();
+            case 79: return c79();
+            case 80: return c80();
+            case 81: return c81();
+            case 82: return c82();
+            case 83: return c83();
+            case 84: return c84();
+            case 85: return c85();
             default: throw new IllegalArgumentException();
         }
     }
@@ -249,9 +344,15 @@ public class ExprCheck {
                 System.out.println("FAIL [" + c[0] + "] " + c[1] + ": Java compiles it, but the table says it does not");
             }
         }
-        int total = VALID.length + REJECT.length;
+        for (String[] c : ACCEPT) {
+            if (!compiles(javac, c[2])) {
+                failures++;
+                System.out.println("FAIL [" + c[0] + "] " + c[1] + ": the tool calls it unsupported, but it is not valid Java");
+            }
+        }
+        int total = VALID.length + REJECT.length + ACCEPT.length;
         System.out.println(failures == 0
-            ? "PASS: " + VALID.length + " results and " + REJECT.length + " compile errors match Java " + System.getProperty("java.version")
+            ? "PASS: " + VALID.length + " results, " + REJECT.length + " compile errors and " + ACCEPT.length + " valid-but-unsupported cases match Java " + System.getProperty("java.version")
             : failures + " of " + total + " cases differ");
     }
 
