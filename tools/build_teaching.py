@@ -12,6 +12,11 @@ TEACHING=json.loads((ROOT/'content/teaching.json').read_text())
 ROWS={r['date']:r for r in COURSE['rows']}
 MATERIALS={m['id']:m for m in json.loads((ROOT/'content/materials.json').read_text())}
 VISUALIZERS=json.loads((ROOT/'content/visualizers.json').read_text())
+STUDY_BY_DATE={}
+for f in sorted((ROOT/'content/study').glob('*.json')):
+    if f.name.endswith('-bank.json'):continue
+    g=json.loads(f.read_text())
+    for d in g['linkDates']:STUDY_BY_DATE.setdefault(d,[]).append(g)
 VIS_BY_DATE={}
 for v in VISUALIZERS:
     for d in v['dates']:VIS_BY_DATE.setdefault(d,[]).append(v)
@@ -23,7 +28,7 @@ def write(path,text):
 def frame(title,body,depth=1,slides=False):
     p='../'*depth
     css='slides.css' if slides else 'teaching.css'
-    nav='' if slides else f'<header class="masthead"><div class="wrap">{a(p+"index.html","AP CS A 2026–27","logo")}<nav aria-label="Primary">{a(p+"index.html","Schedule")}{a(p+"units.html","Units")}{a(p+"materials.html","Materials")}{a(p+"teaching.html","Notes & slides")}{a(p+"visualizers/index.html","Visualizers")}{a(p+"setup.html","Setup")}</nav></div></header>'
+    nav='' if slides else f'<header class="masthead"><div class="wrap">{a(p+"index.html","AP CS A 2026–27","logo")}<nav aria-label="Primary">{a(p+"index.html","Schedule")}{a(p+"units.html","Units")}{a(p+"materials.html","Materials")}{a(p+"teaching.html","Notes & slides")}{a(p+"study/index.html","Study")}{a(p+"visualizers/index.html","Visualizers")}{a(p+"setup.html","Setup")}</nav></div></header>'
     return f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{e(title)} · AP CSA</title><link rel="stylesheet" href="{p}assets/site.css"><link rel="stylesheet" href="{p}assets/course.css"><link rel="stylesheet" href="{p}assets/{css}"></head><body class="{'deck-page' if slides else 'notes-page'}"><a class="skip-link" href="#main">Skip to content</a>{nav}<main id="main" class="{'deck-main' if slides else 'wrap year-main'}" tabindex="-1">{body}</main>{f'<script src="{p}assets/slides.js" defer></script>' if slides else ''}</body></html>'''
 def material_list(r,depth=1):return '<ul class="material-list">'+''.join('<li>'+a('../'*depth+'materials/'+k+'.html',MATERIALS[k]['name'])+'</li>' for k in r['sources'])+'</ul>'
 def agenda(l):
@@ -44,7 +49,7 @@ slide_total=0
 for l in TEACHING:
     d=l['date'];r=ROWS[d];timing=agenda(l)
     note='<header class="page-heading"><p class="kicker">'+e(human(d))+'</p><h1>'+e(r['assignment'])+'</h1><p class="lede">'+e(l['goal'])+'</p></header>'
-    note+='<nav class="resource-actions" aria-label="Lesson resources">'+a('../slides/'+d+'.html','Open slides','button')+a('../days/'+d+'.html','Daily assignment')+a('../downloads/notes/'+d+'.md','Download notes')+''.join(a('../visualizers/'+v['file'],v['title']) for v in VIS_BY_DATE.get(d,[]))+'</nav>'
+    note+='<nav class="resource-actions" aria-label="Lesson resources">'+a('../slides/'+d+'.html','Open slides','button')+a('../days/'+d+'.html','Daily assignment')+a('../downloads/notes/'+d+'.md','Download notes')+''.join(a('../study/'+g['id']+'.html',g['title']) for g in STUDY_BY_DATE.get(d,[]))+''.join(a('../visualizers/'+v['file'],v['title']) for v in VIS_BY_DATE.get(d,[]))+'</nav>'
     if l['independent']:note+='<aside class="calendar-note">Complete the independent attempt before using the worked review example. Your teacher supplies the selected assessment questions.</aside>'
     note+='<section><h2>Key ideas</h2><ul class="idea-list">'+''.join('<li>'+e(s)+'</li>' for s in l['ideas'])+'</ul></section>'
     note+='<section><h2>Opening prompt</h2><p>'+e(l['warm'])+'</p></section>'
@@ -87,7 +92,7 @@ for l in TEACHING:
     write('slides/'+d+'.html',frame(r['assignment']+' — slides',body,slides=True))
     # Idempotent integration preserves the rest of every existing lesson page.
     p=DOCS/'days'/f'{d}.html';text=p.read_text()
-    links=f'<nav class="daily-teaching-links resource-actions" aria-label="Notes and slides">{a("../notes/"+d+".html","Study notes","button")}{a("../slides/"+d+".html","Class slides","button")}</nav>'
+    links=f'<nav class="daily-teaching-links resource-actions" aria-label="Notes and slides">{a("../notes/"+d+".html","Study notes","button")}{a("../slides/"+d+".html","Class slides","button")}{"".join(a("../study/"+g["id"]+".html",g["title"]+" and practice","button") for g in STUDY_BY_DATE.get(d,[]))}</nav>'
     text=re.sub(r'<nav class="daily-teaching-links.*?</nav>','',text)
     text=text.replace('<div class="lesson-grid">',links+'<div class="lesson-grid">')
     if 'assets/teaching.css' not in text:text=text.replace('</head>','<link rel="stylesheet" href="../assets/teaching.css"></head>')
@@ -109,6 +114,8 @@ for p in list(DOCS.glob('*.html'))+list((DOCS/'days').glob('*.html'))+list((DOCS
     text=p.read_text();prefix='' if p.parent==DOCS else '../'
     if f'href="{prefix}teaching.html"' not in text:
         text=re.sub(r'(<a href="'+re.escape(prefix)+r'setup\.html"[^>]*>)',a(prefix+'teaching.html','Notes & slides')+r'\1',text,count=1)
+    if f'href="{prefix}study/index.html"' not in text:
+        text=re.sub(r'(<a href="'+re.escape(prefix)+r'(?:visualizers/index|setup)\.html"[^>]*>)',a(prefix+'study/index.html','Study')+r'\1',text,count=1)
     if f'href="{prefix}visualizers/index.html"' not in text:
         text=re.sub(r'(<a href="'+re.escape(prefix)+r'setup\.html"[^>]*>)',a(prefix+'visualizers/index.html','Visualizers')+r'\1',text,count=1)
     p.write_text(text)

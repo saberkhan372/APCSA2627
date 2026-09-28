@@ -3,3 +3,11 @@ __pycache__/
 *.class
 classroom-only/
 *PRIVATE*.zip
+
+# Assessment originals and answer keys are private; they never belong in the published docs/ folder.
+docs/Quizzes/
+docs/Tests/
+docs/**/Keys/
+docs/**/*.doc
+docs/**/*.docx
+docs/**/*.pdf

@@ -1,0 +1,224 @@
+{
+  "id": "u1",
+  "title": "Unit 1 Study Guide",
+  "unit": "Unit 1 · Using Objects and Methods",
+  "assessment": {
+    "date": "2026-09-30",
+    "name": "Unit 1 assessment",
+    "format": "12 multiple-choice questions (26 minutes), then two short code tasks with supplied method headers (24 minutes)."
+  },
+  "linkDates": [
+    "2026-09-28",
+    "2026-09-30"
+  ],
+  "lede": "Practice the skills on the Unit 1 assessment. Practice explains each answer right away. The mock collects your answers first, like the real thing.",
+  "sections": [
+    {
+      "id": "running",
+      "title": "How Java runs",
+      "topics": "AP 1.1–1.3",
+      "source": "Draws on Quiz 1",
+      "skills": [
+        "errors",
+        "syntax",
+        "identifiers",
+        "bits",
+        "hardware"
+      ],
+      "ideas": [
+        "Compile-time errors stop a program from running at all. Run-time errors crash it while it runs. Logic errors run fine but give wrong answers.",
+        "Every statement ends with a semicolon; Strings use double quotes; Java is case-sensitive.",
+        "Names use letters, digits, _ and $, cannot start with a digit, and cannot be reserved words. Classes are LikeThis; variables and methods are likeThis.",
+        "n bits can represent 2ⁿ different values. RAM is volatile: it loses its contents without power."
+      ],
+      "lessons": [
+        "2026-09-04",
+        "2026-09-09"
+      ],
+      "visualizers": []
+    },
+    {
+      "id": "numbers",
+      "title": "Expressions and types",
+      "topics": "AP 1.3–1.6",
+      "source": "Draws on Quiz 2 and Test 2",
+      "skills": [
+        "division",
+        "casting"
+      ],
+      "ideas": [
+        "int / int is an int: the fraction is truncated toward zero, not rounded. % gives the remainder, with the sign of the left operand.",
+        "The right side is evaluated first; assignment happens last. A double variable does not undo integer division.",
+        "An int can be stored in a double (widening). A double needs a cast to go into an int, and the cast truncates.",
+        "Where the cast goes matters: (double) a / b divides as doubles; (double) (a / b) divides as ints first.",
+        "An int that goes past Integer.MAX_VALUE wraps around, with no error."
+      ],
+      "lessons": [
+        "2026-09-11"
+      ],
+      "visualizers": [
+        [
+          "exprtracer.html",
+          "Expression and Type Tracer"
+        ]
+      ]
+    },
+    {
+      "id": "output",
+      "title": "Output and + with Strings",
+      "topics": "AP 1.1, 1.15",
+      "source": "Draws on Quiz 2 and Test 2",
+      "skills": [
+        "printing",
+        "concat"
+      ],
+      "ideas": [
+        "print leaves the cursor on the same line; println moves to the next line afterwards. Neither adds spaces.",
+        "\\n is a new line, \\t a tab, \\\" a quote character, and \\\\ a backslash.",
+        "+ works left to right. Once one side is a String, + joins text: \"a\" + 1 + 2 is \"a12\", but 1 + 2 + \"a\" is \"3a\".",
+        "* / % still happen before +, so \"x\" + 3 * 4 is \"x12\"."
+      ],
+      "lessons": [
+        "2026-09-24"
+      ],
+      "visualizers": [
+        [
+          "exprtracer.html",
+          "Expression and Type Tracer"
+        ]
+      ]
+    },
+    {
+      "id": "strings",
+      "title": "String methods",
+      "topics": "AP 1.15",
+      "source": "Draws on Quiz 2b and Test 2",
+      "skills": [
+        "substring",
+        "indexOf",
+        "compareTo",
+        "signatures"
+      ],
+      "ideas": [
+        "Indexes start at 0 and end at length() − 1. substring(a, b) starts at a and stops before b, so its length is b − a.",
+        "substring(length()) and substring(k, k) are legal and return \"\". Going past length() throws an exception.",
+        "indexOf returns where the first match starts, or −1 if there is none. Case matters.",
+        "compareTo stops at the first different character and subtracts; if one String runs out first, it subtracts the lengths.",
+        "length() and indexOf return int; equals returns boolean; substring returns a new String. Strings never change."
+      ],
+      "lessons": [
+        "2026-09-22",
+        "2026-09-24"
+      ],
+      "visualizers": [
+        [
+          "stringindex.html",
+          "String Index Explorer"
+        ],
+        [
+          "compareto.html",
+          "compareTo Visualizer"
+        ]
+      ]
+    },
+    {
+      "id": "methods",
+      "title": "Math.random and method signatures",
+      "topics": "AP 1.7–1.11",
+      "source": "Draws on Quiz 2b and Test 2",
+      "skills": [
+        "random",
+        "signatures"
+      ],
+      "ideas": [
+        "Math.random() is at least 0.0 and less than 1.0. For min to max inclusive: (int) (Math.random() * (max − min + 1)) + min.",
+        "Cast after multiplying. (int) Math.random() is always 0.",
+        "A method header tells you the argument types, in order, and the return type. An int argument can go where a double is expected, but not the reverse.",
+        "Math.abs keeps its argument's type; Math.sqrt and Math.pow always return a double."
+      ],
+      "lessons": [
+        "2026-09-15"
+      ],
+      "visualizers": []
+    },
+    {
+      "id": "objects",
+      "title": "Objects and references",
+      "topics": "AP 1.12–1.14",
+      "source": "New for the current course (the Sep 17 AliasingLab)",
+      "skills": [
+        "references"
+      ],
+      "ideas": [
+        "new creates an object and gives back a reference to it. A variable holds the reference, not the object.",
+        "b = a copies the reference: both now refer to the same object, and a change through one is seen through the other.",
+        "Reassigning a variable points it at a different object; it does not change the old one.",
+        "Calling a method on null compiles but throws a NullPointerException when it runs.",
+        "== asks \"same object?\"; equals asks \"same contents?\"."
+      ],
+      "lessons": [
+        "2026-09-17"
+      ],
+      "visualizers": []
+    }
+  ],
+  "skills": {
+    "errors": "I can tell compile-time, run-time and logic errors apart.",
+    "syntax": "I can spot syntax mistakes such as a missing semicolon or a bad comment.",
+    "identifiers": "I can tell legal names from illegal ones and follow Java's naming conventions.",
+    "bits": "I can work out how many values a number of bits can represent.",
+    "hardware": "I can explain what RAM does and why it is volatile.",
+    "division": "I can predict int division, % and precedence, including negative numbers.",
+    "casting": "I can predict casts and say when an assignment needs one.",
+    "printing": "I can predict exactly what print, println and escape sequences output.",
+    "concat": "I can predict + with Strings, working left to right.",
+    "substring": "I can predict substring and length, including legal and illegal bounds.",
+    "indexOf": "I can use indexOf to find text and to cut a String around it.",
+    "compareTo": "I can compute compareTo and explain its rules.",
+    "signatures": "I can use a method's header to check its arguments and return type.",
+    "random": "I can write Math.random for any inclusive range.",
+    "references": "I can trace references, aliases, null, and == versus equals."
+  },
+  "mock": {
+    "count": 12,
+    "minutes": 26,
+    "perSection": 2,
+    "formats": [
+      "mc",
+      "value",
+      "call",
+      "int",
+      "tf"
+    ]
+  },
+  "codeTasks": [
+    {
+      "id": "U1-initials",
+      "title": "Initials",
+      "skill": "indexOf",
+      "header": "public static String initials(String fullName)",
+      "does": "Returns the first letter of each name, each followed by a period: initials(\"Ada Lovelace\") returns \"A.L.\".",
+      "pre": "fullName contains exactly one space, which separates two non-empty names, with no spaces at the start or end.",
+      "rubric": [
+        "Finds the space with indexOf instead of assuming where it is.",
+        "Takes one character from the start and one just after the space, using correct substring bounds.",
+        "Joins the letters and periods in the right order, and returns the result (does not print it).",
+        "Keeps the method header exactly as given."
+      ]
+    },
+    {
+      "id": "U1-percent",
+      "title": "Percent correct",
+      "skill": "casting",
+      "header": "public static double percentCorrect(int correct, int total)",
+      "does": "Returns the exact percentage of correct answers, not rounded: percentCorrect(7, 8) returns 87.5.",
+      "pre": "total > 0 and 0 <= correct <= total.",
+      "rubric": [
+        "Makes the division happen in double arithmetic (for example 100.0 * correct / total), so 7 of 8 gives 87.5, not 0.0 or 87.0.",
+        "Does not round or cast the result to int.",
+        "Returns the value (does not print it).",
+        "Keeps the method header exactly as given."
+      ]
+    }
+  ]
+}

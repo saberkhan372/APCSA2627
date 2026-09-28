@@ -1,0 +1,2647 @@
+[
+ {
+  "id": "u1-run-logic",
+  "section": "running",
+  "skill": "errors",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "A program compiles and runs, but prints an average of 85.0 when the right answer is 85.33. What kind of error is this?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "A logic error",
+     "code": false,
+     "correct": true,
+     "why": "The program compiles and runs; it just computes the wrong thing (here, integer division before storing in a double)."
+    },
+    {
+     "text": "A compile-time error",
+     "code": false,
+     "correct": false,
+     "why": "A compile-time error stops the program from running at all. This one ran."
+    },
+    {
+     "text": "A run-time error",
+     "code": false,
+     "correct": false,
+     "why": "A run-time error crashes the program with an exception. This one finished and printed a number."
+    },
+    {
+     "text": "No error: Java always rounds averages",
+     "code": false,
+     "correct": false,
+     "why": "Java does not round. It printed 85.0 because (90 + 85 + 81) / 3 is int division."
+    }
+   ]
+  },
+  "explain": "The program compiles and runs; it just computes the wrong thing (here, integer division before storing in a double).",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "double avg = (90 + 85 + 81) / 3;",
+    "label": "double:85.0"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-run-crash",
+  "section": "running",
+  "skill": "errors",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "Which line compiles, but then crashes when it runs?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "int x = 5 / 0;",
+     "code": true,
+     "correct": true,
+     "why": "Integer division by zero compiles, then throws an ArithmeticException when it runs."
+    },
+    {
+     "text": "int x = 5 / 0.0;",
+     "code": true,
+     "correct": false,
+     "why": "This does not compile: 5 / 0.0 is a double, and a double cannot be stored in an int without a cast."
+    },
+    {
+     "text": "double d = 5 / 0.0;",
+     "code": true,
+     "correct": false,
+     "why": "Double division by zero does not crash. It gives Infinity."
+    },
+    {
+     "text": "int x = 5 / 2;",
+     "code": true,
+     "correct": false,
+     "why": "This runs fine and stores 2."
+    }
+   ]
+  },
+  "explain": "Integer division by zero compiles, then throws an ArithmeticException when it runs.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "int x = 5 / 0;",
+    "label": "throws:ArithmeticException"
+   },
+   {
+    "k": "expr",
+    "d": "",
+    "s": "int x = 5 / 0.0;",
+    "label": "compile-error"
+   },
+   {
+    "k": "expr",
+    "d": "",
+    "s": "double d = 5 / 0.0;",
+    "label": "double:Infinity"
+   },
+   {
+    "k": "expr",
+    "d": "",
+    "s": "int x = 5 / 2;",
+    "label": "int:2"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-run-bits",
+  "section": "running",
+  "skill": "bits",
+  "origin": "sibling",
+  "format": "int",
+  "prompt": "How many different values can 6 bits represent?",
+  "code": "",
+  "answer": {
+   "value": 64
+  },
+  "explain": "Each extra bit doubles the number of patterns: 2 × 2 × 2 × 2 × 2 × 2 = 2⁶ = 64.",
+  "java": [],
+  "conceptual": true
+ },
+ {
+  "id": "u1-run-bits2",
+  "section": "running",
+  "skill": "bits",
+  "origin": "new",
+  "format": "int",
+  "prompt": "What is the fewest number of bits needed to give each of 200 students a different ID?",
+  "code": "",
+  "answer": {
+   "value": 8
+  },
+  "explain": "7 bits give 2⁷ = 128 patterns, which is not enough. 8 bits give 2⁸ = 256, which is.",
+  "java": [],
+  "conceptual": true
+ },
+ {
+  "id": "u1-run-ident",
+  "section": "running",
+  "skill": "identifiers",
+  "origin": "sibling",
+  "format": "mc",
+  "prompt": "Which is a legal Java variable name?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "score2",
+     "code": true,
+     "correct": true,
+     "why": "Letters and digits are allowed as long as the name does not start with a digit."
+    },
+    {
+     "text": "2ndPlace",
+     "code": true,
+     "correct": false,
+     "why": "A name cannot start with a digit."
+    },
+    {
+     "text": "first-name",
+     "code": true,
+     "correct": false,
+     "why": "A hyphen is not allowed; Java would read it as subtraction."
+    },
+    {
+     "text": "my score",
+     "code": true,
+     "correct": false,
+     "why": "Names cannot contain spaces."
+    },
+    {
+     "text": "class",
+     "code": true,
+     "correct": false,
+     "why": "class is a reserved word."
+    }
+   ]
+  },
+  "explain": "Letters and digits are allowed as long as the name does not start with a digit.",
+  "java": [
+   {
+    "k": "ident",
+    "name": "score2",
+    "ok": true
+   },
+   {
+    "k": "ident",
+    "name": "2ndPlace",
+    "ok": false
+   },
+   {
+    "k": "ident",
+    "name": "first-name",
+    "ok": false
+   },
+   {
+    "k": "ident",
+    "name": "my score",
+    "ok": false
+   },
+   {
+    "k": "ident",
+    "name": "class",
+    "ok": false
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-run-ident2",
+  "section": "running",
+  "skill": "identifiers",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "Which is NOT a legal variable name?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "total!",
+     "code": true,
+     "correct": true,
+     "why": "Only letters, digits, _ and $ are allowed. ! is not."
+    },
+    {
+     "text": "_count",
+     "code": true,
+     "correct": false,
+     "why": "Starting with an underscore is legal."
+    },
+    {
+     "text": "$price",
+     "code": true,
+     "correct": false,
+     "why": "Starting with $ is legal (though rarely used)."
+    },
+    {
+     "text": "numberOfStudents",
+     "code": true,
+     "correct": false,
+     "why": "Legal, and it follows the naming convention for variables."
+    },
+    {
+     "text": "x2",
+     "code": true,
+     "correct": false,
+     "why": "Legal: a digit may appear after the first character."
+    }
+   ]
+  },
+  "explain": "Only letters, digits, _ and $ are allowed. ! is not.",
+  "java": [
+   {
+    "k": "ident",
+    "name": "total!",
+    "ok": false
+   },
+   {
+    "k": "ident",
+    "name": "_count",
+    "ok": true
+   },
+   {
+    "k": "ident",
+    "name": "$price",
+    "ok": true
+   },
+   {
+    "k": "ident",
+    "name": "numberOfStudents",
+    "ok": true
+   },
+   {
+    "k": "ident",
+    "name": "x2",
+    "ok": true
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-run-naming",
+  "section": "running",
+  "skill": "identifiers",
+  "origin": "sibling",
+  "format": "mc",
+  "prompt": "Following Java naming conventions, which is the best name for a class about library books?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "LibraryBook",
+     "code": true,
+     "correct": true,
+     "why": "Class names start with a capital letter and capitalize each word."
+    },
+    {
+     "text": "libraryBook",
+     "code": true,
+     "correct": false,
+     "why": "Legal, but this style (lower case first) is the convention for variables and methods."
+    },
+    {
+     "text": "LIBRARY_BOOK",
+     "code": true,
+     "correct": false,
+     "why": "Legal, but all capitals is the convention for constants."
+    },
+    {
+     "text": "Library-Book",
+     "code": true,
+     "correct": false,
+     "why": "Not legal: hyphens are not allowed in names."
+    }
+   ]
+  },
+  "explain": "Class names start with a capital letter and capitalize each word.",
+  "java": [
+   {
+    "k": "ident",
+    "name": "LibraryBook",
+    "ok": true
+   },
+   {
+    "k": "ident",
+    "name": "libraryBook",
+    "ok": true
+   },
+   {
+    "k": "ident",
+    "name": "LIBRARY_BOOK",
+    "ok": true
+   },
+   {
+    "k": "ident",
+    "name": "Library-Book",
+    "ok": false
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-run-ram",
+  "section": "running",
+  "skill": "hardware",
+  "origin": "sibling",
+  "format": "mc",
+  "prompt": "Which kind of storage loses its contents when the power is turned off?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "RAM (main memory)",
+     "code": false,
+     "correct": true,
+     "why": "RAM is volatile: it needs power to keep its contents. That is why unsaved work is lost in a power cut."
+    },
+    {
+     "text": "A hard drive",
+     "code": false,
+     "correct": false,
+     "why": "A hard drive keeps data without power (non-volatile)."
+    },
+    {
+     "text": "A solid-state drive (SSD)",
+     "code": false,
+     "correct": false,
+     "why": "SSDs are non-volatile flash storage."
+    },
+    {
+     "text": "A USB flash drive",
+     "code": false,
+     "correct": false,
+     "why": "Flash drives keep data without power."
+    }
+   ]
+  },
+  "explain": "RAM is volatile: it needs power to keep its contents. That is why unsaved work is lost in a power cut.",
+  "java": [],
+  "conceptual": true
+ },
+ {
+  "id": "u1-run-save-tf",
+  "section": "running",
+  "skill": "hardware",
+  "origin": "new",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "Saving a file copies it from RAM to long-term storage, such as a disk, so it survives when the power goes off.",
+  "answer": {
+   "value": true
+  },
+  "explain": "While you work, the document lives in RAM, which is volatile. Saving writes it to non-volatile storage (a disk, SSD or flash drive), which keeps it without power.",
+  "java": [],
+  "conceptual": true
+ },
+ {
+  "id": "u1-run-case",
+  "section": "running",
+  "skill": "identifiers",
+  "origin": "new",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "Java is case-sensitive, so score and Score are two different names.",
+  "answer": {
+   "value": true
+  },
+  "explain": "Java treats upper and lower case letters as different, so both can be declared in the same method.",
+  "java": [
+   {
+    "k": "compiles",
+    "code": "int score = 1;\nint Score = 2;",
+    "ok": true
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-run-compiles",
+  "section": "running",
+  "skill": "errors",
+  "origin": "new",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "If a program compiles, it has no errors.",
+  "answer": {
+   "value": false
+  },
+  "explain": "Compiling only checks the rules of the language. A program can still crash while running (for example 1 / 0) or give wrong answers (a logic error).",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "1 / 0",
+    "label": "throws:ArithmeticException"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-run-comment",
+  "section": "running",
+  "skill": "syntax",
+  "origin": "sibling",
+  "format": "mc",
+  "prompt": "Which of these is NOT a Java comment?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "# total points",
+     "code": true,
+     "correct": true,
+     "why": "Java does not use # for comments; this line does not compile."
+    },
+    {
+     "text": "// total points",
+     "code": true,
+     "correct": false,
+     "why": "A line comment: everything after // is ignored."
+    },
+    {
+     "text": "/* total points */",
+     "code": true,
+     "correct": false,
+     "why": "A block comment, which can span several lines."
+    },
+    {
+     "text": "/** total points */",
+     "code": true,
+     "correct": false,
+     "why": "A documentation (Javadoc) comment. It is also a block comment."
+    }
+   ]
+  },
+  "explain": "Java does not use # for comments; this line does not compile.",
+  "java": [
+   {
+    "k": "compiles",
+    "code": "# total points\nint a = 1;",
+    "ok": false
+   },
+   {
+    "k": "compiles",
+    "code": "// total points\nint a = 1;",
+    "ok": true
+   },
+   {
+    "k": "compiles",
+    "code": "/* total points */\nint a = 1;",
+    "ok": true
+   },
+   {
+    "k": "compiles",
+    "code": "/** total points */\nint a = 1;",
+    "ok": true
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-run-fix",
+  "section": "running",
+  "skill": "syntax",
+  "origin": "sibling",
+  "format": "mc",
+  "prompt": "This program does not compile. Which change fixes it?",
+  "code": "public class Greeting {\n    public static void main(String[] args) {\n        System.out.println(\"Hi there\")\n    }\n}",
+  "answer": {
+   "choices": [
+    {
+     "text": "Add ; after the closing parenthesis",
+     "code": false,
+     "correct": true,
+     "why": "Every statement ends with a semicolon."
+    },
+    {
+     "text": "Change println to print",
+     "code": false,
+     "correct": false,
+     "why": "print would also need a semicolon; the method name is not the problem."
+    },
+    {
+     "text": "Use single quotes: 'Hi there'",
+     "code": false,
+     "correct": false,
+     "why": "Single quotes are for one char, not text. 'Hi there' does not compile."
+    },
+    {
+     "text": "Remove the word static",
+     "code": false,
+     "correct": false,
+     "why": "The missing semicolon would still stop it compiling."
+    }
+   ]
+  },
+  "explain": "Every statement ends with a semicolon.",
+  "java": [
+   {
+    "k": "compilesClass",
+    "code": "public class Greeting {\n    public static void main(String[] args) {\n        System.out.println(\"Hi there\");\n    }\n}",
+    "ok": true
+   },
+   {
+    "k": "compilesClass",
+    "code": "public class Greeting {\n    public static void main(String[] args) {\n        System.out.print(\"Hi there\")\n    }\n}",
+    "ok": false
+   },
+   {
+    "k": "compilesClass",
+    "code": "public class Greeting {\n    public static void main(String[] args) {\n        System.out.println('Hi there');\n    }\n}",
+    "ok": false
+   },
+   {
+    "k": "compilesClass",
+    "code": "public class Greeting {\n    public void main(String[] args) {\n        System.out.println(\"Hi there\")\n    }\n}",
+    "ok": false
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-num-ratio",
+  "section": "numbers",
+  "skill": "division",
+  "origin": "sibling",
+  "format": "value",
+  "prompt": "What is stored in ratio? (Or does it not compile, or crash?)",
+  "code": "double ratio = 3 / 4;",
+  "answer": {
+   "label": "double:0.0"
+  },
+  "explain": "3 ÷ 4 gives 0; ratio = 0.0. int ÷ int gives an int. The exact answer 0.75 is truncated toward zero. It is not rounded. Assignment happens last, after the right side is finished. The int 0 is widened to 0.0 to fit in the double ratio. Any fraction lost earlier does not come back.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "double ratio = 3 / 4;",
+    "label": "double:0.0"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=double%20ratio%20%3D%203%20%2F%204%3B"
+ },
+ {
+  "id": "u1-num-lossy",
+  "section": "numbers",
+  "skill": "casting",
+  "origin": "sibling",
+  "format": "value",
+  "prompt": "What is stored in n? (Or does it not compile, or crash?)",
+  "code": "int n = 90 / 4.0;",
+  "answer": {
+   "label": "compile-error"
+  },
+  "explain": "It does not compile. incompatible types: possible lossy conversion from double to int. Java will not silently drop the fraction; a cast is required.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "int n = 90 / 4.0;",
+    "label": "compile-error"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=int%20n%20%3D%2090%20%2F%204.0%3B"
+ },
+ {
+  "id": "u1-num-chain",
+  "section": "numbers",
+  "skill": "division",
+  "origin": "sibling",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "int a = 90;\nint b = 7;\nint c = 4;\na / b / c",
+  "answer": {
+   "label": "int:3"
+  },
+  "explain": "a gives 90; b gives 7; 90 ÷ 7 gives 12; c gives 4; 12 ÷ 4 gives 3. int ÷ int gives an int. The exact answer 12.8571 is truncated toward zero. It is not rounded.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "int a = 90; int b = 7; int c = 4;",
+    "s": "a / b / c",
+    "label": "int:3"
+   }
+  ],
+  "link": "exprtracer.html?d=int%20a%20%3D%2090%3B%20int%20b%20%3D%207%3B%20int%20c%20%3D%204%3B&s=a%20%2F%20b%20%2F%20c"
+ },
+ {
+  "id": "u1-num-cast1",
+  "section": "numbers",
+  "skill": "casting",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "(double) 17 / 4",
+  "answer": {
+   "label": "double:4.25"
+  },
+  "explain": "(double) 17 gives 17.0; 17.0 ÷ 4 gives 4.25. Casting to double: 17 becomes 17.0. Same value, new type. It cannot bring back a fraction that was already lost. The int 4 is promoted to 4.0 first. double division keeps the fraction.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "(double) 17 / 4",
+    "label": "double:4.25"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=(double)%2017%20%2F%204"
+ },
+ {
+  "id": "u1-num-cast2",
+  "section": "numbers",
+  "skill": "casting",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "(double) (17 / 4)",
+  "answer": {
+   "label": "double:4.0"
+  },
+  "explain": "17 ÷ 4 gives 4; (double) 4 gives 4.0. int ÷ int gives an int. The exact answer 4.25 is truncated toward zero. It is not rounded. Casting to double: 4 becomes 4.0. Same value, new type. It cannot bring back a fraction that was already lost.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "(double) (17 / 4)",
+    "label": "double:4.0"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=(double)%20(17%20%2F%204)"
+ },
+ {
+  "id": "u1-num-trunc",
+  "section": "numbers",
+  "skill": "casting",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "(int) 9.99 + (int) 0.5",
+  "answer": {
+   "label": "int:9"
+  },
+  "explain": "(int) 9.99 gives 9; (int) 0.5 gives 0; 9 + 0 gives 9. Casting to int chops off the fraction, toward zero. It does not round: 9.99 becomes 9. Casting to int chops off the fraction, toward zero. It does not round: 0.5 becomes 0.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "(int) 9.99 + (int) 0.5",
+    "label": "int:9"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=(int)%209.99%20%2B%20(int)%200.5"
+ },
+ {
+  "id": "u1-num-negdiv",
+  "section": "numbers",
+  "skill": "division",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "-17 / 5",
+  "answer": {
+   "label": "int:-3"
+  },
+  "explain": "−17 ÷ 5 gives −3. int ÷ int gives an int. The exact answer -3.4 is truncated toward zero (to −3, not −4). It is not rounded.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "-17 / 5",
+    "label": "int:-3"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=-17%20%2F%205"
+ },
+ {
+  "id": "u1-num-negmod",
+  "section": "numbers",
+  "skill": "division",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "-17 % 5",
+  "answer": {
+   "label": "int:-2"
+  },
+  "explain": "−17 % 5 gives −2. % gives the remainder after int division: −17 = −3 × 5 + −2. The remainder takes the sign of the left operand.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "-17 % 5",
+    "label": "int:-2"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=-17%20%25%205"
+ },
+ {
+  "id": "u1-num-prec",
+  "section": "numbers",
+  "skill": "division",
+  "origin": "sibling",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "20 - 12 / 4 * 2 + 7 % 3",
+  "answer": {
+   "label": "int:15"
+  },
+  "explain": "12 ÷ 4 gives 3; 3 × 2 gives 6; 20 − 6 gives 14; 7 % 3 gives 1; 14 + 1 gives 15. int arithmetic gives an int.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "20 - 12 / 4 * 2 + 7 % 3",
+    "label": "int:15"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=20%20-%2012%20%2F%204%20*%202%20%2B%207%20%25%203"
+ },
+ {
+  "id": "u1-num-time",
+  "section": "numbers",
+  "skill": "division",
+  "origin": "sibling",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "int total = 7384;\ntotal % 3600 / 60",
+  "answer": {
+   "label": "int:3"
+  },
+  "explain": "total gives 7384; 7384 % 3600 gives 184; 184 ÷ 60 gives 3. int ÷ int gives an int. The exact answer 3.0667 is truncated toward zero. It is not rounded. 7384 seconds is 2 hours (7200 s) with 184 s left over; 184 / 60 is 3 whole minutes.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "int total = 7384;",
+    "s": "total % 3600 / 60",
+    "label": "int:3"
+   }
+  ],
+  "link": "exprtracer.html?d=int%20total%20%3D%207384%3B&s=total%20%25%203600%20%2F%2060"
+ },
+ {
+  "id": "u1-num-digit",
+  "section": "numbers",
+  "skill": "division",
+  "origin": "sibling",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "int code = 4829;\ncode / 10 % 10",
+  "answer": {
+   "label": "int:2"
+  },
+  "explain": "code gives 4829; 4829 ÷ 10 gives 482; 482 % 10 gives 2. int ÷ int gives an int. The exact answer 482.9 is truncated toward zero. It is not rounded. / 10 drops the last digit; % 10 then keeps the new last digit, which was the tens digit.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "int code = 4829;",
+    "s": "code / 10 % 10",
+    "label": "int:2"
+   }
+  ],
+  "link": "exprtracer.html?d=int%20code%20%3D%204829%3B&s=code%20%2F%2010%20%25%2010"
+ },
+ {
+  "id": "u1-num-overflow",
+  "section": "numbers",
+  "skill": "casting",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "Integer.MAX_VALUE + 1",
+  "answer": {
+   "label": "int:-2147483648"
+  },
+  "explain": "Integer.MAX_VALUE gives 2147483647; 2147483647 + 1 gives −2147483648. The true answer 2147483648 does not fit in an int (−2147483648 to 2147483647), so it wraps around to −2147483648. No error is reported.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "Integer.MAX_VALUE + 1",
+    "label": "int:-2147483648"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=Integer.MAX_VALUE%20%2B%201"
+ },
+ {
+  "id": "u1-num-explain1",
+  "section": "numbers",
+  "skill": "division",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "A student predicted 0.75 is stored. What was their mistake?",
+  "code": "double ratio = 3 / 4;",
+  "answer": {
+   "choices": [
+    {
+     "text": "They assumed the division is done in double because ratio is a double.",
+     "code": false,
+     "correct": true,
+     "why": "3 / 4 is evaluated first, as int division, giving 0. Only then is 0 widened to 0.0 for the double variable."
+    },
+    {
+     "text": "They forgot that Java rounds 0.75 up to 1.",
+     "code": false,
+     "correct": false,
+     "why": "Java never rounds in division; int division truncates. The stored value is 0.0."
+    },
+    {
+     "text": "They should have said it does not compile, because 3 / 4 is an int.",
+     "code": false,
+     "correct": false,
+     "why": "An int can be stored in a double (widening), so this compiles."
+    },
+    {
+     "text": "Nothing: Java stores 0.75.",
+     "code": false,
+     "correct": false,
+     "why": "Java stores 0.0. The fraction is lost in 3 / 4 before assignment."
+    }
+   ]
+  },
+  "explain": "3 / 4 is evaluated first, as int division, giving 0. Only then is 0 widened to 0.0 for the double variable.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "double ratio = 3 / 4;",
+    "label": "double:0.0"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-num-explain2",
+  "section": "numbers",
+  "skill": "casting",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "A student says this line crashes when it runs. What is actually true?",
+  "code": "int n = 90 / 4.0;",
+  "answer": {
+   "choices": [
+    {
+     "text": "It does not compile: the right side is a double, and storing a double in an int needs a cast.",
+     "code": false,
+     "correct": true,
+     "why": "90 / 4.0 is 22.5, a double. Java refuses to silently drop the fraction, so the compiler reports an error before anything runs."
+    },
+    {
+     "text": "It runs and stores 22.",
+     "code": false,
+     "correct": false,
+     "why": "That would need a cast: int n = (int) (90 / 4.0);"
+    },
+    {
+     "text": "It runs and stores 22.5.",
+     "code": false,
+     "correct": false,
+     "why": "An int cannot hold 22.5."
+    },
+    {
+     "text": "It crashes with an ArithmeticException.",
+     "code": false,
+     "correct": false,
+     "why": "Nothing runs: the compiler rejects it first. ArithmeticException is for int division by zero."
+    }
+   ]
+  },
+  "explain": "90 / 4.0 is 22.5, a double. Java refuses to silently drop the fraction, so the compiler reports an error before anything runs.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "int n = 90 / 4.0;",
+    "label": "compile-error"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-num-repair",
+  "section": "numbers",
+  "skill": "casting",
+  "origin": "sibling",
+  "format": "mc",
+  "prompt": "This should store the exact average, 4.25, but stores 4.0. Which replacement for the last line fixes it?",
+  "code": "int sum = 17;\nint count = 4;\ndouble avg = sum / count;",
+  "answer": {
+   "choices": [
+    {
+     "text": "double avg = (double) sum / count;",
+     "code": true,
+     "correct": true,
+     "why": "The cast applies to sum before dividing, so the division is done in double: 17.0 / 4 = 4.25."
+    },
+    {
+     "text": "double avg = (double) (sum / count);",
+     "code": true,
+     "correct": false,
+     "why": "The parentheses make the int division happen first (4), so the cast only turns 4 into 4.0."
+    },
+    {
+     "text": "double avg = sum / count * 1.0;",
+     "code": true,
+     "correct": false,
+     "why": "sum / count is still int division (4); multiplying by 1.0 afterwards is too late."
+    },
+    {
+     "text": "int avg = sum / (double) count;",
+     "code": true,
+     "correct": false,
+     "why": "The division is now double (4.25), but it cannot be stored in an int: this does not compile."
+    }
+   ]
+  },
+  "explain": "The cast applies to sum before dividing, so the division is done in double: 17.0 / 4 = 4.25.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "int sum = 17; int count = 4;",
+    "s": "double avg = (double) sum / count;",
+    "label": "double:4.25"
+   },
+   {
+    "k": "expr",
+    "d": "int sum = 17; int count = 4;",
+    "s": "double avg = (double) (sum / count);",
+    "label": "double:4.0"
+   },
+   {
+    "k": "expr",
+    "d": "int sum = 17; int count = 4;",
+    "s": "double avg = sum / count * 1.0;",
+    "label": "double:4.0"
+   },
+   {
+    "k": "expr",
+    "d": "int sum = 17; int count = 4;",
+    "s": "int avg = sum / (double) count;",
+    "label": "compile-error"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-num-prec-tf",
+  "section": "numbers",
+  "skill": "division",
+  "origin": "sibling",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "* and % have the same precedence, so they are done left to right.",
+  "answer": {
+   "value": true
+  },
+  "explain": "They share precedence. 7 % 3 * 2 is (7 % 3) * 2 = 2. If * went first, it would be 7 % 6 = 1.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "7 % 3 * 2",
+    "label": "int:2"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-num-round-tf",
+  "section": "numbers",
+  "skill": "casting",
+  "origin": "new",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "(int) 3.99 rounds to 4.",
+  "answer": {
+   "value": false
+  },
+  "explain": "Casting to int truncates (chops off the fraction). (int) 3.99 is 3.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "(int) 3.99",
+    "label": "int:3"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-out-print",
+  "section": "output",
+  "skill": "printing",
+  "origin": "sibling",
+  "format": "output",
+  "prompt": "What exactly does this print? (Spaces and line breaks count.)",
+  "code": "System.out.print(\"Rain\");\nSystem.out.println(\"bow \" + \"Road\");\nSystem.out.println(\"Sun\" + \"  set\");",
+  "answer": {
+   "text": "Rainbow Road\nSun  set\n"
+  },
+  "explain": "print leaves the cursor on the same line, so \"bow Road\" continues right after \"Rain\". + joins Strings exactly as written: no space is added, and the two spaces inside \"  set\" stay.",
+  "java": [
+   {
+    "k": "output",
+    "code": "System.out.print(\"Rain\");\nSystem.out.println(\"bow \" + \"Road\");\nSystem.out.println(\"Sun\" + \"  set\");",
+    "out": "Rainbow Road\nSun  set\n"
+   }
+  ]
+ },
+ {
+  "id": "u1-out-lines",
+  "section": "output",
+  "skill": "printing",
+  "origin": "sibling",
+  "format": "int",
+  "prompt": "How many lines of text does this print?",
+  "code": "System.out.println(\"one\\ttwo\\nthree\\\\four\");",
+  "answer": {
+   "value": 2
+  },
+  "explain": "\\t is a tab (same line), \\n starts a new line, and \\\\ prints one backslash. So: \"one<tab>two\" on line 1 and \"three\\four\" on line 2.",
+  "java": [
+   {
+    "k": "output",
+    "code": "System.out.println(\"one\\ttwo\\nthree\\\\four\");",
+    "out": "one\ttwo\nthree\\four\n"
+   }
+  ]
+ },
+ {
+  "id": "u1-out-quote",
+  "section": "output",
+  "skill": "printing",
+  "origin": "sibling",
+  "format": "mc",
+  "prompt": "Which statement prints exactly this, including the quotes?   He said \"go\"",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "System.out.println(\"He said \\\"go\\\"\");",
+     "code": true,
+     "correct": true,
+     "why": "\\\" puts a quote character inside a String without ending it."
+    },
+    {
+     "text": "System.out.println(\"He said \"go\"\");",
+     "code": true,
+     "correct": false,
+     "why": "The second \" ends the String early, so this does not compile."
+    },
+    {
+     "text": "System.out.println(\"He said \\\"go\");",
+     "code": true,
+     "correct": false,
+     "why": "This compiles but prints He said \"go (the closing quote is missing)."
+    },
+    {
+     "text": "System.out.println('He said \"go\"');",
+     "code": true,
+     "correct": false,
+     "why": "Single quotes are for one char; this does not compile."
+    }
+   ]
+  },
+  "explain": "\\\" puts a quote character inside a String without ending it.",
+  "java": [
+   {
+    "k": "output",
+    "code": "System.out.println(\"He said \\\"go\\\"\");",
+    "out": "He said \"go\"\n"
+   },
+   {
+    "k": "compiles",
+    "code": "System.out.println(\"He said \"go\"\");",
+    "ok": false
+   },
+   {
+    "k": "output",
+    "code": "System.out.println(\"He said \\\"go\");",
+    "out": "He said \"go\n"
+   },
+   {
+    "k": "compiles",
+    "code": "System.out.println('He said \"go\"');",
+    "ok": false
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-out-cat1",
+  "section": "output",
+  "skill": "concat",
+  "origin": "sibling",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "int y = 3;\nint z = 4;\n\"Total: \" + y + z",
+  "answer": {
+   "label": "String:Total: 34"
+  },
+  "explain": "y gives 3; \"Total: \" + 3 gives \"Total: 3\"; z gives 4; \"Total: 3\" + 4 gives \"Total: 34\". One side is a String, so + joins text: the int 3 becomes \"3\". One side is a String, so + joins text: the int 4 becomes \"4\".",
+  "java": [
+   {
+    "k": "expr",
+    "d": "int y = 3; int z = 4;",
+    "s": "\"Total: \" + y + z",
+    "label": "String:Total: 34"
+   }
+  ],
+  "link": "exprtracer.html?d=int%20y%20%3D%203%3B%20int%20z%20%3D%204%3B&s=%22Total%3A%20%22%20%2B%20y%20%2B%20z"
+ },
+ {
+  "id": "u1-out-cat2",
+  "section": "output",
+  "skill": "concat",
+  "origin": "sibling",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "int y = 3;\nint z = 4;\ny + z + \" total\"",
+  "answer": {
+   "label": "String:7 total"
+  },
+  "explain": "y gives 3; z gives 4; 3 + 4 gives 7; 7 + \" total\" gives \"7 total\". One side is a String, so + joins text: the int 7 becomes \"7\".",
+  "java": [
+   {
+    "k": "expr",
+    "d": "int y = 3; int z = 4;",
+    "s": "y + z + \" total\"",
+    "label": "String:7 total"
+   }
+  ],
+  "link": "exprtracer.html?d=int%20y%20%3D%203%3B%20int%20z%20%3D%204%3B&s=y%20%2B%20z%20%2B%20%22%20total%22"
+ },
+ {
+  "id": "u1-out-cat3",
+  "section": "output",
+  "skill": "concat",
+  "origin": "sibling",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "int x = 10;\nint y = 5;\n\"\" + x + y",
+  "answer": {
+   "label": "String:105"
+  },
+  "explain": "x gives 10; \"\" + 10 gives \"10\"; y gives 5; \"10\" + 5 gives \"105\". One side is a String, so + joins text: the int 10 becomes \"10\". One side is a String, so + joins text: the int 5 becomes \"5\".",
+  "java": [
+   {
+    "k": "expr",
+    "d": "int x = 10; int y = 5;",
+    "s": "\"\" + x + y",
+    "label": "String:105"
+   }
+  ],
+  "link": "exprtracer.html?d=int%20x%20%3D%2010%3B%20int%20y%20%3D%205%3B&s=%22%22%20%2B%20x%20%2B%20y"
+ },
+ {
+  "id": "u1-out-cat4",
+  "section": "output",
+  "skill": "concat",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "\"Area: \" + 3 * 4",
+  "answer": {
+   "label": "String:Area: 12"
+  },
+  "explain": "3 × 4 gives 12; \"Area: \" + 12 gives \"Area: 12\". One side is a String, so + joins text: the int 12 becomes \"12\".",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "\"Area: \" + 3 * 4",
+    "label": "String:Area: 12"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=%22Area%3A%20%22%20%2B%203%20*%204"
+ },
+ {
+  "id": "u1-out-cat5",
+  "section": "output",
+  "skill": "concat",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "\"Half: \" + 7 / 2",
+  "answer": {
+   "label": "String:Half: 3"
+  },
+  "explain": "7 ÷ 2 gives 3; \"Half: \" + 3 gives \"Half: 3\". int ÷ int gives an int. The exact answer 3.5 is truncated toward zero. It is not rounded. One side is a String, so + joins text: the int 3 becomes \"3\".",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "\"Half: \" + 7 / 2",
+    "label": "String:Half: 3"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=%22Half%3A%20%22%20%2B%207%20%2F%202"
+ },
+ {
+  "id": "u1-out-explain",
+  "section": "output",
+  "skill": "concat",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "A student expected this to print Score: 10. Why does it print Score: 82?",
+  "code": "System.out.println(\"Score: \" + 8 + 2);",
+  "answer": {
+   "choices": [
+    {
+     "text": "+ works left to right: \"Score: \" + 8 is already a String, so 2 is joined as text.",
+     "code": false,
+     "correct": true,
+     "why": "After the first +, the left side is the String \"Score: 8\", and String + 2 joins \"2\"."
+    },
+    {
+     "text": "Java always joins numbers as text.",
+     "code": false,
+     "correct": false,
+     "why": "Not always: 8 + 2 + \"\" gives \"10\", because the numbers are added before any String appears."
+    },
+    {
+     "text": "The space inside \"Score: \" turns the numbers into text.",
+     "code": false,
+     "correct": false,
+     "why": "The space has nothing to do with it; any String on the left causes joining."
+    },
+    {
+     "text": "println converts each number to text before adding.",
+     "code": false,
+     "correct": false,
+     "why": "println receives one finished String; the joining happens in the expression, left to right."
+    }
+   ]
+  },
+  "explain": "After the first +, the left side is the String \"Score: 8\", and String + 2 joins \"2\".",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "\"Score: \" + 8 + 2",
+    "label": "String:Score: 82"
+   },
+   {
+    "k": "expr",
+    "d": "",
+    "s": "8 + 2 + \"\"",
+    "label": "String:10"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-out-repair",
+  "section": "output",
+  "skill": "concat",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "This should print the sum, Sum: 7. Which replacement fixes it?",
+  "code": "int a = 2;\nint b = 5;\nSystem.out.println(\"Sum: \" + a + b);",
+  "answer": {
+   "choices": [
+    {
+     "text": "\"Sum: \" + (a + b)",
+     "code": true,
+     "correct": true,
+     "why": "The parentheses make a + b happen first, as int addition (7), before joining."
+    },
+    {
+     "text": "(\"Sum: \" + a) + b",
+     "code": true,
+     "correct": false,
+     "why": "This is the same as the original: \"Sum: 2\" + 5 gives \"Sum: 25\"."
+    },
+    {
+     "text": "\"Sum: \" + \"\" + a + b",
+     "code": true,
+     "correct": false,
+     "why": "Adding \"\" keeps everything as text: \"Sum: 25\"."
+    },
+    {
+     "text": "a + b + \"Sum: \"",
+     "code": true,
+     "correct": false,
+     "why": "The sum is right (7) but it ends up in front: \"7Sum: \"."
+    }
+   ]
+  },
+  "explain": "The parentheses make a + b happen first, as int addition (7), before joining.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "int a = 2; int b = 5;",
+    "s": "\"Sum: \" + (a + b)",
+    "label": "String:Sum: 7"
+   },
+   {
+    "k": "expr",
+    "d": "int a = 2; int b = 5;",
+    "s": "(\"Sum: \" + a) + b",
+    "label": "String:Sum: 25"
+   },
+   {
+    "k": "expr",
+    "d": "int a = 2; int b = 5;",
+    "s": "\"Sum: \" + \"\" + a + b",
+    "label": "String:Sum: 25"
+   },
+   {
+    "k": "expr",
+    "d": "int a = 2; int b = 5;",
+    "s": "a + b + \"Sum: \"",
+    "label": "String:7Sum: "
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-out-cursor",
+  "section": "output",
+  "skill": "printing",
+  "origin": "new",
+  "format": "output",
+  "prompt": "What exactly does this print? (Spaces and line breaks count.)",
+  "code": "String name = \"Kai\";\nSystem.out.print(\"Hi, \");\nSystem.out.print(name);\nSystem.out.println(\"!\");\nSystem.out.println(\"Bye\");",
+  "answer": {
+   "text": "Hi, Kai!\nBye\n"
+  },
+  "explain": "The three prints stay on one line until println moves to the next line.",
+  "java": [
+   {
+    "k": "output",
+    "code": "String name = \"Kai\";\nSystem.out.print(\"Hi, \");\nSystem.out.print(name);\nSystem.out.println(\"!\");\nSystem.out.println(\"Bye\");",
+    "out": "Hi, Kai!\nBye\n"
+   }
+  ]
+ },
+ {
+  "id": "u1-out-space-tf",
+  "section": "output",
+  "skill": "printing",
+  "origin": "new",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "System.out.print adds a space after what it prints.",
+  "answer": {
+   "value": false
+  },
+  "explain": "print adds nothing: print(\"a\") then print(\"b\") shows ab.",
+  "java": [
+   {
+    "k": "output",
+    "code": "System.out.print(\"a\");\nSystem.out.print(\"b\");",
+    "out": "ab"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-str-sub1",
+  "section": "strings",
+  "skill": "substring",
+  "origin": "sibling",
+  "format": "call",
+  "prompt": "What does this call return? (Or does it throw an exception?)",
+  "code": "\"Good Morning\".substring(2, 7)",
+  "answer": {
+   "label": "String:od Mo"
+  },
+  "explain": "Cut at post 2 and post 7. You get the boxes between them, 2 to 6: 7 − 2 = 5 characters. Box 7 is not included.",
+  "java": [
+   {
+    "k": "call",
+    "s": "Good Morning",
+    "m": "substring2",
+    "args": [
+     2,
+     7
+    ],
+    "label": "String:od Mo"
+   }
+  ],
+  "link": "stringindex.html?s=Good%20Morning&m=substring2&a=2%2C7"
+ },
+ {
+  "id": "u1-str-sub2",
+  "section": "strings",
+  "skill": "substring",
+  "origin": "sibling",
+  "format": "call",
+  "prompt": "What does this call return? (Or does it throw an exception?)",
+  "code": "\"Good Morning\".substring(5)",
+  "answer": {
+   "label": "String:Morning"
+  },
+  "explain": "Cut at post 5 and keep everything to the end (post 12): 12 − 5 = 7 characters.",
+  "java": [
+   {
+    "k": "call",
+    "s": "Good Morning",
+    "m": "substring1",
+    "args": [
+     5
+    ],
+    "label": "String:Morning"
+   }
+  ],
+  "link": "stringindex.html?s=Good%20Morning&m=substring1&a=5"
+ },
+ {
+  "id": "u1-str-sub3",
+  "section": "strings",
+  "skill": "substring",
+  "origin": "new",
+  "format": "call",
+  "prompt": "What does this call return? (Or does it throw an exception?)",
+  "code": "\"planet\".substring(6)",
+  "answer": {
+   "label": "String:"
+  },
+  "explain": "Post 6 is the last post, so there is nothing after it: the result is the empty String. This is legal. Only a post past 6 would crash.",
+  "java": [
+   {
+    "k": "call",
+    "s": "planet",
+    "m": "substring1",
+    "args": [
+     6
+    ],
+    "label": "String:"
+   }
+  ],
+  "link": "stringindex.html?s=planet&m=substring1&a=6"
+ },
+ {
+  "id": "u1-str-sub4",
+  "section": "strings",
+  "skill": "substring",
+  "origin": "new",
+  "format": "call",
+  "prompt": "What does this call return? (Or does it throw an exception?)",
+  "code": "\"planet\".substring(3, 7)",
+  "answer": {
+   "label": "throws"
+  },
+  "explain": "Java throws a StringIndexOutOfBoundsException: end 7 is past the last post, 6.",
+  "java": [
+   {
+    "k": "call",
+    "s": "planet",
+    "m": "substring2",
+    "args": [
+     3,
+     7
+    ],
+    "label": "throws"
+   }
+  ],
+  "link": "stringindex.html?s=planet&m=substring2&a=3%2C7"
+ },
+ {
+  "id": "u1-str-len",
+  "section": "strings",
+  "skill": "substring",
+  "origin": "new",
+  "format": "call",
+  "prompt": "What does this call return? (Or does it throw an exception?)",
+  "code": "\"Hi there\".length()",
+  "answer": {
+   "label": "int:8"
+  },
+  "explain": "\"Hi there\" has 8 characters in boxes 0 to 7. length() counts the boxes; it is also the number of the last fence post.",
+  "java": [
+   {
+    "k": "call",
+    "s": "Hi there",
+    "m": "length",
+    "args": [],
+    "label": "int:8"
+   }
+  ],
+  "link": "stringindex.html?s=Hi%20there&m=length&a="
+ },
+ {
+  "id": "u1-str-idx1",
+  "section": "strings",
+  "skill": "indexOf",
+  "origin": "sibling",
+  "format": "call",
+  "prompt": "What does this call return? (Or does it throw an exception?)",
+  "code": "\"Robinson\".indexOf(\"bin\")",
+  "answer": {
+   "label": "int:2"
+  },
+  "explain": "Java tries each start position from 0. At position 2 all 3 characters match, so indexOf returns 2: where the match starts. Positions 0 to 1 failed.",
+  "java": [
+   {
+    "k": "call",
+    "s": "Robinson",
+    "m": "indexOf",
+    "args": [
+     "bin"
+    ],
+    "label": "int:2"
+   }
+  ],
+  "link": "stringindex.html?s=Robinson&m=indexOf&a=bin"
+ },
+ {
+  "id": "u1-str-idx2",
+  "section": "strings",
+  "skill": "indexOf",
+  "origin": "new",
+  "format": "call",
+  "prompt": "What does this call return? (Or does it throw an exception?)",
+  "code": "\"Robinson\".indexOf(\"son\")",
+  "answer": {
+   "label": "int:5"
+  },
+  "explain": "Java tries each start position from 0. At position 5 all 3 characters match, so indexOf returns 5: where the match starts. Positions 0 to 4 failed.",
+  "java": [
+   {
+    "k": "call",
+    "s": "Robinson",
+    "m": "indexOf",
+    "args": [
+     "son"
+    ],
+    "label": "int:5"
+   }
+  ],
+  "link": "stringindex.html?s=Robinson&m=indexOf&a=son"
+ },
+ {
+  "id": "u1-str-idx3",
+  "section": "strings",
+  "skill": "indexOf",
+  "origin": "new",
+  "format": "call",
+  "prompt": "What does this call return? (Or does it throw an exception?)",
+  "code": "\"Robinson\".indexOf(\"Son\")",
+  "answer": {
+   "label": "int:-1"
+  },
+  "explain": "Java tries every start position from 0 to 5 (the last place \"Son\" could fit) and none matches completely, so indexOf returns −1. Case matters: \"Son\" is not the same as \"son\".",
+  "java": [
+   {
+    "k": "call",
+    "s": "Robinson",
+    "m": "indexOf",
+    "args": [
+     "Son"
+    ],
+    "label": "int:-1"
+   }
+  ],
+  "link": "stringindex.html?s=Robinson&m=indexOf&a=Son"
+ },
+ {
+  "id": "u1-str-idx4",
+  "section": "strings",
+  "skill": "indexOf",
+  "origin": "new",
+  "format": "call",
+  "prompt": "What does this call return? (Or does it throw an exception?)",
+  "code": "\"banana\".indexOf(\"na\")",
+  "answer": {
+   "label": "int:2"
+  },
+  "explain": "Java tries each start position from 0. At position 2 all 2 characters match, so indexOf returns 2: where the match starts. Positions 0 to 1 failed.",
+  "java": [
+   {
+    "k": "call",
+    "s": "banana",
+    "m": "indexOf",
+    "args": [
+     "na"
+    ],
+    "label": "int:2"
+   }
+  ],
+  "link": "stringindex.html?s=banana&m=indexOf&a=na"
+ },
+ {
+  "id": "u1-str-cmp1",
+  "section": "strings",
+  "skill": "compareTo",
+  "origin": "sibling",
+  "format": "int",
+  "prompt": "What int does this return?",
+  "code": "\"Tran\".compareTo(\"Park\")",
+  "answer": {
+   "value": 4
+  },
+  "explain": "At index 0, 'T' (84) and 'P' (80) differ, so Java stops there and returns 84 − 80 = 4.",
+  "java": [
+   {
+    "k": "cmp",
+    "a": "Tran",
+    "b": "Park",
+    "value": 4
+   }
+  ],
+  "link": "compareto.html?a=Tran&b=Park"
+ },
+ {
+  "id": "u1-str-cmp2",
+  "section": "strings",
+  "skill": "compareTo",
+  "origin": "sibling",
+  "format": "int",
+  "prompt": "What int does this return?",
+  "code": "\"Park\".compareTo(\"Parker\")",
+  "answer": {
+   "value": -2
+  },
+  "explain": "All 4 characters of \"Park\" match the start of \"Parker\", so there is no mismatch. Length decides: 4 − 6 = −2.",
+  "java": [
+   {
+    "k": "cmp",
+    "a": "Park",
+    "b": "Parker",
+    "value": -2
+   }
+  ],
+  "link": "compareto.html?a=Park&b=Parker"
+ },
+ {
+  "id": "u1-str-cmp3",
+  "section": "strings",
+  "skill": "compareTo",
+  "origin": "new",
+  "format": "int",
+  "prompt": "What int does this return?",
+  "code": "\"apple\".compareTo(\"Apple\")",
+  "answer": {
+   "value": 32
+  },
+  "explain": "At index 0, 'a' (97) and 'A' (65) differ, so Java stops there and returns 97 − 65 = 32. This is Unicode order, not dictionary order: every uppercase letter (65–90) comes before every lowercase letter (97–122).",
+  "java": [
+   {
+    "k": "cmp",
+    "a": "apple",
+    "b": "Apple",
+    "value": 32
+   }
+  ],
+  "link": "compareto.html?a=apple&b=Apple"
+ },
+ {
+  "id": "u1-str-cmp4",
+  "section": "strings",
+  "skill": "compareTo",
+  "origin": "sibling",
+  "format": "int",
+  "prompt": "What int does this return?",
+  "code": "\"Lee\".compareTo(\"Lee\")",
+  "answer": {
+   "value": 0
+  },
+  "explain": "Every character matches and both lengths are 3, so the strings are equal and the result is 0.",
+  "java": [
+   {
+    "k": "cmp",
+    "a": "Lee",
+    "b": "Lee",
+    "value": 0
+   }
+  ],
+  "link": "compareto.html?a=Lee&b=Lee"
+ },
+ {
+  "id": "u1-str-explain",
+  "section": "strings",
+  "skill": "substring",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "A student says this returns \"ane\". What went wrong?",
+  "code": "\"planet\".substring(2, 4)",
+  "answer": {
+   "choices": [
+    {
+     "text": "They included index 4. substring stops before its end index, so the result is \"an\".",
+     "code": false,
+     "correct": true,
+     "why": "Boxes 2 and 3 only: \"an\". The end index is where the cut is made, not the last box included."
+    },
+    {
+     "text": "They started counting at 1 instead of 0.",
+     "code": false,
+     "correct": false,
+     "why": "Counting from 1 would give \"la\", not \"ane\"."
+    },
+    {
+     "text": "substring includes both end points.",
+     "code": false,
+     "correct": false,
+     "why": "That is exactly the mistake: substring excludes the end index."
+    },
+    {
+     "text": "Nothing: it returns \"ane\".",
+     "code": false,
+     "correct": false,
+     "why": "It returns \"an\"."
+    }
+   ]
+  },
+  "explain": "Boxes 2 and 3 only: \"an\". The end index is where the cut is made, not the last box included.",
+  "java": [
+   {
+    "k": "call",
+    "s": "planet",
+    "m": "substring2",
+    "args": [
+     2,
+     4
+    ],
+    "label": "String:an"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-str-repair",
+  "section": "strings",
+  "skill": "indexOf",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "For any \"First Last\" name, this should store the first name with no space, but it keeps the space. Which replacement fixes it?",
+  "code": "String first = full.substring(0, full.indexOf(\" \") + 1);",
+  "answer": {
+   "choices": [
+    {
+     "text": "full.substring(0, full.indexOf(\" \"))",
+     "code": true,
+     "correct": true,
+     "why": "The space is at index 3, and substring stops before its end index, so you get indexes 0 to 2."
+    },
+    {
+     "text": "full.substring(1, full.indexOf(\" \"))",
+     "code": true,
+     "correct": false,
+     "why": "Starting at 1 drops the first letter."
+    },
+    {
+     "text": "full.substring(0, full.indexOf(\" \") - 1)",
+     "code": true,
+     "correct": false,
+     "why": "Subtracting 1 cuts one letter too early."
+    },
+    {
+     "text": "full.substring(full.indexOf(\" \"))",
+     "code": true,
+     "correct": false,
+     "why": "This starts at the space and keeps everything after it."
+    }
+   ]
+  },
+  "explain": "The space is at index 3, and substring stops before its end index, so you get indexes 0 to 2.",
+  "java": [
+   {
+    "k": "output",
+    "code": "String full = \"Ada Lovelace\";\nSystem.out.print(full.substring(0, full.indexOf(\" \")));",
+    "out": "Ada"
+   },
+   {
+    "k": "output",
+    "code": "String full = \"Ada Lovelace\";\nSystem.out.print(full.substring(1, full.indexOf(\" \")));",
+    "out": "da"
+   },
+   {
+    "k": "output",
+    "code": "String full = \"Ada Lovelace\";\nSystem.out.print(full.substring(0, full.indexOf(\" \") - 1));",
+    "out": "Ad"
+   },
+   {
+    "k": "output",
+    "code": "String full = \"Ada Lovelace\";\nSystem.out.print(full.substring(full.indexOf(\" \")));",
+    "out": " Lovelace"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-str-flip",
+  "section": "strings",
+  "skill": "indexOf",
+  "origin": "sibling",
+  "format": "output",
+  "prompt": "What exactly does this print? (Spaces and line breaks count.)",
+  "code": "String s = \"Lin Wei\";\nint sp = s.indexOf(\" \");\nSystem.out.println(s.substring(sp + 1) + \", \" + s.substring(0, sp));",
+  "answer": {
+   "text": "Wei, Lin\n"
+  },
+  "explain": "sp is 3. substring(4) is \"Wei\" and substring(0, 3) is \"Lin\", joined with \", \".",
+  "java": [
+   {
+    "k": "output",
+    "code": "String s = \"Lin Wei\";\nint sp = s.indexOf(\" \");\nSystem.out.println(s.substring(sp + 1) + \", \" + s.substring(0, sp));",
+    "out": "Wei, Lin\n"
+   }
+  ]
+ },
+ {
+  "id": "u1-str-type1",
+  "section": "strings",
+  "skill": "signatures",
+  "origin": "sibling",
+  "format": "mc",
+  "prompt": "What type does \"hello\".indexOf(\"l\") return?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "int",
+     "code": true,
+     "correct": true,
+     "why": "indexOf returns a position (or −1), which is an int."
+    },
+    {
+     "text": "String",
+     "code": true,
+     "correct": false,
+     "why": "It returns where the text is, not the text."
+    },
+    {
+     "text": "boolean",
+     "code": true,
+     "correct": false,
+     "why": "It does not just say whether the text is there; it says where."
+    },
+    {
+     "text": "char",
+     "code": true,
+     "correct": false,
+     "why": "It returns an index, not a character."
+    }
+   ]
+  },
+  "explain": "indexOf returns a position (or −1), which is an int.",
+  "java": [
+   {
+    "k": "compiles",
+    "code": "int i = \"hello\".indexOf(\"l\");",
+    "ok": true
+   },
+   {
+    "k": "compiles",
+    "code": "String t = \"hello\".indexOf(\"l\");",
+    "ok": false
+   },
+   {
+    "k": "compiles",
+    "code": "boolean b = \"hello\".indexOf(\"l\");",
+    "ok": false
+   },
+   {
+    "k": "compiles",
+    "code": "char c = \"hello\".indexOf(\"l\");",
+    "ok": false
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-str-type2",
+  "section": "strings",
+  "skill": "signatures",
+  "origin": "sibling",
+  "format": "mc",
+  "prompt": "What type does a.equals(b) return, for Strings a and b?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "boolean",
+     "code": true,
+     "correct": true,
+     "why": "equals answers a yes/no question: true or false."
+    },
+    {
+     "text": "int",
+     "code": true,
+     "correct": false,
+     "why": "compareTo returns an int; equals returns a boolean."
+    },
+    {
+     "text": "String",
+     "code": true,
+     "correct": false,
+     "why": "It does not return text."
+    },
+    {
+     "text": "void",
+     "code": false,
+     "correct": false,
+     "why": "equals returns a value you can use in a condition, so it is not void."
+    }
+   ]
+  },
+  "explain": "equals answers a yes/no question: true or false.",
+  "java": [
+   {
+    "k": "compiles",
+    "code": "boolean e = \"a\".equals(\"b\");",
+    "ok": true
+   },
+   {
+    "k": "compiles",
+    "code": "int e = \"a\".equals(\"b\");",
+    "ok": false
+   },
+   {
+    "k": "compiles",
+    "code": "String e = \"a\".equals(\"b\");",
+    "ok": false
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-str-cmp-tf1",
+  "section": "strings",
+  "skill": "compareTo",
+  "origin": "new",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "If one String matches the start of the other, compareTo returns the difference in their lengths.",
+  "answer": {
+   "value": true
+  },
+  "explain": "\"Park\".compareTo(\"Parker\") has no mismatch in the first 4 letters, so it returns 4 − 6 = −2.",
+  "java": [
+   {
+    "k": "cmp",
+    "a": "Park",
+    "b": "Parker",
+    "value": -2
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-str-cmp-tf2",
+  "section": "strings",
+  "skill": "compareTo",
+  "origin": "new",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "compareTo compares the lengths of the two Strings first.",
+  "answer": {
+   "value": false
+  },
+  "explain": "It compares characters first and only uses length when one String runs out. \"zoo\".compareTo(\"apple\") is 25, positive even though \"zoo\" is shorter.",
+  "java": [
+   {
+    "k": "cmp",
+    "a": "zoo",
+    "b": "apple",
+    "value": 25
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-met-max",
+  "section": "methods",
+  "skill": "random",
+  "origin": "sibling",
+  "format": "int",
+  "prompt": "What is the largest value this can produce?",
+  "code": "(int) (Math.random() * 8) + 3",
+  "answer": {
+   "value": 10
+  },
+  "explain": "Math.random() is at least 0.0 and less than 1.0, so Math.random() * 8 is less than 8, and the cast gives 0 to 7. Adding 3 gives 3 to 10.",
+  "java": [
+   {
+    "k": "range",
+    "expr": "(int) (r * 8) + 3",
+    "min": 3,
+    "max": 10
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-met-min",
+  "section": "methods",
+  "skill": "random",
+  "origin": "new",
+  "format": "int",
+  "prompt": "What is the smallest value this can produce?",
+  "code": "(int) (Math.random() * 6) + 10",
+  "answer": {
+   "value": 10
+  },
+  "explain": "When Math.random() is 0.0 the product is 0, so the smallest result is 0 + 10 = 10 (the largest is 15).",
+  "java": [
+   {
+    "k": "range",
+    "expr": "(int) (r * 6) + 10",
+    "min": 10,
+    "max": 15
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-met-formula",
+  "section": "methods",
+  "skill": "random",
+  "origin": "sibling",
+  "format": "mc",
+  "prompt": "Which expression gives a random int from 20 to 30, inclusive?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "(int) (Math.random() * 11) + 20",
+     "code": true,
+     "correct": true,
+     "why": "20 to 30 is 30 − 20 + 1 = 11 values: multiply by 11, cast, then add 20."
+    },
+    {
+     "text": "(int) (Math.random() * 10) + 20",
+     "code": true,
+     "correct": false,
+     "why": "Only 10 values: 20 to 29. It can never give 30."
+    },
+    {
+     "text": "(int) Math.random() * 11 + 20",
+     "code": true,
+     "correct": false,
+     "why": "The cast applies to Math.random() alone, which always becomes 0, so this is always 20."
+    },
+    {
+     "text": "(int) (Math.random() * 30) + 20",
+     "code": true,
+     "correct": false,
+     "why": "Multiplying by 30 gives 30 values, 20 to 49."
+    }
+   ]
+  },
+  "explain": "20 to 30 is 30 − 20 + 1 = 11 values: multiply by 11, cast, then add 20.",
+  "java": [
+   {
+    "k": "range",
+    "expr": "(int) (r * 11) + 20",
+    "min": 20,
+    "max": 30
+   },
+   {
+    "k": "range",
+    "expr": "(int) (r * 10) + 20",
+    "min": 20,
+    "max": 29
+   },
+   {
+    "k": "range",
+    "expr": "(int) r * 11 + 20",
+    "min": 20,
+    "max": 20
+   },
+   {
+    "k": "range",
+    "expr": "(int) (r * 30) + 20",
+    "min": 20,
+    "max": 49
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-met-die",
+  "section": "methods",
+  "skill": "random",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "A student wrote this for a die roll. What does it actually produce?",
+  "code": "(int) Math.random() * 6 + 1",
+  "answer": {
+   "choices": [
+    {
+     "text": "Always 1",
+     "code": false,
+     "correct": true,
+     "why": "The cast applies to Math.random() alone and turns it into 0 before multiplying, so it is 0 * 6 + 1 every time."
+    },
+    {
+     "text": "1 to 6, as intended",
+     "code": false,
+     "correct": false,
+     "why": "That needs the cast around the product: (int) (Math.random() * 6) + 1."
+    },
+    {
+     "text": "0 to 5",
+     "code": false,
+     "correct": false,
+     "why": "That would be (int) (Math.random() * 6), with no + 1."
+    },
+    {
+     "text": "1 to 7",
+     "code": false,
+     "correct": false,
+     "why": "No version of this formula reaches 7."
+    }
+   ]
+  },
+  "explain": "The cast applies to Math.random() alone and turns it into 0 before multiplying, so it is 0 * 6 + 1 every time.",
+  "java": [
+   {
+    "k": "range",
+    "expr": "(int) r * 6 + 1",
+    "min": 1,
+    "max": 1
+   },
+   {
+    "k": "range",
+    "expr": "(int) (r * 6) + 1",
+    "min": 1,
+    "max": 6
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-met-sig1",
+  "section": "methods",
+  "skill": "signatures",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "Given the method header below, which statement compiles?",
+  "code": "public static double area(double width, int sides)",
+  "answer": {
+   "choices": [
+    {
+     "text": "double a = area(2.5, 4);",
+     "code": true,
+     "correct": true,
+     "why": "A double and an int, in that order, and the double result is stored in a double."
+    },
+    {
+     "text": "double a = area(4, 2.5);",
+     "code": true,
+     "correct": false,
+     "why": "The first argument is fine (an int can widen to double), but 2.5 cannot be passed to the int parameter sides."
+    },
+    {
+     "text": "int a = area(2.5, 4);",
+     "code": true,
+     "correct": false,
+     "why": "area returns a double, which cannot be stored in an int without a cast."
+    },
+    {
+     "text": "double a = area(2.5);",
+     "code": true,
+     "correct": false,
+     "why": "The method needs two arguments."
+    }
+   ]
+  },
+  "explain": "A double and an int, in that order, and the double result is stored in a double.",
+  "java": [
+   {
+    "k": "compiles",
+    "code": "double a = area(2.5, 4);",
+    "ok": true
+   },
+   {
+    "k": "compiles",
+    "code": "double a = area(4, 2.5);",
+    "ok": false
+   },
+   {
+    "k": "compiles",
+    "code": "int a = area(2.5, 4);",
+    "ok": false
+   },
+   {
+    "k": "compiles",
+    "code": "double a = area(2.5);",
+    "ok": false
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-met-sig2",
+  "section": "methods",
+  "skill": "signatures",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "Given public static int roll(int sides), what is the type of roll(6) + 0.5?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "double",
+     "code": false,
+     "correct": true,
+     "why": "roll(6) is an int; adding the double 0.5 promotes the result to double."
+    },
+    {
+     "text": "int",
+     "code": false,
+     "correct": false,
+     "why": "int + double is a double."
+    },
+    {
+     "text": "String",
+     "code": false,
+     "correct": false,
+     "why": "No String is involved."
+    },
+    {
+     "text": "It does not compile.",
+     "code": false,
+     "correct": false,
+     "why": "It compiles: an int return value can be used in arithmetic."
+    }
+   ]
+  },
+  "explain": "roll(6) is an int; adding the double 0.5 promotes the result to double.",
+  "java": [
+   {
+    "k": "compiles",
+    "code": "double v = roll(6) + 0.5;",
+    "ok": true
+   },
+   {
+    "k": "compiles",
+    "code": "int v = roll(6) + 0.5;",
+    "ok": false
+   },
+   {
+    "k": "compiles",
+    "code": "double v = roll(6) + 0.5;",
+    "ok": true
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-met-math",
+  "section": "methods",
+  "skill": "signatures",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "Which call returns an int when given an int?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "Math.abs(-4)",
+     "code": true,
+     "correct": true,
+     "why": "Math.abs returns the same type it is given."
+    },
+    {
+     "text": "Math.sqrt(16)",
+     "code": true,
+     "correct": false,
+     "why": "Math.sqrt always returns a double (4.0)."
+    },
+    {
+     "text": "Math.pow(2, 3)",
+     "code": true,
+     "correct": false,
+     "why": "Math.pow always returns a double (8.0)."
+    },
+    {
+     "text": "Math.random()",
+     "code": true,
+     "correct": false,
+     "why": "Math.random takes no argument and returns a double."
+    }
+   ]
+  },
+  "explain": "Math.abs returns the same type it is given.",
+  "java": [
+   {
+    "k": "compiles",
+    "code": "int a = Math.abs(-4);",
+    "ok": true
+   },
+   {
+    "k": "compiles",
+    "code": "int a = Math.sqrt(16);",
+    "ok": false
+   },
+   {
+    "k": "compiles",
+    "code": "int a = Math.pow(2, 3);",
+    "ok": false
+   },
+   {
+    "k": "compiles",
+    "code": "int a = Math.random();",
+    "ok": false
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-met-random-tf",
+  "section": "methods",
+  "skill": "random",
+  "origin": "new",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "Math.random() can return 1.0.",
+  "answer": {
+   "value": false
+  },
+  "explain": "Math.random() returns a value from 0.0 up to, but not including, 1.0. That is why (int) (Math.random() * n) never reaches n.",
+  "java": [],
+  "conceptual": true
+ },
+ {
+  "id": "u1-met-pow",
+  "section": "methods",
+  "skill": "signatures",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "Math.pow(3, 2)",
+  "answer": {
+   "label": "double:9.0"
+  },
+  "explain": "Math.pow(3, 2) gives 9.0. Math.pow always returns a double, even when the answer is a whole number.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "Math.pow(3, 2)",
+    "label": "double:9.0"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=Math.pow(3%2C%202)"
+ },
+ {
+  "id": "u1-met-abs",
+  "section": "methods",
+  "skill": "signatures",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "Math.abs(-7) / 2",
+  "answer": {
+   "label": "int:3"
+  },
+  "explain": "Math.abs(−7) gives 7; 7 ÷ 2 gives 3. Math.abs returns the same type it is given (int). int ÷ int gives an int. The exact answer 3.5 is truncated toward zero. It is not rounded.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "Math.abs(-7) / 2",
+    "label": "int:3"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=Math.abs(-7)%20%2F%202"
+ },
+ {
+  "id": "u1-met-sqrt",
+  "section": "methods",
+  "skill": "signatures",
+  "origin": "new",
+  "format": "value",
+  "prompt": "What is the result? (Or does it not compile, or crash?)",
+  "code": "Math.sqrt(25) + 1",
+  "answer": {
+   "label": "double:6.0"
+  },
+  "explain": "Math.sqrt(25) gives 5.0; 5.0 + 1 gives 6.0. Math.sqrt always returns a double. The int 1 is promoted to 1.0 first. double arithmetic.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "Math.sqrt(25) + 1",
+    "label": "double:6.0"
+   }
+  ],
+  "link": "exprtracer.html?d=&s=Math.sqrt(25)%20%2B%201"
+ },
+ {
+  "id": "u1-obj-alias",
+  "section": "objects",
+  "skill": "references",
+  "origin": "new",
+  "format": "output",
+  "prompt": "What exactly does this print? (Spaces and line breaks count.)",
+  "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = a;\nb.addScore(5);\nSystem.out.println(a.getScore());",
+  "answer": {
+   "text": "15\n"
+  },
+  "explain": "b = a copies the reference, not the object. a and b refer to the same Player, so adding 5 through b is seen through a.",
+  "java": [
+   {
+    "k": "output",
+    "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = a;\nb.addScore(5);\nSystem.out.println(a.getScore());",
+    "out": "15\n"
+   }
+  ]
+ },
+ {
+  "id": "u1-obj-two",
+  "section": "objects",
+  "skill": "references",
+  "origin": "new",
+  "format": "output",
+  "prompt": "What exactly does this print? (Spaces and line breaks count.)",
+  "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = new Player(\"Ana\", 10);\nb.addScore(5);\nSystem.out.println(a.getScore() + \" \" + b.getScore());",
+  "answer": {
+   "text": "10 15\n"
+  },
+  "explain": "Two uses of new make two separate objects, even with the same values. Changing b does not affect a.",
+  "java": [
+   {
+    "k": "output",
+    "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = new Player(\"Ana\", 10);\nb.addScore(5);\nSystem.out.println(a.getScore() + \" \" + b.getScore());",
+    "out": "10 15\n"
+   }
+  ]
+ },
+ {
+  "id": "u1-obj-reassign",
+  "section": "objects",
+  "skill": "references",
+  "origin": "new",
+  "format": "output",
+  "prompt": "What exactly does this print? (Spaces and line breaks count.)",
+  "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = a;\na = new Player(\"Bo\", 3);\nb.addScore(1);\nSystem.out.println(a.getName() + \" \" + b.getScore());",
+  "answer": {
+   "text": "Bo 11\n"
+  },
+  "explain": "After b = a, both refer to Ana. Then a is pointed at a new Player (Bo), but b still refers to Ana, whose score goes from 10 to 11.",
+  "java": [
+   {
+    "k": "output",
+    "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = a;\na = new Player(\"Bo\", 3);\nb.addScore(1);\nSystem.out.println(a.getName() + \" \" + b.getScore());",
+    "out": "Bo 11\n"
+   }
+  ]
+ },
+ {
+  "id": "u1-obj-null",
+  "section": "objects",
+  "skill": "references",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "What happens when this runs?",
+  "code": "Player p = null;\nSystem.out.println(p.getScore());",
+  "answer": {
+   "choices": [
+    {
+     "text": "It compiles, then throws a NullPointerException.",
+     "code": false,
+     "correct": true,
+     "why": "p does not refer to any object, so there is no score to get. The compiler cannot know that; the crash happens when the line runs."
+    },
+    {
+     "text": "It prints 0.",
+     "code": false,
+     "correct": false,
+     "why": "There is no Player object at all, so there is no score, not even 0."
+    },
+    {
+     "text": "It does not compile.",
+     "code": false,
+     "correct": false,
+     "why": "It compiles: p has type Player, which has getScore()."
+    },
+    {
+     "text": "It prints null.",
+     "code": false,
+     "correct": false,
+     "why": "Calling a method on null does not return null; it throws an exception."
+    }
+   ]
+  },
+  "explain": "p does not refer to any object, so there is no score to get. The compiler cannot know that; the crash happens when the line runs.",
+  "java": [
+   {
+    "k": "throws",
+    "code": "Player p = null;\nSystem.out.println(p.getScore());",
+    "type": "NullPointerException"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-obj-equals",
+  "section": "objects",
+  "skill": "references",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "What does this print?",
+  "code": "String s = new String(\"hi\");\nString t = new String(\"hi\");\nSystem.out.println(s.equals(t) + \" \" + (s == t));",
+  "answer": {
+   "choices": [
+    {
+     "text": "true false",
+     "code": false,
+     "correct": true,
+     "why": "equals compares the characters (the same); == compares references, and new made two different objects."
+    },
+    {
+     "text": "true true",
+     "code": false,
+     "correct": false,
+     "why": "== is false here: two separate objects, even though they hold the same text."
+    },
+    {
+     "text": "false false",
+     "code": false,
+     "correct": false,
+     "why": "equals is true: the contents match."
+    },
+    {
+     "text": "false true",
+     "code": false,
+     "correct": false,
+     "why": "This is backwards: equals checks contents, == checks whether it is the same object."
+    }
+   ]
+  },
+  "explain": "equals compares the characters (the same); == compares references, and new made two different objects.",
+  "java": [
+   {
+    "k": "output",
+    "code": "String s = new String(\"hi\");\nString t = new String(\"hi\");\nSystem.out.println(s.equals(t) + \" \" + (s == t));",
+    "out": "true false\n"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-obj-copy-tf",
+  "section": "objects",
+  "skill": "references",
+  "origin": "new",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "Player b = a; makes a copy of the Player object.",
+  "answer": {
+   "value": false
+  },
+  "explain": "It copies the reference, so a and b refer to the same single object.",
+  "java": [
+   {
+    "k": "output",
+    "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = a;\nb.addScore(5);\nSystem.out.println(a.getScore());",
+    "out": "15\n"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-obj-immutable-tf",
+  "section": "objects",
+  "skill": "references",
+  "origin": "new",
+  "format": "tf",
+  "prompt": "True or false?",
+  "statement": "Calling w.substring(1) changes the String that w refers to.",
+  "answer": {
+   "value": false
+  },
+  "explain": "Strings never change. substring returns a new String; unless you store it (w = w.substring(1);), w is unchanged.",
+  "java": [
+   {
+    "k": "output",
+    "code": "String w = \"hello\";\nw.substring(1);\nSystem.out.println(w);",
+    "out": "hello\n"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-obj-store",
+  "section": "objects",
+  "skill": "references",
+  "origin": "new",
+  "format": "output",
+  "prompt": "What exactly does this print? (Spaces and line breaks count.)",
+  "code": "String w = \"hello\";\nw = w.substring(1);\nSystem.out.println(w);",
+  "answer": {
+   "text": "ello\n"
+  },
+  "explain": "This time the new String is stored back in w, so w now refers to \"ello\". The original \"hello\" object is unchanged.",
+  "java": [
+   {
+    "k": "output",
+    "code": "String w = \"hello\";\nw = w.substring(1);\nSystem.out.println(w);",
+    "out": "ello\n"
+   }
+  ]
+ }
+]

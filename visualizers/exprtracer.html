@@ -260,7 +260,7 @@ textarea.declin { font: 15px var(--mono); min-height: 2.6em; }
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
+<header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="../study/index.html">Study</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
 <main id="main" class="wrap" tabindex="-1">
   <header class="page-heading">
     <p class="kicker"><a href="index.html">Visualizers</a> · Unit 1 · Expressions</p>
@@ -1112,6 +1112,9 @@ PRESETS.forEach(p => {
 ed.value = PRESETS[0].d; es.value = PRESETS[0].s;
 ed.addEventListener('input', exploreUpdate); es.addEventListener('input', exploreUpdate);
 exploreUpdate();
+// Study-guide links open a specific case in Explore: ?d=<variables>&s=<expression or statement>
+const params = new URLSearchParams(location.search);
+if (params.has('s')) { ed.value = params.get('d') || ''; es.value = params.get('s'); exploreUpdate(); selectTab('explore'); }
 </script>
 </body>
 </html>

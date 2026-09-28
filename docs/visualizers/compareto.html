@@ -220,7 +220,7 @@ details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
+<header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="../study/index.html">Study</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
 <main id="main" class="wrap" tabindex="-1">
   <header class="page-heading">
     <p class="kicker"><a href="index.html">Visualizers</a> · Unit 1 · Strings</p>
@@ -829,6 +829,9 @@ ea.value = 'apple'; eb.value = 'chocolate';
 ea.addEventListener('input', exploreUpdate);
 eb.addEventListener('input', exploreUpdate);
 exploreUpdate();
+// Study-guide links open a specific comparison in Explore: ?a=<this>&b=<other>
+const params = new URLSearchParams(location.search);
+if (params.has('a') && params.has('b')) { ea.value = params.get('a'); eb.value = params.get('b'); exploreUpdate(); selectTab('explore'); }
 </script>
 </body>
 </html>

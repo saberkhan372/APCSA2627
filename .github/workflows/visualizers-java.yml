@@ -1,9 +1,9 @@
 name: Check visualizers against real Java
 on:
   push:
-    paths: ['visualizers/**', '.github/workflows/visualizers-java.yml']
+    paths: ['visualizers/**', 'study/**', 'content/study/**', '.github/workflows/visualizers-java.yml']
   pull_request:
-    paths: ['visualizers/**']
+    paths: ['visualizers/**', 'study/**', 'content/study/**']
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,19 +16,42 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Page engines match their case tables
-        run: for t in visualizers/tests/run-*-tests.mjs; do node "$t"; done
-      - name: Generated Java checks are up to date
+      - name: Page engines and study banks pass their Node checks
+        run: for t in visualizers/tests/run-*-tests.mjs study/tests/run-*-tests.mjs; do node "$t"; done
+      - name: Study banks and generated Java checks are up to date
         run: |
-          for g in visualizers/tests/make-*-java.mjs; do node "$g"; done
-          git diff --exit-code visualizers/tests/
-      - name: Real Java matches every case table
-        working-directory: visualizers/tests
+          for b in study/*-bank.mjs; do node "$b"; done
+          for g in visualizers/tests/make-*-java.mjs study/tests/make-*-java.mjs; do node "$g"; done
+          git diff --exit-code visualizers/tests/ study/tests/ content/study/
+      - name: Real Java matches every case table and study item
         run: |
           status=0
-          for j in *Check.java; do
-            java "$j" | tee "$j.txt"
-            echo "::notice title=${j%.java} vs real Java::$(tail -n 1 "$j.txt")"
+          for j in visualizers/tests/*Check.java study/tests/*Check.java; do
+            (cd "$(dirname "$j")" && java "$(basename "$j")") | tee "$j.txt"
+            name=$(basename "$j" .java)
+            echo "::notice title=$name vs real Java::$(tail -n 1 "$j.txt")"
             tail -n 1 "$j.txt" | grep -q '^PASS' || status=1
+          done
+          exit $status
+      - name: Code tasks - the solution passes and the unfinished starter does not
+        run: |
+          status=0
+          for task in study/code/*/; do
+            name=$(basename "$task")
+            check=$(basename "$(ls "$task"*Check.java)" .java)
+            sol=$(mktemp -d); cp "$task"solution/*.java "$task$check.java" "$sol"/
+            if (cd "$sol" && javac *.java && java "$check" > out.txt); then
+              echo "::notice title=$name::the reference solution passes $(grep -c '^PASS' "$sol/out.txt") checks"
+            else
+              cat "$sol/out.txt"; echo "::error title=$name::the reference solution fails its checker"; status=1
+            fi
+            start=$(mktemp -d); cp "$task"*.java "$start"/
+            if (cd "$start" && javac *.java && java "$check" > out.txt); then
+              echo "::error title=$name::the unfinished starter passes the checker, so the checks are too weak"; status=1
+            elif grep -q '^REVISE' "$start/out.txt"; then
+              echo "::notice title=$name::the unfinished starter gets REVISE, as expected"
+            else
+              echo "::error title=$name::the starter does not compile or run"; status=1
+            fi
           done
           exit $status

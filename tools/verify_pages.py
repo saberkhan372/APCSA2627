@@ -102,7 +102,10 @@ for m in materials:
 
 for p in DOCS.rglob('*'):
     if not p.is_file():continue
-    check(p.suffix not in ('.pdf','.docx','.class','.env'),f'Unexpected public file: {p.name}')
+    check(p.suffix.lower() not in ('.pdf','.doc','.docx','.rtf','.odt','.pages','.class','.env'),f'Unexpected public file: {p.name}')
+    # Assessment originals and answer keys stay private (see .gitignore).
+    rel=p.relative_to(DOCS).parts
+    check(not any(part.lower() in ('quizzes','tests','keys','assessments') for part in rel[:-1]),f'Private assessment folder in public site: {p.relative_to(DOCS)}')
     if p.suffix in ('.html','.js','.css','.json'):
         text=p.read_text()
         check('/Users/' not in text and '/private/tmp/' not in text,f'Local path in public page: {p.name}')
@@ -118,3 +121,6 @@ print('Java compilation and live GitHub Pages deployment are separate checks; no
 if (ROOT/'content/teaching.json').exists():
     import runpy
     runpy.run_path(str(ROOT/'tools/verify_teaching.py'), run_name='__main__')
+if (ROOT/'content/study').exists():
+    import runpy
+    runpy.run_path(str(ROOT/'tools/verify_study.py'), run_name='__main__')

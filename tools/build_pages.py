@@ -167,3 +167,6 @@ print(f'Built {len(list(DOCS.rglob("*.html")))} static pages, {project_count} pr
 if (ROOT/'content/teaching.json').exists():
     import runpy
     runpy.run_path(str(ROOT/'tools/build_teaching.py'),run_name='__main__')
+if (ROOT/'content/study').exists():
+    import runpy
+    runpy.run_path(str(ROOT/'tools/build_study.py'),run_name='__main__')
