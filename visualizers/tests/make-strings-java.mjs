@@ -1,6 +1,7 @@
 // Generates StringIndexCheck.java: a self-contained program that checks every case in
 // strings-cases.json against real Java, including a line-by-line run of the
-// WorkingWithStrings lab statements. Run `java StringIndexCheck.java` or paste it into any Java runner.
+// WorkingWithStrings lab statements. Run `java StringIndexCheck.java` in this folder. Online runners
+// that require a class named Main need the class renamed.
 import { readFileSync, writeFileSync } from 'node:fs';
 const here = new URL('.', import.meta.url);
 const { calls, lab } = JSON.parse(readFileSync(new URL('strings-cases.json', here), 'utf8'));

@@ -1,6 +1,6 @@
 // Generates CompareToCheck.java: a self-contained program (no file reading) that
-// checks every case in compareto-cases.json against real Java. Paste it into any
-// Java runner, or run `java CompareToCheck.java` in this folder.
+// checks every case in compareto-cases.json against real Java. Run `java CompareToCheck.java`
+// in this folder. Online runners that require a class named Main need the class renamed.
 import { readFileSync, writeFileSync } from 'node:fs';
 const here = new URL('.', import.meta.url);
 const cases = JSON.parse(readFileSync(new URL('compareto-cases.json', here), 'utf8'));

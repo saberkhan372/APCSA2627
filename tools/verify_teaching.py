@@ -64,6 +64,9 @@ for v in visualizers:
     assert page.exists() and page.read_bytes() == (ROOT / 'visualizers' / v['file']).read_bytes(), f'Visualizer copy: {v["file"]}'
     for d in v['dates']:
         assert f'../visualizers/{v["file"]}' in (DOCS / 'notes' / f'{d}.html').read_text(), f'Visualizer link: {d}'
+    # Every tool must ship an engine test and a Java-check generator; the workflow runs them by name pattern.
+    for name in (f'run-{v["tests"]}-tests.mjs', f'make-{v["tests"]}-java.mjs'):
+        assert (ROOT / 'visualizers/tests' / name).exists(), f'Missing visualizer test: {name}'
 
 for name in ('teaching.css', 'slides.css', 'slides.js'):
     assert (ROOT / 'web' / name).read_bytes() == (DOCS / 'assets' / name).read_bytes()

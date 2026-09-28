@@ -71,9 +71,11 @@ The repository contains no teacher solution directories, answer-key PDFs, studen
 
 ## Visualizers
 
-`visualizers/` holds standalone interactive pages (no libraries, no build step) that `tools/build_pages.py` copies to `docs/visualizers/`. `content/visualizers.json` lists which dated notes pages link to each tool; `tools/verify_teaching.py` checks those links and copies.
+`visualizers/` holds standalone interactive pages (no libraries, no build step) that `tools/build_pages.py` copies to `docs/visualizers/`. `content/visualizers.json` lists which dated notes pages link to each tool and names its test suite; `tools/verify_teaching.py` checks the links, the copies, and that each named suite exists.
 
-Each tool keeps its expected results in `visualizers/tests/`. For each tool, `node visualizers/tests/run-<tool>-tests.mjs` checks the page's JavaScript against its case table, and `node visualizers/tests/make-<tool>-java.mjs` regenerates a self-contained `*Check.java` program that checks the same table against real Java. The **Check visualizers against real Java** workflow runs both on GitHub whenever `visualizers/` changes, so no local JDK is needed; the file can also be pasted into any online Java runner.
+Each tool keeps its expected results in `visualizers/tests/`. For each tool, `node visualizers/tests/run-<tests>-tests.mjs` checks the page's JavaScript against its case table, and `node visualizers/tests/make-<tests>-java.mjs` regenerates a self-contained `*Check.java` program that checks the same table against real Java. The **Check visualizers against real Java** workflow runs every file matching those patterns on GitHub whenever `visualizers/` changes, so no local JDK is needed. A new tool is covered only if its files follow the naming pattern, which the `tests` field and `verify_teaching.py` enforce.
+
+The generated checks also run locally with `java <Name>Check.java` from `visualizers/tests/`. Online runners vary: some require the public class to be named `Main` (rename it there), and `ExprCheck.java` needs a full JDK because it calls the Java compiler to confirm compile errors.
 
 ## Verification limits
 

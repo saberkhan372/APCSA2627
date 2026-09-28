@@ -358,9 +358,10 @@ table.vars td.unset { color: var(--faint); font-family: var(--sans); font-size: 
   <!-- EXPLORE -->
   <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
     <div class="panel">
-      <label class="field">The String <span class="hint">(up to 20 characters)</span>
+      <label class="field">The String <span class="hint">(up to 20 characters; a few symbols, such as emoji, count as two)</span>
         <input type="text" class="strin" id="e-s" maxlength="20" autocomplete="off" spellcheck="false">
       </label>
+      <p class="small hidden" id="e-warn">This tool is built for basic Latin text (letters, digits, punctuation, spaces). Other symbols still follow Java's rule, one UTF-16 code unit per index, so one visible symbol may take up two boxes.</p>
       <div class="small" id="e-mlabel">Method</div>
       <div class="seg" role="radiogroup" aria-labelledby="e-mlabel" id="e-methods"></div>
       <div class="argrow" id="e-args"></div>
@@ -1129,7 +1130,11 @@ function syncArgInputs() {
   $('e-args').querySelectorAll('input[type="number"]').forEach(inp => { inp.value = ex.args[ex.m][+inp.dataset.ai]; });
 }
 $('e-s').value = ex.s;
-$('e-s').addEventListener('input', () => { ex.s = $('e-s').value; exploreRender(); });
+$('e-s').addEventListener('input', () => {
+  ex.s = $('e-s').value;
+  $('e-warn').classList.toggle('hidden', !/[^\x20-\x7E]/.test(ex.s));
+  exploreRender();
+});
 buildMethods(); buildArgs(); exploreRender();
 
 /* ---------- Lab tracer ---------- */
