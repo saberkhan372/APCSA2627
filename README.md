@@ -73,7 +73,7 @@ The repository contains no teacher solution directories, answer-key PDFs, studen
 
 `visualizers/` holds standalone interactive pages (no libraries, no build step) that `tools/build_pages.py` copies to `docs/visualizers/`. `content/visualizers.json` lists which dated notes pages link to each tool; `tools/verify_teaching.py` checks those links and copies.
 
-Each tool keeps its expected results in `visualizers/tests/`. `node visualizers/tests/run-engine-tests.mjs` checks the page's JavaScript against the case table. `node visualizers/tests/make-java-check.mjs` regenerates `CompareToCheck.java`, a self-contained program that checks the same table against real Java. The **Check visualizers against real Java** workflow runs both on GitHub whenever `visualizers/` changes, so no local JDK is needed; the file can also be pasted into any online Java runner.
+Each tool keeps its expected results in `visualizers/tests/`. For each tool, `node visualizers/tests/run-<tool>-tests.mjs` checks the page's JavaScript against its case table, and `node visualizers/tests/make-<tool>-java.mjs` regenerates a self-contained `*Check.java` program that checks the same table against real Java. The **Check visualizers against real Java** workflow runs both on GitHub whenever `visualizers/` changes, so no local JDK is needed; the file can also be pasted into any online Java runner.
 
 ## Verification limits
 

@@ -16,15 +16,19 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Page engine matches the case table
-        run: node visualizers/tests/run-engine-tests.mjs
-      - name: Generated Java check is up to date
+      - name: Page engines match their case tables
+        run: for t in visualizers/tests/run-*-tests.mjs; do node "$t"; done
+      - name: Generated Java checks are up to date
         run: |
-          node visualizers/tests/make-java-check.mjs
-          git diff --exit-code visualizers/tests/CompareToCheck.java
-      - name: Real Java matches the case table
+          for g in visualizers/tests/make-*-java.mjs; do node "$g"; done
+          git diff --exit-code visualizers/tests/
+      - name: Real Java matches every case table
         working-directory: visualizers/tests
         run: |
-          java CompareToCheck.java | tee result.txt
-          echo "::notice title=compareTo vs real Java::$(tail -n 1 result.txt)"
-          tail -n 1 result.txt | grep -q '^PASS'
+          status=0
+          for j in *Check.java; do
+            java "$j" | tee "$j.txt"
+            echo "::notice title=${j%.java} vs real Java::$(tail -n 1 "$j.txt")"
+            tail -n 1 "$j.txt" | grep -q '^PASS' || status=1
+          done
+          exit $status

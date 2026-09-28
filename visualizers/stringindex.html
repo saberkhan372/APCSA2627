@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>String Index Explorer</title>
+<style>
+/* Palette and chrome match the course site (web/site.css). */
+:root {
+  --bg: #FAFBFA; --panel: #FFFFFF; --ink: #16211F; --muted: #46524F; --faint: #6F7C79;
+  --line: #D8E0DD; --soft: #EAF0EE;
+  --accent: #0B5570; --accent-ink: #FFFFFF; --accent-soft: #E2EDF3;
+  --same-bg: #E4F1EC; --same-line: #1F7A63; --same-ink: #145443;
+  --diff-bg: #F8E5E1; --diff-line: #A63D2F; --diff-ink: #85291E;
+  --extra-bg: #FBF0DF; --extra-line: #9A5B14; --extra-ink: #6E400C;
+  --skip-ink: #8C9794; --str: #6B4A8C;
+  --serif: "Iowan Old Style", Charter, Georgia, "Times New Roman", serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pad: clamp(1rem, 4vw, 2.75rem);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111917; --panel: #171F1E; --ink: #E6EDEA; --muted: #A9B6B2; --faint: #7B8783;
+    --line: #2A3634; --soft: #1E2827;
+    --accent: #6FBEE2; --accent-ink: #0C1A20; --accent-soft: #0C2734;
+    --same-bg: #10312A; --same-line: #5FCFAF; --same-ink: #A6E6D2;
+    --diff-bg: #3A1D18; --diff-line: #E57A68; --diff-ink: #F4B8AC;
+    --extra-bg: #33270F; --extra-line: #E0A552; --extra-ink: #F0D29A;
+    --skip-ink: #5F6B68; --str: #B497D6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111917; --panel: #171F1E; --ink: #E6EDEA; --muted: #A9B6B2; --faint: #7B8783;
+  --line: #2A3634; --soft: #1E2827;
+  --accent: #6FBEE2; --accent-ink: #0C1A20; --accent-soft: #0C2734;
+  --same-bg: #10312A; --same-line: #5FCFAF; --same-ink: #A6E6D2;
+  --diff-bg: #3A1D18; --diff-line: #E57A68; --diff-ink: #F4B8AC;
+  --extra-bg: #33270F; --extra-line: #E0A552; --extra-ink: #F0D29A;
+  --skip-ink: #5F6B68; --str: #B497D6;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 17px/1.55 var(--sans); -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1040px; margin-inline: auto; padding-inline: var(--pad); }
+main.wrap { padding-block: 2rem 4rem; }
+a { color: var(--accent); }
+.skip-link {
+  position: fixed; top: .5rem; left: .5rem; z-index: 100; transform: translateY(-160%);
+  padding: .45rem .75rem; background: var(--ink); color: var(--panel); border-radius: 2px;
+  font: .76rem var(--mono);
+}
+.skip-link:focus { transform: translateY(0); }
+.masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+.masthead .wrap { display: flex; align-items: baseline; gap: .9rem; flex-wrap: wrap; padding-block: .8rem; }
+.logo { font: 600 .92rem var(--mono); color: var(--ink); text-decoration: none; }
+.masthead nav { margin-left: auto; display: flex; gap: 1rem; flex-wrap: wrap; font: .75rem var(--mono); }
+.masthead nav a { color: var(--faint); text-decoration: none; }
+.masthead nav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.masthead nav a[aria-current="page"] { color: var(--same-line); }
+.page-heading { display: grid; gap: .6rem; margin-bottom: 1.6rem; }
+.kicker { font: .88rem var(--mono); color: var(--accent); letter-spacing: .03em; margin: 0; }
+.kicker a { color: inherit; }
+h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.16; letter-spacing: -.018em; margin: 0; }
+h1 code { font-family: var(--mono); font-weight: 600; font-size: .9em; }
+.lede { font-size: 1.1rem; color: var(--muted); margin: 0; max-width: 66ch; }
+.mono, code { font-family: var(--mono); }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+.tab {
+  appearance: none; border: 1px solid transparent; border-bottom: none; background: none;
+  font: 600 15px var(--sans); color: var(--muted); padding: 9px 14px; border-radius: 3px 3px 0 0;
+  cursor: pointer; position: relative; top: 1px;
+}
+.tab[aria-selected="true"] { background: var(--panel); color: var(--ink); border-color: var(--line); box-shadow: inset 0 3px 0 var(--same-line); }
+.tab .n { font-weight: 400; color: var(--muted); font-size: 13px; margin-left: 4px; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: clamp(14px, 3vw, 22px); }
+.panel + .panel { margin-top: 14px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.spacer { flex: 1; }
+.small { font-size: 14px; color: var(--muted); }
+
+button.btn {
+  appearance: none; font: 600 14px var(--sans); border-radius: 3px; padding: 8px 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+}
+button.btn:hover:not(:disabled) { border-color: var(--accent); }
+button.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.btn:disabled { opacity: .45; cursor: default; }
+:focus-visible { outline: 2px solid var(--same-line); outline-offset: 3px; border-radius: 2px; }
+
+/* Expression line */
+.expr {
+  font: 600 22px/1.4 var(--mono); background: var(--soft); border-radius: 8px; padding: 12px 14px;
+  overflow-x: auto; white-space: pre; margin: 10px 0 14px;
+}
+.expr .s { color: var(--str); }
+.qmeta { font-size: 14px; color: var(--muted); }
+
+/* Forms */
+label.field { display: block; font-weight: 600; font-size: 14px; margin-bottom: 10px; }
+label.field span.hint { font-weight: 400; color: var(--muted); }
+input[type="text"], textarea {
+  display: block; width: 100%; margin-top: 4px; font: 16px var(--sans); color: var(--ink);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+}
+input.num { width: 9em; font-family: var(--mono); font-size: 18px; }
+input.strin { font-family: var(--mono); font-size: 18px; }
+textarea { min-height: 3.2em; resize: vertical; }
+input:disabled, textarea:disabled { opacity: .75; }
+.formerr { color: var(--diff-ink); font-size: 14px; min-height: 1.4em; margin: 2px 0 0; }
+
+.feedback { border-radius: 10px; padding: 12px 14px; margin-top: 12px; border: 1px solid; }
+.feedback.good { background: var(--same-bg); border-color: var(--same-line); color: var(--same-ink); }
+.feedback.part { background: var(--extra-bg); border-color: var(--extra-line); color: var(--extra-ink); }
+.feedback.bad { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
+.feedback p { margin: 4px 0; }
+.feedback .tag { font-weight: 700; }
+.note { background: var(--soft); border-radius: 8px; padding: 10px 12px; font-size: 15px; margin-top: 10px; }
+.note b { font-weight: 700; }
+
+/* Explore inputs */
+.inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .inputs { grid-template-columns: 1fr; } }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.chip {
+  appearance: none; font: 13px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  border-radius: 999px; padding: 4px 10px; cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); }
+
+/* Trace */
+.trace { margin-top: 14px; }
+.trace:focus-visible { outline-offset: 6px; border-radius: 6px; }
+.gridwrap { overflow-x: auto; padding: 4px 2px 8px; }
+.grid { display: grid; gap: 4px; width: max-content; }
+.rl { font: 600 13px var(--sans); color: var(--muted); align-self: center; padding-right: 6px; text-align: right; }
+.rl code { font-size: 12px; }
+.idx { font: 12px var(--mono); color: var(--muted); text-align: center; height: 30px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.idx .ptr { color: var(--accent); font-size: 14px; line-height: 1; visibility: hidden; }
+.col-current .idx .ptr, .idx.col-current .ptr { visibility: visible; }
+.tile {
+  width: 46px; height: 58px; border: 2px solid var(--line); border-radius: 8px; background: var(--panel);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: background-color .25s, border-color .25s, transform .25s;
+}
+.tile .ch { font: 700 20px/1.1 var(--mono); }
+.tile .ch.sp { font-size: 12px; font-weight: 600; color: var(--muted); }
+.tile .cu { font: 12px var(--mono); color: var(--muted); }
+.tile.none { border-style: dashed; background: transparent; }
+.tile.none .ch { font: 12px var(--sans); color: var(--muted); }
+.st { font: 600 11px/1.15 var(--sans); text-align: center; min-height: 28px; }
+.s-same .tile:not(.none) { background: var(--same-bg); border-color: var(--same-line); }
+.st.s-same { color: var(--same-ink); }
+.s-diff .tile:not(.none) { background: var(--diff-bg); border-color: var(--diff-line); }
+.st.s-diff { color: var(--diff-ink); }
+.s-extra .tile:not(.none) { background: var(--extra-bg); border-color: var(--extra-line); }
+.st.s-extra { color: var(--extra-ink); }
+.s-skip .tile { opacity: .45; }
+.st.s-skip { color: var(--skip-ink); font-weight: 400; }
+.col-current .tile { transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent); }
+.empty-note { font-size: 13px; color: var(--muted); margin: 2px 0 0; }
+
+.tracebody { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; margin-top: 8px; }
+@media (max-width: 720px) { .tracebody { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .expr { font-size: 17px; } .op { font-size: 15px; } }
+.stepbox { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.stepcount { font-size: 13px; color: var(--muted); }
+.op { font: 700 17px/1.4 var(--mono); margin: 4px 0 6px; overflow-wrap: anywhere; }
+.expl { margin: 0; }
+.algo { list-style: none; margin: 0; padding: 10px 0; background: var(--soft); border-radius: 10px; font: 13px/1.6 var(--mono); overflow-x: auto; }
+.algo li { padding: 0 12px; white-space: pre; border-left: 4px solid transparent; }
+.algo li.on { background: var(--accent-soft); border-left-color: var(--accent); font-weight: 700; }
+.algo .cap { font: 12px var(--sans); color: var(--muted); padding: 0 12px 4px; white-space: normal; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.keys { font-size: 13px; color: var(--muted); }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--bg); }
+
+/* Result */
+.result { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.resrow { display: flex; flex-wrap: wrap; gap: 18px; align-items: baseline; }
+.big { font: 700 34px/1 var(--mono); }
+.sign { font-weight: 700; }
+.meaning { margin: 6px 0 0; }
+.nline { position: relative; display: grid; grid-template-columns: 1fr 72px 1fr; margin: 16px 0 4px; max-width: 520px; font-size: 13px; text-align: center; }
+.nline > div { border-top: 3px solid var(--line); padding-top: 6px; color: var(--muted); }
+.nline > div.on { border-top-color: var(--accent); color: var(--ink); font-weight: 700; }
+.nline > div.on::before { content: "▼"; display: block; color: var(--accent); margin-top: -26px; margin-bottom: 4px; font-size: 14px; line-height: 1; }
+.apnote { font-size: 14px; color: var(--muted); margin: 10px 0 0; max-width: 70ch; }
+
+/* Reference */
+details.ref { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.refgroup { margin-top: 8px; }
+.refgroup .gl { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+.chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.rc { font: 11px/1.2 var(--mono); border: 1px solid var(--line); border-radius: 4px; padding: 2px 4px; text-align: center; min-width: 30px; }
+.rc b { display: block; font-size: 13px; }
+.rc.hl { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.reffact { font-size: 13px; margin: 8px 0 2px; }
+
+.hidden { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .col-current .tile { transform: none; }
+}
+/* ---- String Index Explorer ---- */
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+.seg button {
+  appearance: none; font: 600 14px var(--mono); border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  border-radius: 3px; padding: 6px 10px; cursor: pointer;
+}
+.seg button[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.argrow { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin-bottom: 6px; }
+.stepper { display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+.stepper button { appearance: none; width: 34px; height: 36px; font: 700 18px var(--mono); border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 3px; cursor: pointer; }
+.stepper input { width: 4.2em; text-align: center; font: 18px var(--mono); padding: 6px 4px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--ink); }
+.argrow label.field { margin-bottom: 0; }
+input.target { width: 12em; }
+
+.legend { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+.legend b { color: var(--ink); }
+.stripwrap { overflow-x: auto; padding: 6px 0 4px; margin-top: 6px; }
+.strip { position: relative; }
+.layer { position: relative; }
+.posts { height: 30px; }
+.has-handles .posts { height: 68px; }
+.tiles { height: 62px; }
+.boxes { height: 22px; }
+.win { height: 64px; }
+.postnum, .boxnum { position: absolute; font: 12px var(--mono); color: var(--faint); transform: translateX(-50%); text-align: center; }
+.postnum { bottom: 2px; }
+.boxnum { top: 2px; }
+.emph-posts .postnum, .emph-boxes .boxnum { color: var(--ink); font-weight: 700; font-size: 13px; }
+.postline { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--line); }
+.emph-posts .postline { background: var(--faint); opacity: .5; }
+.postline.on { background: var(--accent); opacity: 1; width: 4px; margin-left: -2px; }
+.postline.bad { background: var(--diff-line); opacity: 1; width: 4px; margin-left: -2px; }
+.strip .tile { position: absolute; top: 2px; width: 44px; height: 58px; }
+.strip .tile.ghost { border-style: dashed; background: transparent; opacity: .55; }
+.strip .tile.ghost .ch { font: 12px var(--sans); color: var(--muted); }
+.strip .tile.sel { background: var(--same-bg); border-color: var(--same-line); }
+.strip .tile.hit { background: var(--same-bg); border-color: var(--same-line); box-shadow: 0 0 0 3px var(--accent); }
+.strip .tile.badbox { background: var(--diff-bg); border-color: var(--diff-line); border-style: dashed; opacity: 1; }
+.strip .tile.win-ok { background: var(--same-bg); border-color: var(--same-line); }
+.strip .tile.win-bad { background: var(--diff-bg); border-color: var(--diff-line); }
+.strip .tile.win-todo { opacity: .6; }
+.strip .tile.cmp { box-shadow: 0 0 0 3px var(--accent); }
+.handle {
+  position: absolute; top: 0; transform: translateX(-50%); font: 700 12px/1 var(--mono); white-space: nowrap;
+  background: var(--accent); color: var(--accent-ink); border-radius: 3px; padding: 4px 6px; cursor: grab; touch-action: none; user-select: none;
+  transition: left .2s;
+}
+.handle::after { content: ""; position: absolute; left: 50%; bottom: -6px; margin-left: -6px; border: 6px solid transparent; border-bottom: 0; border-top-color: var(--accent); }
+.handle.bad { background: var(--diff-line); }
+.handle.bad::after { border-top-color: var(--diff-line); }
+.handle.fixed { cursor: default; opacity: .75; }
+.handle:active { cursor: grabbing; }
+.handle.low { top: 24px; }
+.brace { position: absolute; top: 8px; height: 12px; border: 2px solid var(--accent); border-top: 0; border-radius: 0 0 6px 6px; }
+.bracelabel { position: absolute; top: 24px; font: 12px var(--sans); color: var(--ink); white-space: nowrap; }
+.winlabel { position: absolute; top: 20px; font: 600 12px var(--sans); color: var(--muted); white-space: nowrap; }
+
+.anat { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 2px 4px; font: 600 17px var(--mono); margin: 4px 0 12px; }
+.anat .part { display: flex; flex-direction: column; align-items: center; }
+.anat .part code { padding: 2px 6px; border-radius: 3px; background: var(--soft); white-space: pre; }
+.anat .part span { font: 11px var(--sans); color: var(--muted); margin-top: 3px; white-space: nowrap; }
+.anat .punct { padding-top: 2px; }
+.anat .arrow { padding: 2px 6px; color: var(--muted); }
+.anat .s { color: var(--str); }
+.chain { font: 600 16px var(--mono); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; }
+.chain .le { padding: 1px 6px; border-radius: 3px; }
+.chain .le.ok { background: var(--same-bg); color: var(--same-ink); }
+.chain .le.no { background: var(--diff-bg); color: var(--diff-ink); outline: 2px solid var(--diff-line); }
+.valbox { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 18px; }
+.val { font: 700 28px/1.2 var(--mono); white-space: pre; }
+.val .s { color: var(--str); }
+.val.throws { font-size: 20px; color: var(--diff-ink); white-space: normal; overflow-wrap: anywhere; }
+.typetag { font: 600 12px var(--mono); border: 1px solid var(--line); border-radius: 3px; padding: 2px 6px; color: var(--muted); }
+.why { margin: 8px 0 0; max-width: 70ch; }
+
+.predictrow { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+select { font: 16px var(--sans); padding: 7px 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--ink); margin-top: 4px; display: block; }
+.quoted { display: flex; align-items: center; font: 20px var(--mono); margin-top: 4px; }
+.quoted .q { color: var(--str); padding: 0 3px; }
+.quoted input { width: 12em; margin: 0; font: 18px var(--mono); }
+.quoted .q.hidden-q { visibility: hidden; }
+
+/* Lab tracer */
+.labgrid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 14px; margin-top: 12px; }
+@media (max-width: 760px) { .labgrid { grid-template-columns: minmax(0, 1fr); } }
+.code { list-style: none; margin: 0; padding: 10px 0; background: var(--soft); border-radius: 8px; font: 13px/1.7 var(--mono); overflow-x: auto; counter-reset: ln; }
+.code li { padding: 0 12px 0 8px; white-space: pre; border-left: 4px solid transparent; }
+.code li::before { counter-increment: ln; content: counter(ln); display: inline-block; width: 2em; color: var(--faint); font-weight: 400; }
+.code li.done { color: var(--muted); }
+.code li.on { background: var(--accent-soft); border-left-color: var(--accent); font-weight: 700; color: var(--ink); }
+.code li.err { background: var(--diff-bg); border-left-color: var(--diff-line); font-weight: 700; color: var(--diff-ink); }
+table.vars { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.vars th { text-align: left; font: 600 12px var(--sans); color: var(--muted); border-bottom: 1px solid var(--line); padding: 4px 6px; }
+table.vars td { padding: 4px 6px; border-bottom: 1px solid var(--line); font-family: var(--mono); white-space: pre; }
+table.vars td.t { color: var(--muted); font-size: 12px; }
+table.vars tr.changed td { background: var(--same-bg); color: var(--same-ink); font-weight: 700; }
+table.vars td.unset { color: var(--faint); font-family: var(--sans); font-size: 12px; }
+.labnote { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
+.labnote.err { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
+.labnote.done { background: var(--same-bg); border-color: var(--same-line); color: var(--same-ink); }
+.labnote .op { margin-top: 0; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap" tabindex="-1">
+  <header class="page-heading">
+    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 1 · Strings</p>
+    <h1>String Index Explorer</h1>
+    <p class="lede">Characters sit in numbered <b>boxes</b>. <code>substring</code> cuts at numbered <b>fence posts</b> between them. Predict a call, then see exactly where Java looks, and why some calls crash.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Mode">
+    <button class="tab" role="tab" id="tab-predict" aria-controls="mode-predict" aria-selected="true">Predict</button>
+    <button class="tab" role="tab" id="tab-explore" aria-controls="mode-explore" aria-selected="false" tabindex="-1">Explore</button>
+    <button class="tab" role="tab" id="tab-lab" aria-controls="mode-lab" aria-selected="false" tabindex="-1">Lab tracer</button>
+    <button class="tab" role="tab" id="tab-transfer" aria-controls="mode-transfer" aria-selected="false" tabindex="-1">Transfer</button>
+  </div>
+
+  <!-- PREDICT -->
+  <section id="mode-predict" role="tabpanel" aria-labelledby="tab-predict">
+    <div class="panel">
+      <div class="row">
+        <span class="qmeta" id="p-count"></span>
+        <span class="spacer"></span>
+        <button class="btn" id="p-prev">← Previous</button>
+        <button class="btn" id="p-next">Next question →</button>
+      </div>
+      <div class="expr" id="p-expr" aria-label="Java expression"></div>
+      <form id="p-form" novalidate></form>
+      <div id="p-after" class="hidden">
+        <div id="p-feedback" class="feedback" role="status"></div>
+        <div class="note" id="p-tests"></div>
+        <div id="p-view"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPLORE -->
+  <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
+    <div class="panel">
+      <label class="field">The String <span class="hint">(up to 20 characters)</span>
+        <input type="text" class="strin" id="e-s" maxlength="20" autocomplete="off" spellcheck="false">
+      </label>
+      <div class="small" id="e-mlabel">Method</div>
+      <div class="seg" role="radiogroup" aria-labelledby="e-mlabel" id="e-methods"></div>
+      <div class="argrow" id="e-args"></div>
+      <div id="e-view"></div>
+    </div>
+  </section>
+
+  <!-- LAB -->
+  <section id="mode-lab" role="tabpanel" aria-labelledby="tab-lab" class="hidden">
+    <div class="panel">
+      <p class="small" style="margin-top:0">Trace the string part of <code>WorkingWithStrings.java</code> (Chapter 2 Lab 5) one statement at a time. Try the inputs that crash it.</p>
+      <div class="inputs">
+        <label class="field">Full name <span class="hint">(first and last, one space)</span>
+          <input type="text" class="strin" id="l-name" maxlength="24" autocomplete="off" spellcheck="false">
+        </label>
+        <label class="field">Phrase
+          <input type="text" class="strin" id="l-phrase" maxlength="24" autocomplete="off" spellcheck="false">
+        </label>
+      </div>
+      <div class="small">Try:</div>
+      <div class="presets" id="l-presets"></div>
+      <div class="labgrid">
+        <div>
+          <ol class="code" id="l-code" aria-label="Lab code"></ol>
+          <div class="controls">
+            <button class="btn" id="l-reset">⟲ Reset</button>
+            <button class="btn" id="l-back">← Back</button>
+            <button class="btn primary" id="l-next">Next →</button>
+            <button class="btn" id="l-end">Run to end</button>
+          </div>
+        </div>
+        <div>
+          <table class="vars" aria-label="Variables">
+            <thead><tr><th>Variable</th><th>Type</th><th>Value</th></tr></thead>
+            <tbody id="l-vars"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="labnote" id="l-note" aria-live="polite"></div>
+      <div id="l-view"></div>
+    </div>
+  </section>
+
+  <!-- TRANSFER -->
+  <section id="mode-transfer" role="tabpanel" aria-labelledby="tab-transfer" class="hidden">
+    <div class="panel">
+      <p class="small" style="margin-top:0">No pictures here. Draw the boxes and posts on paper if it helps, then check.</p>
+      <div class="row">
+        <span class="qmeta" id="t-count"></span>
+        <span class="spacer"></span>
+        <button class="btn" id="t-prev">← Previous</button>
+        <button class="btn" id="t-next">Next question →</button>
+      </div>
+      <div class="expr" id="t-expr" aria-label="Java expression"></div>
+      <form id="t-form" novalidate></form>
+      <div id="t-after" class="hidden">
+        <div id="t-feedback" class="feedback" role="status"></div>
+        <div class="note" id="t-model"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ENGINE START
+// Java String semantics, implemented explicitly (JavaScript's own substring and
+// charAt do not throw). Indexes are UTF-16 code units, as in Java.
+const SIOOBE = 'StringIndexOutOfBoundsException';
+
+// Java's indexOf(String): the first start position where every character matches.
+function traceIndexOf(s, t) {
+  const steps = [];
+  if (t.length === 0) return { value: 0, steps: [{ kind: 'empty' }] };
+  if (t.length > s.length) return { value: -1, steps: [{ kind: 'toolong' }] };
+  for (let i = 0; i <= s.length - t.length; i++) {
+    let j = 0;
+    while (j < t.length && s.charCodeAt(i + j) === t.charCodeAt(j)) j++;
+    if (j === t.length) { steps.push({ kind: 'found', i, j }); return { value: i, steps }; }
+    steps.push({ kind: 'miss', i, j });
+  }
+  steps.push({ kind: 'none', last: s.length - t.length });
+  return { value: -1, steps };
+}
+
+// The legal-call conditions for each method, each marked true or false.
+function boundsChain(s, m, args) {
+  const n = s.length;
+  if (m === 'charAt') {
+    const k = args[0];
+    return [['0', null], ['≤', k >= 0], [`index (${k})`, null], ['<', k < n], [`length() (${n})`, null]];
+  }
+  if (m === 'substring1') {
+    const b = args[0];
+    return [['0', null], ['≤', b >= 0], [`begin (${b})`, null], ['≤', b <= n], [`length() (${n})`, null]];
+  }
+  if (m === 'substring2') {
+    const [b, e] = args;
+    return [['0', null], ['≤', b >= 0], [`begin (${b})`, null], ['≤', b <= e], [`end (${e})`, null], ['≤', e <= n], [`length() (${n})`, null]];
+  }
+  return null;
+}
+
+function breakReasons(s, m, args) {
+  const n = s.length, out = [];
+  if (m === 'charAt') {
+    const k = args[0];
+    if (k < 0) out.push(`index ${fmtInt(k)} is negative. Boxes start at 0.`);
+    if (k >= n) out.push(n === 0 ? 'The String is empty, so it has no boxes at all.' : `index ${k} is not less than length() (${n}). The last box is ${n - 1}.`);
+  } else if (m === 'substring1') {
+    const b = args[0];
+    if (b < 0) out.push(`begin ${fmtInt(b)} is negative. Posts start at 0.`);
+    if (b > n) out.push(`begin ${b} is past the last post, ${n}.`);
+  } else if (m === 'substring2') {
+    const [b, e] = args;
+    if (b < 0) out.push(`begin ${fmtInt(b)} is negative. Posts start at 0.`);
+    if (e < 0) out.push(`end ${fmtInt(e)} is negative. Posts start at 0.`);
+    if (e > n) out.push(`end ${e} is past the last post, ${n}.`);
+    if (b > e) out.push(`begin ${fmtInt(b)} comes after end ${fmtInt(e)}. substring cannot run backwards.`);
+  }
+  return out;
+}
+
+function callString(s, m, args) {
+  const n = s.length;
+  if (m === 'length') return { kind: 'int', value: n };
+  if (m === 'indexOf') { const tr = traceIndexOf(s, args[0]); return { kind: 'int', value: tr.value, trace: tr }; }
+  const reasons = breakReasons(s, m, args);
+  if (reasons.length) return { kind: 'throws', value: SIOOBE, reasons };
+  if (m === 'charAt') return { kind: 'char', value: s[args[0]] };
+  if (m === 'substring1') return { kind: 'String', value: s.slice(args[0]) };
+  return { kind: 'String', value: s.slice(args[0], args[1]) };
+}
+
+function jstr(s) { return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; }
+function jchar(c) { return "'" + (c === "'" ? "\\'" : c === '\\' ? '\\\\' : c) + "'"; }
+function fmtInt(v) { return v < 0 ? '−' + (-v) : String(v); }
+function methodName(m) { return m.startsWith('substring') ? 'substring' : m; }
+function argText(m, args) { return m === 'indexOf' ? jstr(args[0]) : args.join(', '); }
+function callText(s, m, args) { return `${jstr(s)}.${methodName(m)}(${argText(m, args)})`; }
+function showValue(r) {
+  if (r.kind === 'throws') return 'throws ' + SIOOBE;
+  if (r.kind === 'int') return fmtInt(r.value);
+  if (r.kind === 'char') return jchar(r.value);
+  const note = r.value === '' ? ' (the empty String)' : /^ +$/.test(r.value) ? ` (${r.value.length === 1 ? 'a single space' : 'spaces only'})` : '';
+  return jstr(r.value) + note;
+}
+
+// Plain-language account of a call and its result.
+function explainCall(s, m, args, r) {
+  const n = s.length;
+  if (r.kind === 'throws') return `Java throws a ${SIOOBE}: ${r.reasons.join(' ')}`;
+  if (m === 'length') return n === 0
+    ? 'The empty String has no characters, so length() is 0. Its only fence post is post 0.'
+    : `${jstr(s)} has ${n} characters in boxes 0 to ${n - 1}. length() counts the boxes; it is also the number of the last fence post.`;
+  if (m === 'charAt') return `Box ${args[0]} holds ${jchar(r.value)}. charAt returns a char. AP code usually writes ${jstr(s)}.substring(${args[0]}, ${args[0] + 1}) instead, which returns the same letter as a String.`;
+  if (m === 'substring1') {
+    const b = args[0];
+    return b === n
+      ? `Post ${b} is the last post, so there is nothing after it: the result is the empty String. This is legal. Only a post past ${n} would crash.`
+      : `Cut at post ${b} and keep everything to the end (post ${n}): ${n} − ${b} = ${n - b} character${n - b === 1 ? '' : 's'}.`;
+  }
+  if (m === 'substring2') {
+    const [b, e] = args;
+    return b === e
+      ? `Both cuts are at post ${b}, so there are no boxes between them: the result is the empty String. This is legal.`
+      : `Cut at post ${b} and post ${e}. You get the boxes between them, ${b} to ${e - 1}: ${e} − ${b} = ${e - b} character${e - b === 1 ? '' : 's'}. Box ${e} is not included.`;
+  }
+  const tr = r.trace, t = args[0], last = tr.steps[tr.steps.length - 1];
+  if (last.kind === 'empty') return 'The empty String matches immediately, at position 0.';
+  if (last.kind === 'toolong') return `${jstr(t)} is longer than ${jstr(s)}, so it cannot fit anywhere: −1.`;
+  if (last.kind === 'found') return `Java tries each start position from 0. At position ${last.i} all ${t.length} characters match, so indexOf returns ${last.i}: where the match starts.` + (tr.steps.length > 1 ? ` Positions 0 to ${last.i - 1} failed.` : '');
+  return `Java tries every start position from 0 to ${last.last} (the last place ${jstr(t)} could fit) and none matches completely, so indexOf returns −1.`;
+}
+
+// WorkingWithStrings.java, string section, one statement per line.
+const LAB_LINES = [
+  'space = fullname.indexOf(" ");',
+  'firstName = fullname.substring(0, space);',
+  'secondName = fullname.substring(space + 1);',
+  'fullname = (secondName + " " + firstName);',
+  'phraseLength = phrase.length();',
+  'middleIndex = phraseLength / 2;',
+  'firstHalf = phrase.substring(0, middleIndex);',
+  'secondHalf = phrase.substring(middleIndex, phraseLength);',
+  'switchedPhrase = secondHalf.concat(firstHalf);',
+  'middle3 = phrase.substring(middleIndex - 1, middleIndex + 2);',
+  'System.out.println("Character at the middle index: " + phrase.charAt(middleIndex));',
+];
+const LAB_VARS = [
+  ['fullname', 'String'], ['space', 'int'], ['firstName', 'String'], ['secondName', 'String'],
+  ['phrase', 'String'], ['phraseLength', 'int'], ['middleIndex', 'int'], ['firstHalf', 'String'],
+  ['secondHalf', 'String'], ['switchedPhrase', 'String'], ['middle3', 'String'],
+];
+
+function runLab(name, phrase) {
+  const v = { fullname: name, phrase };
+  const steps = [{ line: -1, vars: { ...v }, changed: ['fullname', 'phrase'] }];
+  const summary = [];
+  let error = null;
+  const record = (line, key, value, call, extra) => {
+    if (key) v[key] = value;
+    summary.push(`${key || 'middleChar'}=${typeof value === 'string' ? jstr(value) : value};`);
+    steps.push({ line, vars: { ...v }, changed: key ? [key] : [], call, result: extra, printed: key ? null : value });
+  };
+  // Each call either records its result or stops the program at that line.
+  const attempt = (line, key, s, m, args) => {
+    const r = callString(s, m, args);
+    if (r.kind === 'throws') {
+      error = { line, reasons: r.reasons };
+      steps.push({ line, vars: { ...v }, changed: [], call: { s, m, args }, result: r, error: true });
+      return false;
+    }
+    record(line, key, r.value, { s, m, args }, r);
+    return true;
+  };
+  const go = () => {
+    if (!attempt(0, 'space', v.fullname, 'indexOf', [' '])) return;
+    if (!attempt(1, 'firstName', v.fullname, 'substring2', [0, v.space])) return;
+    if (!attempt(2, 'secondName', v.fullname, 'substring1', [v.space + 1])) return;
+    record(3, 'fullname', v.secondName + ' ' + v.firstName, null);
+    if (!attempt(4, 'phraseLength', v.phrase, 'length', [])) return;
+    record(5, 'middleIndex', Math.trunc(v.phraseLength / 2), null);
+    if (!attempt(6, 'firstHalf', v.phrase, 'substring2', [0, v.middleIndex])) return;
+    if (!attempt(7, 'secondHalf', v.phrase, 'substring2', [v.middleIndex, v.phraseLength])) return;
+    record(8, 'switchedPhrase', v.secondHalf + v.firstHalf, null);
+    if (!attempt(9, 'middle3', v.phrase, 'substring2', [v.middleIndex - 1, v.middleIndex + 2])) return;
+    const r = callString(v.phrase, 'charAt', [v.middleIndex]);
+    if (r.kind === 'throws') { error = { line: 10, reasons: r.reasons }; steps.push({ line: 10, vars: { ...v }, changed: [], call: { s: v.phrase, m: 'charAt', args: [v.middleIndex] }, result: r, error: true }); return; }
+    record(10, null, r.value, { s: v.phrase, m: 'charAt', args: [v.middleIndex] }, r);
+  };
+  go();
+  return { steps, error, summary: summary.join('') + (error ? 'THROWS@' + error.line : '') };
+}
+// ENGINE END
+
+/* ---------- Question sets ---------- */
+const PREDICT = [
+  { s: 'planet', m: 'substring2', args: [1, 4], tests: 'The end post is excluded: you get boxes 1, 2 and 3.' },
+  { s: 'planet', m: 'length', args: [], tests: 'length() counts the characters. It is one more than the last box index.' },
+  { s: 'planet', m: 'charAt', args: [6], tests: '<code>charAt(length())</code> asks for a box that does not exist.' },
+  { s: 'planet', m: 'substring1', args: [6], tests: 'But <code>substring(length())</code> is legal: post 6 exists, and nothing comes after it.' },
+  { s: 'planet', m: 'substring2', args: [6, 6], tests: 'The same post twice gives the empty String, not an error (the lesson’s opening prompt).' },
+  { s: 'Hello There', m: 'substring2', args: [2, 7], tests: 'A space is a character and takes a box (Quiz 2b).' },
+  { s: 'Hello There', m: 'substring1', args: [6], tests: 'One argument: start at the post and keep going to the end (Quiz 2b).' },
+  { s: 'planet', m: 'substring2', args: [4, 2], tests: 'begin may not come after end. substring never runs backwards.' },
+  { s: 'Roberts', m: 'indexOf', args: ['ber'], tests: 'indexOf returns where the match <b>starts</b> (Quiz 2b).' },
+  { s: 'Roberts', m: 'indexOf', args: ['berz'], tests: 'A partial match is not a match. The whole target must fit (Quiz 2b).' },
+  { s: 'banana', m: 'indexOf', args: ['an'], tests: 'indexOf stops at the <b>first</b> match.' },
+  { s: 'red kite', m: 'indexOf', args: [' '], tests: 'Searching for a space: the first step of <code>firstWord</code>.' },
+  { s: 'Robe', m: 'indexOf', args: ['Roberts'], tests: 'A target longer than the String can never fit.' },
+  { s: 'Mister', m: 'charAt', args: [0], tests: 'charAt returns a <code>char</code>, not a String. Note the single quotes.' },
+];
+const TRANSFER = [
+  { s: 'computer', m: 'substring2', args: [3, 6] },
+  { s: 'computer', m: 'substring1', args: [8] },
+  { s: 'computer', m: 'charAt', args: [8] },
+  { s: 'computer', m: 'length', args: [] },
+  { s: 'mississippi', m: 'indexOf', args: ['ss'] },
+  { s: 'mississippi', m: 'indexOf', args: ['sip'] },
+  { s: 'AP CSA', m: 'substring2', args: [2, 3] },
+  { s: 'AP CSA', m: 'indexOf', args: ['csa'] },
+  { s: 'code', m: 'substring2', args: [-1, 2] },
+  { s: 'code', m: 'substring2', args: [1, 1] },
+];
+const LAB_PRESETS = [
+  { label: 'Normal', name: 'Ada Lovelace', phrase: 'hello world' },
+  { label: 'Even-length phrase', name: 'Ada Lovelace', phrase: 'abcd' },
+  { label: 'Phrase too short', name: 'Ada Lovelace', phrase: 'hi' },
+  { label: 'Empty phrase', name: 'Ada Lovelace', phrase: '' },
+  { label: 'No space in name', name: 'Cher', phrase: 'hello world' },
+  { label: 'Two spaces in name', name: 'Mary Ann Lee', phrase: 'hello world' },
+  { label: 'Leading space', name: ' Bob', phrase: 'hello world' },
+];
+const METHODS = [
+  { m: 'length', label: 'length()' },
+  { m: 'charAt', label: 'charAt(index)' },
+  { m: 'substring1', label: 'substring(begin)' },
+  { m: 'substring2', label: 'substring(begin, end)' },
+  { m: 'indexOf', label: 'indexOf(str)' },
+];
+const RETURN_TYPE = { length: 'int', charAt: 'char', substring1: 'String', substring2: 'String', indexOf: 'int' };
+const PARAM_TYPES = { length: '', charAt: 'int', substring1: 'int', substring2: 'int, int', indexOf: 'String' };
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text != null) e.textContent = text;
+  return e;
+}
+function renderCallCode(node, s, m, args) {
+  node.textContent = '';
+  const argNodes = m === 'indexOf' ? [el('span', 's', jstr(args[0]))] : [args.join(', ')];
+  node.append(el('span', 's', jstr(s)), `.${methodName(m)}(`, ...argNodes, ')');
+}
+
+/* ---------- The box-and-post strip ---------- */
+const STEP = 48, TILE = 44, PAD = 2;
+class Strip {
+  constructor(host, { interactive = false, onMove = null } = {}) {
+    this.host = host; this.interactive = interactive; this.onMove = onMove;
+    this.wrap = el('div', 'stripwrap');
+    this.root = el('div', 'strip');
+    this.wrap.append(this.root);
+    this.legend = el('p', 'legend');
+    host.append(this.legend, this.wrap);
+  }
+  x(post) { return (PAD + post) * STEP; }
+  set(s, m, args, opt = {}) { this.s = s; this.m = m; this.args = args; this.opt = opt; this.render(); }
+  render() {
+    const { s, m, args } = this, n = s.length, r = this.root, opt = this.opt;
+    r.textContent = '';
+    r.style.width = ((n + 2 * PAD) * STEP) + 'px';
+    const res = callString(s, m, args);
+    const postsMode = m.startsWith('substring') || m === 'length';
+    r.className = 'strip ' + (postsMode ? 'emph-posts' : m === 'charAt' ? 'emph-boxes' : '') + (m.startsWith('substring') ? ' has-handles' : '');
+    this.legend.innerHTML = postsMode
+      ? 'Numbers <b>above</b> are fence posts, 0 to length(). substring cuts at posts.'
+      : m === 'charAt' ? 'Numbers <b>below</b> are box indexes, 0 to length() − 1. charAt picks a box.'
+      : 'indexOf slides the target along the String, one start position at a time.';
+
+    const posts = el('div', 'layer posts'), tiles = el('div', 'layer tiles'), boxes = el('div', 'layer boxes');
+    r.append(posts, tiles, boxes);
+    for (let p = 0; p <= n; p++) {
+      const num = el('div', 'postnum', String(p)); num.style.left = this.x(p) + 'px'; posts.append(num);
+    }
+    // Post lines behind the tiles
+    const active = new Set(), bad = new Set();
+    if (m === 'substring1' || m === 'substring2') {
+      const ps = m === 'substring1' ? [args[0], n] : args;
+      const reversed = m === 'substring2' && args[0] > args[1];
+      ps.forEach(p => (p < 0 || p > n || reversed ? bad : active).add(p));
+    }
+    for (let p = -PAD; p <= n + PAD; p++) {
+      if ((p < 0 || p > n) && !bad.has(p)) continue;
+      const line = el('div', 'postline' + (active.has(p) ? ' on' : bad.has(p) ? ' bad' : ''));
+      line.style.left = this.x(p) + 'px'; tiles.append(line);
+    }
+    // Tiles, including dashed ghost boxes outside the String
+    const selFrom = res.kind === 'String' ? args[0] : null;
+    const selTo = res.kind === 'String' ? (m === 'substring1' ? n : args[1]) : null;
+    for (let k = -PAD; k < n + PAD; k++) {
+      const t = el('div', 'tile');
+      t.style.left = (this.x(k) + (STEP - TILE) / 2) + 'px';
+      if (k < 0 || k >= n) {
+        t.classList.add('ghost');
+        t.append(el('span', 'ch', 'none'));
+        if (m === 'charAt' && args[0] === k) t.classList.add('badbox');
+        t.setAttribute('aria-hidden', 'true');
+      } else {
+        const c = s[k];
+        t.append(el('span', c === ' ' ? 'ch sp' : 'ch', c === ' ' ? 'space' : c));
+        t.setAttribute('aria-label', `box ${k}: ${c === ' ' ? 'space' : c}`);
+        if (selFrom != null && k >= selFrom && k < selTo) t.classList.add('sel');
+        if (m === 'charAt' && res.kind === 'char' && k === args[0]) t.classList.add('hit');
+        if (m === 'indexOf' && opt.found != null && k >= opt.found && k < opt.found + args[0].length) t.classList.add('sel');
+      }
+      tiles.append(t);
+      if (k >= 0 && k < n) { const b = el('div', 'boxnum', String(k)); b.style.left = (this.x(k) + STEP / 2) + 'px'; boxes.append(b); }
+    }
+    if (n === 0) {
+      const lab = el('div', 'bracelabel', 'The empty String: no boxes, one post (0).');
+      lab.style.left = this.x(0) + 8 + 'px'; lab.style.top = '4px'; boxes.append(lab);
+    }
+    // Handles for substring
+    if (m === 'substring1' || m === 'substring2') {
+      const hs = m === 'substring1' ? [['begin', 0], ['end = length()', null]] : [['begin', 0], ['end', 1]];
+      hs.forEach(([label, ai]) => {
+        const p = ai == null ? n : args[ai];
+        const h = el('div', 'handle', ai == null ? `end ${n}` : `${label} ${p}`);
+        const clamped = Math.max(-PAD, Math.min(n + PAD, p));
+        h.style.left = this.x(clamped) + 'px';
+        if (p < 0 || p > n || (m === 'substring2' && args[0] > args[1])) h.classList.add('bad');
+        // Flags one post apart would overlap, so the end flag drops to a lower lane.
+        if (label.startsWith('end') && Math.abs(Math.max(-PAD, Math.min(n + PAD, args[0])) - clamped) <= 1) h.classList.add('low');
+        if (ai == null) { h.classList.add('fixed'); h.title = 'substring(begin) always runs to the end of the String'; }
+        else if (this.interactive) this.makeDraggable(h, ai, label);
+        posts.append(h);
+      });
+    }
+    if (m === 'charAt') this.reveal(args[0], args[0] + 1);
+    else if (m === 'substring1') this.reveal(Math.min(args[0], n), Math.max(args[0], n));
+    else if (m === 'substring2') this.reveal(Math.min(...args), Math.max(...args));
+    else if (m === 'indexOf' && opt.step && opt.step.i != null) this.reveal(opt.step.i, opt.step.i + args[0].length);
+    // length: a brace over every box
+    if (m === 'length' && n > 0) {
+      const win = el('div', 'layer win'); r.append(win);
+      const br = el('div', 'brace'); br.style.left = this.x(0) + 'px'; br.style.width = (n * STEP) + 'px'; win.append(br);
+      const lab = el('div', 'bracelabel', `length() = ${n} boxes · last box is ${n - 1} · last post is ${n}`); lab.style.left = this.x(0) + 'px'; win.append(lab);
+    }
+    // indexOf: the target window at the current attempt
+    if (m === 'indexOf' && opt.step) {
+      const win = el('div', 'layer win'); r.append(win);
+      const t = args[0], st = opt.step;
+      if (st.kind === 'miss' || st.kind === 'found') {
+        for (let j = 0; j < t.length; j++) {
+          const tile = el('div', 'tile');
+          tile.style.left = (this.x(st.i + j) + (STEP - TILE) / 2) + 'px';
+          tile.append(el('span', t[j] === ' ' ? 'ch sp' : 'ch', t[j] === ' ' ? 'space' : t[j]));
+          tile.classList.add(j < st.j ? 'win-ok' : j === st.j && st.kind === 'miss' ? 'win-bad' : 'win-todo');
+          win.append(tile);
+        }
+        tiles.querySelectorAll('.tile:not(.ghost)').forEach((tile, k) => {
+          if (k >= st.i && k < st.i + st.j) tile.classList.add('win-ok');
+          if (st.kind === 'miss' && k === st.i + st.j) tile.classList.add('cmp');
+        });
+      } else {
+        const lab = el('div', 'winlabel', st.kind === 'toolong' ? `${jstr(t)} is longer than the String` : st.kind === 'empty' ? 'Empty target: matches at 0' : 'No start position left to try');
+        lab.style.left = this.x(0) + 'px'; win.append(lab);
+      }
+    }
+  }
+  // Keep the part being asked about in view on narrow screens, without jumping if it already is.
+  reveal(fromPost, toPost) {
+    const w = this.wrap, a = this.x(Math.max(-PAD, fromPost)), b = this.x(Math.min(this.s.length + PAD, toPost));
+    if (a >= w.scrollLeft && b <= w.scrollLeft + w.clientWidth) return;
+    w.scrollLeft = Math.max(0, (a + b) / 2 - w.clientWidth / 2);
+  }
+  makeDraggable(h, ai, label) {
+    const n = this.s.length;
+    h.tabIndex = 0;
+    h.setAttribute('role', 'slider');
+    h.setAttribute('aria-label', label + ' post');
+    h.setAttribute('aria-valuemin', -PAD); h.setAttribute('aria-valuemax', n + PAD); h.setAttribute('aria-valuenow', this.args[ai]);
+    const move = p => { p = Math.max(-PAD, Math.min(n + PAD, p)); if (p !== this.args[ai]) this.onMove(ai, p); };
+    h.addEventListener('keydown', e => {
+      const d = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 }[e.key];
+      if (d) { e.preventDefault(); move(this.args[ai] + d); this.focusHandle(ai); }
+      if (e.key === 'Home') { e.preventDefault(); move(0); this.focusHandle(ai); }
+      if (e.key === 'End') { e.preventDefault(); move(n); this.focusHandle(ai); }
+    });
+    // Re-rendering replaces the handle mid-drag, so listen on the window, not the handle.
+    h.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      const onMove = ev => move(Math.round((ev.clientX - this.root.getBoundingClientRect().left) / STEP) - PAD);
+      const onUp = () => { window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); this.focusHandle(ai); };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+    });
+  }
+  focusHandle(ai) { const hs = this.root.querySelectorAll('.handle[role="slider"]'); if (hs[ai]) hs[ai].focus(); }
+}
+
+/* ---------- Result view: anatomy, legality check, value, explanation, indexOf stepper ---------- */
+class CallView {
+  constructor(host, { interactive = false, onMove = null } = {}) {
+    this.host = host;
+    host.textContent = '';
+    this.anat = el('div', 'anat');
+    this.stripHost = el('div');
+    this.traceBox = el('div', 'hidden');
+    this.result = el('div', 'result');
+    host.append(this.anat, this.stripHost, this.traceBox, this.result);
+    this.strip = new Strip(this.stripHost, { interactive, onMove });
+    this.timer = null;
+    this.buildTrace();
+  }
+  buildTrace() {
+    const b = this.traceBox;
+    b.innerHTML = `<div class="stepbox" aria-live="polite"><div class="stepcount"></div><div class="op"></div><p class="expl"></p></div>
+      <div class="controls"><button class="btn" data-act="reset">⟲ Reset</button><button class="btn" data-act="back">← Back</button><button class="btn primary" data-act="next">Next →</button><button class="btn" data-act="play">▶ Play</button><span class="keys"><kbd>←</kbd> <kbd>→</kbd> step</span></div>`;
+    b.tabIndex = 0;
+    b.querySelectorAll('[data-act]').forEach(btn => btn.addEventListener('click', () => this.act(btn.dataset.act)));
+    b.addEventListener('keydown', e => {
+      const a = { ArrowRight: 'next', ArrowLeft: 'back', Home: 'reset' }[e.key];
+      if (a) { e.preventDefault(); this.act(a); }
+    });
+  }
+  set(s, m, args, { showAll = false } = {}) {
+    this.stop();
+    this.s = s; this.m = m; this.args = args;
+    this.res = callString(s, m, args);
+    this.i = 0;
+    this.renderAnatomy();
+    if (m === 'indexOf') {
+      this.traceBox.classList.remove('hidden');
+      if (showAll) this.i = this.res.trace.steps.length - 1;
+      this.renderStep();
+    } else {
+      this.traceBox.classList.add('hidden');
+      this.strip.set(s, m, args);
+      this.renderResult();
+    }
+  }
+  renderAnatomy() {
+    const { s, m, args } = this, a = this.anat;
+    a.textContent = '';
+    const part = (code, label, cls) => { const p = el('div', 'part'); const c = el('code', cls, code); p.append(c, el('span', null, label)); return p; };
+    const recv = part(jstr(s), 'receiver (String)', 's');
+    const ptypes = PARAM_TYPES[m];
+    a.append(recv, el('span', 'punct', '.'), part(methodName(m), 'method'), el('span', 'punct', '('));
+    if (args.length) a.append(part(argText(m, args), `argument${args.length > 1 ? 's' : ''} (${ptypes})`, m === 'indexOf' ? 's' : ''));
+    a.append(el('span', 'punct', ')'), el('span', 'arrow', '→'), part(RETURN_TYPE[m], 'return type'));
+  }
+  renderResult() {
+    const { s, m, args, res } = this, r = this.result;
+    r.textContent = '';
+    const chain = boundsChain(s, m, args);
+    if (chain) {
+      const box = el('div');
+      box.append(el('div', 'small', 'Legal-call check'));
+      const c = el('div', 'chain');
+      chain.forEach(([txt, ok]) => c.append(el('span', ok == null ? '' : 'le ' + (ok ? 'ok' : 'no'), txt + (ok == null ? '' : ok ? ' ✓' : ' ✗'))));
+      box.append(c);
+      r.append(box);
+    }
+    const vb = el('div', 'valbox');
+    const val = el('div', 'val' + (res.kind === 'throws' ? ' throws' : ''));
+    if (res.kind === 'String') val.append(el('span', 's', jstr(res.value)));
+    else val.textContent = res.kind === 'throws' ? 'throws ' + SIOOBE : res.kind === 'char' ? jchar(res.value) : fmtInt(res.value);
+    vb.append(val, el('span', 'typetag', res.kind === 'throws' ? 'exception' : res.kind));
+    if (res.kind === 'String' && (res.value === '' || /^ +$/.test(res.value))) vb.append(el('span', 'small', res.value === '' ? 'the empty String' : 'a single space'));
+    r.append(vb, el('p', 'why', explainCall(s, m, args, res)));
+  }
+  renderStep() {
+    const steps = this.res.trace.steps, st = steps[this.i], t = this.args[0], s = this.s;
+    const last = this.i === steps.length - 1;
+    this.strip.set(s, 'indexOf', this.args, { step: st, found: st.kind === 'found' ? st.i : null });
+    const b = this.traceBox;
+    b.querySelector('.stepcount').textContent = `Attempt ${this.i + 1} of ${steps.length}`;
+    let op = '', ex = '';
+    const q = c => c === ' ' ? "' '" : `'${c}'`;
+    if (st.kind === 'miss') {
+      op = `start at ${st.i}: ` + (st.j > 0 ? `${st.j} character${st.j > 1 ? 's match' : ' matches'}, then ${q(s[st.i + st.j])} ≠ ${q(t[st.j])}` : `${q(s[st.i])} ≠ ${q(t[0])}`);
+      ex = (st.j > 0 ? 'A partial match is not enough. ' : '') + 'Slide the target one position right and try again.';
+    } else if (st.kind === 'found') {
+      op = `start at ${st.i}: all ${t.length} character${t.length > 1 ? 's match' : ' matches'}`;
+      ex = `Found it. indexOf returns ${st.i}, the position where the match starts, and stops looking.`;
+    } else if (st.kind === 'none') {
+      op = 'no start position left';
+      ex = `A match would have to start by position ${st.last} to fit, and none did. indexOf returns −1.`;
+    } else if (st.kind === 'toolong') {
+      op = `${jstr(t)} cannot fit`; ex = `The target has ${t.length} characters but the String has only ${s.length}. indexOf returns −1 without trying.`;
+    } else { op = 'empty target'; ex = 'The empty String matches right away, at position 0.'; }
+    b.querySelector('.op').textContent = op;
+    b.querySelector('.expl').textContent = ex;
+    b.querySelector('[data-act="back"]').disabled = this.i === 0;
+    b.querySelector('[data-act="reset"]').disabled = this.i === 0;
+    b.querySelector('[data-act="next"]').disabled = last;
+    this.result.classList.toggle('hidden', !last);
+    if (last) this.renderResult();
+  }
+  act(a) {
+    if (!this.res.trace) return;
+    const last = this.res.trace.steps.length - 1;
+    if (a !== 'play') this.stop();
+    if (a === 'next') this.i = Math.min(last, this.i + 1);
+    else if (a === 'back') this.i = Math.max(0, this.i - 1);
+    else if (a === 'reset') this.i = 0;
+    else if (a === 'play') {
+      if (this.timer) { this.stop(); return; }
+      if (this.i === last) this.i = 0;
+      this.traceBox.querySelector('[data-act="play"]').textContent = '❚❚ Pause';
+      this.timer = setInterval(() => { if (this.i >= last) { this.stop(); return; } this.i++; this.renderStep(); if (this.i >= last) this.stop(); }, 1100);
+    }
+    this.renderStep();
+  }
+  stop() {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
+    const p = this.traceBox.querySelector('[data-act="play"]'); if (p) p.textContent = '▶ Play';
+  }
+}
+
+/* ---------- Tabs ---------- */
+const TABS = ['predict', 'explore', 'lab', 'transfer'];
+function selectTab(name, focus) {
+  TABS.forEach(n => {
+    const on = n === name, tab = $('tab-' + n);
+    tab.setAttribute('aria-selected', on); tab.tabIndex = on ? 0 : -1;
+    $('mode-' + n).classList.toggle('hidden', !on);
+    if (on && focus) tab.focus();
+  });
+  predictView.stop(); exploreView.stop();
+}
+TABS.forEach((n, i) => {
+  const tab = $('tab-' + n);
+  tab.addEventListener('click', () => selectTab(n));
+  tab.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      selectTab(TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length], true);
+    }
+  });
+});
+
+/* ---------- Predict and Transfer (shared) ---------- */
+function buildAnswerForm(form, prefix, submitLabel, reasonPrompt) {
+  form.innerHTML = `
+    <div class="predictrow">
+      <label class="field">It…
+        <select id="${prefix}-kind">
+          <option value="">choose…</option>
+          <option value="int">returns an int</option>
+          <option value="String">returns a String</option>
+          <option value="char">returns a char</option>
+          <option value="throws">throws an exception</option>
+        </select>
+      </label>
+      <label class="field" id="${prefix}-vwrap">Value <span class="hint" id="${prefix}-vhint"></span>
+        <span class="quoted"><span class="q" id="${prefix}-q1">"</span><input type="text" id="${prefix}-val" autocomplete="off" spellcheck="false"><span class="q" id="${prefix}-q2">"</span></span>
+      </label>
+    </div>
+    <label class="field">${reasonPrompt}
+      <textarea id="${prefix}-why" rows="2"></textarea>
+    </label>
+    <div class="row"><button class="btn primary" type="submit">${submitLabel}</button><span class="formerr" id="${prefix}-err" role="alert"></span></div>`;
+  const kind = $(prefix + '-kind');
+  const sync = () => {
+    const k = kind.value;
+    $(prefix + '-vwrap').classList.toggle('hidden', k === 'throws');
+    const quote = k === 'String' ? '"' : k === 'char' ? "'" : '';
+    $(prefix + '-q1').textContent = $(prefix + '-q2').textContent = quote || '"';
+    $(prefix + '-q1').classList.toggle('hidden-q', !quote);
+    $(prefix + '-q2').classList.toggle('hidden-q', !quote);
+    $(prefix + '-vhint').textContent = k === 'String' ? 'Type the characters exactly; spaces count. Leave it blank for the empty String.' : k === 'char' ? 'One character' : k === 'int' ? 'A whole number' : '';
+  };
+  kind.addEventListener('change', sync);
+  sync();
+  return sync;
+}
+
+function readAnswer(kind, raw) {
+  if (kind === 'int') { const t = raw.trim().replace(/[−–]/g, '-'); return /^-?\d+$/.test(t) ? { kind, value: parseInt(t, 10) } : null; }
+  if (kind === 'char') { let t = raw; if (/^'.'$/.test(t)) t = t.slice(1, -1); return t.length === 1 ? { kind, value: t } : null; }
+  if (kind === 'String') { let t = raw; if (t.length >= 2 && t.startsWith('"') && t.endsWith('"')) t = t.slice(1, -1); return { kind, value: t }; }
+  if (kind === 'throws') return { kind, value: SIOOBE };
+  return null;
+}
+function showAnswer(a) { return a.kind === 'throws' ? 'an exception' : showValue(a); }
+
+function questionMode(prefix, items, opts) {
+  const state = items.map(() => ({ kind: '', val: '', why: '', done: false }));
+  let idx = 0;
+  const form = $(prefix + '-form');
+  const sync = buildAnswerForm(form, prefix, opts.submitLabel, opts.reasonPrompt);
+  const kind = $(prefix + '-kind'), val = $(prefix + '-val'), why = $(prefix + '-why'), err = $(prefix + '-err');
+  const after = $(prefix + '-after'), fb = $(prefix + '-feedback');
+
+  function show() {
+    const it = items[idx], st = state[idx];
+    $(prefix + '-count').textContent = `Question ${idx + 1} of ${items.length}`;
+    $(prefix + '-prev').disabled = idx === 0;
+    $(prefix + '-next').disabled = idx === items.length - 1;
+    renderCallCode($(prefix + '-expr'), it.s, it.m, it.args);
+    kind.value = st.kind; val.value = st.val; why.value = st.why;
+    sync();
+    [kind, val, why].forEach(x => { x.disabled = st.done; });
+    form.querySelector('[type="submit"]').disabled = st.done;
+    err.textContent = '';
+    after.classList.toggle('hidden', !st.done);
+    if (st.done) reveal(it, st);
+  }
+  function reveal(it, st) {
+    const r = callString(it.s, it.m, it.args);
+    const a = readAnswer(st.kind, st.val);
+    let cls, head;
+    const sameKind = a.kind === r.kind;
+    const sameVal = sameKind && (r.kind === 'throws' || a.value === r.value);
+    if (sameVal) { cls = 'good'; head = r.kind === 'throws' ? `Correct: it throws a ${SIOOBE}.` : `Correct: ${showValue(r)}.`; }
+    else if (sameKind) { cls = 'part'; head = `Right type (${r.kind}), but the value is ${showValue(r)}, not ${showAnswer(a)}.`; }
+    else if (r.kind === 'throws') { cls = 'bad'; head = `Not quite: this call throws a ${SIOOBE}. You predicted ${showAnswer(a)}.`; }
+    else if (a.kind === 'throws') { cls = 'bad'; head = `Not quite: this call is legal. It returns ${showValue(r)} (a${r.kind === 'int' ? 'n' : ''} ${r.kind}).`; }
+    else { cls = 'bad'; head = `Not quite: it returns ${showValue(r)}, a${r.kind === 'int' ? 'n' : ''} ${r.kind}. You predicted ${showAnswer(a)}.`; }
+    fb.className = 'feedback ' + cls;
+    fb.textContent = '';
+    const p1 = el('p'); p1.append(el('span', 'tag', head));
+    fb.append(p1, el('p', null, 'Your reasoning: “' + st.why.trim() + '”'));
+    opts.onReveal(it, r);
+  }
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const st = state[idx];
+    if (!kind.value) { err.textContent = 'Choose what the call does first.'; kind.focus(); return; }
+    const a = readAnswer(kind.value, val.value);
+    if (!a) { err.textContent = kind.value === 'int' ? 'Enter a whole number, like -1 or 3.' : 'A char is exactly one character.'; val.focus(); return; }
+    if (why.value.trim().length < 3) { err.textContent = 'Write a short reason before checking.'; why.focus(); return; }
+    Object.assign(st, { kind: kind.value, val: val.value, why: why.value, done: true });
+    show();
+  });
+  const save = () => { const st = state[idx]; if (!st.done) Object.assign(st, { kind: kind.value, val: val.value, why: why.value }); };
+  $(prefix + '-prev').addEventListener('click', () => { save(); idx--; show(); });
+  $(prefix + '-next').addEventListener('click', () => { save(); idx++; show(); });
+  show();
+}
+
+const predictView = new CallView($('p-view'));
+questionMode('p', PREDICT, {
+  submitLabel: 'Check my prediction',
+  reasonPrompt: 'Why? <span class="hint">Name the boxes or posts involved.</span>',
+  onReveal(it) {
+    $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests;
+    predictView.set(it.s, it.m, it.args);
+  },
+});
+questionMode('t', TRANSFER, {
+  submitLabel: 'Check',
+  reasonPrompt: 'Explain it <span class="hint">Which boxes or posts, and is the call legal?</span>',
+  onReveal(it, r) {
+    const m = $('t-model');
+    m.textContent = '';
+    m.append(el('b', null, 'Model explanation: '), explainCall(it.s, it.m, it.args, r));
+    m.append(el('p', 'small', 'Compare with yours. Did you name the posts or boxes and check that the call was legal?'));
+  },
+});
+
+/* ---------- Explore ---------- */
+const ex = { s: 'Hello There', m: 'substring2', args: { charAt: [1], substring1: [6], substring2: [2, 7], indexOf: ['There'], length: [] } };
+const exploreView = new CallView($('e-view'), {
+  interactive: true,
+  onMove(ai, p) { ex.args[ex.m][ai] = p; syncArgInputs(); exploreRender(); },
+});
+function exploreRender() { exploreView.set(ex.s, ex.m, ex.args[ex.m]); }
+function buildMethods() {
+  const seg = $('e-methods');
+  METHODS.forEach(({ m, label }) => {
+    const b = el('button', null, label);
+    b.type = 'button'; b.setAttribute('role', 'radio'); b.dataset.m = m;
+    b.addEventListener('click', () => { ex.m = m; syncMethods(); buildArgs(); exploreRender(); });
+    b.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      e.preventDefault();
+      const i = METHODS.findIndex(x => x.m === ex.m), j = (i + (e.key === 'ArrowRight' ? 1 : METHODS.length - 1)) % METHODS.length;
+      ex.m = METHODS[j].m; syncMethods(); buildArgs(); exploreRender();
+      seg.querySelector(`[data-m="${ex.m}"]`).focus();
+    });
+    seg.append(b);
+  });
+  syncMethods();
+}
+function syncMethods() {
+  $('e-methods').querySelectorAll('button').forEach(b => { const on = b.dataset.m === ex.m; b.setAttribute('aria-checked', on); b.tabIndex = on ? 0 : -1; });
+}
+function buildArgs() {
+  const box = $('e-args');
+  box.textContent = '';
+  const names = { charAt: ['index'], substring1: ['begin'], substring2: ['begin', 'end'], indexOf: ['str'], length: [] }[ex.m];
+  if (!names.length) { box.append(el('p', 'small', 'length() takes no arguments.')); return; }
+  names.forEach((nm, ai) => {
+    const lab = el('label', 'field');
+    lab.append(nm + ' ');
+    if (ex.m === 'indexOf') {
+      const inp = el('input'); inp.type = 'text'; inp.className = 'strin target'; inp.maxLength = 12; inp.spellcheck = false; inp.autocomplete = 'off';
+      inp.value = ex.args.indexOf[0]; inp.dataset.ai = ai;
+      inp.addEventListener('input', () => { ex.args.indexOf[0] = inp.value; exploreRender(); });
+      lab.append(inp);
+    } else {
+      const st = el('span', 'stepper');
+      const minus = el('button', null, '−'), plus = el('button', null, '+'), inp = el('input');
+      minus.type = plus.type = 'button';
+      minus.setAttribute('aria-label', `decrease ${nm}`); plus.setAttribute('aria-label', `increase ${nm}`);
+      inp.type = 'number'; inp.dataset.ai = ai; inp.value = ex.args[ex.m][ai];
+      const setv = v => { const n = ex.s.length; v = Math.max(-PAD, Math.min(n + PAD, v)); ex.args[ex.m][ai] = v; inp.value = v; exploreRender(); };
+      minus.addEventListener('click', () => setv(ex.args[ex.m][ai] - 1));
+      plus.addEventListener('click', () => setv(ex.args[ex.m][ai] + 1));
+      inp.addEventListener('change', () => { const v = parseInt(inp.value, 10); setv(isNaN(v) ? 0 : v); });
+      st.append(minus, inp, plus);
+      lab.append(st);
+    }
+    box.append(lab);
+  });
+  if (ex.m.startsWith('substring')) box.append(el('p', 'small', 'Or drag the flags above the posts (arrow keys work too).'));
+}
+function syncArgInputs() {
+  $('e-args').querySelectorAll('input[type="number"]').forEach(inp => { inp.value = ex.args[ex.m][+inp.dataset.ai]; });
+}
+$('e-s').value = ex.s;
+$('e-s').addEventListener('input', () => { ex.s = $('e-s').value; exploreRender(); });
+buildMethods(); buildArgs(); exploreRender();
+
+/* ---------- Lab tracer ---------- */
+const lab = { run: null, i: 0 };
+const labView = new CallView($('l-view'));
+LAB_LINES.forEach(t => $('l-code').append(el('li', null, t)));
+LAB_PRESETS.forEach(p => {
+  const c = el('button', 'chip', p.label); c.type = 'button';
+  c.addEventListener('click', () => { $('l-name').value = p.name; $('l-phrase').value = p.phrase; labLoad(); });
+  $('l-presets').append(c);
+});
+function labLoad() { lab.run = runLab($('l-name').value, $('l-phrase').value); lab.i = 0; labRender(); }
+function fmtVar(v) { return typeof v === 'string' ? jstr(v) : String(v); }
+function labRender() {
+  const steps = lab.run.steps, st = steps[lab.i], last = lab.i === steps.length - 1;
+  $('l-code').querySelectorAll('li').forEach((li, n) => {
+    li.className = n === st.line ? (st.error ? 'err' : 'on') : n < st.line ? 'done' : '';
+  });
+  const tb = $('l-vars'); tb.textContent = '';
+  LAB_VARS.forEach(([name, type]) => {
+    const tr = el('tr', st.changed.includes(name) ? 'changed' : '');
+    const has = st.vars[name] !== undefined;
+    tr.append(el('td', null, name), el('td', 't', type), el('td', has ? '' : 'unset', has ? fmtVar(st.vars[name]) : 'not assigned yet'));
+    tb.append(tr);
+  });
+  const note = $('l-note'); note.textContent = ''; note.className = 'labnote';
+  const opEl = el('div', 'op'), p = el('p', 'expl');
+  note.append(opEl, p);
+  const v = st.vars;
+  if (st.line === -1) {
+    opEl.textContent = 'Inputs read';
+    p.textContent = 'The Scanner has read the name and the phrase. Press Next to run the first statement.';
+  } else if (st.error) {
+    note.classList.add('err');
+    opEl.textContent = `Line ${st.line + 1} throws ${SIOOBE}`;
+    let why = st.result.reasons.join(' ');
+    if (st.line === 1 && v.space === -1) why = `There is no space in ${jstr(v.fullname)}, so space is −1 and this line asks for substring(0, −1). ` + why;
+    if (st.line === 9) why = `phrase has only ${v.phraseLength} character${v.phraseLength === 1 ? '' : 's'}, so substring(${v.middleIndex - 1}, ${v.middleIndex + 2}) reaches outside it. ` + why + ' middle3 needs a phrase of at least 3 characters.';
+    p.textContent = why + ' The program stops here; nothing after this line runs.';
+  } else {
+    const line = st.line;
+    const key = st.changed[0];
+    opEl.textContent = key ? `${key} = ${fmtVar(v[key])}` : `prints ${jchar(st.printed)}`;
+    const texts = {
+      0: () => v.space === -1 ? 'indexOf found no space, so it returns −1. Watch what the next line does with it.' : `The first space is at box ${v.space}.`,
+      1: () => `Posts 0 to ${v.space}: everything before the space.`,
+      2: () => `One argument: from post ${v.space + 1} (just after the space) to the end.` + (v.secondName.includes(' ') ? ' The name had more than one space, so the rest still contains a space.' : ''),
+      3: () => 'fullname now refers to a brand-new String. The original String object is unchanged; only the variable was reassigned.',
+      4: () => `phrase has ${v.phraseLength} character${v.phraseLength === 1 ? '' : 's'}.`,
+      5: () => `Integer division: ${v.phraseLength} / 2 = ${v.middleIndex}` + (v.phraseLength % 2 ? ` (the .5 is discarded).` : '.'),
+      6: () => `Posts 0 to ${v.middleIndex}.`,
+      7: () => `Posts ${v.middleIndex} to ${v.phraseLength}. Together the halves use every box exactly once.`,
+      8: () => 'concat joins the two Strings into a new one; + would do the same.',
+      9: () => v.phraseLength % 2 === 0
+        ? `Posts ${v.middleIndex - 1} to ${v.middleIndex + 2}. The phrase has an even length, so there are two middle boxes (${v.middleIndex - 1} and ${v.middleIndex}); this formula takes boxes ${v.middleIndex - 1}–${v.middleIndex + 1}, one box right of centre.`
+        : `Posts ${v.middleIndex - 1} to ${v.middleIndex + 2}: the middle box ${v.middleIndex} plus one box on each side.`,
+      10: () => `Box ${v.middleIndex} of the phrase. The program also prints its other results; this tracer shows only the String work.`,
+    };
+    p.textContent = texts[line]();
+  }
+  if (last && !st.error && st.line === 10) note.classList.add('done');
+  const hasCall = st.call;
+  $('l-view').classList.toggle('hidden', !hasCall);
+  if (hasCall) labView.set(st.call.s, st.call.m, st.call.args, { showAll: true });
+  $('l-back').disabled = $('l-reset').disabled = lab.i === 0;
+  $('l-next').disabled = $('l-end').disabled = last;
+}
+$('l-next').addEventListener('click', () => { lab.i = Math.min(lab.run.steps.length - 1, lab.i + 1); labRender(); });
+$('l-back').addEventListener('click', () => { lab.i = Math.max(0, lab.i - 1); labRender(); });
+$('l-reset').addEventListener('click', () => { lab.i = 0; labRender(); });
+$('l-end').addEventListener('click', () => { lab.i = lab.run.steps.length - 1; labRender(); });
+$('l-name').addEventListener('input', labLoad);
+$('l-phrase').addEventListener('input', labLoad);
+$('l-name').value = 'Ada Lovelace'; $('l-phrase').value = 'hello world';
+labLoad();
+</script>
+</body>
+</html>
