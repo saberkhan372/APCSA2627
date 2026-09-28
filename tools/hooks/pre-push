@@ -1,0 +1,9 @@
+#!/bin/sh
+# Pushing to main publishes docs/ immediately (GitHub Pages deploys from the branch without
+# running any checks), so verify the site here first. Enable once per clone with:
+#   git config core.hooksPath tools/hooks
+if ! out=$(python3 tools/verify_pages.py 2>&1); then
+  echo "Push stopped: tools/verify_pages.py failed. Fix the site (or remove private files from docs/) and try again." >&2
+  echo "$out" | tail -8 >&2
+  exit 1
+fi

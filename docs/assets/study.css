@@ -71,3 +71,41 @@
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 [hidden] { display: none !important; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .formerr { color: #F4B8AC; } }
+
+/* ---------- Print or save as PDF ---------- */
+.print-box { border: 1px solid var(--rule); border-radius: 4px; padding: 0.9rem 1.1rem; display: grid; gap: 0.5rem; }
+.print-box h2 { font-size: 1.15rem; }
+.print-box fieldset, #panel-mock fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
+#print-view { display: none; }
+/* While printing (or when opened with ?print=), only the print view is shown. */
+body.printing > *:not(#print-view) { display: none !important; }
+body.printing #print-view { display: block; max-width: 46rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; font-size: 0.95rem; line-height: 1.45; }
+#print-view h1 { font-size: 1.8rem; margin: 0 0 0.3rem; }
+#print-view h2 { font-size: 1.25rem; margin: 1.3rem 0 0.4rem; break-after: avoid; }
+#print-view h3 { font-size: 1.05rem; margin: 1rem 0 0.3rem; break-after: avoid; }
+#print-view p { margin: 0.25rem 0; max-width: none; }
+#print-view ul { margin: 0.2rem 0 0.5rem; padding-left: 1.2rem; }
+#print-view .p-check { list-style: none; padding-left: 0; }
+#print-view .p-sub { color: var(--ink-2); font-size: 0.88rem; }
+#print-view .p-name { margin: 0.8rem 0 1rem; font-weight: 600; }
+#print-view pre { margin: 0.3rem 0; padding: 0.4rem 0.6rem; border: 1px solid var(--rule); border-radius: 3px; font: 0.88rem/1.4 var(--mono); white-space: pre-wrap; background: none; }
+#print-view .p-item, #print-view .p-ans, #print-view .p-task { break-inside: avoid; margin: 0 0 0.9rem; }
+#print-view .p-q { font-weight: 600; }
+#print-view .p-choices { list-style: none; padding-left: 1rem; margin: 0.2rem 0; }
+#print-view .p-choices code { font-size: 0.9rem; white-space: pre-wrap; }
+#print-view .p-line { color: var(--ink-2); }
+#print-view .p-box { border: 1px solid var(--rule); border-radius: 3px; height: 4.5rem; margin-top: 0.3rem; }
+#print-view .p-box.p-tall { height: 14rem; }
+#print-view .p-break, #print-view .p-key { break-before: page; }
+#print-view .p-screen-only { font-size: 0.9rem; }
+@media print {
+  @page { margin: 1.6cm 1.5cm; }
+  :root { color-scheme: light; }
+  body.printing, body.printing #print-view { background: #fff !important; color: #000 !important; }
+  body.printing #print-view { padding: 0; max-width: none; }
+  #print-view .p-screen-only { display: none; }
+  #print-view pre, #print-view .p-box { border-color: #999; }
+  /* Printing the page directly (without the button) gives a clean copy of the guide tab. */
+  body:not(.printing) .masthead, body:not(.printing) .study-tabs, body:not(.printing) .skip-link, body:not(.printing) [data-needs-js],
+  body:not(.printing) .btn, body:not(.printing) [role="tabpanel"]:not(#panel-guide) { display: none !important; }
+}

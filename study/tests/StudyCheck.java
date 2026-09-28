@@ -45,120 +45,141 @@ public class StudyCheck {
     static String e41() { int sum = 17; int count = 4; double avg = (double) sum / count; return typed(avg); }
     static String e42() { int sum = 17; int count = 4; double avg = (double) (sum / count); return typed(avg); }
     static String e43() { int sum = 17; int count = 4; double avg = sum / count * 1.0; return typed(avg); }
-    static String e45() { return typed(7 % 3 * 2); }
-    static String e46() { return typed((int) 3.99); }
-    static void o47() {
+    static String e45() { return typed(5 / 2); }
+    static String e46() { return typed((double) (5 / 2)); }
+    static String e47() { return typed(5 / 2.0); }
+    static String e48() { return typed((int) 5.0 / 2); }
+    static String e49() { return typed(7 % 3 * 2); }
+    static String e50() { return typed((int) 3.99); }
+    static void o51() {
         System.out.print("Rain");
         System.out.println("bow " + "Road");
         System.out.println("Sun" + "  set");
     }
-    static void o48() {
+    static void o52() {
         System.out.println("one\ttwo\nthree\\four");
     }
-    static void o49() {
+    static void o53() {
         System.out.println("He said \"go\"");
     }
-    static void o51() {
+    static void o55() {
         System.out.println("He said \"go");
     }
-    static String e53() { int y = 3; int z = 4; return typed("Total: " + y + z); }
-    static String e54() { int y = 3; int z = 4; return typed(y + z + " total"); }
-    static String e55() { int x = 10; int y = 5; return typed("" + x + y); }
-    static String e56() { return typed("Area: " + 3 * 4); }
-    static String e57() { return typed("Half: " + 7 / 2); }
-    static String e58() { return typed("Score: " + 8 + 2); }
-    static String e59() { return typed(8 + 2 + ""); }
-    static String e60() { int a = 2; int b = 5; return typed("Sum: " + (a + b)); }
-    static String e61() { int a = 2; int b = 5; return typed(("Sum: " + a) + b); }
-    static String e62() { int a = 2; int b = 5; return typed("Sum: " + "" + a + b); }
-    static String e63() { int a = 2; int b = 5; return typed(a + b + "Sum: "); }
-    static void o64() {
+    static String e57() { int y = 3; int z = 4; return typed("Total: " + y + z); }
+    static String e58() { int y = 3; int z = 4; return typed(y + z + " total"); }
+    static String e59() { int x = 10; int y = 5; return typed("" + x + y); }
+    static String e60() { return typed("Area: " + 3 * 4); }
+    static String e61() { return typed("Half: " + 7 / 2); }
+    static String e62() { return typed("Score: " + 8 + 2); }
+    static String e63() { return typed(8 + 2 + ""); }
+    static String e64() { int a = 2; int b = 5; return typed("Sum: " + (a + b)); }
+    static String e65() { int a = 2; int b = 5; return typed(("Sum: " + a) + b); }
+    static String e66() { int a = 2; int b = 5; return typed("Sum: " + "" + a + b); }
+    static String e67() { int a = 2; int b = 5; return typed(a + b + "Sum: "); }
+    static void o68() {
+        System.out.println(1 + 2 + "3" + 4 + 5);
+    }
+    static void o69() {
         String name = "Kai";
         System.out.print("Hi, ");
         System.out.print(name);
         System.out.println("!");
         System.out.println("Bye");
     }
-    static void o65() {
+    static void o70() {
         System.out.print("a");
         System.out.print("b");
     }
-    static String e66() { return "String:" + "Good Morning".substring(2, 7); }
-    static String e67() { return "String:" + "Good Morning".substring(5); }
-    static String e68() { return "String:" + "planet".substring(6); }
-    static String e69() { return "String:" + "planet".substring(3, 7); }
-    static String e70() { return "int:" + "Hi there".length(); }
-    static String e71() { return "int:" + "Robinson".indexOf("bin"); }
-    static String e72() { return "int:" + "Robinson".indexOf("son"); }
-    static String e73() { return "int:" + "Robinson".indexOf("Son"); }
-    static String e74() { return "int:" + "banana".indexOf("na"); }
-    static String e79() { return "String:" + "planet".substring(2, 4); }
-    static void o80() {
+    static String e71() { return "String:" + "Good Morning".substring(2, 7); }
+    static String e72() { return "String:" + "Good Morning".substring(5); }
+    static String e73() { return "String:" + "planet".substring(6); }
+    static String e74() { return "String:" + "planet".substring(3, 7); }
+    static String e75() { return "int:" + "Hi there".length(); }
+    static String e76() { return "int:" + "Robinson".indexOf("bin"); }
+    static String e77() { return "int:" + "Robinson".indexOf("son"); }
+    static String e78() { return "int:" + "Robinson".indexOf("Son"); }
+    static String e79() { return "int:" + "banana".indexOf("na"); }
+    static String e84() { return "String:" + "planet".substring(2, 4); }
+    static void o85() {
         String full = "Ada Lovelace";
         System.out.print(full.substring(0, full.indexOf(" ")));
     }
-    static void o81() {
+    static void o86() {
         String full = "Ada Lovelace";
         System.out.print(full.substring(1, full.indexOf(" ")));
     }
-    static void o82() {
+    static void o87() {
         String full = "Ada Lovelace";
         System.out.print(full.substring(0, full.indexOf(" ") - 1));
     }
-    static void o83() {
+    static void o88() {
         String full = "Ada Lovelace";
         System.out.print(full.substring(full.indexOf(" ")));
     }
-    static void o84() {
+    static void o89() {
         String s = "Lin Wei";
         int sp = s.indexOf(" ");
         System.out.println(s.substring(sp + 1) + ", " + s.substring(0, sp));
     }
-    static int r93(double r) { return (int) (r * 8) + 3; }
-    static int r94(double r) { return (int) (r * 6) + 10; }
-    static int r95(double r) { return (int) (r * 11) + 20; }
-    static int r96(double r) { return (int) (r * 10) + 20; }
-    static int r97(double r) { return (int) r * 11 + 20; }
-    static int r98(double r) { return (int) (r * 30) + 20; }
-    static int r99(double r) { return (int) r * 6 + 1; }
-    static int r100(double r) { return (int) (r * 6) + 1; }
-    static String e111() { return typed(Math.pow(3, 2)); }
-    static String e112() { return typed(Math.abs(-7) / 2); }
-    static String e113() { return typed(Math.sqrt(25) + 1); }
-    static void o114() {
+    static int r98(double r) { return (int) (r * 8) + 3; }
+    static int r99(double r) { return (int) (r * 6) + 10; }
+    static int r100(double r) { return (int) (r * 11) + 20; }
+    static int r101(double r) { return (int) (r * 10) + 20; }
+    static int r102(double r) { return (int) r * 11 + 20; }
+    static int r103(double r) { return (int) (r * 30) + 20; }
+    static int r104(double r) { return (int) r * 6 + 1; }
+    static int r105(double r) { return (int) (r * 6) + 1; }
+    static String e116() { return typed(Math.pow(3, 2)); }
+    static String e117() { return typed(Math.abs(-7) / 2); }
+    static String e118() { return typed(Math.sqrt(25) + 1); }
+    static void o119() {
         Player a = new Player("Ana", 10);
         Player b = a;
         b.addScore(5);
         System.out.println(a.getScore());
     }
-    static void o115() {
+    static void o120() {
         Player a = new Player("Ana", 10);
         Player b = new Player("Ana", 10);
         b.addScore(5);
         System.out.println(a.getScore() + " " + b.getScore());
     }
-    static void o116() {
+    static void o121() {
         Player a = new Player("Ana", 10);
         Player b = a;
         a = new Player("Bo", 3);
         b.addScore(1);
         System.out.println(a.getName() + " " + b.getScore());
     }
-    static void o117() {
+    static void o122() {
         Player p = null;
         System.out.println(p.getScore());
     }
-    static void o118() {
+    static void o123() {
         String s = new String("hi");
         String t = new String("hi");
         System.out.println(s.equals(t) + " " + (s == t));
     }
-    static void o119() {
+    static void o124() {
+        Player a = new Player("Ana", 10);
+        Player b = new Player("Bo", 4);
+        Player c = b;
+        b = a;
+        c.addScore(1);
+        System.out.println(a.getScore() + " " + b.getScore() + " " + c.getScore());
+    }
+    static void o125() {
+        Player a = new Player("Ana", 10);
+        Player b = a;
+        a = null;
+        System.out.println(b.getScore());
+    }
+    static void o126() {
         String w = "hello";
         w.substring(1);
         System.out.println(w);
     }
-    static void o120() {
+    static void o127() {
         String w = "hello";
         w = w.substring(1);
         System.out.println(w);
@@ -218,63 +239,70 @@ public class StudyCheck {
         check("u1-num-repair [expr]", "double:4.25", () -> e41());
         check("u1-num-repair [expr]", "double:4.0", () -> e42());
         check("u1-num-repair [expr]", "double:4.0", () -> e43());
-        check("u1-num-prec-tf [expr]", "int:2", () -> e45());
-        check("u1-num-round-tf [expr]", "int:3", () -> e46());
-        check("u1-out-print [output]", "Rainbow Road\nSun  set\n", () -> capture(StudyCheck::o47));
-        check("u1-out-lines [output]", "one\ttwo\nthree\\four\n", () -> capture(StudyCheck::o48));
-        check("u1-out-quote [output]", "He said \"go\"\n", () -> capture(StudyCheck::o49));
-        check("u1-out-quote [output]", "He said \"go\n", () -> capture(StudyCheck::o51));
-        check("u1-out-cat1 [expr]", "String:Total: 34", () -> e53());
-        check("u1-out-cat2 [expr]", "String:7 total", () -> e54());
-        check("u1-out-cat3 [expr]", "String:105", () -> e55());
-        check("u1-out-cat4 [expr]", "String:Area: 12", () -> e56());
-        check("u1-out-cat5 [expr]", "String:Half: 3", () -> e57());
-        check("u1-out-explain [expr]", "String:Score: 82", () -> e58());
-        check("u1-out-explain [expr]", "String:10", () -> e59());
-        check("u1-out-repair [expr]", "String:Sum: 7", () -> e60());
-        check("u1-out-repair [expr]", "String:Sum: 25", () -> e61());
-        check("u1-out-repair [expr]", "String:Sum: 25", () -> e62());
-        check("u1-out-repair [expr]", "String:7Sum: ", () -> e63());
-        check("u1-out-cursor [output]", "Hi, Kai!\nBye\n", () -> capture(StudyCheck::o64));
-        check("u1-out-space-tf [output]", "ab", () -> capture(StudyCheck::o65));
-        check("u1-str-sub1 [call]", "String:od Mo", () -> e66());
-        check("u1-str-sub2 [call]", "String:Morning", () -> e67());
-        check("u1-str-sub3 [call]", "String:", () -> e68());
-        check("u1-str-sub4 [call]", "throws", () -> e69());
-        check("u1-str-len [call]", "int:8", () -> e70());
-        check("u1-str-idx1 [call]", "int:2", () -> e71());
-        check("u1-str-idx2 [call]", "int:5", () -> e72());
-        check("u1-str-idx3 [call]", "int:-1", () -> e73());
-        check("u1-str-idx4 [call]", "int:2", () -> e74());
+        check("u1-num-mc [expr]", "int:2", () -> e45());
+        check("u1-num-mc [expr]", "double:2.0", () -> e46());
+        check("u1-num-mc [expr]", "double:2.5", () -> e47());
+        check("u1-num-mc [expr]", "int:2", () -> e48());
+        check("u1-num-prec-tf [expr]", "int:2", () -> e49());
+        check("u1-num-round-tf [expr]", "int:3", () -> e50());
+        check("u1-out-print [output]", "Rainbow Road\nSun  set\n", () -> capture(StudyCheck::o51));
+        check("u1-out-lines [output]", "one\ttwo\nthree\\four\n", () -> capture(StudyCheck::o52));
+        check("u1-out-quote [output]", "He said \"go\"\n", () -> capture(StudyCheck::o53));
+        check("u1-out-quote [output]", "He said \"go\n", () -> capture(StudyCheck::o55));
+        check("u1-out-cat1 [expr]", "String:Total: 34", () -> e57());
+        check("u1-out-cat2 [expr]", "String:7 total", () -> e58());
+        check("u1-out-cat3 [expr]", "String:105", () -> e59());
+        check("u1-out-cat4 [expr]", "String:Area: 12", () -> e60());
+        check("u1-out-cat5 [expr]", "String:Half: 3", () -> e61());
+        check("u1-out-explain [expr]", "String:Score: 82", () -> e62());
+        check("u1-out-explain [expr]", "String:10", () -> e63());
+        check("u1-out-repair [expr]", "String:Sum: 7", () -> e64());
+        check("u1-out-repair [expr]", "String:Sum: 25", () -> e65());
+        check("u1-out-repair [expr]", "String:Sum: 25", () -> e66());
+        check("u1-out-repair [expr]", "String:7Sum: ", () -> e67());
+        check("u1-out-mc [output]", "3345\n", () -> capture(StudyCheck::o68));
+        check("u1-out-cursor [output]", "Hi, Kai!\nBye\n", () -> capture(StudyCheck::o69));
+        check("u1-out-space-tf [output]", "ab", () -> capture(StudyCheck::o70));
+        check("u1-str-sub1 [call]", "String:od Mo", () -> e71());
+        check("u1-str-sub2 [call]", "String:Morning", () -> e72());
+        check("u1-str-sub3 [call]", "String:", () -> e73());
+        check("u1-str-sub4 [call]", "throws", () -> e74());
+        check("u1-str-len [call]", "int:8", () -> e75());
+        check("u1-str-idx1 [call]", "int:2", () -> e76());
+        check("u1-str-idx2 [call]", "int:5", () -> e77());
+        check("u1-str-idx3 [call]", "int:-1", () -> e78());
+        check("u1-str-idx4 [call]", "int:2", () -> e79());
         check("u1-str-cmp1 [cmp]", "4", () -> String.valueOf("Tran".compareTo("Park")));
         check("u1-str-cmp2 [cmp]", "-2", () -> String.valueOf("Park".compareTo("Parker")));
         check("u1-str-cmp3 [cmp]", "32", () -> String.valueOf("apple".compareTo("Apple")));
         check("u1-str-cmp4 [cmp]", "0", () -> String.valueOf("Lee".compareTo("Lee")));
-        check("u1-str-explain [call]", "String:an", () -> e79());
-        check("u1-str-repair [output]", "Ada", () -> capture(StudyCheck::o80));
-        check("u1-str-repair [output]", "da", () -> capture(StudyCheck::o81));
-        check("u1-str-repair [output]", "Ad", () -> capture(StudyCheck::o82));
-        check("u1-str-repair [output]", " Lovelace", () -> capture(StudyCheck::o83));
-        check("u1-str-flip [output]", "Wei, Lin\n", () -> capture(StudyCheck::o84));
+        check("u1-str-explain [call]", "String:an", () -> e84());
+        check("u1-str-repair [output]", "Ada", () -> capture(StudyCheck::o85));
+        check("u1-str-repair [output]", "da", () -> capture(StudyCheck::o86));
+        check("u1-str-repair [output]", "Ad", () -> capture(StudyCheck::o87));
+        check("u1-str-repair [output]", " Lovelace", () -> capture(StudyCheck::o88));
+        check("u1-str-flip [output]", "Wei, Lin\n", () -> capture(StudyCheck::o89));
         check("u1-str-cmp-tf2 [cmp]", "25", () -> String.valueOf("zoo".compareTo("apple")));
-        check("u1-met-max [range]", "3..10", () -> r93(0.0) + ".." + r93(Math.nextDown(1.0)));
-        check("u1-met-min [range]", "10..15", () -> r94(0.0) + ".." + r94(Math.nextDown(1.0)));
-        check("u1-met-formula [range]", "20..30", () -> r95(0.0) + ".." + r95(Math.nextDown(1.0)));
-        check("u1-met-formula [range]", "20..29", () -> r96(0.0) + ".." + r96(Math.nextDown(1.0)));
-        check("u1-met-formula [range]", "20..20", () -> r97(0.0) + ".." + r97(Math.nextDown(1.0)));
-        check("u1-met-formula [range]", "20..49", () -> r98(0.0) + ".." + r98(Math.nextDown(1.0)));
-        check("u1-met-die [range]", "1..1", () -> r99(0.0) + ".." + r99(Math.nextDown(1.0)));
-        check("u1-met-die [range]", "1..6", () -> r100(0.0) + ".." + r100(Math.nextDown(1.0)));
-        check("u1-met-pow [expr]", "double:9.0", () -> e111());
-        check("u1-met-abs [expr]", "int:3", () -> e112());
-        check("u1-met-sqrt [expr]", "double:6.0", () -> e113());
-        check("u1-obj-alias [output]", "15\n", () -> capture(StudyCheck::o114));
-        check("u1-obj-two [output]", "10 15\n", () -> capture(StudyCheck::o115));
-        check("u1-obj-reassign [output]", "Bo 11\n", () -> capture(StudyCheck::o116));
-        check("u1-obj-null [throws]", "NullPointerException", () -> thrown(StudyCheck::o117));
-        check("u1-obj-equals [output]", "true false\n", () -> capture(StudyCheck::o118));
-        check("u1-obj-immutable-tf [output]", "hello\n", () -> capture(StudyCheck::o119));
-        check("u1-obj-store [output]", "ello\n", () -> capture(StudyCheck::o120));
+        check("u1-met-max [range]", "3..10", () -> r98(0.0) + ".." + r98(Math.nextDown(1.0)));
+        check("u1-met-min [range]", "10..15", () -> r99(0.0) + ".." + r99(Math.nextDown(1.0)));
+        check("u1-met-formula [range]", "20..30", () -> r100(0.0) + ".." + r100(Math.nextDown(1.0)));
+        check("u1-met-formula [range]", "20..29", () -> r101(0.0) + ".." + r101(Math.nextDown(1.0)));
+        check("u1-met-formula [range]", "20..20", () -> r102(0.0) + ".." + r102(Math.nextDown(1.0)));
+        check("u1-met-formula [range]", "20..49", () -> r103(0.0) + ".." + r103(Math.nextDown(1.0)));
+        check("u1-met-die [range]", "1..1", () -> r104(0.0) + ".." + r104(Math.nextDown(1.0)));
+        check("u1-met-die [range]", "1..6", () -> r105(0.0) + ".." + r105(Math.nextDown(1.0)));
+        check("u1-met-pow [expr]", "double:9.0", () -> e116());
+        check("u1-met-abs [expr]", "int:3", () -> e117());
+        check("u1-met-sqrt [expr]", "double:6.0", () -> e118());
+        check("u1-obj-alias [output]", "15\n", () -> capture(StudyCheck::o119));
+        check("u1-obj-two [output]", "10 15\n", () -> capture(StudyCheck::o120));
+        check("u1-obj-reassign [output]", "Bo 11\n", () -> capture(StudyCheck::o121));
+        check("u1-obj-null [throws]", "NullPointerException", () -> thrown(StudyCheck::o122));
+        check("u1-obj-equals [output]", "true false\n", () -> capture(StudyCheck::o123));
+        check("u1-obj-swapref [output]", "10 10 5\n", () -> capture(StudyCheck::o124));
+        check("u1-obj-nullafter [output]", "10\n", () -> capture(StudyCheck::o125));
+        check("u1-obj-immutable-tf [output]", "hello\n", () -> capture(StudyCheck::o126));
+        check("u1-obj-store [output]", "ello\n", () -> capture(StudyCheck::o127));
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         if (javac == null) throw new IllegalStateException("A JDK (not just a JRE) is needed to check compile claims.");
         compileCheck(javac, "u1-run-crash [expr]", "public class Snip { static String typed(int v) { return \"int:\" + v; } static String typed(double v) { return \"double:\" + v; } static String typed(String v) { return \"String:\" + v; } static class Player {     private String name;     private int score;     public Player(String startName, int startScore) { name = startName; score = startScore; }     public String getName() { return name; }     public int getScore() { return score; }     public void addScore(int amount) { score += amount; } } static double area(double width, int sides) { return width * sides; } static int roll(int sides) { return (int) (Math.random() * sides) + 1; } static String run() { int x = 5 / 0.0; return typed(x); } }", "Snip", false);

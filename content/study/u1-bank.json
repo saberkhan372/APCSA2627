@@ -519,7 +519,7 @@
      "text": "Add ; after the closing parenthesis",
      "code": false,
      "correct": true,
-     "why": "Every statement ends with a semicolon."
+     "why": "A method-call statement like this one must end with a semicolon."
     },
     {
      "text": "Change println to print",
@@ -541,7 +541,7 @@
     }
    ]
   },
-  "explain": "Every statement ends with a semicolon.",
+  "explain": "A method-call statement like this one must end with a semicolon.",
   "java": [
    {
     "k": "compilesClass",
@@ -990,6 +990,71 @@
   "conceptual": false
  },
  {
+  "id": "u1-num-mc",
+  "section": "numbers",
+  "skill": "casting",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "Which expression evaluates to 2.5?",
+  "code": "",
+  "answer": {
+   "choices": [
+    {
+     "text": "5 / 2",
+     "code": true,
+     "correct": false,
+     "why": "int / int gives the int 2."
+    },
+    {
+     "text": "(double) (5 / 2)",
+     "code": true,
+     "correct": false,
+     "why": "The int division happens first (2), so the cast gives 2.0."
+    },
+    {
+     "text": "5 / 2.0",
+     "code": true,
+     "correct": true,
+     "why": "One operand is a double, so the division keeps the fraction: 2.5."
+    },
+    {
+     "text": "(int) 5.0 / 2",
+     "code": true,
+     "correct": false,
+     "why": "The cast turns 5.0 into the int 5 before dividing, so this is int division: 2."
+    }
+   ]
+  },
+  "explain": "One operand is a double, so the division keeps the fraction: 2.5.",
+  "java": [
+   {
+    "k": "expr",
+    "d": "",
+    "s": "5 / 2",
+    "label": "int:2"
+   },
+   {
+    "k": "expr",
+    "d": "",
+    "s": "(double) (5 / 2)",
+    "label": "double:2.0"
+   },
+   {
+    "k": "expr",
+    "d": "",
+    "s": "5 / 2.0",
+    "label": "double:2.5"
+   },
+   {
+    "k": "expr",
+    "d": "",
+    "s": "(int) 5.0 / 2",
+    "label": "int:2"
+   }
+  ],
+  "conceptual": false
+ },
+ {
   "id": "u1-num-prec-tf",
   "section": "numbers",
   "skill": "division",
@@ -1358,6 +1423,52 @@
     "d": "int a = 2; int b = 5;",
     "s": "a + b + \"Sum: \"",
     "label": "String:7Sum: "
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-out-mc",
+  "section": "output",
+  "skill": "concat",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "What does this print?",
+  "code": "System.out.println(1 + 2 + \"3\" + 4 + 5);",
+  "answer": {
+   "choices": [
+    {
+     "text": "3345",
+     "code": false,
+     "correct": true,
+     "why": "1 + 2 is int addition (3). Then \"3\" makes it a String, so 4 and 5 are joined as text: \"33\" + 4 + 5 gives \"3345\"."
+    },
+    {
+     "text": "12345",
+     "code": false,
+     "correct": false,
+     "why": "The first + adds two ints, because no String has appeared yet: 1 + 2 is 3."
+    },
+    {
+     "text": "15",
+     "code": false,
+     "correct": false,
+     "why": "Once \"3\" appears, + joins text instead of adding."
+    },
+    {
+     "text": "339",
+     "code": false,
+     "correct": false,
+     "why": "After the String appears, 4 and 5 are joined one at a time, not added first."
+    }
+   ]
+  },
+  "explain": "1 + 2 is int addition (3). Then \"3\" makes it a String, so 4 and 5 are joined as text: \"33\" + 4 + 5 gives \"3345\".",
+  "java": [
+   {
+    "k": "output",
+    "code": "System.out.println(1 + 2 + \"3\" + 4 + 5);",
+    "out": "3345\n"
    }
   ],
   "conceptual": false
@@ -2583,6 +2694,98 @@
   "conceptual": false
  },
  {
+  "id": "u1-obj-swapref",
+  "section": "objects",
+  "skill": "references",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "What does this print?",
+  "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = new Player(\"Bo\", 4);\nPlayer c = b;\nb = a;\nc.addScore(1);\nSystem.out.println(a.getScore() + \" \" + b.getScore() + \" \" + c.getScore());",
+  "answer": {
+   "choices": [
+    {
+     "text": "10 10 5",
+     "code": false,
+     "correct": true,
+     "why": "c = b makes c refer to Bo. Then b = a points b at Ana. c.addScore(1) changes Bo (4 to 5). a and b both refer to Ana (10)."
+    },
+    {
+     "text": "10 5 5",
+     "code": false,
+     "correct": false,
+     "why": "After b = a, b refers to Ana, not Bo. Reassigning b does not change c."
+    },
+    {
+     "text": "11 11 4",
+     "code": false,
+     "correct": false,
+     "why": "c still refers to Bo, so addScore changes Bo, not Ana."
+    },
+    {
+     "text": "10 4 5",
+     "code": false,
+     "correct": false,
+     "why": "b was reassigned to refer to Ana, so b.getScore() is 10."
+    }
+   ]
+  },
+  "explain": "c = b makes c refer to Bo. Then b = a points b at Ana. c.addScore(1) changes Bo (4 to 5). a and b both refer to Ana (10).",
+  "java": [
+   {
+    "k": "output",
+    "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = new Player(\"Bo\", 4);\nPlayer c = b;\nb = a;\nc.addScore(1);\nSystem.out.println(a.getScore() + \" \" + b.getScore() + \" \" + c.getScore());",
+    "out": "10 10 5\n"
+   }
+  ],
+  "conceptual": false
+ },
+ {
+  "id": "u1-obj-nullafter",
+  "section": "objects",
+  "skill": "references",
+  "origin": "new",
+  "format": "mc",
+  "prompt": "What happens when this runs?",
+  "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = a;\na = null;\nSystem.out.println(b.getScore());",
+  "answer": {
+   "choices": [
+    {
+     "text": "It prints 10.",
+     "code": false,
+     "correct": true,
+     "why": "a = null only changes the variable a. The Player object still exists, and b still refers to it."
+    },
+    {
+     "text": "It throws a NullPointerException.",
+     "code": false,
+     "correct": false,
+     "why": "Only a is null. b still refers to the Player."
+    },
+    {
+     "text": "It prints 0.",
+     "code": false,
+     "correct": false,
+     "why": "Nothing reset the score; the object is unchanged."
+    },
+    {
+     "text": "It does not compile.",
+     "code": false,
+     "correct": false,
+     "why": "Every line is legal Java."
+    }
+   ]
+  },
+  "explain": "a = null only changes the variable a. The Player object still exists, and b still refers to it.",
+  "java": [
+   {
+    "k": "output",
+    "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = a;\na = null;\nSystem.out.println(b.getScore());",
+    "out": "10\n"
+   }
+  ],
+  "conceptual": false
+ },
+ {
   "id": "u1-obj-copy-tf",
   "section": "objects",
   "skill": "references",
@@ -2614,7 +2817,7 @@
   "answer": {
    "value": false
   },
-  "explain": "Strings never change. substring returns a new String; unless you store it (w = w.substring(1);), w is unchanged.",
+  "explain": "No String method changes the String it is called on. substring returns a String with the result; unless you store it (w = w.substring(1);), w is unchanged.",
   "java": [
    {
     "k": "output",
@@ -2635,7 +2838,7 @@
   "answer": {
    "text": "ello\n"
   },
-  "explain": "This time the new String is stored back in w, so w now refers to \"ello\". The original \"hello\" object is unchanged.",
+  "explain": "This time the result is stored back in w, so w now refers to \"ello\". The original \"hello\" is unchanged.",
   "java": [
    {
     "k": "output",

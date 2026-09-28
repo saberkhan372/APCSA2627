@@ -45,10 +45,16 @@ for (const f of readdirSync(dir).filter(f => f.endsWith('.json') && !f.endsWith(
     if (it.format === 'int' && c && cmp.traceCompareTo(c.a, c.b).value !== it.answer.value) bad(`${where}: compareTo engine disagrees`);
     if (it.format === 'output' && it.answer.text !== it.java[0].out) bad(`${where}: shown answer differs from the Java-checked output`);
   }
-  for (const s of g.sections) {
-    const pool = bank.filter(i => i.section === s.id && g.mock.formats.includes(i.format));
-    if (pool.length < g.mock.perSection) bad(`${g.id}: section ${s.id} has only ${pool.length} mock-eligible items`);
+  // Every mock mode must be able to draw perSection items from every section, and the
+  // assessment-format mode must use multiple choice only, like the real assessment.
+  for (const mode of g.mock.modes) {
+    for (const s of g.sections) {
+      const pool = bank.filter(i => i.section === s.id && mode.formats.includes(i.format));
+      if (pool.length < g.mock.perSection * 2) bad(`${g.id}: mock mode ${mode.id} has only ${pool.length} items in section ${s.id} (need at least ${g.mock.perSection * 2} for variety)`);
+    }
   }
+  const assessmentMode = g.mock.modes.find(m => m.id === 'assessment');
+  if (!assessmentMode || assessmentMode.formats.join() !== 'mc') bad(`${g.id}: the assessment-format mock must be multiple choice only`);
   for (const k of Object.keys(g.skills)) {
     const n = bank.filter(i => i.skill === k).length;
     if (n < 2) bad(`${g.id}: skill ${k} has ${n} practice item(s)`);

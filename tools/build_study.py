@@ -74,7 +74,15 @@ def guide_page(g, bank):
             + '</div>')
     # Guide
     guide = (f'<section id="panel-guide" role="tabpanel" class="study-panel"><div class="assessment-box"><strong>{e(a["name"])}: {e(human(a["date"]))}</strong>'
-             f'<span>{e(a["format"])}</span><span class="small">Self-ratings and results are saved in this browser only. No login, and nothing is sent anywhere.</span></div>')
+             f'<span>{e(a["format"])}</span><span class="small">Self-ratings and results are saved in this browser only. No login, and nothing is sent anywhere.</span></div>'
+             '<div class="print-box" id="print-box" data-needs-js hidden><h2>Print or save as PDF</h2>'
+             '<p class="small">Makes a paper version: key ideas, an "I can" checklist, practice questions, the code tasks, and an optional answer key on its own pages. '
+             'To get a PDF, choose "Save as PDF" in your browser\'s print window.</p>'
+             '<fieldset><legend class="small">Questions</legend>'
+             '<label class="row"><input type="radio" name="print-set" value="short" checked> Short set: two per skill (<span id="print-short-count"></span> questions)</label>'
+             '<label class="row"><input type="radio" name="print-set" value="all"> All <span id="print-all-count"></span> questions</label></fieldset>'
+             '<label class="row"><input type="checkbox" id="print-key" checked> Include the answer key (starts on a new page, so you can leave it off)</label>'
+             '<div><button type="button" class="btn primary" id="print-go">Print or save as PDF</button></div></div>')
     for s in g['sections']:
         lessons = ''.join(f'<a href="../notes/{d}.html">{e(ROWS[d]["assignment"])}</a>' for d in s['lessons'])
         vis = ''.join(f'<a href="../visualizers/{f}">{e(t)}</a>' for f, t in s['visualizers'])
@@ -96,10 +104,13 @@ def guide_page(g, bank):
     mock = (f'<section id="panel-mock" role="tabpanel" class="study-panel" hidden><div id="mock-intro" class="study-panel">'
             f'<p>{m["count"]} questions, {m["perSection"]} from each section, in a new mix each time. Like the real assessment, nothing is checked until you submit. '
             'Then you see every explanation and which skills to practice.</p>'
+            '<fieldset><legend class="small">Format</legend>'
+            + ''.join(f'<label class="row"><input type="radio" name="mock-mode" value="{e(md["id"])}"{" checked" if n == 0 else ""}> {e(md["label"])}</label>' for n, md in enumerate(m['modes']))
+            + '</fieldset>'
             f'<label class="row"><input type="checkbox" id="mock-timed"> Time me ({m["minutes"]} minutes, the same as the assessment)</label>'
             '<div><button type="button" class="btn primary" id="mock-start">Start a mock</button></div><div id="mock-history"></div></div>'
             '<div id="mock-run" hidden><div class="mock-bar"><div class="mock-nav" id="mock-nav" aria-label="Questions"></div><span id="mock-timer" aria-live="off"></span></div>'
-            '<div id="mock-item"></div><div class="row"><button type="button" class="btn" id="mock-prev">← Previous</button><button type="button" class="btn" id="mock-next">Next →</button>'
+            '<div id="mock-item"></div><p class="formerr" id="mock-error" role="alert"></p><div class="row"><button type="button" class="btn" id="mock-prev">← Previous</button><button type="button" class="btn" id="mock-next">Next →</button>'
             '<button type="button" class="btn primary" id="mock-submit">Submit answers</button></div></div><div id="mock-results" class="study-panel" hidden></div></section>')
     # Code tasks
     code = ('<section id="panel-code" role="tabpanel" class="study-panel" hidden><p>Like the second part of the assessment: write a method from a supplied header. '

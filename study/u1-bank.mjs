@@ -176,7 +176,7 @@ mc('u1-run-comment', S1, 'syntax', 'sibling', 'Which of these is NOT a Java comm
 ]);
 const greeting = (body) => `public class Greeting {\n    public static void main(String[] args) {\n        ${body}\n    }\n}`;
 mc('u1-run-fix', S1, 'syntax', 'sibling', 'This program does not compile. Which change fixes it?', greeting('System.out.println("Hi there")'), [
-  ['Add ; after the closing parenthesis', true, 'Every statement ends with a semicolon.', { k: 'compilesClass', code: greeting('System.out.println("Hi there");'), ok: true }],
+  ['Add ; after the closing parenthesis', true, 'A method-call statement like this one must end with a semicolon.', { k: 'compilesClass', code: greeting('System.out.println("Hi there");'), ok: true }],
   ['Change println to print', false, 'print would also need a semicolon; the method name is not the problem.', { k: 'compilesClass', code: greeting('System.out.print("Hi there")'), ok: false }],
   ["Use single quotes: 'Hi there'", false, "Single quotes are for one char, not text. 'Hi there' does not compile.", { k: 'compilesClass', code: greeting("System.out.println('Hi there');"), ok: false }],
   ['Remove the word static', false, 'The missing semicolon would still stop it compiling.', { k: 'compilesClass', code: 'public class Greeting {\n    public void main(String[] args) {\n        System.out.println("Hi there")\n    }\n}', ok: false }],
@@ -214,6 +214,12 @@ mcExpr('u1-num-repair', S2, 'casting', 'sibling', 'This should store the exact a
   ['double avg = sum / count * 1.0;', 'sum / count is still int division (4); multiplying by 1.0 afterwards is too late.'],
   ['int avg = sum / (double) count;', 'The division is now double (4.25), but it cannot be stored in an int: this does not compile.'],
 ], 'int sum = 17;\nint count = 4;\ndouble avg = sum / count;');
+mcExpr('u1-num-mc', S2, 'casting', 'new', 'Which expression evaluates to 2.5?', '', 'double:2.5', [
+  ['5 / 2', 'int / int gives the int 2.'],
+  ['(double) (5 / 2)', 'The int division happens first (2), so the cast gives 2.0.'],
+  ['5 / 2.0', 'One operand is a double, so the division keeps the fraction: 2.5.'],
+  ['(int) 5.0 / 2', 'The cast turns 5.0 into the int 5 before dividing, so this is int division: 2.'],
+]);
 tf('u1-num-prec-tf', S2, 'division', 'sibling', '* and % have the same precedence, so they are done left to right.', true,
   'They share precedence. 7 % 3 * 2 is (7 % 3) * 2 = 2. If * went first, it would be 7 % 6 = 1.', [{ k: 'expr', d: '', s: '7 % 3 * 2', label: 'int:2' }]);
 tf('u1-num-round-tf', S2, 'casting', 'new', '(int) 3.99 rounds to 4.', false, 'Casting to int truncates (chops off the fraction). (int) 3.99 is 3.', [{ k: 'expr', d: '', s: '(int) 3.99', label: 'int:3' }]);
@@ -247,6 +253,12 @@ mcExpr('u1-out-repair', S3, 'concat', 'new', 'This should print the sum, Sum: 7.
   ['"Sum: " + "" + a + b', 'Adding "" keeps everything as text: "Sum: 25".'],
   ['a + b + "Sum: "', 'The sum is right (7) but it ends up in front: "7Sum: ".'],
 ], 'int a = 2;\nint b = 5;\nSystem.out.println("Sum: " + a + b);');
+mc('u1-out-mc', S3, 'concat', 'new', 'What does this print?', 'System.out.println(1 + 2 + "3" + 4 + 5);', [
+  ['3345', true, '1 + 2 is int addition (3). Then "3" makes it a String, so 4 and 5 are joined as text: "33" + 4 + 5 gives "3345".', { k: 'output', code: 'System.out.println(1 + 2 + "3" + 4 + 5);', out: '3345\n' }],
+  ['12345', false, 'The first + adds two ints, because no String has appeared yet: 1 + 2 is 3.'],
+  ['15', false, 'Once "3" appears, + joins text instead of adding.'],
+  ['339', false, 'After the String appears, 4 and 5 are joined one at a time, not added first.'],
+]);
 output('u1-out-cursor', S3, 'printing', 'new', 'String name = "Kai";\nSystem.out.print("Hi, ");\nSystem.out.print(name);\nSystem.out.println("!");\nSystem.out.println("Bye");',
   'Hi, Kai!\nBye\n', 'The three prints stay on one line until println moves to the next line.');
 tf('u1-out-space-tf', S3, 'printing', 'new', 'System.out.print adds a space after what it prints.', false, 'print adds nothing: print("a") then print("b") shows ab.', [{ k: 'output', code: 'System.out.print("a");\nSystem.out.print("b");', out: 'ab' }]);
@@ -364,12 +376,24 @@ mc('u1-obj-equals', S6, 'references', 'new', 'What does this print?', 'String s 
   ['false false', false, 'equals is true: the contents match.'],
   ['false true', false, 'This is backwards: equals checks contents, == checks whether it is the same object.'],
 ]);
+mc('u1-obj-swapref', S6, 'references', 'new', 'What does this print?', 'Player a = new Player("Ana", 10);\nPlayer b = new Player("Bo", 4);\nPlayer c = b;\nb = a;\nc.addScore(1);\nSystem.out.println(a.getScore() + " " + b.getScore() + " " + c.getScore());', [
+  ['10 10 5', true, 'c = b makes c refer to Bo. Then b = a points b at Ana. c.addScore(1) changes Bo (4 to 5). a and b both refer to Ana (10).', { k: 'output', code: 'Player a = new Player("Ana", 10);\nPlayer b = new Player("Bo", 4);\nPlayer c = b;\nb = a;\nc.addScore(1);\nSystem.out.println(a.getScore() + " " + b.getScore() + " " + c.getScore());', out: '10 10 5\n' }],
+  ['10 5 5', false, 'After b = a, b refers to Ana, not Bo. Reassigning b does not change c.'],
+  ['11 11 4', false, 'c still refers to Bo, so addScore changes Bo, not Ana.'],
+  ['10 4 5', false, 'b was reassigned to refer to Ana, so b.getScore() is 10.'],
+]);
+mc('u1-obj-nullafter', S6, 'references', 'new', 'What happens when this runs?', 'Player a = new Player("Ana", 10);\nPlayer b = a;\na = null;\nSystem.out.println(b.getScore());', [
+  ['It prints 10.', true, 'a = null only changes the variable a. The Player object still exists, and b still refers to it.', { k: 'output', code: 'Player a = new Player("Ana", 10);\nPlayer b = a;\na = null;\nSystem.out.println(b.getScore());', out: '10\n' }],
+  ['It throws a NullPointerException.', false, 'Only a is null. b still refers to the Player.'],
+  ['It prints 0.', false, 'Nothing reset the score; the object is unchanged.'],
+  ['It does not compile.', false, 'Every line is legal Java.'],
+]);
 tf('u1-obj-copy-tf', S6, 'references', 'new', 'Player b = a; makes a copy of the Player object.', false,
   'It copies the reference, so a and b refer to the same single object.', [{ k: 'output', code: 'Player a = new Player("Ana", 10);\nPlayer b = a;\nb.addScore(5);\nSystem.out.println(a.getScore());', out: '15\n' }]);
 tf('u1-obj-immutable-tf', S6, 'references', 'new', 'Calling w.substring(1) changes the String that w refers to.', false,
-  'Strings never change. substring returns a new String; unless you store it (w = w.substring(1);), w is unchanged.', [{ k: 'output', code: 'String w = "hello";\nw.substring(1);\nSystem.out.println(w);', out: 'hello\n' }]);
+  'No String method changes the String it is called on. substring returns a String with the result; unless you store it (w = w.substring(1);), w is unchanged.', [{ k: 'output', code: 'String w = "hello";\nw.substring(1);\nSystem.out.println(w);', out: 'hello\n' }]);
 output('u1-obj-store', S6, 'references', 'new', 'String w = "hello";\nw = w.substring(1);\nSystem.out.println(w);', 'ello\n',
-  'This time the new String is stored back in w, so w now refers to "ello". The original "hello" object is unchanged.');
+  'This time the result is stored back in w, so w now refers to "ello". The original "hello" is unchanged.');
 
 writeFileSync(new URL('../content/study/u1-bank.json', import.meta.url), JSON.stringify(items, null, 1) + '\n');
 console.log(`Wrote ${items.length} items`);

@@ -5,9 +5,11 @@ classroom-only/
 *PRIVATE*.zip
 
 # Assessment originals and answer keys are private; they never belong in the published docs/ folder.
-docs/Quizzes/
-docs/Tests/
-docs/**/Keys/
-docs/**/*.doc
-docs/**/*.docx
-docs/**/*.pdf
+# Case-insensitive patterns, because Git on Linux treats Quizzes and quizzes as different names.
+docs/[Qq][Uu][Ii][Zz][Zz][Ee][Ss]/
+docs/[Tt][Ee][Ss][Tt][Ss]/
+docs/**/[Kk][Ee][Yy][Ss]/
+docs/**/[Aa][Ss][Ss][Ee][Ss][Ss][Mm][Ee][Nn][Tt][Ss]/
+docs/**/*.[Dd][Oo][Cc]
+docs/**/*.[Dd][Oo][Cc][Xx]
+docs/**/*.[Pp][Dd][Ff]

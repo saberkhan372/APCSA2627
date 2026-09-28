@@ -27,7 +27,7 @@
       ],
       "ideas": [
         "Compile-time errors stop a program from running at all. Run-time errors crash it while it runs. Logic errors run fine but give wrong answers.",
-        "Every statement ends with a semicolon; Strings use double quotes; Java is case-sensitive.",
+        "Simple statements such as declarations, assignments and method calls end with a semicolon; a block in { } and a header such as if (…) do not. Strings use double quotes, and Java is case-sensitive.",
         "Names use letters, digits, _ and $, cannot start with a digit, and cannot be reserved words. Classes are LikeThis; variables and methods are likeThis.",
         "n bits can represent 2ⁿ different values. RAM is volatile: it loses its contents without power."
       ],
@@ -104,7 +104,7 @@
         "substring(length()) and substring(k, k) are legal and return \"\". Going past length() throws an exception.",
         "indexOf returns where the first match starts, or −1 if there is none. Case matters.",
         "compareTo stops at the first different character and subtracts; if one String runs out first, it subtracts the lengths.",
-        "length() and indexOf return int; equals returns boolean; substring returns a new String. Strings never change."
+        "length() and indexOf return int; equals returns boolean; substring returns a String and leaves the original unchanged. No String method changes the String it is called on."
       ],
       "lessons": [
         "2026-09-22",
@@ -154,7 +154,7 @@
         "b = a copies the reference: both now refer to the same object, and a change through one is seen through the other.",
         "Reassigning a variable points it at a different object; it does not change the old one.",
         "Calling a method on null compiles but throws a NullPointerException when it runs.",
-        "== asks \"same object?\"; equals asks \"same contents?\"."
+        "For Strings, equals compares the characters, while == asks whether two references point to the same object. (Other classes decide for themselves what equals means.)"
       ],
       "lessons": [
         "2026-09-17"
@@ -183,12 +183,25 @@
     "count": 12,
     "minutes": 26,
     "perSection": 2,
-    "formats": [
-      "mc",
-      "value",
-      "call",
-      "int",
-      "tf"
+    "modes": [
+      {
+        "id": "assessment",
+        "label": "Assessment format: 12 multiple-choice questions",
+        "formats": [
+          "mc"
+        ]
+      },
+      {
+        "id": "mixed",
+        "label": "Mixed review: 12 questions of every type (typed answers, true/false and multiple choice)",
+        "formats": [
+          "mc",
+          "value",
+          "call",
+          "int",
+          "tf"
+        ]
+      }
     ]
   },
   "codeTasks": [

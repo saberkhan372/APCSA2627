@@ -84,6 +84,7 @@
         root, focus: () => sel.focus(),
         read() {
           const k = sel.value;
+          if (!k && inp.value === '') return { blank: true };
           if (!k) return { error: 'Choose what happens first.' };
           if (!['int', 'double', 'String', 'char'].includes(k)) return { kind: k };
           let v = inp.value;
@@ -99,14 +100,14 @@
       const inp = el('input'); inp.type = 'text'; inp.inputMode = 'numeric'; inp.className = 'num'; inp.autocomplete = 'off';
       if (saved) inp.value = saved.val;
       l.append(inp); root.append(l);
-      return { root, focus: () => inp.focus(), read: () => /^\s*[−-]?\d+\s*$/.test(inp.value) ? { kind: 'int', val: inp.value } : { error: 'Enter a whole number.' } };
+      return { root, focus: () => inp.focus(), read: () => inp.value.trim() === '' ? { blank: true } : /^\s*[−-]?\d+\s*$/.test(inp.value) ? { kind: 'int', val: inp.value } : { error: 'Enter a whole number.' } };
     }
     if (item.format === 'output') {
       const l = el('label', 'field'); l.append('Output ', el('span', 'hint', '(type it exactly; press Enter for a new line)'));
       const ta = el('textarea', 'mono'); ta.rows = 3; ta.spellcheck = false;
       if (saved) ta.value = saved.val;
       l.append(ta); root.append(l);
-      return { root, focus: () => ta.focus(), read: () => ta.value.trim() === '' ? { error: 'Type what you expect to be printed.' } : { kind: 'output', val: ta.value } };
+      return { root, focus: () => ta.focus(), read: () => ta.value.trim() === '' ? { blank: true } : { kind: 'output', val: ta.value } };
     }
     // mc and tf: radio groups
     const fs = el('fieldset', 'choices');
@@ -125,7 +126,7 @@
     const order = item.format === 'mc' ? opts.map(o => +o.key) : null;
     return {
       root, focus: () => { const r = $('input', fs); if (r) r.focus(); },
-      read: () => { const r = $('input:checked', fs); return r ? { kind: item.format, val: r.value, order } : { error: 'Choose an answer.' }; },
+      read: () => { const r = $('input:checked', fs); return r ? { kind: item.format, val: r.value, order } : { blank: true }; },
     };
   }
 
@@ -233,6 +234,7 @@
     const fbHost = el('div'); card.append(fbHost);
     btn.addEventListener('click', () => {
       const a = ctl.read();
+      if (a.blank) { err.textContent = 'Answer the question first.'; return; }
       if (a.error) { err.textContent = a.error; return; }
       err.textContent = '';
       const g = grade(item, a);
@@ -261,16 +263,17 @@
 
   /* ---------- Mock: answers first, explanations at the end ---------- */
   const mock = { items: [], answers: [], i: 0, timer: null, deadline: null, started: 0 };
-  function pickMock() {
+  function pickMock(mode) {
     const cfg = G.mock, picked = [];
     G.sections.forEach(s => {
-      const pool = shuffle(BANK.filter(i => i.section === s.id && cfg.formats.includes(i.format)));
+      const pool = shuffle(BANK.filter(i => i.section === s.id && mode.formats.includes(i.format)));
       picked.push(...pool.slice(0, cfg.perSection));
     });
     return shuffle(picked).slice(0, cfg.count);
   }
   function startMock() {
-    mock.items = pickMock(); mock.answers = mock.items.map(() => null); mock.i = 0; mock.started = Date.now();
+    mock.mode = G.mock.modes.find(m => m.id === ($('input[name="mock-mode"]:checked') || {}).value) || G.mock.modes[0];
+    mock.items = pickMock(mock.mode); mock.answers = mock.items.map(() => null); mock.i = 0; mock.started = Date.now(); mock.dropped = 0;
     const timed = $('#mock-timed').checked;
     mock.deadline = timed ? Date.now() + G.mock.minutes * 60000 : null;
     $('#mock-intro').hidden = true; $('#mock-run').hidden = false; $('#mock-results').hidden = true;
@@ -286,10 +289,20 @@
     if (left === 0) { clearInterval(mock.timer); mock.timer = null; submitMock(true); }
   }
   let mockCtl = null;
-  function keepMockAnswer() {
-    if (!mockCtl) return;
-    const a = mockCtl.read();
-    if (!a.error) mock.answers[mock.i] = a;
+  // Saves the current answer. A blank answer clears any earlier one. An invalid answer blocks moving on,
+  // unless force is set (time ran out), in which case it is dropped and counted as unanswered.
+  function keepMockAnswer(force) {
+    if (!mockCtl) return true;
+    const a = mockCtl.read(), msg = $('#mock-error');
+    if (a.blank) { mock.answers[mock.i] = null; msg.textContent = ''; return true; }
+    if (a.error) {
+      if (force) { mock.answers[mock.i] = null; mock.dropped++; return true; }
+      msg.textContent = a.error + ' Fix it or clear it before moving on.';
+      mockCtl.focus();
+      return false;
+    }
+    mock.answers[mock.i] = a; msg.textContent = '';
+    return true;
   }
   function renderMock() {
     const host = $('#mock-item'); host.textContent = '';
@@ -301,14 +314,14 @@
     mock.items.forEach((_, n) => {
       const b = el('button', 'dot' + (n === mock.i ? ' on' : '') + (mock.answers[n] ? ' answered' : ''), String(n + 1));
       b.type = 'button'; b.setAttribute('aria-label', `Question ${n + 1}${mock.answers[n] ? ', answered' : ''}`);
-      b.addEventListener('click', () => { keepMockAnswer(); mock.i = n; renderMock(); });
+      b.addEventListener('click', () => { if (keepMockAnswer()) { mock.i = n; renderMock(); } });
       nav.append(b);
     });
     $('#mock-prev').disabled = mock.i === 0;
     $('#mock-next').disabled = mock.i === mock.items.length - 1;
   }
   function submitMock(timeUp) {
-    keepMockAnswer();
+    if (!keepMockAnswer(timeUp)) return;
     const unanswered = mock.answers.filter(a => !a).length;
     if (!timeUp && unanswered && !confirm(`${unanswered} question${unanswered > 1 ? 's are' : ' is'} unanswered. Submit anyway?`)) return;
     if (mock.timer) { clearInterval(mock.timer); mock.timer = null; }
@@ -316,7 +329,7 @@
     const bySkill = {};
     results.forEach(({ item, g }) => { const s = bySkill[item.skill] || (bySkill[item.skill] = { c: 0, t: 0 }); s.t++; if (g.ok) s.c++; });
     const score = results.filter(r => r.g.ok).length;
-    store.mocks.push({ date: new Date().toISOString(), score, total: results.length, timed: !!mock.deadline, seconds: Math.round((Date.now() - mock.started) / 1000), bySkill, timeUp: !!timeUp });
+    store.mocks.push({ date: new Date().toISOString(), mode: mock.mode.id, score, total: results.length, timed: !!mock.deadline, seconds: Math.round((Date.now() - mock.started) / 1000), bySkill, timeUp: !!timeUp });
     save();
     showMockResults(results, score, bySkill, timeUp);
   }
@@ -324,7 +337,8 @@
     $('#mock-run').hidden = true;
     const host = $('#mock-results'); host.hidden = false; host.textContent = '';
     host.append(el('h3', null, `Score: ${score} of ${results.length}`));
-    if (timeUp) host.append(el('p', 'small', 'Time ran out, so your answers were submitted automatically.'));
+    host.append(el('p', 'small', mock.mode.label));
+    if (timeUp) host.append(el('p', 'small', 'Time ran out, so your answers were submitted automatically.' + (mock.dropped ? ` ${mock.dropped} answer${mock.dropped > 1 ? 's were' : ' was'} not valid and counted as unanswered.` : '')));
     const weak = Object.entries(bySkill).filter(([, s]) => s.c < s.t);
     const tbl = el('table', 'skilltable');
     tbl.innerHTML = '<thead><tr><th>Skill</th><th>Correct</th></tr></thead>';
@@ -362,14 +376,15 @@
     const ul = el('ul');
     store.mocks.slice(-8).reverse().forEach(m => {
       const d = new Date(m.date);
-      ul.append(el('li', null, `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}: ${m.score} of ${m.total}${m.timed ? `, timed (${Math.round(m.seconds / 60)} min)` : ''}`));
+      const mode = m.mode === 'mixed' ? 'mixed review' : 'assessment format';
+      ul.append(el('li', null, `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}: ${m.score} of ${m.total}, ${mode}${m.timed ? `, timed (${Math.round(m.seconds / 60)} min)` : ''}`));
     });
     h.append(ul);
   }
   function buildMock() {
     $('#mock-start').addEventListener('click', startMock);
-    $('#mock-prev').addEventListener('click', () => { keepMockAnswer(); mock.i--; renderMock(); });
-    $('#mock-next').addEventListener('click', () => { keepMockAnswer(); mock.i++; renderMock(); });
+    $('#mock-prev').addEventListener('click', () => { if (keepMockAnswer()) { mock.i--; renderMock(); } });
+    $('#mock-next').addEventListener('click', () => { if (keepMockAnswer()) { mock.i++; renderMock(); } });
     $('#mock-submit').addEventListener('click', () => submitMock(false));
     renderMockHistory();
   }
@@ -425,7 +440,125 @@
     });
   }
 
+  /* ---------- Print or save as PDF ---------- */
+  // Seeded shuffle so printed multiple-choice letters are the same every time you print.
+  function seeded(id) {
+    let h = 2166136261;
+    for (const ch of id) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+    return () => { h = Math.imul(h ^ (h >>> 15), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+  }
+  function printOrder(item) {
+    const rnd = seeded(item.id), idx = item.answer.choices.map((_, i) => i);
+    for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+    return idx;
+  }
+  // Short set: two items per skill, preferring two different formats.
+  function shortSet() {
+    const chosen = new Set();
+    Object.keys(G.skills).forEach(k => {
+      const pool = BANK.filter(i => i.skill === k && !chosen.has(i.id));
+      if (!pool.length) return;
+      chosen.add(pool[0].id);
+      const second = pool.find(i => i !== pool[0] && i.format !== pool[0].format) || pool[1];
+      if (second) chosen.add(second.id);
+    });
+    return BANK.filter(i => chosen.has(i.id));
+  }
+  const LETTERS = 'ABCDE';
+  function keyText(item) {
+    const a = item.answer;
+    if (item.format === 'mc') { const order = printOrder(item), pos = order.findIndex(i => a.choices[i].correct); return `${LETTERS[pos]}. ${a.choices[order[pos]].text}`; }
+    if (item.format === 'tf') return a.value ? 'True' : 'False';
+    if (item.format === 'int') return String(a.value);
+    if (item.format === 'output') return null;
+    return describeLabel(a.label);
+  }
+  function buildPrintView(which, withKey) {
+    const items = which === 'all' ? BANK.slice() : shortSet();
+    const order = G.sections.map(s => s.id);
+    items.sort((x, y) => order.indexOf(x.section) - order.indexOf(y.section) || BANK.indexOf(x) - BANK.indexOf(y));
+    let v = $('#print-view');
+    if (!v) { v = el('div'); v.id = 'print-view'; document.body.append(v); }
+    v.textContent = '';
+    const back = el('p', 'p-screen-only'); const bl = el('a', null, '← Back to the interactive guide'); bl.href = location.pathname; back.append(bl, ' · Use your browser\'s Print command and choose "Save as PDF" to make a PDF.'); v.append(back);
+    const a = G.assessment;
+    v.append(el('h1', null, G.title), el('p', 'p-sub', `${G.unit} · ${a.name}: ${new Date(a.date + 'T12:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}`),
+      el('p', 'p-sub', a.format), el('p', 'p-name', 'Name ______________________________    Date ______________'));
+    // Key ideas and checklist
+    G.sections.forEach(s => {
+      const sec = el('section', 'p-section');
+      sec.append(el('h2', null, `${s.title} (${s.topics})`));
+      const ul = el('ul'); s.ideas.forEach(i => ul.append(el('li', null, i))); sec.append(ul);
+      const cl = el('ul', 'p-check'); s.skills.forEach(k => cl.append(el('li', null, '☐ ' + G.skills[k]))); sec.append(cl);
+      v.append(sec);
+    });
+    // Questions
+    const qh = el('h2', 'p-break', `Practice questions (${items.length})`); v.append(qh);
+    v.append(el('p', 'p-sub', 'For "value" questions, write the type (int, double, String) and the value, or write "does not compile" or "crashes".'));
+    let n = 0, lastSec = null;
+    const numbered = [];
+    items.forEach(item => {
+      if (item.section !== lastSec) { v.append(el('h3', null, SECTION[item.section].title)); lastSec = item.section; }
+      n++; numbered.push([n, item]);
+      const q = el('div', 'p-item');
+      q.append(el('p', 'p-q', `${n}. ${item.prompt}`));
+      if (item.statement) q.append(el('p', null, item.statement));
+      if (item.code) q.append(el('pre', null, item.code));
+      if (item.format === 'mc') {
+        const ol = el('ol', 'p-choices');
+        printOrder(item).forEach((ci, pos) => { const li = el('li'); const c = item.answer.choices[ci]; li.append(`${LETTERS[pos]}. `, c.code ? el('code', null, c.text) : c.text); ol.append(li); });
+        q.append(ol);
+      } else if (item.format === 'tf') q.append(el('p', 'p-line', 'Circle one:   True     False'));
+      else if (item.format === 'output') q.append(el('div', 'p-box'));
+      else if (item.format === 'value') q.append(el('p', 'p-line', 'Type: ____________   Value: ______________________'));
+      else if (item.format === 'call') q.append(el('p', 'p-line', 'Returns (type): ____________   Value: ______________________'));
+      else q.append(el('p', 'p-line', 'Answer: ______________'));
+      if (item.format !== 'mc' && item.format !== 'tf') q.append(el('p', 'p-line', 'Why: ________________________________________________'));
+      v.append(q);
+    });
+    // Code tasks
+    const ch = el('h2', 'p-break', 'Code tasks'); v.append(ch);
+    $$('.codetask').forEach(t => {
+      const task = G.codeTasks.find(x => x.id === t.dataset.task);
+      const d = el('div', 'p-task');
+      d.append(el('h3', null, task.title), el('pre', null, task.header), el('p', null, 'Returns: ' + task.does), el('p', null, 'Precondition: ' + task.pre));
+      const ol = el('ol'); task.rubric.forEach(r => ol.append(el('li', null, r))); d.append(el('p', 'p-sub', 'Rubric'), ol, el('div', 'p-box p-tall'));
+      v.append(d);
+    });
+    // Answer key
+    if (withKey) {
+      const k = el('section', 'p-key');
+      k.append(el('h2', null, 'Answer key'));
+      numbered.forEach(([num, item]) => {
+        const d = el('div', 'p-ans');
+        const t = keyText(item);
+        d.append(el('p', 'p-q', `${num}. ${t === null ? 'Output:' : t}`));
+        if (t === null) d.append(el('pre', null, item.answer.text.replace(/\n$/, '')));
+        d.append(el('p', null, item.explain));
+        k.append(d);
+      });
+      k.append(el('p', 'p-sub', 'Code tasks: check your method with the downloadable checker and the rubric. Passing the checker is feedback on its test cases, not proof of correctness.'));
+      v.append(k);
+    }
+    v.append(el('p', 'p-sub', `From ${location.origin}${location.pathname}`));
+    document.body.classList.add('printing');
+  }
+  function buildPrintControls() {
+    const box = $('#print-box'); if (!box) return;
+    $('#print-short-count').textContent = shortSet().length;
+    $('#print-all-count').textContent = BANK.length;
+    $('#print-go').addEventListener('click', () => {
+      buildPrintView($('input[name="print-set"]:checked').value, $('#print-key').checked);
+      const done = () => { document.body.classList.remove('printing'); window.removeEventListener('afterprint', done); };
+      window.addEventListener('afterprint', done);
+      window.print();
+    });
+  }
+  // ?print=short or ?print=all shows the print view on screen (key included unless &key=0).
+  const printParam = new URLSearchParams(location.search).get('print');
+
   $('#js-note') && ($('#js-note').hidden = true);
   $$('[data-needs-js]').forEach(e => { e.hidden = false; });
-  buildRatings(); buildPractice(); buildMock(); buildCode(); renderProgress();
+  buildRatings(); buildPractice(); buildMock(); buildCode(); renderProgress(); buildPrintControls();
+  if (printParam === 'short' || printParam === 'all') buildPrintView(printParam, new URLSearchParams(location.search).get('key') !== '0');
 })();
