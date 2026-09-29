@@ -487,8 +487,11 @@
     // Key ideas and checklist
     G.sections.forEach(s => {
       const sec = el('section', 'p-section');
-      sec.append(el('h2', null, `${s.title} (${s.topics})`));
-      const ul = el('ul'); s.ideas.forEach(i => ul.append(el('li', null, i))); sec.append(ul);
+      // A heading and the list under it form one unbreakable block, so a heading never sits alone at a page bottom.
+      const keep = el('div', 'p-keep');
+      keep.append(el('h2', null, `${s.title} (${s.topics})`));
+      const ul = el('ul'); s.ideas.forEach(i => ul.append(el('li', null, i))); keep.append(ul);
+      sec.append(keep);
       const cl = el('ul', 'p-check'); s.skills.forEach(k => cl.append(el('li', null, '☐ ' + G.skills[k]))); sec.append(cl);
       v.append(sec);
     });
@@ -498,9 +501,11 @@
     let n = 0, lastSec = null;
     const numbered = [];
     items.forEach(item => {
-      if (item.section !== lastSec) { v.append(el('h3', null, SECTION[item.section].title)); lastSec = item.section; }
+      let heading = null;
+      if (item.section !== lastSec) { heading = el('h3', null, SECTION[item.section].title); lastSec = item.section; }
       n++; numbered.push([n, item]);
       const q = el('div', 'p-item');
+      if (heading) q.prepend(heading);
       q.append(el('p', 'p-q', `${n}. ${item.prompt}`));
       if (item.statement) q.append(el('p', null, item.statement));
       if (item.code) q.append(el('pre', null, item.code));

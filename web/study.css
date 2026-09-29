@@ -89,7 +89,7 @@ body.printing #print-view { display: block; max-width: 46rem; margin: 0 auto; pa
 #print-view .p-sub { color: var(--ink-2); font-size: 0.88rem; }
 #print-view .p-name { margin: 0.8rem 0 1rem; font-weight: 600; }
 #print-view pre { margin: 0.3rem 0; padding: 0.4rem 0.6rem; border: 1px solid var(--rule); border-radius: 3px; font: 0.88rem/1.4 var(--mono); white-space: pre-wrap; background: none; }
-#print-view .p-item, #print-view .p-ans, #print-view .p-task { break-inside: avoid; margin: 0 0 0.9rem; }
+#print-view .p-item, #print-view .p-ans, #print-view .p-task, #print-view .p-keep { break-inside: avoid; margin: 0 0 0.9rem; }
 #print-view .p-q { font-weight: 600; }
 #print-view .p-choices { list-style: none; padding-left: 1rem; margin: 0.2rem 0; }
 #print-view .p-choices code { font-size: 0.9rem; white-space: pre-wrap; }

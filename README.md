@@ -89,13 +89,13 @@ Practice and mock progress is stored only in the student's browser (`localStorag
 
 ## Publishing safeguard
 
-GitHub Pages currently deploys `docs/` straight from `main` on every push, **without running `verify_pages.py`**. Until deployment runs the verifier, use the local pre-push hook, which refuses to push when verification fails:
+GitHub Pages currently deploys `docs/` straight from `main` on every push, **without running `verify_pages.py`**. Until deployment runs the verifier, use the local pre-push hook. For each push to `main`, it checks out the exact commit being pushed in a temporary worktree and refuses the push if verification fails, so uncommitted or ignored files cannot affect the result:
 
 ```
 git config core.hooksPath tools/hooks
 ```
 
-The hook only protects clones where it is enabled. To enforce verification for every push, switch **Settings → Pages → Source** to **GitHub Actions** and let the publishing workflow build, verify and deploy on push to `main` (its trigger and the "workflow must be manual" check in `verify_pages.py` would change together).
+The hook only protects clones where it is enabled, and `git push --no-verify` skips it. To enforce verification for every push, switch **Settings → Pages → Source** to **GitHub Actions** and let the publishing workflow build, verify and deploy on push to `main` (its trigger and the "workflow must be manual" check in `verify_pages.py` would change together).
 
 ## Verification limits
 
