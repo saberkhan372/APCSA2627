@@ -26,8 +26,13 @@ const TUI = (function () {
 .tui-frame { position: relative; z-index: 1; border: 2px solid var(--line); border-radius: 8px; background: var(--panel); padding: 6px 10px; margin-bottom: 10px; }
 .tui-frame.top { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .tui-frame.old { opacity: .75; }
-.tui-frame .fhead { font: 600 13px var(--mono); color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between; gap: 6px; }
-.tui-frame .fvar { display: flex; justify-content: space-between; gap: 8px; font: 14px var(--mono); padding: 1px 0; }
+.tui-frame.ghost { border-style: dashed; opacity: .6; background: transparent; }
+.tui-frame .ptag { font: 600 10px var(--sans); text-transform: uppercase; letter-spacing: .04em; color: var(--accent); border: 1px solid var(--accent); border-radius: 3px; padding: 0 3px; margin-right: 5px; vertical-align: 1px; }
+.tui-frame .ghostnote { font: 600 12px var(--sans); color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .tui-frame.enter { animation: tui-in .35s ease-out; } @keyframes tui-in { from { transform: translateY(-8px); opacity: 0; } } }
+.tui-frame .fhead { font: 600 13px var(--mono); color: var(--muted); margin-bottom: 4px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 6px; }
+.tui-frame .fvar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 8px; font: 14px var(--mono); padding: 1px 0; }
+.tui-frame .fvar > span:last-child { margin-left: auto; white-space: nowrap; }
 .tui-frame .fvar.changed { background: var(--same-bg); color: var(--same-ink); font-weight: 700; border-radius: 3px; }
 .tui-frame .fvar .ty { color: var(--muted); font-size: 11px; margin-right: 4px; }
 .tui-anchor { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); display: inline-block; vertical-align: middle; }
@@ -153,16 +158,28 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
     if (!step) { left.append(el('p', 'small', 'Nothing has run yet.')); return; }
     const frames = step.frames.slice().reverse();
     const changed = step.changed || [];
+    const head = f => f.name === 'main' ? 'main' : `${f.name}(${(f.params || []).join(', ') || ''})`;
+    // A frame that a return just removed: drawn dashed above the stack for this one step.
+    if (opts.ghost) {
+      const g = el('div', 'tui-frame ghost'), h = el('div', 'fhead');
+      h.append(el('span', null, head(opts.ghost.frame)), el('span', 'ghostnote', opts.ghost.label));
+      g.append(h); left.append(g);
+    }
+    // A very deep stack shows its newest frames, a count of the hidden ones, and the oldest two.
+    const hidden = frames.length > 12 ? frames.length - 8 : 0;
     frames.forEach((f, k) => {
-      const box = el('div', 'tui-frame' + (k === 0 ? ' top' : ' old'));
-      const h = el('div', 'fhead'); h.append(el('span', null, f.name === 'main' ? 'main' : `${f.name}(…)`), el('span', null, k === 0 ? 'running' : 'waiting'));
+      if (hidden && k >= 6 && k < 6 + hidden) { if (k === 6) left.append(el('div', 'tui-frame ghost', `… ${hidden} more frames …`)); return; }
+      const box = el('div', 'tui-frame' + (k === 0 ? ' top' : ' old') + (k === 0 && opts.entering ? ' enter' : ''));
+      const h = el('div', 'fhead'); h.append(el('span', null, head(f)), el('span', null, k === 0 ? 'running' : 'waiting'));
       box.append(h);
       if (!f.vars.length) box.append(el('div', 'small', 'no variables'));
       f.vars.forEach(v => {
         const row = el('div', 'fvar' + (k === 0 && changed.includes(v.name) ? ' changed' : ''));
-        const name = el('span'); name.append(el('span', 'ty', v.type), v.name);
+        const name = el('span');
+        if ((f.params || []).includes(v.name)) { const t = el('span', 'ptag', 'param'); t.title = 'A parameter: it got a copy of the argument when the method was called.'; name.append(t); }
+        name.append(el('span', 'ty', v.type), v.name);
         const val = el('span');
-        if (v.v && typeof v.v === 'object' && 'ref' in v.v) { val.append(valueText(v.v, v.type, step.heap) + ' '); const an = el('span', 'tui-anchor'); an.dataset.ref = v.v.ref; val.append(an); }
+        if (v.v && typeof v.v === 'object' && 'ref' in v.v) { const full = 'refers to ' + valueText(v.v, v.type, step.heap).replace('→ ', ''); val.title = full; val.setAttribute('aria-label', full); val.append(`#${v.v.ref} `); const an = el('span', 'tui-anchor'); an.dataset.ref = v.v.ref; val.append(an); }
         else val.textContent = valueText(v.v, v.type, step.heap);
         row.append(name, val); box.append(row);
       });

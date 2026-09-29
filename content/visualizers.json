@@ -83,5 +83,15 @@
       "2026-11-03"
     ],
     "tests": "boolean"
+  },
+  {
+    "id": "calls",
+    "title": "Method-Call and Parameter Tracer",
+    "file": "calls.html",
+    "dates": [
+      "2026-11-11",
+      "2026-11-13"
+    ],
+    "tests": "calls"
   }
 ]

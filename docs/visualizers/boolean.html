@@ -1417,7 +1417,7 @@ const MJ = (function () {
 
   /* ---------------- Running ---------------- */
   function run(src, opts = {}) {
-    const maxOps = opts.maxOps || 200000, maxSteps = opts.maxSteps || 3000, maxDepth = opts.maxDepth || 1000;
+    const maxOps = opts.maxOps || 200000, maxSteps = opts.maxSteps || 3000, maxDepth = opts.maxDepth || 200;
     nodeSeq = 0;
     let prog, mtab;
     try { prog = parse(src); mtab = check(prog); }
@@ -1439,7 +1439,12 @@ const MJ = (function () {
       if (t && t.startsWith('ArrayList')) { const e = ELEM(t); return '[' + v.values.map(x => text(e, x)).join(', ') + ']'; }
       return String(v);
     };
-    const show = (t, v) => t === 'String' && v !== null ? JSON.stringify(v) : text(t, v);
+    const show = (t, v) => {
+      if (v !== null && typeof v === 'object' && v.kind !== 'list') return `→ ${v.kind === 'player' ? 'Player' : 'array'} #${v.hid}`;
+      return t === 'String' && v !== null ? JSON.stringify(v) : text(t, v);
+    };
+    // For call and return notes: a reference reads as the object it points to.
+    const showRef = (t, v) => v !== null && typeof v === 'object' ? `→ ${v.kind === 'player' ? 'Player' : v.kind === 'list' ? 'ArrayList' : 'array'} #${v.hid}` : show(t, v);
     const snapVal = (t, v) => (v !== null && typeof v === 'object') ? { ref: v.hid } : v;
     function snapshot() {
       const heap = {};
@@ -1453,7 +1458,7 @@ const MJ = (function () {
       const fs = frames.map(f => {
         const vars = [];
         for (const sc of f.scopes) for (const [name, cell] of sc) { vars.push({ name, type: cell.type, v: snapVal(cell.type, cell.v) }); visit(cell.v); }
-        return { name: f.name, line: f.line, vars, args: f.args };
+        return { name: f.name, line: f.line, vars, args: f.args, params: f.params || [] };
       });
       return { frames: fs, heap };
     }
@@ -1569,7 +1574,7 @@ const MJ = (function () {
         if (n.name === 'getName') return r.name;
         if (n.name === 'getScore') return r.score;
         const old = r.score; r.score = (r.score + a[0]) | 0;
-        record('mutate', n, `addScore changes the Player that ${n.recv.src} refers to: its score goes from ${old} to ${r.score}.`);
+        record('mutate', n, `addScore changes the Player that ${n.recv.src} refers to: its score goes from ${old} to ${r.score}.`, { obj: r.hid });
         return undefined;
       }
       // ArrayList
@@ -1614,24 +1619,30 @@ const MJ = (function () {
       if (frames.length >= maxDepth) throw new ToolLimit('depth', n.line);
       const scope = new Map();
       m.params.forEach((q, i) => scope.set(q.name, { type: q.type, v: a[i] }));
-      frames.push({ name: m.name, scopes: [scope], line: n.line, args: m.params.map((q, i) => `${q.name} = ${show(q.type, a[i])}`) });
-      const argText = m.params.map((q, i) => `${q.name} = ${show(q.type, a[i])}`).join(', ');
-      record('call', m, `Call ${m.name}(${a.map((x, i) => show(m.params[i].type, x)).join(', ')}): a new frame${m.params.length ? ` where ${argText}` : ''}. ${m.params.some(q => isRef(q.type) && q.type !== 'String') ? 'A reference parameter gets a copy of the reference, so it refers to the same object as the argument.' : m.params.length ? 'Each parameter gets a copy of its argument.' : ''}`.trim(), { callLine: n.line });
+      const caller = fr().name;
+      frames.push({ name: m.name, scopes: [scope], line: n.line, params: m.params.map(q => q.name), args: m.params.map((q, i) => `${q.name} = ${showRef(q.type, a[i])}`) });
+      const argText = m.params.map((q, i) => `${q.name} = ${showRef(q.type, a[i])}`).join(', ');
+      const hasRef = m.params.some(q => isRef(q.type) && q.type !== 'String');
+      record('call', m, `Call ${m.name}(${n.args.map(x => x.src.trim()).join(', ')}): a new frame${m.params.length ? ` where ${argText}` : ''}. ${hasRef ? 'A reference parameter gets a copy of the reference, so it refers to the same object as the argument.' : m.params.length ? 'Each parameter gets a copy of its argument.' : ''}`.trim(),
+        { callLine: n.line, method: m.name, caller, args: m.params.map((q, i) => ({ name: q.name, type: q.type, src: n.args[i].src, v: snapVal(q.type, a[i]), text: showRef(q.type, a[i]) })) });
       let ret;
       try { execBlockBody(m.body); ret = undefined; }
       catch (e) { if (e instanceof Ret) ret = e.v; else { throw e; } }
       const f = frames.pop();
-      record('return', n, m.ret === 'void' ? `${m.name} finishes. Its frame and its variables are removed, and execution continues in ${fr().name}.` : `${m.name} returns ${show(m.ret, ret)} to ${fr().name}, and its frame is removed.`, { returned: m.ret === 'void' ? undefined : show(m.ret, ret), from: f.name });
+      record('return', n, m.ret === 'void' ? `${m.name} finishes. Its frame and its variables are removed, and execution continues in ${fr().name}.` : `${m.name} returns ${showRef(m.ret, ret)} to ${fr().name}, and its frame is removed.`,
+        { returned: m.ret === 'void' ? undefined : showRef(m.ret, ret), retType: m.ret, retValue: m.ret === 'void' ? undefined : snapVal(m.ret, ret), from: f.name, method: m.name });
       return ret;
     }
     class Ret { constructor(v) { this.v = v; } }
     function execBlockBody(b) { fr().scopes.push(new Map()); try { for (const s of b.body) exec(s); } finally { fr().scopes.pop(); } }
+    let lastArr = null;   // the array an element assignment just changed
     function assignTo(target, v, n) {
       if (target.k === 'var') { lookupCell(target.name).v = v; return; }
       const arr = ev(target.arr), i = ev(target.i);
       if (arr === null) npe(n.line, target.arr.src);
       if (i < 0 || i >= arr.values.length) throw new JavaThrow('ArrayIndexOutOfBoundsException', n.line, `Index ${i} is outside the array, whose indexes run from 0 to ${arr.values.length - 1}.`);
       arr.values[i] = v;
+      lastArr = arr.hid;
       return i;
     }
     function condition(n, node) {
@@ -1670,7 +1681,7 @@ const MJ = (function () {
           const note = n.op === '='
             ? `${who} becomes ${describe(tt, v)}${n.target.k === 'var' && old !== undefined && old !== v && (typeof v !== 'object') ? ` (it was ${show(tt, old)})` : ''}.`
             : `${n.op} updates ${who}: it becomes ${show(tt, v)}.` + (prim(tt) === 'int' && prim(n.e.type) === 'double' ? ' The result is cast back to int automatically.' : '');
-          record('assign', n, note, { changed: [n.target.k === 'var' ? n.target.name : n.target.arr.src], arrayIndex: idx });
+          record('assign', n, note, { changed: [n.target.k === 'var' ? n.target.name : n.target.arr.src], arrayIndex: idx, obj: n.target.k === 'index' ? lastArr : undefined });
           return;
         }
         case 'incdec': {
@@ -1678,7 +1689,7 @@ const MJ = (function () {
           const v = n.op === '++' ? (prim(tt) === 'int' ? (cur + 1) | 0 : cur + 1) : (prim(tt) === 'int' ? (cur - 1) | 0 : cur - 1);
           const idx = assignTo(n.target, v, n);
           const who = n.target.k === 'var' ? n.target.name : `${n.target.arr.src}[${idx}]`;
-          record(n.forUpdate ? 'update' : 'assign', n, `${n.src.trim()} ${n.op === '++' ? 'adds' : 'subtracts'} 1: ${who} goes from ${show(tt, cur)} to ${show(tt, v)}.`, { changed: [n.target.k === 'var' ? n.target.name : n.target.arr.src], arrayIndex: idx });
+          record(n.forUpdate ? 'update' : 'assign', n, `${n.src.trim()} ${n.op === '++' ? 'adds' : 'subtracts'} 1: ${who} goes from ${show(tt, cur)} to ${show(tt, v)}.`, { changed: [n.target.k === 'var' ? n.target.name : n.target.arr.src], arrayIndex: idx, obj: n.target.k === 'index' ? lastArr : undefined });
           return;
         }
         case 'print': {
@@ -1764,6 +1775,8 @@ const MJ = (function () {
         }
         case 'return': {
           const v = n.e ? ev(n.e) : undefined;
+          const t = n.e ? n.e.type : 'void';
+          record('returning', n, n.e ? `return ${n.e.src.trim()}: the value is ${showRef(t, v)}. ${fr().name} stops here, and this value goes back to the call.` : `return; ends ${fr().name} here.`, { value: n.e ? showRef(t, v) : undefined, method: fr().name });
           throw new Ret(v);
         }
       }
@@ -1784,9 +1797,11 @@ const MJ = (function () {
         crashed = e.javaType;
         // Keep the part of a condition that was evaluated before it threw, and where it threw.
         steps.push({ kind: 'error', line: e.line, note: `${e.why} Java throws a${/^[AEIOU]/.test(e.javaType) ? 'n' : ''} ${e.javaType}, and the program stops.`, out, error: e.javaType, depth: frames.length, failNode: e.node, tree: treeRec ? [...treeRec.entries()] : null, ...snapshot() });
-      } else if (e instanceof ToolLimit) {
-        limit = e.kind;
-        steps.push({ kind: 'limit', line: e.line, note: e.kind === 'depth' ? `This tool stops at ${maxDepth} method calls deep. Java itself would stop with a StackOverflowError once the calls get deep enough.` : `This tool stopped after ${maxOps.toLocaleString()} operations. The program may have an infinite loop.`, out, depth: frames.length, ...snapshot() });
+      } else if (e instanceof ToolLimit || e instanceof RangeError && /call stack/i.test(e.message) || e && e.name === 'InternalError') {
+        // The browser's own stack can run out before maxDepth; treat that as the same depth limit.
+        limit = e instanceof ToolLimit ? e.kind : 'depth';
+        const line = e instanceof ToolLimit ? e.line : frames[frames.length - 1].line;
+        steps.push({ kind: 'limit', line, note: limit === 'depth' ? `This tool stops at ${frames.length} method calls deep. Java itself would keep going deeper before stopping with a StackOverflowError.` : `This tool stopped after ${maxOps.toLocaleString()} operations. The program may have an infinite loop.`, out, depth: frames.length, ...snapshot() });
       } else throw e;
     }
     return { steps, out, crashed, limit, truncated, prog };
@@ -1878,8 +1893,13 @@ const TUI = (function () {
 .tui-frame { position: relative; z-index: 1; border: 2px solid var(--line); border-radius: 8px; background: var(--panel); padding: 6px 10px; margin-bottom: 10px; }
 .tui-frame.top { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .tui-frame.old { opacity: .75; }
-.tui-frame .fhead { font: 600 13px var(--mono); color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between; gap: 6px; }
-.tui-frame .fvar { display: flex; justify-content: space-between; gap: 8px; font: 14px var(--mono); padding: 1px 0; }
+.tui-frame.ghost { border-style: dashed; opacity: .6; background: transparent; }
+.tui-frame .ptag { font: 600 10px var(--sans); text-transform: uppercase; letter-spacing: .04em; color: var(--accent); border: 1px solid var(--accent); border-radius: 3px; padding: 0 3px; margin-right: 5px; vertical-align: 1px; }
+.tui-frame .ghostnote { font: 600 12px var(--sans); color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .tui-frame.enter { animation: tui-in .35s ease-out; } @keyframes tui-in { from { transform: translateY(-8px); opacity: 0; } } }
+.tui-frame .fhead { font: 600 13px var(--mono); color: var(--muted); margin-bottom: 4px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 6px; }
+.tui-frame .fvar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 8px; font: 14px var(--mono); padding: 1px 0; }
+.tui-frame .fvar > span:last-child { margin-left: auto; white-space: nowrap; }
 .tui-frame .fvar.changed { background: var(--same-bg); color: var(--same-ink); font-weight: 700; border-radius: 3px; }
 .tui-frame .fvar .ty { color: var(--muted); font-size: 11px; margin-right: 4px; }
 .tui-anchor { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); display: inline-block; vertical-align: middle; }
@@ -2005,16 +2025,28 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
     if (!step) { left.append(el('p', 'small', 'Nothing has run yet.')); return; }
     const frames = step.frames.slice().reverse();
     const changed = step.changed || [];
+    const head = f => f.name === 'main' ? 'main' : `${f.name}(${(f.params || []).join(', ') || ''})`;
+    // A frame that a return just removed: drawn dashed above the stack for this one step.
+    if (opts.ghost) {
+      const g = el('div', 'tui-frame ghost'), h = el('div', 'fhead');
+      h.append(el('span', null, head(opts.ghost.frame)), el('span', 'ghostnote', opts.ghost.label));
+      g.append(h); left.append(g);
+    }
+    // A very deep stack shows its newest frames, a count of the hidden ones, and the oldest two.
+    const hidden = frames.length > 12 ? frames.length - 8 : 0;
     frames.forEach((f, k) => {
-      const box = el('div', 'tui-frame' + (k === 0 ? ' top' : ' old'));
-      const h = el('div', 'fhead'); h.append(el('span', null, f.name === 'main' ? 'main' : `${f.name}(…)`), el('span', null, k === 0 ? 'running' : 'waiting'));
+      if (hidden && k >= 6 && k < 6 + hidden) { if (k === 6) left.append(el('div', 'tui-frame ghost', `… ${hidden} more frames …`)); return; }
+      const box = el('div', 'tui-frame' + (k === 0 ? ' top' : ' old') + (k === 0 && opts.entering ? ' enter' : ''));
+      const h = el('div', 'fhead'); h.append(el('span', null, head(f)), el('span', null, k === 0 ? 'running' : 'waiting'));
       box.append(h);
       if (!f.vars.length) box.append(el('div', 'small', 'no variables'));
       f.vars.forEach(v => {
         const row = el('div', 'fvar' + (k === 0 && changed.includes(v.name) ? ' changed' : ''));
-        const name = el('span'); name.append(el('span', 'ty', v.type), v.name);
+        const name = el('span');
+        if ((f.params || []).includes(v.name)) { const t = el('span', 'ptag', 'param'); t.title = 'A parameter: it got a copy of the argument when the method was called.'; name.append(t); }
+        name.append(el('span', 'ty', v.type), v.name);
         const val = el('span');
-        if (v.v && typeof v.v === 'object' && 'ref' in v.v) { val.append(valueText(v.v, v.type, step.heap) + ' '); const an = el('span', 'tui-anchor'); an.dataset.ref = v.v.ref; val.append(an); }
+        if (v.v && typeof v.v === 'object' && 'ref' in v.v) { const full = 'refers to ' + valueText(v.v, v.type, step.heap).replace('→ ', ''); val.title = full; val.setAttribute('aria-label', full); val.append(`#${v.v.ref} `); const an = el('span', 'tui-anchor'); an.dataset.ref = v.v.ref; val.append(an); }
         else val.textContent = valueText(v.v, v.type, step.heap);
         row.append(name, val); box.append(row);
       });

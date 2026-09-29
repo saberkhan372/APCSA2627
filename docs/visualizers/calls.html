@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Boolean and Short-Circuit Explorer</title>
+<title>Method-Call Tracer</title>
 <style>
 /* Palette and chrome match the course site (web/site.css). */
 :root {
@@ -216,38 +216,24 @@ details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
   .col-current .tile { transform: none; }
 }
-/* ---- Boolean Explorer ---- */
-.seg { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
-.seg button { appearance: none; font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 3px; padding: 6px 12px; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-input.condin { font: 17px var(--mono); }
-textarea.declin { font: 15px var(--mono); min-height: 4em; }
-.tree { margin-top: 14px; overflow-x: auto; padding: 4px 2px 8px; }
-.bx { display: inline-flex; align-items: stretch; gap: 6px; border: 2px solid var(--line); border-radius: 8px; padding: 6px; vertical-align: top; }
-.bx.and, .bx.or { background: var(--panel); }
-.bx .opx { align-self: center; font: 700 16px var(--mono); color: var(--accent); padding: 0 2px; }
-.leaf { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; border: 1.5px solid var(--line); border-radius: 6px; padding: 5px 8px; font: 15px var(--mono); background: var(--panel); vertical-align: top; white-space: pre; }
-.chip { font: 700 12px var(--mono); border-radius: 999px; padding: 1px 8px; }
-.chip.t { background: var(--same-bg); color: var(--same-ink); border: 1px solid var(--same-line); }
-.chip.f { background: var(--diff-bg); color: var(--diff-ink); border: 1px solid var(--diff-line); }
-.chip.n { background: var(--soft); color: var(--muted); border: 1px solid var(--line); }
-.chip.x { background: var(--diff-line); color: #fff; }
-.skipped { opacity: .45; border-style: dashed !important; }
-.threw { border-color: var(--diff-line) !important; box-shadow: 0 0 0 3px var(--diff-bg); }
-.cur { box-shadow: 0 0 0 3px var(--accent); }
-.valrow { display: flex; align-items: center; justify-content: flex-end; }
-.valrow .chip, .leaf .chip { white-space: nowrap; }
-.equiv { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
-table.tt { border-collapse: collapse; font: 13px var(--mono); margin-top: 6px; }
-table.tt th, table.tt td { border: 1px solid var(--line); padding: 3px 8px; text-align: center; }
-table.tt th { background: var(--soft); font: 600 12px var(--sans); color: var(--muted); }
-table.tt tr.bad td { background: var(--diff-bg); }
-.verdict { font-weight: 700; margin-top: 6px; }
-.verdict.ok { color: var(--same-ink); } .verdict.no { color: var(--diff-ink); }
-.runner-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 12px; }
-@media (max-width: 820px) { .runner-grid { grid-template-columns: minmax(0, 1fr); } }
+/* ---- Method-Call Tracer ---- */
+.runner-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 16px; margin-top: 12px; }
+@media (max-width: 980px) { .runner-grid { grid-template-columns: minmax(0, 1fr); } }
 .colhead { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 12px 0 6px; }
-.reindent { font: 14px/1.6 var(--mono); background: var(--soft); border-radius: 8px; padding: 10px 14px; white-space: pre; overflow-x: auto; }
+.callcard { border: 2px solid var(--accent); border-radius: 8px; padding: 8px 12px; margin-top: 10px; background: var(--panel); }
+.callcard.ret { border-color: var(--same-line); }
+.callcard .chead { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .06em; color: var(--accent); margin-bottom: 4px; }
+.callcard.ret .chead { color: var(--same-ink); }
+.callcard table { border-collapse: collapse; font: 14px var(--mono); width: 100%; }
+.callcard th { font: 600 11px var(--sans); color: var(--muted); text-align: left; padding: 2px 6px; }
+.callcard td { padding: 3px 6px; border-top: 1px solid var(--line); vertical-align: top; }
+.callcard td.arrow { color: var(--accent); font-weight: 700; text-align: center; }
+.callcard .big { font: 700 18px var(--mono); }
+.callout { border-left: 4px solid var(--extra-line); background: var(--extra-bg); border-radius: 0 6px 6px 0; padding: 6px 10px; margin-top: 8px; font-size: 15px; }
+.callout.copy { border-left-color: var(--accent); background: var(--accent-soft); }
+.toolbar2 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.limits { font-size: 14px; color: var(--muted); margin-top: 14px; }
+@media (prefers-reduced-motion: no-preference) { .callcard { animation: pop .3s ease-out; } @keyframes pop { from { transform: scale(.97); opacity: .4; } } }
 </style>
 </head>
 <body>
@@ -255,9 +241,9 @@ table.tt tr.bad td { background: var(--diff-bg); }
 <header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="../study/index.html">Study</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
 <main id="main" class="wrap" tabindex="-1">
   <header class="page-heading">
-    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 2 · Selection</p>
-    <h1>Boolean and Short-Circuit Explorer</h1>
-    <p class="lede">Java evaluates a condition left to right, and <code>&amp;&amp;</code> and <code>||</code> stop as soon as the answer is known. See which parts run and which are skipped, why a null check must come first, and how Java pairs each <code>else</code>.</p>
+    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 3 · Methods</p>
+    <h1>Method-Call and Parameter Tracer</h1>
+    <p class="lede">Every call gets its own <b>frame</b>. Each parameter gets a <b>copy</b> of its argument, a <code>return</code> sends one value back, and a reference parameter points to the <b>same object</b> as the argument. Changing a parameter is not the same as changing the object it refers to.</p>
   </header>
 
   <div class="tabs" role="tablist" aria-label="Mode">
@@ -278,25 +264,19 @@ table.tt tr.bad td { background: var(--diff-bg); }
 
   <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
     <div class="panel">
-      <div class="seg" role="group" aria-label="Explore"><button type="button" id="m-cond" aria-pressed="true">A condition</button><button type="button" id="m-prog" aria-pressed="false">An if / else program</button></div>
-      <div id="cond-mode">
-        <label class="field">Variables <span class="hint">(declarations with values)</span><textarea class="declin" id="e-decls" spellcheck="false"></textarea></label>
-        <label class="field">Condition <input type="text" class="condin" id="e-cond" spellcheck="false" autocomplete="off"></label>
-        <label class="field">Compare with another condition <span class="hint">(optional: checks whether the two always agree, for example with De Morgan's laws)</span><input type="text" class="condin" id="e-cond2" spellcheck="false" autocomplete="off"></label>
-        <div class="small">Try:</div><div class="presets" id="e-cpresets"></div>
-        <div id="e-cview"></div>
-      </div>
-      <div id="prog-mode" class="hidden">
-        <label class="field">Program<textarea class="tui-codein" id="e-code" spellcheck="false"></textarea></label>
-        <div class="small">Try:</div><div class="presets" id="e-ppresets"></div>
-        <div id="e-pview"></div>
-      </div>
+      <label class="field">Program <span class="hint">(static methods first, then the statements for <code>main</code>)</span>
+        <textarea class="tui-codein" id="e-code" spellcheck="false"></textarea>
+      </label>
+      <div class="small">Try:</div>
+      <div class="presets" id="e-presets"></div>
+      <div id="e-view"></div>
+      <p class="limits">Supported here: static methods (including recursion), <code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>, arrays, <code>ArrayList</code>, and the course <code>Player</code> class (<code>getName</code>, <code>getScore</code>, <code>addScore</code>). Writing your own class is not supported here. Strings are shown as values to keep the diagram small: a <code>String</code> variable really holds a reference, but because a String never changes, every result is the same.</p>
     </div>
   </section>
 
   <section id="mode-transfer" role="tabpanel" aria-labelledby="tab-transfer" class="hidden">
     <div class="panel">
-      <p class="small" style="margin-top:0">No evaluator here. Work left to right on paper and mark what gets skipped, then check.</p>
+      <p class="small" style="margin-top:0">No tracer here. Draw the frames on paper: one box per call, with its own parameters. Then check.</p>
       <div class="row"><span class="qmeta" id="t-count"></span><span class="spacer"></span><button class="btn" id="t-prev">← Previous</button><button class="btn" id="t-next">Next question →</button></div>
       <p class="qprompt" id="t-ask"></p>
       <div class="tui-codebox" id="t-code" aria-label="Java code"></div>
@@ -2172,329 +2152,238 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
 // TRACE UI END
 
 // ENGINE START
-// A condition is evaluated by the interpreter inside "if (condition) { }", which records every part
-// it evaluated (in order) and, if it threw, where.
-function condProgram(decls, cond) { return `${decls.trim()}\nif (${cond}) {\n}`; }
-function printProgram(decls, cond) { return `${decls.trim()}\nSystem.out.println(${cond});`; }
-function evalCondition(decls, cond) {
-  const run = MJ.run(condProgram(decls, cond));
-  if (run.compileError || run.unsupported) return { run };
-  const last = run.prog.main[run.prog.main.length - 1];
-  const step = run.steps.find(s => s.kind === 'cond' && s.cond === last.cond.id) || run.steps.find(s => s.kind === 'error');
-  return { run, node: last.cond, tree: new Map(step && step.tree || []), order: (step && step.tree || []).map(e => e[0]), value: step && step.kind === 'cond' ? step.value : undefined, error: step && step.kind === 'error' ? step.error : null, failNode: step && step.failNode };
+// Call-specific readings of an interpreter run.
+const maxDepth = run => Math.max(1, ...run.steps.map(s => s.frames.length));
+// The value the first call made from main returns, as Java would print it (no quotes on a String).
+function firstReturn(run) {
+  const s = run.steps.find(x => x.kind === 'return' && x.frames.length === 1 && x.returned !== undefined);
+  return s ? (s.retType === 'String' && s.returned !== 'null' ? JSON.parse(s.returned) : s.returned) : null;
 }
-// The parts shown as boxes: && and || nodes, ! nodes, and the comparisons or values between them.
-function displayNodes(node, out = []) {
-  if (node.k === 'bin' && (node.op === '&&' || node.op === '||')) { displayNodes(node.l, out); displayNodes(node.r, out); }
-  else if (node.k === 'unary' && node.op === '!') displayNodes(node.e, out);
-  out.push(node);
+// The call step that opened the frame running at step k.
+function openingCall(steps, k) {
+  const depth = steps[k].frames.length;
+  for (let j = k; j >= 0; j--) if (steps[j].kind === 'call' && steps[j].frames.length === depth) return steps[j];
+  return null;
+}
+// Every variable, in any frame, that reaches object hid: directly, or through an array or list it refers to.
+function holders(step, hid) {
+  const out = [];
+  step.frames.forEach((f, fi) => f.vars.forEach(v => {
+    if (!v.v || typeof v.v !== 'object') return;
+    if (v.v.ref === hid) { out.push({ frame: f.name, fi, name: v.name }); return; }
+    const o = step.heap[v.v.ref];
+    if (o && o.values) o.values.forEach((x, i) => { if (x && typeof x === 'object' && x.ref === hid) out.push({ frame: f.name, fi, name: o.kind === 'list' ? `${v.name}.get(${i})` : `${v.name}[${i}]` }); });
+  }));
   return out;
 }
-function subtreeIds(node, acc = new Set()) {
-  acc.add(node.id);
-  for (const k of ['l', 'r', 'e', 'recv', 'arr', 'i']) if (node[k] && typeof node[k] === 'object' && 'id' in node[k]) subtreeIds(node[k], acc);
-  (node.args || []).forEach(a => subtreeIds(a, acc));
-  return acc;
-}
-// Whether two conditions agree for every combination of the variables' values (booleans: both values;
-// ints: −2 to 10 when there are one or two ints, otherwise the declared value ± 3). Strings keep their value.
-function compareConditions(decls, a, b) {
-  const base = MJ.run(decls.trim() || 'int unusedVariable = 0;');
-  if (base.compileError || base.unsupported) return { error: base.compileError || base.unsupported };
-  const vars = base.steps.length ? base.steps[base.steps.length - 1].frames[0].vars : [];
-  const ints = vars.filter(v => v.type === 'int');
-  const ranges = vars.map(v => v.type === 'boolean' ? [false, true] : v.type === 'int' ? (ints.length <= 2 ? Array.from({ length: 13 }, (_, i) => i - 2) : [-3, -2, -1, 0, 1, 2, 3].map(d => v.v + d)) : [v.v]);
-  const lit = (t, v) => t === 'String' ? (v === null ? 'null' : JSON.stringify(v)) : t === 'double' ? javaDouble(v) : String(v);
-  const rows = [];
-  const walk = (i, vals) => {
-    if (i === vars.length) {
-      const d = vars.map((v, k) => `${v.type} ${v.name} = ${lit(v.type, vals[k])};`).join('\n');
-      const ra = MJ.label(MJ.run(printProgram(d, a))), rb = MJ.label(MJ.run(printProgram(d, b)));
-      rows.push({ vals, a: ra.replace(/\n$/, ''), b: rb.replace(/\n$/, ''), same: ra === rb });
-      return;
-    }
-    for (const x of ranges[i]) walk(i + 1, [...vals, x]);
-  };
-  walk(0, []);
-  return { vars, rows, mismatches: rows.filter(r => !r.same) };
-}
-// How Java pairs each else: the program re-printed with indentation that matches its structure.
-function reindent(prog, src) {
-  const out = [];
-  const lineOf = pos => src.slice(0, pos).split('\n').length;
-  const fmt = (n, d) => {
-    const pad = '    '.repeat(d);
-    if (n.k === 'block') { out.push(pad + '{'); n.body.forEach(s => fmt(s, d + 1)); out.push(pad + '}'); return; }
-    if (n.k === 'if') {
-      out.push(pad + `if (${n.cond.src})`);
-      fmt(n.then, n.then.k === 'block' ? d : d + 1);
-      if (n.els) { out.push(pad + 'else'); fmt(n.els, n.els.k === 'block' ? d : d + 1); }
-      return;
-    }
-    if (n.k === 'while' || n.k === 'for' || n.k === 'foreach') { out.push(pad + src.slice(n.pos, n.body.pos).trim()); fmt(n.body, n.body.k === 'block' ? d : d + 1); return; }
-    const t = n.src.trim();
-    out.push(pad + (t.endsWith(';') ? t : t + ';'));
-  };
-  prog.main.forEach(s => fmt(s, 0));
-  return out.join('\n');
-}
-function hasDangling(prog) {
-  let found = false;
-  const walk = n => { if (!n || typeof n !== 'object') return; if (n.k === 'if' && n.then.k === 'if') found = true; ['then', 'els', 'body'].forEach(k => walk(n[k])); if (n.k === 'block') n.body.forEach(walk); };
-  prog.main.forEach(walk);
-  return found;
+// Calls in order with what each returned: "twice(3) returns 6".
+function callLog(run) {
+  const open = [], log = [];
+  run.steps.forEach(s => {
+    if (s.kind === 'call') open.push(`${s.method}(${s.args.map(a => a.text).join(', ')})`);
+    if (s.kind === 'return') { const c = open.pop(); log.push(s.returned === undefined ? `${c} finishes` : `${c} returns ${s.returned}`); }
+  });
+  return log;
 }
 // ENGINE END
 
 // DATA START
-const TF = [{ text: 'true' }, { text: 'false' }, { text: 'It throws an exception' }];
 const PREDICT = [
-  { decls: 'int x = 5;\nint y = 4;', cond: 'x > 3 && y < 2', ask: 'value', tests: '&& is true only when both sides are true.' },
-  { decls: 'int x = 0;\nint y = 10;', cond: 'x != 0 && y / x > 1', ask: 'value', tests: 'The left side is false, so && stops: y / x is never evaluated, and nothing divides by zero.' },
-  { decls: 'int x = 0;\nint y = 10;', cond: 'y / x > 1 && x != 0', ask: 'value', tests: 'Order matters: now the division runs first, before the guard can protect it.' },
-  { decls: 'String s = null;', cond: 's != null && s.length() > 3', ask: 'value', tests: 'A null check first: when s is null, s.length() is skipped.' },
-  { decls: 'String s = null;', cond: 's.length() > 3 && s != null', ask: 'value', tests: 'The null check comes too late: s.length() runs first and throws.' },
-  { decls: 'String s = null;', cond: 's == null || s.length() == 0', ask: 'value', tests: 'The left side of || is true, so the whole thing is true and the right side is skipped.' },
-  { decls: 'int x = 20;', cond: 'x >= 10 && x <= 20', ask: 'value', tests: 'Boundaries: <= includes 20.' },
-  { decls: 'boolean a = false;\nboolean b = true;', cond: '!(a || b)', ask: 'value', tests: '! applies to the whole parenthesized expression.' },
-  { code: 'int diff = 0;\nfor (int x = -2; x <= 10; x++) {\n    for (int y = -2; y <= 10; y++) {\n        if ((!(x > 5 && y == 3)) != (x <= 5 || y != 3)) {\n            diff++;\n        }\n    }\n}\nSystem.out.println(diff);', show: '!(x > 5 && y == 3)', ask: 'mc', choices: [{ text: 'x <= 5 || y != 3', code: true, prog: 'x <= 5 || y != 3' }, { text: 'x <= 5 && y != 3', code: true, prog: 'x <= 5 && y != 3' }, { text: 'x < 5 || y != 3', code: true, prog: 'x < 5 || y != 3' }, { text: '!(x > 5) && !(y == 3)', code: true, prog: '!(x > 5) && !(y == 3)' }], tests: 'De Morgan: negate each part and swap && for ||. The negation of x > 5 is x <= 5, not x < 5.' },
-  { code: 'int a = 0;\nint b = 5;\nif (a > 0)\n    if (b < 0)\n        System.out.println("x");\nelse\n    System.out.println("y");\nSystem.out.println("done");', ask: 'output', tests: 'Dangling else: Java pairs an else with the closest if that has none, whatever the indentation says. Here that is if (b < 0).' },
-  { code: 'int score = 95;\nString grade = "F";\nif (score >= 90) {\n    grade = "A";\n}\nif (score >= 80) {\n    grade = "B";\n}\nif (score >= 70) {\n    grade = "C";\n}\nSystem.out.println(grade);', ask: 'output', tests: 'Separate if statements all run their checks, so later ones overwrite earlier ones.' },
-  { code: 'int score = 95;\nString grade = "F";\nif (score >= 90) {\n    grade = "A";\n} else if (score >= 80) {\n    grade = "B";\n} else if (score >= 70) {\n    grade = "C";\n}\nSystem.out.println(grade);', ask: 'output', tests: 'An else-if chain stops at the first true condition.' },
-  { code: 'int t = 75;\nif (t >= 80) {\n    System.out.println("hot");\n} else if (t >= 60) {\n    System.out.println("mild");\n} else {\n    System.out.println("cold");\n}', ask: 'output', tests: 'Order the checks from the top: 75 fails the first and passes the second.' },
+  { code: 'static int twice(int n) {\n    return n * 2;\n}\n\nint r = twice(4) + twice(1);\nSystem.out.println(r);', ask: 'output', tests: 'Each call runs to its return, and the returned value takes the place of the call in the expression: 8 + 2.' },
+  { code: 'static void addOne(int n) {\n    n++;\n    System.out.println("in addOne: " + n);\n}\n\nint x = 5;\naddOne(x);\nSystem.out.println("in main: " + x);', ask: 'output', tests: 'n is a copy of x. Changing the copy never changes x.' },
+  { code: 'static void swap(int a, int b) {\n    int t = a;\n    a = b;\n    b = t;\n}\n\nint x = 1;\nint y = 2;\nswap(x, y);\nSystem.out.println(x + " " + y);', ask: 'output', tests: 'swap exchanges its own copies, a and b. x and y in main are untouched.' },
+  { code: 'static void bonus(Player p) {\n    p.addScore(10);\n}\n\nPlayer a = new Player("Ana", 5);\nbonus(a);\nSystem.out.println(a.getScore());', ask: 'output', tests: 'p gets a copy of the reference in a, so both refer to the same Player. Changing that object is visible through a.' },
+  { code: 'static void replace(Player p) {\n    p = new Player("Zed", 0);\n}\n\nPlayer a = new Player("Ana", 5);\nreplace(a);\nSystem.out.println(a.getName());', ask: 'output', tests: 'Assigning to p changes only the copy: p now refers to a new Player, and a still refers to the original.' },
+  { code: 'static void update(Player p) {\n    p.addScore(3);\n    p = new Player("Bo", 0);\n    p.addScore(100);\n}\n\nPlayer a = new Player("Ana", 5);\nupdate(a);\nSystem.out.println(a.getName() + " " + a.getScore());', ask: 'mc', q: 'What does this print?', choices: [{ text: 'Ana 5', match: 'Ana 5\n' }, { text: 'Ana 8', match: 'Ana 8\n' }, { text: 'Bo 100', match: 'Bo 100\n' }, { text: 'Ana 108', match: 'Ana 108\n' }], tests: 'The first addScore changes Ana through the shared reference. After p is reassigned, it refers to Bo, so the +100 goes to Bo.' },
+  { code: 'static void zeroFirst(int[] arr) {\n    arr[0] = 0;\n}\n\nint[] nums = {4, 5, 6};\nzeroFirst(nums);\nSystem.out.println(nums[0] + " " + nums.length);', ask: 'output', tests: 'An array parameter refers to the same array as the argument, so changing an element changes the caller\'s array.' },
+  { code: 'static void reset(int[] arr) {\n    arr = new int[2];\n    arr[0] = 9;\n}\n\nint[] nums = {4, 5, 6};\nreset(nums);\nSystem.out.println(nums[0] + " " + nums.length);', ask: 'output', tests: 'arr is reassigned to a new array first, so the 9 goes into the new array. nums still refers to the original.' },
+  { code: 'static int square(int n) {\n    return n * n;\n}\n\nint x = 3;\nsquare(x);\nSystem.out.println(x);', ask: 'output', tests: 'square returns 9, but nothing stores or prints it. Returning a value does not change any variable.' },
+  { code: 'static int f(int n) {\n    System.out.println("f(" + n + ")");\n    return n + 1;\n}\n\nint y = f(f(1));\nSystem.out.println(y);', ask: 'output', tests: 'The inner call runs first, because its value is the argument of the outer call.' },
+  { code: 'static int a(int n) {\n    return b(n) + 1;\n}\n\nstatic int b(int n) {\n    return c(n) * 2;\n}\n\nstatic int c(int n) {\n    return n - 1;\n}\n\nSystem.out.println(a(5));', ask: 'depth', tests: 'main calls a, a calls b, and b calls c: four frames at once. Each one waits for the call above it to return.' },
+  { code: 'static int grow(int x) {\n    x = x * 10;\n    return x + 1;\n}\n\nint x = 2;\nint y = grow(x);\nSystem.out.println(x + " " + y);', ask: 'output', tests: 'The parameter x and main\'s x are different variables in different frames. They only share a name.' },
+  { code: 'static void greet(String name) {\n    System.out.println("Hi " + name);\n}\n\nString s = greet("Ana");', ask: 'mc', q: 'What happens?', choices: [{ text: 'It prints Hi Ana, and s is "Hi Ana".', match: 'Hi Ana\n' }, { text: 'It prints Hi Ana, and s is null.', match: '#null' }, { text: 'It does not compile.', match: 'compile-error' }, { text: 'It prints nothing.', match: '' }], tests: 'A void method returns nothing, so its call cannot be used as a value.' },
 ];
 const TRANSFER = [
-  { decls: 'int x = 8;\nint y = 8;', cond: 'x > 5 || y / 0 > 1', ask: 'value' },
-  { decls: 'int x = 3;\nint y = 8;', cond: 'x > 5 || y / 0 > 1', ask: 'value' },
-  { decls: 'String name = "";', cond: 'name != null && name.length() > 0', ask: 'value' },
-  { decls: 'int n = 7;', cond: 'n % 2 == 0 || n > 5 && n < 10', ask: 'value' },
-  { decls: 'boolean a = true;\nboolean b = false;', cond: '!a || !b', ask: 'value' },
-  { code: 'int diff = 0;\nfor (int x = -2; x <= 10; x++) {\n    for (int y = -2; y <= 10; y++) {\n        if ((!(x < 3 || y >= 7)) != (x >= 3 && y < 7)) {\n            diff++;\n        }\n    }\n}\nSystem.out.println(diff);', show: '!(x < 3 || y >= 7)', ask: 'mc', choices: [{ text: 'x >= 3 && y < 7', code: true, prog: 'x >= 3 && y < 7' }, { text: 'x >= 3 || y < 7', code: true, prog: 'x >= 3 || y < 7' }, { text: 'x > 3 && y < 7', code: true, prog: 'x > 3 && y < 7' }, { text: '!(x < 3) || !(y >= 7)', code: true, prog: '!(x < 3) || !(y >= 7)' }] },
-  { code: 'int a = 5;\nint b = -1;\nif (a > 0)\n    if (b > 0)\n        System.out.println("both");\n    else\n        System.out.println("only a");\nSystem.out.println("end");', ask: 'output' },
-  { code: 'int n = 15;\nif (n % 3 == 0) {\n    System.out.print("Fizz");\n}\nif (n % 5 == 0) {\n    System.out.print("Buzz");\n}\nSystem.out.println();', ask: 'output' },
+  { code: 'static int addUp(int a, int b) {\n    a = a + b;\n    return a;\n}\n\nint x = 3;\nint y = 4;\nint z = addUp(x, y);\nSystem.out.println(x + " " + y + " " + z);', ask: 'output' },
+  { code: 'static void move(Player from, Player to) {\n    from.addScore(-5);\n    to.addScore(5);\n}\n\nPlayer a = new Player("A", 10);\nPlayer b = new Player("B", 0);\nmove(a, b);\nmove(a, b);\nSystem.out.println(a.getScore() + " " + b.getScore());', ask: 'output' },
+  { code: 'static void both(Player p, Player q) {\n    p.addScore(1);\n    q.addScore(1);\n}\n\nPlayer a = new Player("A", 0);\nboth(a, a);\nSystem.out.println(a.getScore());', ask: 'output' },
+  { code: 'static void fill(int[] arr, int v) {\n    for (int i = 0; i < arr.length; i++) {\n        arr[i] = v;\n    }\n    v = 0;\n}\n\nint[] d = new int[3];\nint k = 7;\nfill(d, k);\nSystem.out.println(d[2] + " " + k);', ask: 'mc', q: 'What does this print?', choices: [{ text: '7 7', match: '7 7\n' }, { text: '0 7', match: '0 7\n' }, { text: '7 0', match: '7 0\n' }, { text: '0 0', match: '0 0\n' }] },
+  { code: 'static int f(int n) {\n    return g(n) + g(n + 1);\n}\n\nstatic int g(int n) {\n    return n * n;\n}\n\nSystem.out.println(f(2));', ask: 'depth' },
+  { code: 'static String tag(String s) {\n    s = "[" + s + "]";\n    return s;\n}\n\nString w = "hi";\nString t = tag(w);\nSystem.out.println(w + " " + t);', ask: 'output' },
+  { code: 'static int count(int[] arr, int target) {\n    int c = 0;\n    for (int x : arr) {\n        if (x == target) {\n            c++;\n        }\n    }\n    return c;\n}\n\nint[] v = {3, 1, 3, 3};\nSystem.out.println(count(v, 3));', ask: 'returns', call: 'count(v, 3)' },
+  { code: 'static void swapFirstTwo(int[] arr) {\n    int t = arr[0];\n    arr[0] = arr[1];\n    arr[1] = t;\n}\n\nint[] p = {1, 2, 3};\nswapFirstTwo(p);\nSystem.out.println(p[0] + " " + p[1]);', ask: 'output' },
 ];
-const COND_PRESETS = [
-  { label: 'Null guard', decls: 'String s = null;', cond: 's != null && s.length() > 3' },
-  { label: 'Guard in the wrong order', decls: 'String s = null;', cond: 's.length() > 3 && s != null' },
-  { label: 'Division guard', decls: 'int x = 0;\nint y = 10;', cond: 'x != 0 && y / x > 1' },
-  { label: '|| stops early', decls: 'String s = null;', cond: 's == null || s.length() == 0' },
-  { label: 'De Morgan', decls: 'boolean a = true;\nboolean b = false;', cond: '!(a && b)', cond2: '!a || !b' },
-  { label: 'A wrong De Morgan', decls: 'int x = 6;\nint y = 3;', cond: '!(x > 5 && y == 3)', cond2: 'x < 5 || y != 3' },
-  { label: 'Boundaries', decls: 'int x = 20;', cond: 'x >= 10 && x <= 20' },
-  { label: '&& before ||', decls: 'int n = 7;', cond: 'n % 2 == 0 || n > 5 && n < 10' },
-];
-const PROG_PRESETS = [
-  { label: 'Dangling else', code: PREDICT[9].code },
-  { label: 'Separate ifs', code: PREDICT[10].code },
-  { label: 'else-if chain', code: PREDICT[11].code },
-  { label: 'Temperature', code: PREDICT[12].code },
-  { label: 'FizzBuzz check', code: TRANSFER[7].code },
+const PRESETS = [
+  { label: 'Return value travels back', code: PREDICT[0].code },
+  { label: 'Parameters are copies', code: PREDICT[1].code },
+  { label: 'A swap that fails', code: PREDICT[2].code },
+  { label: 'A swap that works (array)', code: TRANSFER[7].code },
+  { label: 'Change the object', code: PREDICT[3].code },
+  { label: 'Reassign the parameter', code: PREDICT[4].code },
+  { label: 'Change, then reassign', code: PREDICT[5].code },
+  { label: 'Returned value ignored', code: PREDICT[8].code },
+  { label: 'Nested calls', code: PREDICT[9].code },
+  { label: 'Call chain', code: PREDICT[10].code },
+  { label: 'One object, two parameters', code: TRANSFER[2].code },
+  { label: 'ArrayList parameter', code: 'static void addTwice(ArrayList<Integer> list, int v) {\n    list.add(v);\n    list.add(v);\n}\n\nArrayList<Integer> nums = new ArrayList<Integer>();\nnums.add(1);\naddTwice(nums, 7);\nSystem.out.println(nums);' },
 ];
 // DATA END
 
 TUI.injectCSS();
 const { el, $ } = TUI;
-const itemCode = it => it.code ? (it.show ? `Which condition always gives the same result as\n    ${it.show}` : it.code) : `${it.decls}\n\n${it.cond}`;
+const isName = s => /^[A-Za-z_]\w*$/.test(s.trim());
 
-/* ---------- Condition view ---------- */
-class CondView {
+/* ---------- Call runner ---------- */
+class CallRunner {
   constructor(host) {
     this.host = host;
-    host.innerHTML = `<div class="tui-err hidden"></div><div class="cbody"><div class="stepbar"></div><div class="tui-note" aria-live="polite"><div class="phase"></div><p class="text"></p></div><div class="tree" aria-label="How the condition is evaluated"></div><div class="equiv hidden"></div></div>`;
-    this.err = host.querySelector('.tui-err'); this.body = host.querySelector('.cbody');
-    this.step = TUI.stepper(host.querySelector('.stepbar'), i => this.render(i), { next: 'Evaluate the next part →', end: 'Evaluate all' });
-    this.step.keys(this.body);
-  }
-  set(decls, cond, cond2) {
-    this.e = evalCondition(decls, cond);
-    const r = this.e.run, bad = r.compileError || r.unsupported;
-    this.err.classList.toggle('hidden', !bad); this.body.classList.toggle('hidden', !!bad);
-    if (bad) { TUI.errorBox(this.err, r); return; }
-    this.shown = displayNodes(this.e.node).filter(n => this.e.tree.has(n.id)).sort((a, b) => this.e.order.indexOf(a.id) - this.e.order.indexOf(b.id));
-    // The comparison or value box that contains the part that threw.
-    const isBox = n => !(n.k === 'bin' && (n.op === '&&' || n.op === '||')) && !(n.k === 'unary' && n.op === '!');
-    this.failDisplay = this.e.error ? displayNodes(this.e.node).find(n => isBox(n) && subtreeIds(n).has(this.e.failNode)) || null : null;
-    this.step.set(this.shown.length + (this.e.error ? 1 : 0), 0);
-    const eq = this.host.querySelector('.equiv');
-    eq.classList.toggle('hidden', !cond2 || !cond2.trim());
-    if (cond2 && cond2.trim()) this.renderEquiv(decls, cond, cond2);
-  }
-  render(i) {
-    const e = this.e, visible = new Set(this.shown.slice(0, i).map(n => n.id));
-    const threw = !!e.error && i === this.shown.length + 1;
-    const tree = this.host.querySelector('.tree'); tree.textContent = '';
-    const current = i > 0 && i <= this.shown.length ? this.shown[i - 1].id : null;
-    const draw = n => {
-      const isAndOr = n.k === 'bin' && (n.op === '&&' || n.op === '||');
-      const isNot = n.k === 'unary' && n.op === '!';
-      const box = el('span', isAndOr ? 'bx ' + (n.op === '&&' ? 'and' : 'or') : isNot ? 'bx' : 'leaf');
-      if (isAndOr) box.append(draw(n.l), el('span', 'opx', n.op), draw(n.r));
-      else if (isNot) box.append(el('span', 'opx', '!'), draw(n.e));
-      else box.append(el('span', null, n.src));
-      const done = i >= this.shown.length + (e.error ? 1 : 0);
-      let chip = null;
-      if (visible.has(n.id)) { const v = e.tree.get(n.id); chip = el('span', 'chip ' + (v ? 't' : 'f'), String(v)); }
-      else if (threw && this.failDisplay === n) { chip = el('span', 'chip x', 'throws ' + e.error); box.classList.add('threw'); }
-      else if (threw && this.failDisplay && subtreeIds(n).has(this.failDisplay.id)) chip = el('span', 'chip x', 'no value: stopped');
-      else if (done && !e.tree.has(n.id) && !(e.error && this.failDisplay === n)) { chip = el('span', 'chip n', 'not evaluated'); box.classList.add('skipped'); }
-      if (n.id === current) box.classList.add('cur');
-      if (chip) { if (isAndOr || isNot) { const w = el('span', 'valrow'); w.append(chip); box.append(w); } else box.append(chip); }
-      return box;
-    };
-    tree.append(draw(e.node));
-    const note = this.host.querySelector('.tui-note');
-    note.classList.toggle('err', !!threw);
-    note.querySelector('.phase').textContent = i === 0 ? 'Ready' : threw ? 'Exception' : `Part ${i} of ${this.shown.length}`;
-    note.querySelector('.text').textContent = i === 0 ? 'Java works left to right. Press the button to evaluate the first part.' : threw ? this.errorText() : this.explain(this.shown[i - 1]);
-  }
-  explain(n) {
-    const v = this.e.tree.get(n.id);
-    if (n.k === 'bin' && n.op === '&&') {
-      const lv = this.e.tree.get(n.l.id);
-      return lv === false ? `The left side is false, so ${n.src} is false. The right side, ${n.r.src}, is skipped: it is never evaluated.` : `The left side is true, so the right side decides: ${n.src} is ${v}.`;
-    }
-    if (n.k === 'bin' && n.op === '||') {
-      const lv = this.e.tree.get(n.l.id);
-      return lv === true ? `The left side is true, so ${n.src} is true. The right side, ${n.r.src}, is skipped: it is never evaluated.` : `The left side is false, so the right side decides: ${n.src} is ${v}.`;
-    }
-    if (n.k === 'unary') return `! flips ${n.e.src}: ${n.src} is ${v}.`;
-    return `${n.src} is ${v}.`;
-  }
-  errorText() {
-    const s = this.e.run.steps.find(x => x.kind === 'error');
-    return (this.failDisplay ? `Evaluating ${this.failDisplay.src} fails. ` : '') + (s ? s.note : '');
-  }
-  renderEquiv(decls, a, b) {
-    const box = this.host.querySelector('.equiv'); box.textContent = '';
-    box.append(el('div', 'colhead', 'Do the two conditions always agree?'));
-    const c = compareConditions(decls, a, b);
-    if (c.error) { box.append(el('p', 'small', c.error)); return; }
-    const tested = c.rows.length;
-    const v = el('p', 'verdict ' + (c.mismatches.length ? 'no' : 'ok'), c.mismatches.length ? `No: they differ in ${c.mismatches.length} of ${tested} combinations.` : `Yes: they agree in all ${tested} combinations tested.`);
-    box.append(v);
-    const note = c.vars.some(x => x.type === 'int') ? 'Each int variable was tried from −2 to 10 (or its value ± 3 when there are more than two ints). Agreeing on these values is strong evidence, not a proof for every int.' : 'Every combination of the boolean values was tried, so this is a complete truth table.';
-    box.append(el('p', 'small', note));
-    const rows = c.vars.every(x => x.type === 'boolean') ? c.rows : c.mismatches.slice(0, 10);
-    if (!rows.length) return;
-    const t = el('table', 'tt'), h = el('tr');
-    [...c.vars.map(x => x.name), a, b].forEach(x => h.append(el('th', null, x)));
-    t.append(h);
-    rows.forEach(r => { const tr = el('tr', r.same ? '' : 'bad'); r.vals.forEach(x => tr.append(el('td', null, String(x)))); tr.append(el('td', null, r.a.replace('|throws:', 'throws '))); tr.append(el('td', null, r.b.replace('|throws:', 'throws '))); t.append(tr); });
-    box.append(t);
-    if (!c.vars.every(x => x.type === 'boolean') && c.mismatches.length > 10) box.append(el('p', 'small', `Showing the first 10 of ${c.mismatches.length} disagreements.`));
-  }
-}
-
-/* ---------- Program view (if / else) ---------- */
-class ProgView {
-  constructor(host) {
-    this.host = host;
-    host.innerHTML = `<div class="tui-err hidden"></div><div class="pbody"><div class="runner-grid">
-      <div><ol class="tui-code" aria-label="Program"></ol><div class="stepbar"></div><div class="tui-note" aria-live="polite"><div class="phase"></div><p class="text"></p></div></div>
-      <div><div class="reinbox hidden"><div class="colhead">How Java reads it (indentation is ignored)</div><div class="reindent"></div></div>
-        <div class="colhead">Condition</div><div class="tree"></div>
-        <div class="colhead">Console</div><div class="tui-console" role="log"></div>
-        <div class="colhead">Variables</div><table class="tui-vars"></table></div></div></div>`;
-    this.err = host.querySelector('.tui-err'); this.body = host.querySelector('.pbody');
+    host.innerHTML = `<div class="tui-err hidden"></div><div class="rbody"><div class="runner-grid">
+      <div><ol class="tui-code" aria-label="Program"></ol><div class="stepbar"></div>
+        <div class="tui-note" aria-live="polite"><div class="phase"></div><p class="text"></p></div>
+        <div class="cardbox"></div>
+        <div class="colhead">Console</div><div class="tui-console" role="log" aria-label="Console output"></div></div>
+      <div class="memory" aria-label="Call stack and objects"></div>
+    </div></div>`;
+    this.err = host.querySelector('.tui-err'); this.body = host.querySelector('.rbody');
     this.step = TUI.stepper(host.querySelector('.stepbar'), i => this.render(i));
     this.step.keys(this.body);
+    window.addEventListener('resize', () => { if (this.run && !this.body.classList.contains('hidden')) this.render(this.step.i); });
   }
   set(src) {
     this.src = src; this.run = MJ.run(src);
     const bad = this.run.compileError || this.run.unsupported;
     this.err.classList.toggle('hidden', !bad); this.body.classList.toggle('hidden', !!bad);
     if (bad) { TUI.errorBox(this.err, this.run); return; }
-    const dang = hasDangling(this.run.prog);
-    this.host.querySelector('.reinbox').classList.toggle('hidden', !dang);
-    if (dang) this.host.querySelector('.reindent').textContent = reindent(this.run.prog, src);
-    this.nodes = new Map();
-    const walk = n => { if (!n || typeof n !== 'object') return; if ('id' in n) this.nodes.set(n.id, n); for (const k of Object.keys(n)) { if (k === 'src') continue; const c = n[k]; if (Array.isArray(c)) c.forEach(walk); else if (c && typeof c === 'object' && c !== n) walk(c); } };
-    this.run.prog.main.forEach(walk);
     this.step.set(this.run.steps.length, 0);
   }
   render(i) {
-    const steps = this.run.steps, s = i > 0 ? steps[i - 1] : null;
-    TUI.renderCode(this.host.querySelector('.tui-code'), this.src, s ? s.line : 0, new Set(steps.slice(0, Math.max(0, i - 1)).map(x => x.line)), s && s.kind === 'error' ? 'err' : 'on');
+    const run = this.run, steps = run.steps, s = i > 0 ? steps[i - 1] : null;
+    const done = new Set(steps.slice(0, Math.max(0, i - 1)).map(x => x.line));
+    // Lines where a caller is waiting for a call to return.
+    const waiting = {};
+    if (s) s.frames.slice(1).forEach(f => { waiting[f.line] = 'called'; });
+    const bad = s && (s.kind === 'error' || s.kind === 'limit');
+    TUI.renderCode(this.host.querySelector('.tui-code'), this.src, s ? s.line : 0, done, bad ? 'err' : 'on', waiting);
     const note = this.host.querySelector('.tui-note');
-    note.classList.toggle('err', !!(s && s.kind === 'error'));
-    note.querySelector('.phase').textContent = s ? (s.kind === 'cond' ? `Condition: ${s.value}` : s.kind === 'error' ? 'Exception' : 'Statement') : 'Ready';
-    note.querySelector('.text').textContent = s ? s.note : 'Press Next to run the first statement.';
+    note.classList.toggle('err', !!bad);
+    note.querySelector('.phase').textContent = s ? this.phaseLabel(s) : 'Ready';
+    note.querySelector('.text').textContent = s ? s.note : 'Nothing has run yet. Press Next, or use the arrow keys. A line marked in yellow is waiting for a call to return.';
+    if (i === steps.length && run.truncated) note.querySelector('.text').textContent += ` (Showing the first ${steps.length} steps.)`;
     this.host.querySelector('.tui-console').textContent = s ? s.out : '';
-    TUI.renderVars(this.host.querySelector('.tui-vars'), s ? s.frames[0] : null, s ? s.heap : {}, s ? s.changed || [] : []);
-    const tree = this.host.querySelector('.tree'); tree.textContent = '';
-    if (s && s.kind === 'cond' && s.cond !== undefined) {
-      const node = this.nodes.get(s.cond), vals = new Map(s.tree || []);
-      const draw = n => {
-        const isAndOr = n.k === 'bin' && (n.op === '&&' || n.op === '||'), isNot = n.k === 'unary' && n.op === '!';
-        const box = el('span', isAndOr || isNot ? 'bx' : 'leaf');
-        if (isAndOr) box.append(draw(n.l), el('span', 'opx', n.op), draw(n.r)); else if (isNot) box.append(el('span', 'opx', '!'), draw(n.e)); else box.append(el('span', null, n.src));
-        const chip = vals.has(n.id) ? el('span', 'chip ' + (vals.get(n.id) ? 't' : 'f'), String(vals.get(n.id))) : el('span', 'chip n', 'not evaluated');
-        if (!vals.has(n.id)) box.classList.add('skipped');
-        if (isAndOr || isNot) { const w = el('span', 'valrow'); w.append(chip); box.append(w); } else box.append(chip);
-        return box;
-      };
-      if (node) tree.append(draw(node));
-    } else tree.append(el('p', 'small', 'Step to an if condition to see how it is evaluated.'));
+    this.renderCard(i);
+    const prev = i > 1 ? steps[i - 2] : null;
+    const ghost = s && s.kind === 'return' && prev && prev.frames.length > s.frames.length
+      ? { frame: prev.frames[prev.frames.length - 1], label: s.returned === undefined ? 'finished · removed' : `returned ${s.returned} · removed` } : null;
+    TUI.renderMemory(this.host.querySelector('.memory'), s, { ghost, entering: s && s.kind === 'call' });
+  }
+  phaseLabel(s) {
+    if (s.kind === 'error') return 'Exception';
+    if (s.kind === 'limit') return 'Stopped';
+    if (s.kind === 'call') return `Call: new frame for ${s.method}`;
+    if (s.kind === 'returning') return 'return statement';
+    if (s.kind === 'return') return s.returned === undefined ? `Back in ${s.frames[s.frames.length - 1].name}` : `Value returned to ${s.frames[s.frames.length - 1].name}`;
+    if (s.kind === 'discard') return 'Returned value not used';
+    if (s.kind === 'mutate' || s.obj !== undefined || s.list) return 'Object changed';
+    return s.frames.length > 1 ? `Running ${s.frames[s.frames.length - 1].name}` : 'main';
+  }
+  // The card under the note: arguments copied into parameters, a value going back, or who sees a change.
+  renderCard(i) {
+    const box = this.host.querySelector('.cardbox'); box.textContent = '';
+    const steps = this.run.steps, s = i > 0 ? steps[i - 1] : null;
+    if (!s) return;
+    if (s.kind === 'call') {
+      const c = el('div', 'callcard'); c.append(el('div', 'chead', `${s.method}(…) is called from line ${s.callLine}`));
+      if (!s.args.length) c.append(el('p', 'small', 'No arguments: the new frame starts with no parameters.'));
+      else {
+        const t = el('table'), h = el('tr'); ['Argument', 'Value copied', '', 'Parameter'].forEach(x => h.append(el('th', null, x))); t.append(h);
+        s.args.forEach(a => {
+          const tr = el('tr'), ref = a.v && typeof a.v === 'object';
+          tr.append(el('td', null, a.src.trim()), el('td', null, TUI.valueText(a.v, a.type, s.heap) + (ref ? ' (a copy of the reference)' : '')), el('td', 'arrow', '→'), el('td', null, `${a.type} ${a.name}`));
+          t.append(tr);
+        });
+        c.append(t);
+      }
+      box.append(c);
+      return;
+    }
+    if (s.kind === 'returning' && s.value !== undefined) {
+      const c = el('div', 'callcard ret'); c.append(el('div', 'chead', `${s.method} returns`), el('div', 'big', s.value));
+      c.append(el('p', 'small', 'This one value goes back to the line that made the call. The frame and its variables are about to be removed.'));
+      box.append(c); return;
+    }
+    if (s.kind === 'return') {
+      const c = el('div', 'callcard ret'), back = s.frames[s.frames.length - 1].name;
+      if (s.returned === undefined) { c.append(el('div', 'chead', `${s.method} is done`)); c.append(el('p', 'small', `A void method returns no value. ${back} continues on line ${s.line}.`)); }
+      else { c.append(el('div', 'chead', `Back in ${back}, line ${s.line}`)); c.append(el('p', null, `The call ${s.method}(…) is replaced by the value ${s.returned}.`)); }
+      box.append(c); return;
+    }
+    const top = s.frames[s.frames.length - 1];
+    // A parameter was reassigned: only the copy changes.
+    if (s.frames.length > 1 && (s.kind === 'assign' || s.kind === 'update') && s.obj === undefined && s.changed && top.params.includes(s.changed[0])) {
+      const call = openingCall(steps, i - 1), a = call && call.args.find(x => x.name === s.changed[0]);
+      if (a && isName(a.src)) {
+        const caller = s.frames[s.frames.length - 2], cv = caller.vars.find(v => v.name === a.src.trim());
+        if (cv) box.append(el('div', 'callout copy', `Only ${a.name}, the copy in ${top.name}'s frame, changes. ${cv.name} in ${caller.name} is still ${TUI.valueText(cv.v, cv.type, s.heap)}.`));
+      }
+      return;
+    }
+    // An object was changed: everyone who refers to it sees the change.
+    const hid = s.obj !== undefined ? s.obj : s.list ? s.list.hid : undefined;
+    if (hid !== undefined) {
+      const who = holders(s, hid);
+      if (who.length > 1) {
+        const names = who.map(w => `${w.name} (in ${w.frame})`), both = who.length === 2 ? 'both' : 'all';
+        const list = who.length === 2 ? names.join(' and ') : names.slice(0, -1).join(', ') + ', and ' + names[names.length - 1];
+        box.append(el('div', 'callout', `This changes the object itself. ${list} ${both} refer to it, so they ${both} see the change.`));
+      } else if (who.length === 1 && s.frames.length > 1 && who[0].fi === s.frames.length - 1) {
+        const callers = [...new Set(s.frames.slice(0, -1).map(f => f.name))].join(' or ');
+        box.append(el('div', 'callout copy', `Only ${who[0].name} (in ${top.name}) refers to this object. Nothing in ${callers} refers to it, so ${callers} cannot see this change.`));
+      }
+    }
   }
 }
 
 /* ---------- Predict and Transfer ---------- */
 const select = TUI.tabs(['predict', 'explore', 'transfer']);
 function expected(it) {
-  if (it.ask === 'value') { const l = MJ.label(MJ.run(printProgram(it.decls, it.cond))); return l === 'true\n' ? 0 : l === 'false\n' ? 1 : 2; }
-  if (it.ask === 'output') return MJ.run(it.code).out;
-  // Equivalence: the right choice makes the mismatch-counting program print 0.
-  return it.choices.findIndex(c => MJ.run(it.code.split(it.choices[0].prog).join(c.prog)).out === '0\n');
+  const run = MJ.run(it.code);
+  if (it.ask === 'output') return run.out;
+  if (it.ask === 'depth') return maxDepth(run);
+  if (it.ask === 'returns') return firstReturn(run);
+  return it.choices.findIndex(c => c.match === MJ.label(run));
 }
-const asMc = it => it.ask === 'value' ? { ...it, ask: 'mc', choices: TF } : it;
-const askText = it => it.ask === 'value' ? 'What is the value of the condition?' : it.ask === 'output' ? 'What exactly does this print?' : 'Choose one.';
-const pview = el('div'), cview = new CondView(el('div')), progv = new ProgView(el('div'));
-function revealInto(host, it) {
-  host.textContent = '';
-  if (it.ask === 'output') { host.append(progv.host); progv.set(it.code); progv.step.go(0); }
-  else if (it.ask === 'value') { host.append(cview.host); cview.set(it.decls, it.cond, ''); }
-  else { host.append(cview.host); const v = [...it.show.matchAll(/[a-z]\w*/g)].map(m => m[0]).filter((x, i, a) => a.indexOf(x) === i); const decls = v.map(n => `int ${n} = 6;`).join('\n'); cview.set(decls, it.show, it.choices[expected(it)].prog); }
-}
-TUI.questions('p', PREDICT.map(asMc).map(x => ({ ...x, code: itemCode(x) })), {
-  submitLabel: 'Check my prediction', reasonPrompt: 'Why? Which parts run, and which are skipped?',
-  askText: it => askText(PREDICT.find(p => itemCode(p) === it.code)),
-  expected: it => expected(PREDICT.find(p => itemCode(p) === it.code)),
-  onReveal(it) { const orig = PREDICT.find(p => itemCode(p) === it.code); $('p-tests').innerHTML = '<b>What this one tests:</b> ' + orig.tests; revealInto($('p-view'), orig); },
+const kindOf = it => it.ask === 'returns' ? 'text' : it.ask === 'depth' ? 'int' : undefined;
+const withKind = items => items.map(it => ({ ...it, kind: kindOf(it) }));
+const askText = it => it.ask === 'output' ? 'What exactly does this print?' : it.ask === 'depth' ? 'At the deepest point, how many frames are on the call stack, counting main?' : it.ask === 'returns' ? `What does ${it.call} return?` : it.q;
+const predictRunner = new CallRunner($('p-view'));
+TUI.questions('p', withKind(PREDICT), {
+  submitLabel: 'Check my prediction', reasonPrompt: 'Why? Which frame does each variable belong to?',
+  askText, expected,
+  onReveal(it) { $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests; predictRunner.set(it.code); },
 });
-TUI.questions('t', TRANSFER.map(asMc).map(x => ({ ...x, code: itemCode(x) })), {
-  submitLabel: 'Check', reasonPrompt: 'Explain it: which parts are evaluated, in order?',
-  askText: it => askText(TRANSFER.find(p => itemCode(p) === it.code)),
-  expected: it => expected(TRANSFER.find(p => itemCode(p) === it.code)),
+TUI.questions('t', withKind(TRANSFER), {
+  submitLabel: 'Check', reasonPrompt: 'Explain it: list each call, its parameter values, and what it returns.',
+  askText, expected,
   onReveal(it) {
-    const orig = TRANSFER.find(p => itemCode(p) === it.code), m = $('t-model'); m.textContent = '';
-    if (orig.ask === 'value') {
-      const e = evalCondition(orig.decls, orig.cond);
-      const parts = displayNodes(e.node).filter(n => e.tree.has(n.id)).sort((a, b) => e.order.indexOf(a.id) - e.order.indexOf(b.id)).map(n => `${n.src} is ${e.tree.get(n.id)}`);
-      const skipped = displayNodes(e.node).filter(n => !e.tree.has(n.id) && !(e.error && subtreeIds(n).has(e.failNode))).map(n => n.src);
-      m.append(el('b', null, 'Model working: '), parts.join('; ') + '.' + (skipped.length ? ` Not evaluated: ${skipped.join(', ')}.` : '') + (e.error ? ` It throws a${/^[AEIOU]/.test(e.error) ? 'n' : ''} ${e.error}.` : ''));
-    } else if (orig.ask === 'output') m.append(el('b', null, 'Model working: '), MJ.run(orig.code).steps.filter(s => s.kind === 'cond').map(s => s.note).join(' '));
-    else m.append(el('b', null, 'Model working: '), `De Morgan: negate each part and swap && with ||. The answer is ${orig.choices[expected(orig)].text}.`);
-    m.append(el('p', 'small', 'Compare with yours. Did you stop as soon as && or || knew the answer?'));
+    const run = MJ.run(it.code), m = $('t-model'); m.textContent = '';
+    if (run.compileError) m.append(el('b', null, 'Model working: '), `It does not compile. ${run.compileError}`);
+    else {
+      const log = callLog(run);
+      m.append(el('b', null, 'Model working: '), `${log.join('; ')}.` + (it.ask === 'depth' ? ` The deepest point has ${maxDepth(run)} frames, counting main.` : '') + (run.out ? ` Output: ${JSON.stringify(run.out)}.` : ''));
+    }
+    m.append(el('p', 'small', 'Compare with your frames. Did each call get its own copies of the arguments?'));
   },
 });
 
 /* ---------- Explore ---------- */
-const econd = new CondView($('e-cview')), eprog = new ProgView($('e-pview'));
-function condUpdate() { econd.set($('e-decls').value, $('e-cond').value, $('e-cond2').value); }
-['e-decls', 'e-cond', 'e-cond2'].forEach(id => $(id).addEventListener('input', condUpdate));
-COND_PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => { $('e-decls').value = p.decls; $('e-cond').value = p.cond; $('e-cond2').value = p.cond2 || ''; condUpdate(); }); $('e-cpresets').append(c); });
-PROG_PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => { $('e-code').value = p.code; eprog.set(p.code); }); $('e-ppresets').append(c); });
-$('e-code').addEventListener('input', () => eprog.set($('e-code').value));
-function mode(m) {
-  $('m-cond').setAttribute('aria-pressed', m === 'cond'); $('m-prog').setAttribute('aria-pressed', m === 'prog');
-  $('cond-mode').classList.toggle('hidden', m !== 'cond'); $('prog-mode').classList.toggle('hidden', m !== 'prog');
-}
-$('m-cond').addEventListener('click', () => mode('cond')); $('m-prog').addEventListener('click', () => mode('prog'));
-$('e-decls').value = COND_PRESETS[0].decls; $('e-cond').value = COND_PRESETS[0].cond; condUpdate();
-$('e-code').value = PROG_PRESETS[0].code; eprog.set(PROG_PRESETS[0].code);
+const exploreRunner = new CallRunner($('e-view'));
+const ecode = $('e-code');
+PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => { ecode.value = p.code; exploreRunner.set(ecode.value); }); $('e-presets').append(c); });
+ecode.value = PRESETS[4].code;
+ecode.addEventListener('input', () => exploreRunner.set(ecode.value));
+exploreRunner.set(ecode.value);
 const params = new URLSearchParams(location.search);
-if (params.has('cond')) { $('e-decls').value = params.get('decls') || ''; $('e-cond').value = params.get('cond'); $('e-cond2').value = params.get('cond2') || ''; condUpdate(); select('explore'); }
-if (params.has('code')) { $('e-code').value = params.get('code'); eprog.set(params.get('code')); mode('prog'); select('explore'); }
+if (params.has('code')) { ecode.value = params.get('code'); exploreRunner.set(ecode.value); select('explore'); }
 </script>
 </body>
 </html>

@@ -660,7 +660,7 @@ const MJ = (function () {
 
   /* ---------------- Running ---------------- */
   function run(src, opts = {}) {
-    const maxOps = opts.maxOps || 200000, maxSteps = opts.maxSteps || 3000, maxDepth = opts.maxDepth || 1000;
+    const maxOps = opts.maxOps || 200000, maxSteps = opts.maxSteps || 3000, maxDepth = opts.maxDepth || 200;
     nodeSeq = 0;
     let prog, mtab;
     try { prog = parse(src); mtab = check(prog); }
@@ -682,7 +682,12 @@ const MJ = (function () {
       if (t && t.startsWith('ArrayList')) { const e = ELEM(t); return '[' + v.values.map(x => text(e, x)).join(', ') + ']'; }
       return String(v);
     };
-    const show = (t, v) => t === 'String' && v !== null ? JSON.stringify(v) : text(t, v);
+    const show = (t, v) => {
+      if (v !== null && typeof v === 'object' && v.kind !== 'list') return `→ ${v.kind === 'player' ? 'Player' : 'array'} #${v.hid}`;
+      return t === 'String' && v !== null ? JSON.stringify(v) : text(t, v);
+    };
+    // For call and return notes: a reference reads as the object it points to.
+    const showRef = (t, v) => v !== null && typeof v === 'object' ? `→ ${v.kind === 'player' ? 'Player' : v.kind === 'list' ? 'ArrayList' : 'array'} #${v.hid}` : show(t, v);
     const snapVal = (t, v) => (v !== null && typeof v === 'object') ? { ref: v.hid } : v;
     function snapshot() {
       const heap = {};
@@ -696,7 +701,7 @@ const MJ = (function () {
       const fs = frames.map(f => {
         const vars = [];
         for (const sc of f.scopes) for (const [name, cell] of sc) { vars.push({ name, type: cell.type, v: snapVal(cell.type, cell.v) }); visit(cell.v); }
-        return { name: f.name, line: f.line, vars, args: f.args };
+        return { name: f.name, line: f.line, vars, args: f.args, params: f.params || [] };
       });
       return { frames: fs, heap };
     }
@@ -812,7 +817,7 @@ const MJ = (function () {
         if (n.name === 'getName') return r.name;
         if (n.name === 'getScore') return r.score;
         const old = r.score; r.score = (r.score + a[0]) | 0;
-        record('mutate', n, `addScore changes the Player that ${n.recv.src} refers to: its score goes from ${old} to ${r.score}.`);
+        record('mutate', n, `addScore changes the Player that ${n.recv.src} refers to: its score goes from ${old} to ${r.score}.`, { obj: r.hid });
         return undefined;
       }
       // ArrayList
@@ -857,24 +862,30 @@ const MJ = (function () {
       if (frames.length >= maxDepth) throw new ToolLimit('depth', n.line);
       const scope = new Map();
       m.params.forEach((q, i) => scope.set(q.name, { type: q.type, v: a[i] }));
-      frames.push({ name: m.name, scopes: [scope], line: n.line, args: m.params.map((q, i) => `${q.name} = ${show(q.type, a[i])}`) });
-      const argText = m.params.map((q, i) => `${q.name} = ${show(q.type, a[i])}`).join(', ');
-      record('call', m, `Call ${m.name}(${a.map((x, i) => show(m.params[i].type, x)).join(', ')}): a new frame${m.params.length ? ` where ${argText}` : ''}. ${m.params.some(q => isRef(q.type) && q.type !== 'String') ? 'A reference parameter gets a copy of the reference, so it refers to the same object as the argument.' : m.params.length ? 'Each parameter gets a copy of its argument.' : ''}`.trim(), { callLine: n.line });
+      const caller = fr().name;
+      frames.push({ name: m.name, scopes: [scope], line: n.line, params: m.params.map(q => q.name), args: m.params.map((q, i) => `${q.name} = ${showRef(q.type, a[i])}`) });
+      const argText = m.params.map((q, i) => `${q.name} = ${showRef(q.type, a[i])}`).join(', ');
+      const hasRef = m.params.some(q => isRef(q.type) && q.type !== 'String');
+      record('call', m, `Call ${m.name}(${n.args.map(x => x.src.trim()).join(', ')}): a new frame${m.params.length ? ` where ${argText}` : ''}. ${hasRef ? 'A reference parameter gets a copy of the reference, so it refers to the same object as the argument.' : m.params.length ? 'Each parameter gets a copy of its argument.' : ''}`.trim(),
+        { callLine: n.line, method: m.name, caller, args: m.params.map((q, i) => ({ name: q.name, type: q.type, src: n.args[i].src, v: snapVal(q.type, a[i]), text: showRef(q.type, a[i]) })) });
       let ret;
       try { execBlockBody(m.body); ret = undefined; }
       catch (e) { if (e instanceof Ret) ret = e.v; else { throw e; } }
       const f = frames.pop();
-      record('return', n, m.ret === 'void' ? `${m.name} finishes. Its frame and its variables are removed, and execution continues in ${fr().name}.` : `${m.name} returns ${show(m.ret, ret)} to ${fr().name}, and its frame is removed.`, { returned: m.ret === 'void' ? undefined : show(m.ret, ret), from: f.name });
+      record('return', n, m.ret === 'void' ? `${m.name} finishes. Its frame and its variables are removed, and execution continues in ${fr().name}.` : `${m.name} returns ${showRef(m.ret, ret)} to ${fr().name}, and its frame is removed.`,
+        { returned: m.ret === 'void' ? undefined : showRef(m.ret, ret), retType: m.ret, retValue: m.ret === 'void' ? undefined : snapVal(m.ret, ret), from: f.name, method: m.name });
       return ret;
     }
     class Ret { constructor(v) { this.v = v; } }
     function execBlockBody(b) { fr().scopes.push(new Map()); try { for (const s of b.body) exec(s); } finally { fr().scopes.pop(); } }
+    let lastArr = null;   // the array an element assignment just changed
     function assignTo(target, v, n) {
       if (target.k === 'var') { lookupCell(target.name).v = v; return; }
       const arr = ev(target.arr), i = ev(target.i);
       if (arr === null) npe(n.line, target.arr.src);
       if (i < 0 || i >= arr.values.length) throw new JavaThrow('ArrayIndexOutOfBoundsException', n.line, `Index ${i} is outside the array, whose indexes run from 0 to ${arr.values.length - 1}.`);
       arr.values[i] = v;
+      lastArr = arr.hid;
       return i;
     }
     function condition(n, node) {
@@ -913,7 +924,7 @@ const MJ = (function () {
           const note = n.op === '='
             ? `${who} becomes ${describe(tt, v)}${n.target.k === 'var' && old !== undefined && old !== v && (typeof v !== 'object') ? ` (it was ${show(tt, old)})` : ''}.`
             : `${n.op} updates ${who}: it becomes ${show(tt, v)}.` + (prim(tt) === 'int' && prim(n.e.type) === 'double' ? ' The result is cast back to int automatically.' : '');
-          record('assign', n, note, { changed: [n.target.k === 'var' ? n.target.name : n.target.arr.src], arrayIndex: idx });
+          record('assign', n, note, { changed: [n.target.k === 'var' ? n.target.name : n.target.arr.src], arrayIndex: idx, obj: n.target.k === 'index' ? lastArr : undefined });
           return;
         }
         case 'incdec': {
@@ -921,7 +932,7 @@ const MJ = (function () {
           const v = n.op === '++' ? (prim(tt) === 'int' ? (cur + 1) | 0 : cur + 1) : (prim(tt) === 'int' ? (cur - 1) | 0 : cur - 1);
           const idx = assignTo(n.target, v, n);
           const who = n.target.k === 'var' ? n.target.name : `${n.target.arr.src}[${idx}]`;
-          record(n.forUpdate ? 'update' : 'assign', n, `${n.src.trim()} ${n.op === '++' ? 'adds' : 'subtracts'} 1: ${who} goes from ${show(tt, cur)} to ${show(tt, v)}.`, { changed: [n.target.k === 'var' ? n.target.name : n.target.arr.src], arrayIndex: idx });
+          record(n.forUpdate ? 'update' : 'assign', n, `${n.src.trim()} ${n.op === '++' ? 'adds' : 'subtracts'} 1: ${who} goes from ${show(tt, cur)} to ${show(tt, v)}.`, { changed: [n.target.k === 'var' ? n.target.name : n.target.arr.src], arrayIndex: idx, obj: n.target.k === 'index' ? lastArr : undefined });
           return;
         }
         case 'print': {
@@ -1007,6 +1018,8 @@ const MJ = (function () {
         }
         case 'return': {
           const v = n.e ? ev(n.e) : undefined;
+          const t = n.e ? n.e.type : 'void';
+          record('returning', n, n.e ? `return ${n.e.src.trim()}: the value is ${showRef(t, v)}. ${fr().name} stops here, and this value goes back to the call.` : `return; ends ${fr().name} here.`, { value: n.e ? showRef(t, v) : undefined, method: fr().name });
           throw new Ret(v);
         }
       }
@@ -1027,9 +1040,11 @@ const MJ = (function () {
         crashed = e.javaType;
         // Keep the part of a condition that was evaluated before it threw, and where it threw.
         steps.push({ kind: 'error', line: e.line, note: `${e.why} Java throws a${/^[AEIOU]/.test(e.javaType) ? 'n' : ''} ${e.javaType}, and the program stops.`, out, error: e.javaType, depth: frames.length, failNode: e.node, tree: treeRec ? [...treeRec.entries()] : null, ...snapshot() });
-      } else if (e instanceof ToolLimit) {
-        limit = e.kind;
-        steps.push({ kind: 'limit', line: e.line, note: e.kind === 'depth' ? `This tool stops at ${maxDepth} method calls deep. Java itself would stop with a StackOverflowError once the calls get deep enough.` : `This tool stopped after ${maxOps.toLocaleString()} operations. The program may have an infinite loop.`, out, depth: frames.length, ...snapshot() });
+      } else if (e instanceof ToolLimit || e instanceof RangeError && /call stack/i.test(e.message) || e && e.name === 'InternalError') {
+        // The browser's own stack can run out before maxDepth; treat that as the same depth limit.
+        limit = e instanceof ToolLimit ? e.kind : 'depth';
+        const line = e instanceof ToolLimit ? e.line : frames[frames.length - 1].line;
+        steps.push({ kind: 'limit', line, note: limit === 'depth' ? `This tool stops at ${frames.length} method calls deep. Java itself would keep going deeper before stopping with a StackOverflowError.` : `This tool stopped after ${maxOps.toLocaleString()} operations. The program may have an infinite loop.`, out, depth: frames.length, ...snapshot() });
       } else throw e;
     }
     return { steps, out, crashed, limit, truncated, prog };

@@ -24,13 +24,28 @@ function split(MJ, code) {
   const main = prog.main.map(s => code.slice(s.pos, through(s.end))).join('\n');
   return { methods, main };
 }
+// The same split done on the text, for programs that do not parse (compile-error cases): a line
+// starting with "static" at the top level begins a method, which runs until its braces balance.
+export function splitText(code) {
+  const methods = [], main = [];
+  let depth = 0, inMethod = false, opened = false;
+  for (const line of code.split('\n')) {
+    if (depth === 0 && !inMethod && /^static\s/.test(line)) { inMethod = true; opened = false; }
+    (inMethod ? methods : main).push(line);
+    const bare = line.replace(/\/\/.*$/, '').replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '');
+    for (const ch of bare) { if (ch === '{') { depth++; opened = true; } else if (ch === '}') depth--; }
+    if (inMethod && opened && depth === 0) inMethod = false;
+  }
+  return { methods: methods.join('\n'), main: main.join('\n') };
+}
 export function writeCheck(casesUrl, className, outUrl) {
   const MJ = loadMJ();
   const cases = JSON.parse(readFileSync(casesUrl, 'utf8'));
   const helpers = [], runs = [], compiles = [];
   cases.forEach(([code, want], i) => {
     if (want === 'compile-error' || want === 'unsupported' || want === 'limit') {
-      compiles.push(`        compileCheck(javac, ${lit(code)}, ${lit(`import java.util.ArrayList;\npublic class Snip {\n${PLAYER}\nstatic void run() {\n${code}\n}\n}`)}, ${want !== 'compile-error'});`);
+      const t = splitText(code);
+      compiles.push(`        compileCheck(javac, ${lit(code)}, ${lit(`import java.util.ArrayList;\npublic class Snip {\n${PLAYER}\n${t.methods}\nstatic void run() {\n${t.main}\n}\n}`)}, ${want !== 'compile-error'});`);
       return;
     }
     const parts = split(MJ, code);
