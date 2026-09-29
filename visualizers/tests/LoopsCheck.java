@@ -22,7 +22,7 @@ public class LoopsCheck {
     }
 
     static class C0 {
-        
+
         static void run() {
             int count = 0;
             for (int i = 0; i < 5; i++) {
@@ -33,7 +33,7 @@ public class LoopsCheck {
     }
 
     static class C1 {
-        
+
         static void run() {
             int x = 2;
             while (x < 100) {
@@ -44,7 +44,7 @@ public class LoopsCheck {
     }
 
     static class C2 {
-        
+
         static void run() {
             for (int i = 1; i <= 10; i += 3) {
                 System.out.print(i + " ");
@@ -53,7 +53,7 @@ public class LoopsCheck {
     }
 
     static class C3 {
-        
+
         static void run() {
             int i = 0;
             int last = 0;
@@ -66,7 +66,7 @@ public class LoopsCheck {
     }
 
     static class C4 {
-        
+
         static void run() {
             int n = 10;
             while (n < 5) {
@@ -77,7 +77,7 @@ public class LoopsCheck {
     }
 
     static class C5 {
-        
+
         static void run() {
             int sum = 0;
             for (int k = 1; k <= 5; k++) {
@@ -88,7 +88,7 @@ public class LoopsCheck {
     }
 
     static class C6 {
-        
+
         static void run() {
             int count = 0;
             for (int j = 10; j > 0; j -= 3) {
@@ -99,7 +99,7 @@ public class LoopsCheck {
     }
 
     static class C7 {
-        
+
         static void run() {
             int i = 5;
             while (i > 0) {
@@ -110,7 +110,7 @@ public class LoopsCheck {
     }
 
     static class C9 {
-        
+
         static void run() {
             String s = "banana";
             int count = 0;
@@ -124,7 +124,7 @@ public class LoopsCheck {
     }
 
     static class C10 {
-        
+
         static void run() {
             int c = 0;
             for (int r = 0; r < 3; r++) {
@@ -137,7 +137,7 @@ public class LoopsCheck {
     }
 
     static class C11 {
-        
+
         static void run() {
             for (int r = 1; r <= 4; r++) {
                 for (int k = 1; k <= r; k++) {
@@ -149,7 +149,7 @@ public class LoopsCheck {
     }
 
     static class C12 {
-        
+
         static void run() {
             int count = 0;
             for (int i = 3; i < 12; i += 2) {
@@ -160,7 +160,7 @@ public class LoopsCheck {
     }
 
     static class C13 {
-        
+
         static void run() {
             int x = 1;
             while (x <= 50) {
@@ -171,7 +171,7 @@ public class LoopsCheck {
     }
 
     static class C15 {
-        
+
         static void run() {
             for (int i = 10; i >= 0; i -= 4) {
                 System.out.print(i + ",");
@@ -180,7 +180,7 @@ public class LoopsCheck {
     }
 
     static class C16 {
-        
+
         static void run() {
             String w = "loop";
             String r = "";
@@ -192,7 +192,7 @@ public class LoopsCheck {
     }
 
     static class C17 {
-        
+
         static void run() {
             int c = 0;
             for (int a = 1; a <= 3; a++) {
@@ -205,7 +205,7 @@ public class LoopsCheck {
     }
 
     static class C18 {
-        
+
         static void run() {
             int x = 20;
             while (x > 1) {
@@ -216,7 +216,7 @@ public class LoopsCheck {
     }
 
     static class C19 {
-        
+
         static void run() {
             int total = 0;
             for (int i = 0; i < 6; i++) {
@@ -229,7 +229,7 @@ public class LoopsCheck {
     }
 
     static class C20 {
-        
+
         static void run() {
             int[] scores = {8, 5, 9, 6};
             int total = 0;
@@ -241,7 +241,7 @@ public class LoopsCheck {
     }
 
     static class C21 {
-        
+
         static void run() {
             int sum = 0;
             {
@@ -256,7 +256,7 @@ public class LoopsCheck {
     }
 
     static class C22 {
-        
+
         static void run() {
             int n = 0;
             for (int i = 0; i < 5; i++);
@@ -265,7 +265,7 @@ public class LoopsCheck {
     }
 
     static class C23 {
-        
+
         static void run() {
             for (int i = 0; i < 3; i++) {
                 System.out.print(i);
@@ -277,7 +277,7 @@ public class LoopsCheck {
     }
 
     static class C24 {
-        
+
         static void run() {
             int x = 7;
             x += 2.5;
@@ -290,7 +290,7 @@ public class LoopsCheck {
     }
 
     static class C25 {
-        
+
         static void run() {
             double d = 1;
             for (int i = 0; i < 3; i++) {
@@ -301,7 +301,7 @@ public class LoopsCheck {
     }
 
     static class C26 {
-        
+
         static void run() {
             int[] a = new int[4];
             for (int i = 0; i < a.length; i++) {
@@ -314,7 +314,7 @@ public class LoopsCheck {
     }
 
     static class C27 {
-        
+
         static void run() {
             int[] a = {1, 2, 3};
             for (int v : a) {
@@ -325,7 +325,7 @@ public class LoopsCheck {
     }
 
     static class C28 {
-        
+
         static void run() {
             int i = 0;
             while (i < 10 && i * i < 20) {
@@ -336,7 +336,7 @@ public class LoopsCheck {
     }
 
     static class C29 {
-        
+
         static void run() {
             boolean done = false;
             int n = 1;
@@ -351,7 +351,7 @@ public class LoopsCheck {
     }
 
     static class C30 {
-        
+
         static void run() {
             int[] a = {3, 1, 2};
             System.out.println(a[3]);
@@ -359,7 +359,7 @@ public class LoopsCheck {
     }
 
     static class C31 {
-        
+
         static void run() {
             String s = "abc";
             for (int i = 0; i <= s.length(); i++) {

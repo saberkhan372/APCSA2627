@@ -10,7 +10,7 @@ if (copy) bad(copy);
 for (const c of cases) {
   const f = api.compileFormula(c.f);
   if (c.error) {
-    const got = f.compileError ? 'compile-error' : f.type === 'int' && api.analyze(f).error ? 'throws:' + api.analyze(f).error : 'ok';
+    const got = f.compileError ? 'compile-error' : f.unsupported ? 'unsupported' : f.type === 'int' && api.analyze(f).error ? 'throws:' + api.analyze(f).error : 'ok';
     if (got !== c.error) bad(`${c.f}: got ${got}, expected ${c.error}`);
     continue;
   }

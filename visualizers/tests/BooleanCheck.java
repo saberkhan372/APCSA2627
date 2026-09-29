@@ -22,7 +22,7 @@ public class BooleanCheck {
     }
 
     static class C0 {
-        
+
         static void run() {
             int x = 5;
             int y = 4;
@@ -31,7 +31,7 @@ public class BooleanCheck {
     }
 
     static class C1 {
-        
+
         static void run() {
             int x = 0;
             int y = 10;
@@ -40,7 +40,7 @@ public class BooleanCheck {
     }
 
     static class C2 {
-        
+
         static void run() {
             int x = 0;
             int y = 10;
@@ -49,7 +49,7 @@ public class BooleanCheck {
     }
 
     static class C3 {
-        
+
         static void run() {
             String s = null;
             System.out.println(s != null && s.length() > 3);
@@ -57,7 +57,7 @@ public class BooleanCheck {
     }
 
     static class C4 {
-        
+
         static void run() {
             String s = null;
             System.out.println(s.length() > 3 && s != null);
@@ -65,7 +65,7 @@ public class BooleanCheck {
     }
 
     static class C5 {
-        
+
         static void run() {
             String s = null;
             System.out.println(s == null || s.length() == 0);
@@ -73,7 +73,7 @@ public class BooleanCheck {
     }
 
     static class C6 {
-        
+
         static void run() {
             int x = 20;
             System.out.println(x >= 10 && x <= 20);
@@ -81,7 +81,7 @@ public class BooleanCheck {
     }
 
     static class C7 {
-        
+
         static void run() {
             boolean a = false;
             boolean b = true;
@@ -90,7 +90,7 @@ public class BooleanCheck {
     }
 
     static class C8 {
-        
+
         static void run() {
             int x = 8;
             int y = 8;
@@ -99,7 +99,7 @@ public class BooleanCheck {
     }
 
     static class C9 {
-        
+
         static void run() {
             int x = 3;
             int y = 8;
@@ -108,7 +108,7 @@ public class BooleanCheck {
     }
 
     static class C10 {
-        
+
         static void run() {
             String name = "";
             System.out.println(name != null && name.length() > 0);
@@ -116,7 +116,7 @@ public class BooleanCheck {
     }
 
     static class C11 {
-        
+
         static void run() {
             int n = 7;
             System.out.println(n % 2 == 0 || n > 5 && n < 10);
@@ -124,7 +124,7 @@ public class BooleanCheck {
     }
 
     static class C12 {
-        
+
         static void run() {
             boolean a = true;
             boolean b = false;
@@ -133,7 +133,7 @@ public class BooleanCheck {
     }
 
     static class C13 {
-        
+
         static void run() {
             boolean a = true;
             boolean b = false;
@@ -142,7 +142,7 @@ public class BooleanCheck {
     }
 
     static class C14 {
-        
+
         static void run() {
             int x = 6;
             int y = 3;
@@ -151,7 +151,7 @@ public class BooleanCheck {
     }
 
     static class C15 {
-        
+
         static void run() {
             int x = 6;
             int y = 3;
@@ -160,7 +160,7 @@ public class BooleanCheck {
     }
 
     static class C16 {
-        
+
         static void run() {
             int diff = 0;
             for (int x = -2; x <= 10; x++) {
@@ -175,7 +175,7 @@ public class BooleanCheck {
     }
 
     static class C17 {
-        
+
         static void run() {
             int diff = 0;
             for (int x = -2; x <= 10; x++) {
@@ -190,7 +190,7 @@ public class BooleanCheck {
     }
 
     static class C18 {
-        
+
         static void run() {
             int diff = 0;
             for (int x = -2; x <= 10; x++) {
@@ -205,7 +205,7 @@ public class BooleanCheck {
     }
 
     static class C19 {
-        
+
         static void run() {
             int diff = 0;
             for (int x = -2; x <= 10; x++) {
@@ -220,7 +220,7 @@ public class BooleanCheck {
     }
 
     static class C20 {
-        
+
         static void run() {
             int diff = 0;
             for (int x = -2; x <= 10; x++) {
@@ -235,7 +235,7 @@ public class BooleanCheck {
     }
 
     static class C21 {
-        
+
         static void run() {
             int diff = 0;
             for (int x = -2; x <= 10; x++) {
@@ -250,7 +250,7 @@ public class BooleanCheck {
     }
 
     static class C22 {
-        
+
         static void run() {
             int diff = 0;
             for (int x = -2; x <= 10; x++) {
@@ -265,7 +265,7 @@ public class BooleanCheck {
     }
 
     static class C23 {
-        
+
         static void run() {
             int diff = 0;
             for (int x = -2; x <= 10; x++) {
@@ -280,7 +280,7 @@ public class BooleanCheck {
     }
 
     static class C24 {
-        
+
         static void run() {
             int a = 0;
             int b = 5;
@@ -294,7 +294,7 @@ public class BooleanCheck {
     }
 
     static class C25 {
-        
+
         static void run() {
             int score = 95;
             String grade = "F";
@@ -312,7 +312,7 @@ public class BooleanCheck {
     }
 
     static class C26 {
-        
+
         static void run() {
             int score = 95;
             String grade = "F";
@@ -328,7 +328,7 @@ public class BooleanCheck {
     }
 
     static class C27 {
-        
+
         static void run() {
             int t = 75;
             if (t >= 80) {
@@ -342,7 +342,7 @@ public class BooleanCheck {
     }
 
     static class C28 {
-        
+
         static void run() {
             int a = 5;
             int b = -1;
@@ -356,7 +356,7 @@ public class BooleanCheck {
     }
 
     static class C29 {
-        
+
         static void run() {
             int n = 15;
             if (n % 3 == 0) {

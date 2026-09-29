@@ -524,7 +524,8 @@ function memType(n, types) {
           return 'boolean';
         }
         if (rt === 'Player') {
-          const m = PLAYER_METHODS[n.name];
+          if (n.name === 'toString' && ts.length === 0) throw new MemUnsupported('Player inherits toString(), but its default text includes an object identity that varies between runs.', n.line);
+          const m = Object.hasOwn(PLAYER_METHODS, n.name) ? PLAYER_METHODS[n.name] : null;
           if (!m) throw new MemCompileError(`cannot find symbol: method ${n.name} in class Player`, n.line);
           if (ts.length !== m.args.length || ts.some((t, i) => t !== m.args[i])) throw new MemCompileError(`method ${n.name} in class Player cannot be applied to given types`, n.line);
           return m.ret;
@@ -659,7 +660,7 @@ function runMemory(src) {
         const o = heap.get(r);
         if (n.name === 'equals') {
           if (o.cls === 'Player') {
-            const res = r === a[0];
+            const res = n.args[0].type === 'Player' && r === a[0];
             notes.push(`Player does not define its own equals, so equals works like ==: ${res ? 'same object' : 'not the same object'}, so it gives ${res}.`);
             return res;
           }

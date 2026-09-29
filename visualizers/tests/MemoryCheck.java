@@ -242,6 +242,10 @@ public class MemoryCheck {
         System.out.println();
         System.out.print(1 - 3);
     }
+    static void m57() {
+        Player p = new Player("A", 0);
+        System.out.println(p.equals(2));
+    }
 
     static int passed = 0, failed = 0;
     static String capture(Runnable r) {
@@ -311,6 +315,7 @@ public class MemoryCheck {
         check("boolean same = \"a\" == \"a\";\nSystem.out.println(same);", "true\n", MemoryCheck::m39);
         check("Player p = new Player(null, 3);\nSystem.out.println(p.getName());", "null\n", MemoryCheck::m40);
         check("System.out.print(\"a\");\nSystem.out.println();\nSystem.out.print(1 - 3);", "a\n-2", MemoryCheck::m41);
+        check("Player p = new Player(\"A\", 0);\nSystem.out.println(p.equals(2));", "false\n", MemoryCheck::m57);
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         if (javac == null) throw new IllegalStateException("A JDK is needed to check compile claims.");
         compileCheck(javac, "Player p = \"Ana\";", "public class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\nstatic void run() {\nPlayer p = \"Ana\";\n}\n}", false);
@@ -328,6 +333,7 @@ public class MemoryCheck {
         compileCheck(javac, "Player a = new Player(\"Ana\", 10);\nSystem.out.println(a);", "public class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\nstatic void run() {\nPlayer a = new Player(\"Ana\", 10);\nSystem.out.println(a);\n}\n}", true);
         compileCheck(javac, "double d = 1.5;\nSystem.out.println(d);", "public class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\nstatic void run() {\ndouble d = 1.5;\nSystem.out.println(d);\n}\n}", true);
         compileCheck(javac, "String s = \"abc\";\nSystem.out.println(s.indexOf(98));", "public class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\nstatic void run() {\nString s = \"abc\";\nSystem.out.println(s.indexOf(98));\n}\n}", true);
+        compileCheck(javac, "Player p = new Player(\"A\", 0);\nSystem.out.println(p.toString());", "public class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\nstatic void run() {\nPlayer p = new Player(\"A\", 0);\nSystem.out.println(p.toString());\n}\n}", true);
         System.out.println(failed == 0 ? "PASS: " + passed + " programs match Java " + System.getProperty("java.version") : failed + " of " + (passed + failed) + " programs differ");
     }
 }

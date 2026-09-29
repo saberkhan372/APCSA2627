@@ -12,7 +12,11 @@ const methods = [], checks = [], rejects = [];
 cases.forEach((c, i) => {
   const lit = JSON.stringify(c.f);
   if (c.error === 'compile-error') {
-    rejects.push(`        reject(javac, ${lit}, ${JSON.stringify(`public class Snip { static int f(double r) { return ${javaR(c.f)}; } }`)});`);
+    rejects.push(`        compileCheck(javac, ${lit}, ${JSON.stringify(`public class Snip { static int f(double r) { return ${javaR(c.f)}; } }`)}, false);`);
+    return;
+  }
+  if (c.error === 'unsupported') {
+    rejects.push(`        compileCheck(javac, ${lit}, ${JSON.stringify(`public class Snip { static int f() { return ${c.f}; } }`)}, true);`);
     return;
   }
   methods.push(`    static int f${i}(double r) { return ${javaR(c.f)}; }`);
@@ -73,13 +77,13 @@ ${methods.join('\n')}
         try { r.run(); fail(formula, "Java does not throw"); } catch (RuntimeException e) { if (e.getClass().getSimpleName().equals(type)) passed++; else fail(formula, "Java throws " + e.getClass().getSimpleName()); }
     }
     static void expectThrows(String formula, String type, java.util.function.IntSupplier s) { expectThrows(formula, type, (Runnable) () -> s.getAsInt()); }
-    static void reject(JavaCompiler javac, String formula, String source) throws Exception {
+    static void compileCheck(JavaCompiler javac, String formula, String source, boolean shouldCompile) throws Exception {
         JavaFileObject src = new SimpleJavaFileObject(URI.create("string:///Snip.java"), JavaFileObject.Kind.SOURCE) {
             @Override public CharSequence getCharContent(boolean ignore) { return source; }
         };
         String out = Files.createTempDirectory("snip").toString();
-        if (!javac.getTask(null, null, new DiagnosticCollector<JavaFileObject>(), List.of("-d", out), null, List.of(src)).call()) passed++;
-        else fail(formula, "Java compiles it, but the table says it does not");
+        if (javac.getTask(null, null, new DiagnosticCollector<JavaFileObject>(), List.of("-d", out), null, List.of(src)).call() == shouldCompile) passed++;
+        else fail(formula, "Java " + (shouldCompile ? "rejects a valid formula" : "compiles an invalid formula"));
     }
 
     public static void main(String[] args) throws Exception {
@@ -92,4 +96,4 @@ ${rejects.join('\n')}
 }
 `;
 writeFileSync(new URL('RangeCheck.java', import.meta.url), java);
-console.log(`Wrote RangeCheck.java with ${checks.length} formulas and ${rejects.length} compile errors`);
+console.log(`Wrote RangeCheck.java with ${checks.length} formulas and ${rejects.length} compilation checks`);

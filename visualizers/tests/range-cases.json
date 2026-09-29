@@ -28,5 +28,7 @@
   {"f": "(int) (Math.random() * 100000) - 50000", "min": -50000, "max": 49999, "tooMany": true},
   {"f": "(int) (Math.random() * 1000) + 1", "min": 1, "max": 1000, "count": 1000, "mode": null, "edgeLow": [], "edgeTop": []},
   {"f": "(int) (Math.random() * 6) + ", "error": "compile-error"},
-  {"f": "(int) (Math.random() * 6) / 0", "error": "throws:ArithmeticException"}
+  {"f": "(int) (Math.random() * 6) / 0", "error": "throws:ArithmeticException"},
+  {"f": "(int) ((Math.random() - Math.random()) * 10)", "error": "unsupported"},
+  {"f": "(int) (1 / (Math.random() - 0.5))", "error": "unsupported"}
 ]

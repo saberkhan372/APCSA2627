@@ -755,22 +755,59 @@ function runJava(declSrc, stmtSrc) {
 // EXPR ENGINE END
 
 // ENGINE START
-// Math.random() is replaced by a double r with 0.0 <= r < 1.0, and the formula is evaluated by the
-// Expression Tracer engine. The possible values come from both ends of that interval (0.0 and the
-// largest double below 1.0) plus the midpoints of GRID equal slices; each outcome's share of the
-// interval comes from those midpoints.
+// The slider models one Math.random() call. Exact endpoints are reported only for expressions
+// proven to rise (or stay flat) as that one draw rises. Frequencies are grid estimates.
 const R_TOP = 1 - Math.pow(2, -53);   // Math.nextDown(1.0)
 const GRID = 12000;
 const MAX_VALUES = 1000;  // counts and shares are reported only up to this many values (at least 12 slices each)
+function hasDraw(n) {
+  return n.k === 'var' && n.name === 'r' || !!n.e && hasDraw(n.e) || !!n.l && hasDraw(n.l) || !!n.r && hasDraw(n.r);
+}
+function provenRangeShape(n) {
+  if (n.k === 'var') return n.name === 'r';
+  if (n.k === 'num' || n.k === 'const') return true;
+  if (n.k === 'group' || n.k === 'cast') return provenRangeShape(n.e);
+  if (n.k === 'neg') return provenRangeShape(n.e) && (n.op === '+' || !hasDraw(n.e));
+  if (n.k !== 'bin' || !provenRangeShape(n.l) || !provenRangeShape(n.r)) return false;
+  const left = hasDraw(n.l), right = hasDraw(n.r);
+  if (!left && !right) return true;
+  if (left && right) return false;
+  if (n.op === '+') return true;
+  if (n.op === '-') return left;
+  if (n.op === '*') {
+    const fixed = left ? n.r : n.l;
+    const v = evalAt({ expr: fixed }, 0);
+    return !v.error && v.value >= 0;
+  }
+  // Division by a fixed zero always throws; preserve that runtime-error lesson.
+  if (n.op === '/' && left) {
+    const v = evalAt({ expr: n.r }, 0);
+    return !v.error && v.value === 0;
+  }
+  return false;
+}
+function noIntWrap(n) {
+  if (n.e && !noIntWrap(n.e) || n.l && !noIntWrap(n.l) || n.r && !noIntWrap(n.r)) return false;
+  if (n.k !== 'bin' || n.type !== 'int' || !hasDraw(n) || !['+', '-', '*'].includes(n.op)) return true;
+  for (const r of [0, R_TOP]) {
+    const a = evalAt({ expr: n.l }, r), b = evalAt({ expr: n.r }, r);
+    if (a.error || b.error) return false;
+    const raw = n.op === '+' ? a.value + b.value : n.op === '-' ? a.value - b.value : a.value * b.value;
+    if (raw < INT_MIN || raw > INT_MAX) return false;
+  }
+  return true;
+}
 function compileFormula(src) {
   const text = src.trim().replace(/;\s*$/, '');
   if (!text) return { empty: true };
   if (/(^|[^\w$.])r([^\w$]|$)/.test(text)) return { unsupported: 'the name r is used by this tool for Math.random(); please use another name.' };
+  if ((text.match(/Math\.random\s*\(\s*\)/g) || []).length > 1) return { unsupported: 'each Math.random() call makes an independent draw; this tool can model one call at a time.' };
   const body = text.replace(/Math\.random\s*\(\s*\)/g, 'r');
   nodeId = 0;
   try {
     const expr = parseExpression(body);
     const type = typeOf(expr, { r: 'double' });
+    if (type === 'int' && (!provenRangeShape(expr) || !noIntWrap(expr))) return { unsupported: 'the exact range of this expression cannot be proved by this tool. Use a scale, cast and shift formula with one Math.random() call.' };
     return { expr, type, text, usesRandom: body !== text };
   } catch (e) {
     if (e instanceof JavaCompileError) return { compileError: e.message };
@@ -864,7 +901,7 @@ class RangeView {
       <ol class="pipe" aria-label="Each step at this value"></ol>
       <div class="boxes2">
         <div class="card"><h3>Possible values</h3><div class="rangebig"></div><div class="dots"></div><p class="small rangenote"></p></div>
-        <div class="card"><h3>Share of Math.random()'s range</h3><div class="shares"></div>
+        <div class="card"><h3>Estimated share of Math.random()'s range</h3><div class="shares"></div>
           <div class="row" style="margin-top:8px"><button class="btn" data-roll>Roll 1,000 times</button><span class="small rollnote"></span></div></div>
       </div><div class="warns"></div></div>`;
     this.err = host.querySelector('.bigerr'); this.body = host.querySelector('.rbody');
@@ -913,12 +950,12 @@ class RangeView {
     h.querySelector('.warns').textContent = '';
     h.querySelector('[data-roll]').disabled = !!a.tooMany;
     if (a.tooMany) {
-      h.querySelector('.rangenote').textContent = `More than ${MAX_VALUES.toLocaleString()} different values. The smallest and largest come from Math.random() = 0.0 and the largest double below 1.0` + (a.monotonic ? '.' : ', and from 12,000 evenly spaced values.') + ` This tool counts values and shows shares only for up to ${MAX_VALUES.toLocaleString()} values.`;
+      h.querySelector('.rangenote').textContent = `More than ${MAX_VALUES.toLocaleString()} sampled values. The exact smallest and largest come from Math.random() = 0.0 and the largest double below 1.0. This tool shows individual values and estimated shares only for up to ${MAX_VALUES.toLocaleString()} outcomes.`;
       sh.append(el('p', 'small', 'Too many values to show each one.'));
       return;
     }
     if (a.values.length <= 40) a.values.forEach(v => { const d = el('span', 'dot' + (a.edges.includes(v) ? ' edge' : ''), minus(v)); if (a.edges.includes(v)) d.title = 'possible, but practically never (see the note below)'; dots.append(d); });
-    h.querySelector('.rangenote').textContent = `${a.values.length} different value${a.values.length === 1 ? '' : 's'}. ` + (a.monotonic ? 'The smallest comes from Math.random() = 0.0 and the largest from the largest double below 1.0.' : 'This formula does not rise steadily, so the range comes from checking 12,000 evenly spaced values as well as both ends.');
+    h.querySelector('.rangenote').textContent = `${a.values.length} value${a.values.length === 1 ? '' : 's'} seen in 12,000 samples and at the endpoints. The exact minimum and maximum occur at Math.random() = 0.0 and the largest double below 1.0; the shares are estimates.`;
     const total = GRID, maxShare = Math.max(...a.counts.values());
     const shares = [...a.counts.entries()].sort((x, y) => x[0] - y[0]);
     const uneven = shares.some(([, c]) => Math.abs(c - maxShare) > total * 0.01);
@@ -941,7 +978,7 @@ class RangeView {
     const counts = new Map();
     for (let i = 0; i < 1000; i++) { const v = evalAt(this.f, Math.random()).value; counts.set(v, (counts.get(v) || 0) + 1); }
     this.rolls = counts;
-    this.host.querySelector('.rollnote').textContent = 'Green: 1,000 real rolls. Random results wobble around the exact shares; they cannot prove the range.';
+    this.host.querySelector('.rollnote').textContent = 'Green: 1,000 real rolls. Both these results and the displayed shares are estimates; rolls cannot prove a range.';
     this.renderRange();
   }
 }

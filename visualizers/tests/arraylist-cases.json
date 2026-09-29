@@ -35,5 +35,9 @@
   ["ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(4);\nv.add(5);\nv.remove(-1);","|throws:IndexOutOfBoundsException"],
   ["ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(4);\nv.add(5);\nSystem.out.println(v.remove(4.0) + \" \" + v);","false [4, 5]\n"],
   ["ArrayList<Double> d = new ArrayList<Double>();\nd.add(4.0);\nd.remove(4.0);\nSystem.out.println(d);","[]\n"],
-  ["ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(4);\nv.add(5);\nSystem.out.println(v.remove(Integer.valueOf(4)) + \" \" + v);","true [5]\n"]
+  ["ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(4);\nv.add(5);\nSystem.out.println(v.remove(Integer.valueOf(4)) + \" \" + v);","true [5]\n"],
+  ["Integer x = null;\nint y = x;\nSystem.out.println(y);","|throws:NullPointerException"],
+  ["ArrayList<Integer> a = new ArrayList<Integer>();\na.add(null);\nfor (int x : a) System.out.println(x);","|throws:NullPointerException"],
+  ["ArrayList<Double> a = new ArrayList<Double>();\na.add(-0.0);\nSystem.out.println(a.remove(0.0));\nSystem.out.println(a);","false\n[-0.0]\n"],
+  ["ArrayList<Double> a = new ArrayList<Double>();\na.add(0.0 / 0.0);\nSystem.out.println(a.remove(0.0 / 0.0));\nSystem.out.println(a);","true\n[]\n"]
 ]

@@ -22,7 +22,7 @@ public class ArrayListCheck {
     }
 
     static class C0 {
-        
+
         static void run() {
             ArrayList<Integer> list = new ArrayList<Integer>();
             list.add(10);
@@ -34,7 +34,7 @@ public class ArrayListCheck {
     }
 
     static class C1 {
-        
+
         static void run() {
             ArrayList<Integer> list = new ArrayList<Integer>();
             list.add(10);
@@ -46,7 +46,7 @@ public class ArrayListCheck {
     }
 
     static class C2 {
-        
+
         static void run() {
             ArrayList<String> w = new ArrayList<String>();
             w.add("a");
@@ -58,7 +58,7 @@ public class ArrayListCheck {
     }
 
     static class C3 {
-        
+
         static void run() {
             ArrayList<String> w = new ArrayList<String>();
             w.add("a");
@@ -70,7 +70,7 @@ public class ArrayListCheck {
     }
 
     static class C4 {
-        
+
         static void run() {
             ArrayList<Integer> nums = new ArrayList<Integer>();
             nums.add(2);
@@ -88,7 +88,7 @@ public class ArrayListCheck {
     }
 
     static class C5 {
-        
+
         static void run() {
             ArrayList<Integer> nums = new ArrayList<Integer>();
             nums.add(2);
@@ -106,7 +106,7 @@ public class ArrayListCheck {
     }
 
     static class C6 {
-        
+
         static void run() {
             ArrayList<Integer> nums = new ArrayList<Integer>();
             nums.add(2);
@@ -125,7 +125,7 @@ public class ArrayListCheck {
     }
 
     static class C7 {
-        
+
         static void run() {
             ArrayList<String> w = new ArrayList<String>();
             w.add("a");
@@ -141,7 +141,7 @@ public class ArrayListCheck {
     }
 
     static class C8 {
-        
+
         static void run() {
             ArrayList<String> w = new ArrayList<String>();
             w.add("a");
@@ -157,7 +157,7 @@ public class ArrayListCheck {
     }
 
     static class C9 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             for (int i = 1; i <= 5; i++) {
@@ -170,7 +170,7 @@ public class ArrayListCheck {
     }
 
     static class C10 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(1);
@@ -185,7 +185,7 @@ public class ArrayListCheck {
     }
 
     static class C11 {
-        
+
         static void run() {
             ArrayList<String> w = new ArrayList<String>();
             w.add("a");
@@ -202,7 +202,7 @@ public class ArrayListCheck {
     }
 
     static class C12 {
-        
+
         static void run() {
             ArrayList<String> w = new ArrayList<String>();
             w.add("a");
@@ -219,7 +219,7 @@ public class ArrayListCheck {
     }
 
     static class C13 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(2);
@@ -232,7 +232,7 @@ public class ArrayListCheck {
     }
 
     static class C14 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(7);
@@ -249,7 +249,7 @@ public class ArrayListCheck {
     }
 
     static class C15 {
-        
+
         static void run() {
             ArrayList<String> w = new ArrayList<String>();
             w.add(0, "x");
@@ -261,7 +261,7 @@ public class ArrayListCheck {
     }
 
     static class C16 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(1);
@@ -274,7 +274,7 @@ public class ArrayListCheck {
     }
 
     static class C17 {
-        
+
         static void run() {
             ArrayList<String> w = new ArrayList<String>();
             w.add("a");
@@ -286,7 +286,7 @@ public class ArrayListCheck {
     }
 
     static class C18 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(7);
@@ -298,7 +298,7 @@ public class ArrayListCheck {
     }
 
     static class C19 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(4);
@@ -308,7 +308,7 @@ public class ArrayListCheck {
     }
 
     static class C26 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(4);
@@ -318,7 +318,7 @@ public class ArrayListCheck {
     }
 
     static class C27 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(4);
@@ -328,7 +328,7 @@ public class ArrayListCheck {
     }
 
     static class C28 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(4);
@@ -339,7 +339,7 @@ public class ArrayListCheck {
     }
 
     static class C30 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(4);
@@ -350,7 +350,7 @@ public class ArrayListCheck {
     }
 
     static class C31 {
-        
+
         static void run() {
             ArrayList<Double> d = new ArrayList<Double>();
             d.add(1.5);
@@ -361,7 +361,7 @@ public class ArrayListCheck {
     }
 
     static class C32 {
-        
+
         static void run() {
             ArrayList<String> w = new ArrayList<String>();
             w.add("x");
@@ -371,7 +371,7 @@ public class ArrayListCheck {
     }
 
     static class C33 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(4);
@@ -381,7 +381,7 @@ public class ArrayListCheck {
     }
 
     static class C34 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(4);
@@ -391,7 +391,7 @@ public class ArrayListCheck {
     }
 
     static class C35 {
-        
+
         static void run() {
             ArrayList<Double> d = new ArrayList<Double>();
             d.add(4.0);
@@ -401,12 +401,50 @@ public class ArrayListCheck {
     }
 
     static class C36 {
-        
+
         static void run() {
             ArrayList<Integer> v = new ArrayList<Integer>();
             v.add(4);
             v.add(5);
             System.out.println(v.remove(Integer.valueOf(4)) + " " + v);
+        }
+    }
+
+    static class C37 {
+
+        static void run() {
+            Integer x = null;
+            int y = x;
+            System.out.println(y);
+        }
+    }
+
+    static class C38 {
+
+        static void run() {
+            ArrayList<Integer> a = new ArrayList<Integer>();
+            a.add(null);
+            for (int x : a) System.out.println(x);
+        }
+    }
+
+    static class C39 {
+
+        static void run() {
+            ArrayList<Double> a = new ArrayList<Double>();
+            a.add(-0.0);
+            System.out.println(a.remove(0.0));
+            System.out.println(a);
+        }
+    }
+
+    static class C40 {
+
+        static void run() {
+            ArrayList<Double> a = new ArrayList<Double>();
+            a.add(0.0 / 0.0);
+            System.out.println(a.remove(0.0 / 0.0));
+            System.out.println(a);
         }
     }
 
@@ -466,6 +504,10 @@ public class ArrayListCheck {
         check("ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(4);\nv.add(5);\nSystem.out.println(v.remove(4.0) + \" \" + v);", "false [4, 5]\n", C34::run);
         check("ArrayList<Double> d = new ArrayList<Double>();\nd.add(4.0);\nd.remove(4.0);\nSystem.out.println(d);", "[]\n", C35::run);
         check("ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(4);\nv.add(5);\nSystem.out.println(v.remove(Integer.valueOf(4)) + \" \" + v);", "true [5]\n", C36::run);
+        check("Integer x = null;\nint y = x;\nSystem.out.println(y);", "|throws:NullPointerException", C37::run);
+        check("ArrayList<Integer> a = new ArrayList<Integer>();\na.add(null);\nfor (int x : a) System.out.println(x);", "|throws:NullPointerException", C38::run);
+        check("ArrayList<Double> a = new ArrayList<Double>();\na.add(-0.0);\nSystem.out.println(a.remove(0.0));\nSystem.out.println(a);", "false\n[-0.0]\n", C39::run);
+        check("ArrayList<Double> a = new ArrayList<Double>();\na.add(0.0 / 0.0);\nSystem.out.println(a.remove(0.0 / 0.0));\nSystem.out.println(a);", "true\n[]\n", C40::run);
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         if (javac == null) throw new IllegalStateException("A JDK is needed to check compile claims.");
         compileCheck(javac, "ArrayList<int> v = new ArrayList<int>();", "import java.util.ArrayList;\npublic class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\n\nstatic void run() {\nArrayList<int> v = new ArrayList<int>();\n}\n}", false);

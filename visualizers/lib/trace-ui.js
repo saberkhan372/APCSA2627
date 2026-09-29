@@ -225,6 +225,7 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
 
   // Predict / Transfer: items have { code, ask, … }; expected(it) gives the answer, and kinds are
   // 'output' (exact text), 'int', 'text', 'mc' (any item with choices: [{ text }]; expected is the index), 'line'.
+  // opts.same(answer, expected), if given, decides whether a 'text' answer matches.
   function questions(prefix, items, opts) {
     const state = items.map(() => ({ val: '', why: '', done: false }));
     let idx = 0;
@@ -267,7 +268,7 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
       let ok;
       if (k === 'output') { const norm = s => s.replace(/\r\n/g, '\n').replace(/\n$/, ''); ok = norm(st.val) === norm(want); }
       else if (k === 'mc') ok = +st.val === want;
-      else if (k === 'text') ok = st.val === want;
+      else if (k === 'text') ok = opts.same ? opts.same(st.val, want) : st.val === want;
       else ok = parseInt(String(st.val).replace('−', '-'), 10) === want;
       fb.className = 'feedback ' + (ok ? 'good' : 'bad'); fb.textContent = '';
       const head = ok ? 'Correct.' : k === 'mc' ? `Not quite: the answer is “${it.choices[want].text}”.` : k === 'output' ? 'Not quite. Compare (· is a space, ↵ a line break):' : `Not quite: the answer is ${want}.`;

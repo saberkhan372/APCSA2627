@@ -77,13 +77,13 @@ public class RangeCheck {
         try { r.run(); fail(formula, "Java does not throw"); } catch (RuntimeException e) { if (e.getClass().getSimpleName().equals(type)) passed++; else fail(formula, "Java throws " + e.getClass().getSimpleName()); }
     }
     static void expectThrows(String formula, String type, java.util.function.IntSupplier s) { expectThrows(formula, type, (Runnable) () -> s.getAsInt()); }
-    static void reject(JavaCompiler javac, String formula, String source) throws Exception {
+    static void compileCheck(JavaCompiler javac, String formula, String source, boolean shouldCompile) throws Exception {
         JavaFileObject src = new SimpleJavaFileObject(URI.create("string:///Snip.java"), JavaFileObject.Kind.SOURCE) {
             @Override public CharSequence getCharContent(boolean ignore) { return source; }
         };
         String out = Files.createTempDirectory("snip").toString();
-        if (!javac.getTask(null, null, new DiagnosticCollector<JavaFileObject>(), List.of("-d", out), null, List.of(src)).call()) passed++;
-        else fail(formula, "Java compiles it, but the table says it does not");
+        if (javac.getTask(null, null, new DiagnosticCollector<JavaFileObject>(), List.of("-d", out), null, List.of(src)).call() == shouldCompile) passed++;
+        else fail(formula, "Java " + (shouldCompile ? "rejects a valid formula" : "compiles an invalid formula"));
     }
 
     public static void main(String[] args) throws Exception {
@@ -118,7 +118,9 @@ public class RangeCheck {
         expectThrows("(int) (Math.random() * 6) / 0", "ArithmeticException", () -> f29(0.5));
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         if (javac == null) throw new IllegalStateException("A JDK is needed to check compile errors.");
-        reject(javac, "(int) (Math.random() * 6) + ", "public class Snip { static int f(double r) { return (int) (r * 6) +; } }");
+        compileCheck(javac, "(int) (Math.random() * 6) + ", "public class Snip { static int f(double r) { return (int) (r * 6) +; } }", false);
+        compileCheck(javac, "(int) ((Math.random() - Math.random()) * 10)", "public class Snip { static int f() { return (int) ((Math.random() - Math.random()) * 10); } }", true);
+        compileCheck(javac, "(int) (1 / (Math.random() - 0.5))", "public class Snip { static int f() { return (int) (1 / (Math.random() - 0.5)); } }", true);
         System.out.println(failed == 0 ? "PASS: " + passed + " formulas match Java " + System.getProperty("java.version") : failed + " problem(s) in " + (passed + failed) + " checks");
     }
 }

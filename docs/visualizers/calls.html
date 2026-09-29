@@ -1467,7 +1467,11 @@ const MJ = (function () {
       }
       return op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? a / b : a % b;
     }
-    const conv = (to, from, v) => (to === 'double' || to === 'Double') ? v : (to === 'int' || to === 'Integer') ? v : v;
+    function conv(to, from, v, line) {
+      if ((to === 'int' || to === 'double') && (from === 'Integer' || from === 'Double') && v === null)
+        npe(line, 'the ' + from + ' value being converted to ' + to);
+      return v;
+    }
     // Condition trees: which parts of a boolean expression were evaluated, and their values.
     let treeRec = null;
     function ev(n) {
@@ -1484,12 +1488,12 @@ const MJ = (function () {
         case 'var': return lookupCell(n.name).v;
         case 'unary': {
           if (n.e.big) return INT_MIN;
-          const a = ev(n.e);
+          const a = n.op === '!' ? ev(n.e) : conv(prim(n.e.type), n.e.type, ev(n.e), n.line);
           if (n.op === '!') return !a;
           if (n.op === '+') return a;
           return n.type === 'int' ? (-a) | 0 : -a;
         }
-        case 'cast': { const a = ev(n.e); return n.to === 'int' ? (n.e.type === 'int' || n.e.type === 'Integer' ? a : castToInt(a)) : a; }
+        case 'cast': { const a = conv(n.to, n.e.type, ev(n.e), n.line); return n.to === 'int' ? (n.e.type === 'int' || n.e.type === 'Integer' ? a : castToInt(a)) : a; }
         case 'bin': {
           if (n.op === '&&') { const a = ev(n.l); return a ? ev(n.r) : false; }
           if (n.op === '||') { const a = ev(n.l); return a ? true : ev(n.r); }
@@ -1507,7 +1511,7 @@ const MJ = (function () {
           return n.op === '==' ? same : !same;
         }
         case 'index': {
-          const arr = ev(n.arr), i = ev(n.i);
+          const arr = ev(n.arr), i = conv('int', n.i.type, ev(n.i), n.line);
           if (arr === null) npe(n.line, n.arr.src);
           if (i < 0 || i >= arr.values.length) throw new JavaThrow('ArrayIndexOutOfBoundsException', n.line, `Index ${i} is outside the array, whose indexes run from 0 to ${arr.values.length - 1}.`);
           return arr.values[i];
@@ -1519,14 +1523,14 @@ const MJ = (function () {
           return r.values.length;
         }
         case 'newArr': {
-          const len = ev(n.n);
+          const len = conv('int', n.n.type, ev(n.n), n.line);
           if (len < 0) throw new JavaThrow('NegativeArraySizeException', n.line, `An array cannot have ${len} elements.`);
           const d = n.elem === 'int' ? 0 : n.elem === 'double' ? 0 : n.elem === 'boolean' ? false : null;
           return newObj({ kind: 'array', elem: n.elem, values: new Array(len).fill(d) });
         }
-        case 'arrInit': return newObj({ kind: 'array', elem: n.elem, values: n.items.map(ev) });
+        case 'arrInit': return newObj({ kind: 'array', elem: n.elem, values: n.items.map(it => conv(n.elem, it.type, ev(it), it.line)) });
         case 'newList': return newObj({ kind: 'list', elem: n.elem, values: [], modCount: 0 });
-        case 'newPlayer': { const a = n.args.map(ev); return newObj({ kind: 'player', name: a[0], score: a[1] }); }
+        case 'newPlayer': { const a = n.args.map(ev); return newObj({ kind: 'player', name: a[0], score: conv('int', n.args[1].type, a[1], n.line) }); }
         case 'scall': return invoke(n);
         case 'call': return method(n);
       }
@@ -1534,10 +1538,11 @@ const MJ = (function () {
     function method(n) {
       if (n.recv.k === 'class') {
         const a = n.args.map(ev);
-        if (n.recv.name === 'Integer') return a[0];
-        if (n.name === 'abs') return n.type === 'int' ? toInt32(Math.abs(a[0])) : Math.abs(a[0]);
-        if (n.name === 'sqrt') return Math.sqrt(a[0]);
-        return Math.pow(a[0], a[1]);
+        if (n.recv.name === 'Integer') return conv('int', n.args[0].type, a[0], n.line);
+        const nums = a.map((v, i) => conv(prim(n.args[i].type), n.args[i].type, v, n.line));
+        if (n.name === 'abs') return n.type === 'int' ? toInt32(Math.abs(nums[0])) : Math.abs(nums[0]);
+        if (n.name === 'sqrt') return Math.sqrt(nums[0]);
+        return Math.pow(nums[0], nums[1]);
       }
       const r = ev(n.recv), a = n.args.map(ev);
       if (r === null) npe(n.line, n.recv.src);
@@ -1552,20 +1557,21 @@ const MJ = (function () {
           for (let k = 0; k < lim; k++) if (r.charCodeAt(k) !== a[0].charCodeAt(k)) return r.charCodeAt(k) - a[0].charCodeAt(k);
           return r.length - a[0].length;
         }
-        const b = a[0], e = a.length > 1 ? a[1] : r.length;
+        const b = conv('int', n.args[0].type, a[0], n.line), e = a.length > 1 ? conv('int', n.args[1].type, a[1], n.line) : r.length;
         if (b < 0 || e > r.length || b > e) throw new JavaThrow('StringIndexOutOfBoundsException', n.line, `substring(${a.join(', ')}) is outside ${JSON.stringify(r)}, whose length is ${r.length}.`);
         return r.slice(b, e);
       }
       if (rt === 'Player') {
-        if (n.name === 'equals') return r === a[0];
+        if (n.name === 'equals') return n.args[0].type === 'Player' && r === a[0];
         if (n.name === 'getName') return r.name;
         if (n.name === 'getScore') return r.score;
-        const old = r.score; r.score = (r.score + a[0]) | 0;
+        const old = r.score; r.score = (r.score + conv('int', n.args[0].type, a[0], n.line)) | 0;
         record('mutate', n, `addScore changes the Player that ${n.recv.src} refers to: its score goes from ${old} to ${r.score}.`, { obj: r.hid });
         return undefined;
       }
       // ArrayList
       const L = r.values, size = L.length, e = ELEM(rt);
+      if (['get', 'set'].includes(n.name) || n.name === 'add' && a.length === 2 || n.name === 'remove' && n.byIndex) a[0] = conv('int', n.args[0].type, a[0], n.line);
       const oob = (i, hi) => { throw new JavaThrow('IndexOutOfBoundsException', n.line, `Index ${i} is out of bounds for length ${size}: valid indexes here are 0 to ${hi}.`); };
       switch (n.name) {
         case 'size': return size;
@@ -1593,7 +1599,7 @@ const MJ = (function () {
             record('list', n, `remove(${a[0]}) removes the element at index ${a[0]}, ${show(e, old)}.` + (a[0] < size - 1 ? ` Every later element moves one place left, so the one that was at index ${a[0] + 1} is now at index ${a[0]}.` : ''), { list: { hid: r.hid, op: 'remove', index: a[0] } });
             return old;
           }
-          const k = n.argBox !== e && n.argBox !== 'null' ? -1 : L.findIndex(x => x === a[0]);
+          const k = n.argBox !== e && n.argBox !== 'null' ? -1 : L.findIndex(x => e === 'Double' ? Object.is(x, a[0]) : x === a[0]);
           if (k < 0) { record('list', n, `remove(${n.args[0].src.trim()}) looks for an element equal to ${show(e, a[0])}, finds none, and returns false. The list is unchanged.`, { list: { hid: r.hid, op: 'none' } }); return false; }
           L.splice(k, 1); r.modCount++;
           record('list', n, `remove(${n.args[0].src.trim()}) removes the first element equal to ${show(e, a[0])}, found at index ${k}, and returns true. This is remove by value, not by index.` + (k < size - 1 ? ` Later elements move one place left.` : ''), { list: { hid: r.hid, op: 'remove', index: k } });
@@ -1602,12 +1608,12 @@ const MJ = (function () {
       }
     }
     function invoke(n) {
-      const m = n.method, a = n.args.map(ev);
+      const m = n.method, a = n.args.map((arg, i) => conv(m.params[i].type, arg.type, ev(arg), arg.line));
       if (frames.length >= maxDepth) throw new ToolLimit('depth', n.line);
       const scope = new Map();
       m.params.forEach((q, i) => scope.set(q.name, { type: q.type, v: a[i] }));
       const caller = fr().name;
-      frames.push({ name: m.name, scopes: [scope], line: n.line, params: m.params.map(q => q.name), args: m.params.map((q, i) => `${q.name} = ${showRef(q.type, a[i])}`) });
+      frames.push({ name: m.name, ret: m.ret, scopes: [scope], line: n.line, params: m.params.map(q => q.name), args: m.params.map((q, i) => `${q.name} = ${showRef(q.type, a[i])}`) });
       const argText = m.params.map((q, i) => `${q.name} = ${showRef(q.type, a[i])}`).join(', ');
       const hasRef = m.params.some(q => isRef(q.type) && q.type !== 'String');
       record('call', m, `Call ${m.name}(${n.args.map(x => x.src.trim()).join(', ')}): a new frame${m.params.length ? ` where ${argText}` : ''}. ${hasRef ? 'A reference parameter gets a copy of the reference, so it refers to the same object as the argument.' : m.params.length ? 'Each parameter gets a copy of its argument.' : ''}`.trim(),
@@ -1626,7 +1632,7 @@ const MJ = (function () {
     let lastArr = null;   // the array an element assignment just changed
     function assignTo(target, v, n) {
       if (target.k === 'var') { lookupCell(target.name).v = v; return; }
-      const arr = ev(target.arr), i = ev(target.i);
+      const arr = ev(target.arr), i = conv('int', target.i.type, ev(target.i), n.line);
       if (arr === null) npe(n.line, target.arr.src);
       if (i < 0 || i >= arr.values.length) throw new JavaThrow('ArrayIndexOutOfBoundsException', n.line, `Index ${i} is outside the array, whose indexes run from 0 to ${arr.values.length - 1}.`);
       arr.values[i] = v;
@@ -1645,7 +1651,7 @@ const MJ = (function () {
         case 'block': execBlockBody(n); return;
         case 'empty': return;
         case 'decl': {
-          const v = ev(n.init);
+          const v = conv(n.type, n.init.type, ev(n.init), n.line);
           fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
           record('decl', n, `Creates ${n.name} (${n.type}) and stores ${describe(n.type, v)}.`, { changed: [n.name] });
           return;
@@ -1664,6 +1670,7 @@ const MJ = (function () {
               if (prim(tt) === 'int' && t === 'double') v = castToInt(v);
             }
           }
+          if (n.op === '=') v = conv(tt, n.e.type, v, n.line);
           const idx = assignTo(n.target, v, n);
           const who = n.target.k === 'var' ? n.target.name : `${n.target.arr.src}[${idx}]`;
           const note = n.op === '='
@@ -1737,7 +1744,7 @@ const MJ = (function () {
           try {
             if (coll.kind === 'array') {
               for (let i = 0; i < coll.values.length; i++) {
-                const v = coll.values[i];
+                const v = conv(n.type, e, coll.values[i], n.line);
                 fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
                 record('foreach', n, `${n.name} gets a copy of the next element, ${show(e, v)} (index ${i}).`, { loop: n.id, iteration: i + 1, changed: [n.name], index: i });
                 fr().scopes.push(new Map());
@@ -1750,7 +1757,7 @@ const MJ = (function () {
               const expected = coll.modCount;
               while (cursor !== coll.values.length) {
                 if (coll.modCount !== expected) throw new JavaThrow('ConcurrentModificationException', n.line, 'The list was changed (an add or remove) while the enhanced for loop was walking through it.');
-                const v = coll.values[cursor++];
+                const v = conv(n.type, e, coll.values[cursor++], n.line);
                 fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
                 record('foreach', n, `${n.name} gets the next element, ${show(e, v)} (index ${cursor - 1}).`, { loop: n.id, iteration: ++it, changed: [n.name], index: cursor - 1, iter: { hid: coll.hid, cursor } });
                 fr().scopes.push(new Map());
@@ -1765,7 +1772,7 @@ const MJ = (function () {
           return;
         }
         case 'return': {
-          const v = n.e ? ev(n.e) : undefined;
+          const v = n.e ? conv(fr().ret, n.e.type, ev(n.e), n.line) : undefined;
           const t = n.e ? n.e.type : 'void';
           record('returning', n, n.e ? `return ${n.e.src.trim()}: the value is ${showRef(t, v)}. ${fr().name} stops here, and this value goes back to the call.` : `return; ends ${fr().name} here.`, { value: n.e ? showRef(t, v) : undefined, method: fr().name });
           throw new Ret(v);
@@ -2083,6 +2090,7 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
 
   // Predict / Transfer: items have { code, ask, … }; expected(it) gives the answer, and kinds are
   // 'output' (exact text), 'int', 'text', 'mc' (any item with choices: [{ text }]; expected is the index), 'line'.
+  // opts.same(answer, expected), if given, decides whether a 'text' answer matches.
   function questions(prefix, items, opts) {
     const state = items.map(() => ({ val: '', why: '', done: false }));
     let idx = 0;
@@ -2125,7 +2133,7 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
       let ok;
       if (k === 'output') { const norm = s => s.replace(/\r\n/g, '\n').replace(/\n$/, ''); ok = norm(st.val) === norm(want); }
       else if (k === 'mc') ok = +st.val === want;
-      else if (k === 'text') ok = st.val === want;
+      else if (k === 'text') ok = opts.same ? opts.same(st.val, want) : st.val === want;
       else ok = parseInt(String(st.val).replace('−', '-'), 10) === want;
       fb.className = 'feedback ' + (ok ? 'good' : 'bad'); fb.textContent = '';
       const head = ok ? 'Correct.' : k === 'mc' ? `Not quite: the answer is “${it.choices[want].text}”.` : k === 'output' ? 'Not quite. Compare (· is a space, ↵ a line break):' : `Not quite: the answer is ${want}.`;

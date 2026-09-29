@@ -55,5 +55,7 @@
   ["String s = \"a\";\nSystem.out.println(s.toUpperCase());", "unsupported"],
   ["Player a = new Player(\"Ana\", 10);\nSystem.out.println(a);", "unsupported"],
   ["double d = 1.5;\nSystem.out.println(d);", "unsupported"],
-  ["String s = \"abc\";\nSystem.out.println(s.indexOf(98));", "unsupported"]
+  ["String s = \"abc\";\nSystem.out.println(s.indexOf(98));", "unsupported"],
+  ["Player p = new Player(\"A\", 0);\nSystem.out.println(p.equals(2));", "false\n"],
+  ["Player p = new Player(\"A\", 0);\nSystem.out.println(p.toString());", "unsupported"]
 ]

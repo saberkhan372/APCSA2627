@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { loadMJ } from './lib-mj.mjs';
 const NAMED = { 8: '\\b', 9: '\\t', 10: '\\n', 12: '\\f', 13: '\\r', 34: '\\"', 92: '\\\\' };
 export function lit(s) { let o = '"'; for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); o += NAMED[c] || (c >= 32 && c <= 126 ? s[i] : c < 32 || c === 127 ? '\\' + c.toString(8).padStart(3, '0') : '\\u' + c.toString(16).padStart(4, '0')); } return o + '"'; }
-const indent = (code, n) => code.split('\n').map(l => ' '.repeat(n) + l).join('\n');
+const indent = (code, n) => code ? code.split('\n').map(l => ' '.repeat(n) + l).join('\n') : '';
 const PLAYER = `static class Player {
     private String name;
     private int score;
