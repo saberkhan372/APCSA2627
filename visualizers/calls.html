@@ -837,6 +837,7 @@ const MJ = (function () {
       if (type === 'ArrayList') {
         expect('<', "'<' (ArrayList needs an element type, such as ArrayList<Integer>)");
         const e = expect('id', 'element type').v;
+        if (['int', 'double', 'boolean', 'char', 'long', 'float', 'short', 'byte'].includes(e)) throw new CompileError(`unexpected type: ArrayList needs a class type such as ${e === 'int' ? 'Integer' : e === 'double' ? 'Double' : 'Boolean'}, not the primitive ${e}`, tk.line);
         if (!['Integer', 'String', 'Double'].includes(e)) throw new Unsupported(`ArrayList<${e}> is not supported here (Integer, String or Double).`, tk.line);
         expect('>');
         type = `ArrayList<${e}>`;
@@ -1095,6 +1096,8 @@ const MJ = (function () {
   /* ---------------- Types (javac's job) ---------------- */
   const ELEM = t => t.endsWith('[]') ? t.slice(0, -2) : t.startsWith('ArrayList<') ? t.slice(10, -1) : null;
   const UNBOX = { Integer: 'int', Double: 'double' };
+  // Real ArrayList methods beyond the AP subset: valid Java this tool does not run.
+  const ARRAYLIST_METHODS = ['contains', 'indexOf', 'lastIndexOf', 'isEmpty', 'clear', 'addAll', 'removeAll', 'retainAll', 'containsAll', 'removeIf', 'sort', 'toArray', 'iterator', 'listIterator', 'forEach', 'subList', 'equals', 'hashCode', 'toString', 'stream', 'clone', 'replaceAll', 'ensureCapacity', 'trimToSize', 'spliterator', 'getClass', 'reversed', 'getFirst', 'getLast', 'addFirst', 'addLast', 'removeFirst', 'removeLast'];
   const numeric = t => t === 'int' || t === 'double' || t === 'Integer' || t === 'Double';
   const prim = t => UNBOX[t] || t;
   const isRef = t => !PRIM.includes(t) && t !== 'void';
@@ -1256,9 +1259,12 @@ const MJ = (function () {
           case 'remove':
             if (ts.length === 1 && ts[0] === 'int') { n.byIndex = true; return e; }
             // Any other argument boxes to an object: remove(Object) removes by value.
-            if (ts.length === 1 && (isRef(ts[0]) || (ts[0] === 'double' && e === 'Double'))) { n.byIndex = false; return 'boolean'; }
+            // equals() is true only for the same boxed class: Double 4.0 never equals Integer 4.
+            if (ts.length === 1 && ts[0] !== 'void') { n.byIndex = false; n.argBox = { double: 'Double', boolean: 'Boolean' }[ts[0]] || ts[0]; return 'boolean'; }
             break;
-          default: throw new Unsupported(`the ArrayList method ${n.name}(…) is not supported here (size, get, set, add and remove are).`, n.line);
+          default:
+            if (!ARRAYLIST_METHODS.includes(n.name)) throw new CompileError(`cannot find symbol: method ${n.name}(…) in class ArrayList`, n.line);
+            throw new Unsupported(`the ArrayList method ${n.name}(…) is not supported here (size, get, set, add and remove are).`, n.line);
         }
         throw new CompileError(`method ${n.name} in class ArrayList<${e}> cannot be applied to these arguments`, n.line);
       }
@@ -1587,10 +1593,10 @@ const MJ = (function () {
             record('list', n, `remove(${a[0]}) removes the element at index ${a[0]}, ${show(e, old)}.` + (a[0] < size - 1 ? ` Every later element moves one place left, so the one that was at index ${a[0] + 1} is now at index ${a[0]}.` : ''), { list: { hid: r.hid, op: 'remove', index: a[0] } });
             return old;
           }
-          const k = L.findIndex(x => x === a[0] || (x !== null && a[0] !== null && x === a[0]));
-          if (k < 0) { record('list', n, `remove(${show(e, a[0])}) looks for an element equal to ${show(e, a[0])}, finds none, and returns false. The list is unchanged.`, { list: { hid: r.hid, op: 'none' } }); return false; }
+          const k = n.argBox !== e && n.argBox !== 'null' ? -1 : L.findIndex(x => x === a[0]);
+          if (k < 0) { record('list', n, `remove(${n.args[0].src.trim()}) looks for an element equal to ${show(e, a[0])}, finds none, and returns false. The list is unchanged.`, { list: { hid: r.hid, op: 'none' } }); return false; }
           L.splice(k, 1); r.modCount++;
-          record('list', n, `remove(${show(e, a[0])}) removes the first element equal to ${show(e, a[0])}, found at index ${k}, and returns true. This is remove by value, not by index.` + (k < size - 1 ? ` Later elements move one place left.` : ''), { list: { hid: r.hid, op: 'remove', index: k } });
+          record('list', n, `remove(${n.args[0].src.trim()}) removes the first element equal to ${show(e, a[0])}, found at index ${k}, and returns true. This is remove by value, not by index.` + (k < size - 1 ? ` Later elements move one place left.` : ''), { list: { hid: r.hid, op: 'remove', index: k } });
           return true;
         }
       }
@@ -1746,10 +1752,13 @@ const MJ = (function () {
                 if (coll.modCount !== expected) throw new JavaThrow('ConcurrentModificationException', n.line, 'The list was changed (an add or remove) while the enhanced for loop was walking through it.');
                 const v = coll.values[cursor++];
                 fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
-                record('foreach', n, `${n.name} gets the next element, ${show(e, v)} (index ${cursor - 1}).`, { loop: n.id, iteration: ++it, changed: [n.name], index: cursor - 1 });
+                record('foreach', n, `${n.name} gets the next element, ${show(e, v)} (index ${cursor - 1}).`, { loop: n.id, iteration: ++it, changed: [n.name], index: cursor - 1, iter: { hid: coll.hid, cursor } });
                 fr().scopes.push(new Map());
                 try { exec(n.body); } finally { fr().scopes.pop(); }
               }
+              const size = coll.values.length;
+              record('cond', n, it < size || coll.modCount !== expected ? `hasNext() is false: the iterator's cursor is at index ${cursor}, which equals size() ${size}, so the loop ends.` : 'No more elements, so the loop ends.', { loop: n.id, value: false, done: true, iter: { hid: coll.hid, cursor } });
+              return;
             }
             record('cond', n, 'No more elements, so the loop ends.', { loop: n.id, value: false, done: true });
           } finally { fr().scopes.pop(); }

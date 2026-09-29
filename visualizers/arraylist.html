@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Recursion Call Stack</title>
+<title>ArrayList Mutation Explorer</title>
 <style>
 /* Palette and chrome match the course site (web/site.css). */
 :root {
@@ -216,28 +216,36 @@ details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
   .col-current .tile { transform: none; }
 }
-/* ---- Recursion Call Stack ---- */
-.runner-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 16px; margin-top: 12px; }
+/* ---- ArrayList Mutation Explorer ---- */
+.runner-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 16px; margin-top: 12px; }
 @media (max-width: 980px) { .runner-grid { grid-template-columns: minmax(0, 1fr); } }
 .colhead { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 12px 0 6px; }
-.rtree { font: 14px/1.5 var(--mono); overflow-x: auto; padding-bottom: 4px; }
-.rtree ul { list-style: none; margin: 0; padding-left: 20px; }
-.rtree > ul { padding-left: 0; }
-.rtree li { position: relative; margin: 3px 0; white-space: nowrap; }
-.rtree ul ul li::before { content: ''; position: absolute; left: -13px; top: -4px; width: 10px; height: 18px; border-left: 2px solid var(--line); border-bottom: 2px solid var(--line); border-bottom-left-radius: 4px; }
-.rnode { display: inline-block; border: 1.5px solid var(--line); border-radius: 5px; padding: 1px 7px; background: var(--panel); }
-.rnode.open { border-color: var(--accent); }
-.rnode.cur { background: var(--accent-soft); border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); font-weight: 700; }
-.rnode.done { color: var(--muted); }
-.rnode .rv { color: var(--same-ink); font-weight: 700; }
-.rnode .tag { font: 600 10px var(--sans); text-transform: uppercase; letter-spacing: .04em; border-radius: 3px; padding: 0 4px; margin-left: 6px; vertical-align: 1px; }
-.rnode .tag.base { color: var(--extra-ink, var(--ink)); background: var(--extra-bg); border: 1px solid var(--extra-line); }
-.rnode .tag.wait { color: var(--accent); border: 1px solid var(--accent); }
-.rkey { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.lview { border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; background: var(--panel); overflow-x: auto; }
+.lhead { font: 600 13px var(--mono); color: var(--muted); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 10px; }
+.lrow { display: flex; gap: 4px; margin-top: 6px; align-items: flex-start; }
+.lrow.before { opacity: .7; }
+.rlabel { font: 600 11px var(--sans); color: var(--muted); width: 3.6em; flex: none; padding-top: 10px; }
+.cellbox { display: flex; flex-direction: column; align-items: center; min-width: 44px; }
+.lcell { min-width: 44px; border: 1.5px solid var(--line); border-radius: 5px; text-align: center; padding: 3px 5px; background: var(--panel); }
+.lcell .cv { font: 700 16px var(--mono); white-space: nowrap; }
+.lcell .ci { font: 11px var(--mono); color: var(--muted); }
+.lcell.gone { border-color: var(--diff-line); background: var(--diff-bg); color: var(--diff-ink); text-decoration: line-through; }
+.lcell.new { border-color: var(--same-line); background: var(--same-bg); }
+.lcell.moved { border-color: var(--extra-line); background: var(--extra-bg); }
+.lcell.set { border-color: var(--same-line); background: var(--same-bg); }
+.lcell.skip { box-shadow: 0 0 0 3px var(--diff-line); }
+.was { font: 600 10px var(--sans); color: var(--muted); margin-top: 2px; white-space: nowrap; }
+.caret { font: 700 12px var(--mono); color: var(--accent); margin-top: 2px; white-space: nowrap; }
+.caret.past { color: var(--muted); }
 .callout { border-left: 4px solid var(--extra-line); background: var(--extra-bg); border-radius: 0 6px 6px 0; padding: 6px 10px; margin-top: 8px; font-size: 15px; }
-.callout.up { border-left-color: var(--same-line); background: var(--same-bg); }
+.callout.bad { border-left-color: var(--diff-line); background: var(--diff-bg); color: var(--diff-ink); }
+.callout.good { border-left-color: var(--same-line); background: var(--same-bg); color: var(--same-ink); }
 .limits { font-size: 14px; color: var(--muted); margin-top: 14px; }
-@media (prefers-reduced-motion: no-preference) { .rnode.cur { transition: box-shadow .2s; } .callout { animation: pop .3s ease-out; } @keyframes pop { from { opacity: .4; } } }
+@media (prefers-reduced-motion: no-preference) {
+  .lcell.moved { animation: slide-l .45s ease-out; } .lcell.moved.right { animation-name: slide-r; }
+  @keyframes slide-l { from { transform: translateX(48px); } } @keyframes slide-r { from { transform: translateX(-48px); } }
+  .lcell.new { animation: drop .35s ease-out; } @keyframes drop { from { transform: translateY(-10px); opacity: 0; } }
+}
 </style>
 </head>
 <body>
@@ -245,9 +253,9 @@ details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 <header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="../study/index.html">Study</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
 <main id="main" class="wrap" tabindex="-1">
   <header class="page-heading">
-    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 4 · Recursion</p>
-    <h1>Recursion Call Stack</h1>
-    <p class="lede">Each recursive call gets its <b>own frame</b> with its own parameters. Calls stack up until one reaches the <b>base case</b>. That is not the end: the waiting calls then <b>finish one at a time</b>, newest first, each using the value returned to it.</p>
+    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 4 · ArrayList</p>
+    <h1>ArrayList Mutation Explorer</h1>
+    <p class="lede">When you <code>add</code> or <code>remove</code> in the middle of an ArrayList, every <b>later element shifts</b> to a new index. Watch the shift happen while a loop's index moves, and see exactly which element a loop skips, and why.</p>
   </header>
 
   <div class="tabs" role="tablist" aria-label="Mode">
@@ -268,19 +276,19 @@ details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
 
   <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
     <div class="panel">
-      <label class="field">Program <span class="hint">(static methods first, then the statements for <code>main</code>)</span>
+      <label class="field">Program
         <textarea class="tui-codein" id="e-code" spellcheck="false"></textarea>
       </label>
       <div class="small">Try:</div>
       <div class="presets" id="e-presets"></div>
       <div id="e-view"></div>
-      <p class="limits">Supported here: static methods, <code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>, arrays and <code>ArrayList</code>. This tool stops at 200 frames on the call stack; Java itself goes much deeper before it throws a <code>StackOverflowError</code>.</p>
+      <p class="limits">Supported here: <code>ArrayList&lt;Integer&gt;</code>, <code>ArrayList&lt;String&gt;</code> and <code>ArrayList&lt;Double&gt;</code> with the AP methods <code>size</code>, <code>add</code>, <code>add(index, value)</code>, <code>get</code>, <code>set</code> and <code>remove</code> (by index, or by value with an object argument such as <code>Integer.valueOf(3)</code> or a String), plus loops, <code>if</code>, and static methods.</p>
     </div>
   </section>
 
   <section id="mode-transfer" role="tabpanel" aria-labelledby="tab-transfer" class="hidden">
     <div class="panel">
-      <p class="small" style="margin-top:0">No tracer here. Draw the calls on paper: one line per call, indented under the call that made it, with the value each one returns. Then check.</p>
+      <p class="small" style="margin-top:0">No tracer here. Write the list and its indexes after each change, and track the loop index. Then check.</p>
       <div class="row"><span class="qmeta" id="t-count"></span><span class="spacer"></span><button class="btn" id="t-prev">← Previous</button><button class="btn" id="t-next">Next question →</button></div>
       <p class="qprompt" id="t-ask"></p>
       <div class="tui-codebox" id="t-code" aria-label="Java code"></div>
@@ -2167,98 +2175,114 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
 // TRACE UI END
 
 // ENGINE START
-// The calls of a run as a tree: one node per call, with its arguments, children and returned value.
-function callTree(run) {
-  const nodes = [], open = [];
-  run.steps.forEach((s, k) => {
-    if (s.kind === 'call') {
-      const parent = open.length ? open[open.length - 1] : null;
-      const label = `${s.method}(${s.args.map(a => a.v && typeof a.v === 'object' ? a.src.trim() : a.text).join(', ')})`;
-      const node = { id: nodes.length, method: s.method, label, parent: parent ? parent.id : null, children: [], start: k, end: null, value: undefined };
-      if (parent) parent.children.push(node.id);
-      nodes.push(node); open.push(node);
+// List-specific readings of an interpreter run.
+function lineOfPos(src, pos) { return src.slice(0, pos).split('\n').length; }
+// The innermost loop whose lines contain step k.
+function loopAt(run, src, k) {
+  const s = run.steps[k], loops = MJ.loopsOf(run.prog);
+  let best = null;
+  loops.forEach(L => { if (s.line >= L.line && s.line <= lineOfPos(src, L.endPos) && (!best || L.line >= best.line)) best = L; });
+  return best;
+}
+const varIn = (s, name) => { const f = s.frames[s.frames.length - 1]; const v = f.vars.find(x => x.name === name); return v ? v.v : undefined; };
+// Where a loop is looking in a list at step k: an index loop's variable, or an enhanced for's iterator cursor.
+function cursorAt(run, src, k) {
+  const L = loopAt(run, src, k);
+  if (!L) return null;
+  if (L.k === 'foreach') {
+    for (let j = k; j >= 0; j--) { const s = run.steps[j]; if (s.loop === L.id && s.iter) return { name: 'for-each', hid: s.iter.hid, at: s.index !== undefined ? s.index : s.iter.cursor, iter: true }; }
+    return null;
+  }
+  const v = L.var ? varIn(run.steps[k], L.var) : undefined;
+  return typeof v === 'number' ? { name: L.var, at: v } : null;
+}
+// After a removal at step k inside an index loop: which index the loop checks next, and whether
+// the element that slid into the removed spot is skipped.
+function afterRemoval(run, src, k) {
+  const s = run.steps[k];
+  if (!s.list || s.list.op !== 'remove') return null;
+  const L = loopAt(run, src, k);
+  if (!L || L.k === 'foreach' || !L.var) return null;
+  const r = s.list.index, list = s.heap[s.list.hid].values;
+  for (let j = k + 1; j < run.steps.length; j++) {
+    const t = run.steps[j];
+    if (t.kind === 'cond' && t.loop === L.id) {
+      const next = varIn(t, L.var);
+      if (r >= list.length) return { r, next, slid: null, skipped: false, ends: !t.value };
+      return { r, next, slid: list[r], skipped: next > r && t.value !== undefined && next !== r, backward: next < r, ends: !t.value };
     }
-    if (s.kind === 'return') { const node = open.pop(); node.end = k; node.value = s.returned; }
-  });
-  // A base case is a call that finished without making another call.
-  nodes.forEach(n => { n.base = n.end !== null && !n.children.length; n.depth = n.parent === null ? 0 : nodes[n.parent].depth + 1; });
-  return nodes;
+    if (t.kind === 'error' || t.kind === 'limit') return null;
+  }
+  return null;
 }
-// The node running at step k (the newest call that has started and not yet returned).
-function activeNode(nodes, k) {
-  let cur = null;
-  nodes.forEach(n => { if (n.start <= k && (n.end === null || n.end > k)) cur = n; });
-  return cur;
+// Every element that an index loop never checks because a removal slid it past the index.
+function skippedValues(run, src) {
+  const out = [];
+  run.steps.forEach((s, k) => { const a = afterRemoval(run, src, k); if (a && a.skipped && a.slid !== null) out.push(a.slid); });
+  return out;
 }
-const totalCalls = run => callTree(run).length;
-const maxDepth = run => Math.max(1, ...run.steps.map(s => s.frames.length));
-// The most copies of one variable name that exist at the same moment (each frame has its own).
-function maxCopies(run, name) { return Math.max(0, ...run.steps.map(s => s.frames.filter(f => f.vars.some(v => v.name === name)).length)); }
-// The value the first call made from main returns, as Java would print it.
-function firstReturn(run) {
-  const s = run.steps.find(x => x.kind === 'return' && x.frames.length === 1 && x.returned !== undefined);
-  return s ? (s.retType === 'String' && s.returned !== 'null' ? JSON.parse(s.returned) : s.returned) : null;
-}
-// What runs right after the first base case returns: 'caller' (a waiting call of the same method resumes) or 'main'.
-function afterBase(run) {
-  const base = callTree(run).find(n => n.base);
-  if (!base) return 'none';
-  const s = run.steps[base.end];
-  return s.frames.length === 1 ? 'main' : 'caller';
+// The value a loop checks next after the nth removal (null if the loop ends first).
+function nextChecked(run, src, nth = 0) {
+  const ks = run.steps.map((s, k) => k).filter(k => run.steps[k].list && run.steps[k].list.op === 'remove');
+  const k = ks[nth], a = afterRemoval(run, src, k);
+  if (!a || a.ends) return null;
+  const list = run.steps[k].heap[run.steps[k].list.hid].values;
+  return a.next >= 0 && a.next < list.length ? list[a.next] : null;
 }
 // ENGINE END
 
 // DATA START
-const AFTER_BASE = [{ text: 'The program ends: the base case stops the recursion.', key: 'end' }, { text: 'The call that was waiting for this value continues where it left off.', key: 'caller' }, { text: 'main gets the value right away.', key: 'main' }, { text: 'The same call runs again from the top.', key: 'again' }];
-const FACT = 'static int fact(int n) {\n    if (n <= 1) {\n        return 1;\n    }\n    return n * fact(n - 1);\n}\n\nSystem.out.println(fact(4));';
-const FIB = 'static int fib(int n) {\n    if (n <= 1) {\n        return n;\n    }\n    return fib(n - 1) + fib(n - 2);\n}\n\n';
-const FIND = 'static int find(int[] a, int target, int lo, int hi) {\n    if (lo > hi) {\n        return -1;\n    }\n    int mid = (lo + hi) / 2;\n    if (a[mid] == target) {\n        return mid;\n    }\n    if (a[mid] < target) {\n        return find(a, target, mid + 1, hi);\n    }\n    return find(a, target, lo, mid - 1);\n}\n\nint[] a = {2, 5, 8, 12, 16, 23, 38};\n';
+const L5 = 'ArrayList<Integer> nums = new ArrayList<Integer>();\nnums.add(2);\nnums.add(4);\nnums.add(5);\nnums.add(6);\nnums.add(8);\n';
+const ABC = 'ArrayList<String> w = new ArrayList<String>();\nw.add("a");\nw.add("b");\nw.add("c");\n';
+const LIST3 = 'ArrayList<Integer> list = new ArrayList<Integer>();\nlist.add(10);\nlist.add(20);\nlist.add(1);\n';
+const FORWARD = L5 + 'for (int i = 0; i < nums.size(); i++) {\n    if (nums.get(i) % 2 == 0) {\n        nums.remove(i);\n    }\n}\nSystem.out.println(nums);';
+const BACKWARD = L5 + 'for (int i = nums.size() - 1; i >= 0; i--) {\n    if (nums.get(i) % 2 == 0) {\n        nums.remove(i);\n    }\n}\nSystem.out.println(nums);';
+const ADJUST = L5 + 'for (int i = 0; i < nums.size(); i++) {\n    if (nums.get(i) % 2 == 0) {\n        nums.remove(i);\n        i--;\n    }\n}\nSystem.out.println(nums);';
+const PRINTED = ['[10, 1]', '[10, 20]', '[20, 1]', '[10, 20, 1]'].map(t => ({ text: `It prints ${t}`, match: t + '\n' }));
 const PREDICT = [
-  { code: FACT, ask: 'returns', call: 'fact(4)', tests: 'fact(4) = 4 × fact(3) = 4 × 3 × fact(2) = 4 × 3 × 2 × fact(1), and fact(1) is the base case: 1.' },
-  { code: FACT, ask: 'copies', name: 'n', tests: 'fact(4), fact(3), fact(2) and fact(1) are all on the stack at once, and each has its own n.' },
-  { code: FACT, ask: 'mc', q: 'fact(1) has just returned 1. What happens next?', after: 'base', choices: AFTER_BASE, tests: 'Reaching the base case is the turning point, not the end. fact(2) was waiting on its return line, and now it computes 2 × 1.' },
-  { code: 'static void down(int n) {\n    if (n == 0) {\n        return;\n    }\n    System.out.print(n + " ");\n    down(n - 1);\n}\n\ndown(3);', ask: 'output', tests: 'The print comes before the recursive call, so it happens on the way down: 3, 2, 1.' },
-  { code: 'static void up(int n) {\n    if (n == 0) {\n        return;\n    }\n    up(n - 1);\n    System.out.print(n + " ");\n}\n\nup(3);', ask: 'output', tests: 'The print comes after the recursive call, so each call prints only after the calls above it return: 1, 2, 3.' },
-  { code: 'static void both(int n) {\n    if (n == 0) {\n        return;\n    }\n    System.out.print(n);\n    both(n - 1);\n    System.out.print(n);\n}\n\nboth(3);\nSystem.out.println();', ask: 'output', tests: 'Each call prints its n once on the way down and once on the way back up.' },
-  { code: 'static int sum(int n) {\n    if (n == 0) {\n        return 0;\n    }\n    int rest = sum(n - 1);\n    return n + rest;\n}\n\nSystem.out.println(sum(3));', ask: 'returns', call: 'sum(3)', tests: 'Each frame has its own n and its own rest. sum(0) returns 0, then 1 + 0, 2 + 1, 3 + 3.' },
-  { code: 'static String rev(String s) {\n    if (s.length() <= 1) {\n        return s;\n    }\n    return rev(s.substring(1)) + s.substring(0, 1);\n}\n\nSystem.out.println(rev("abc"));', ask: 'returns', call: 'rev("abc")', tests: 'rev("abc") = rev("bc") + "a" = (rev("c") + "b") + "a" = "cba".' },
-  { code: FIB + 'System.out.println(fib(4));', ask: 'calls', tests: 'fib(4) calls fib(3) and fib(2); fib(3) calls fib(2) and fib(1); each fib(2) calls fib(1) and fib(0). That is 9 calls, and fib(2) is computed twice.' },
-  { code: 'static int digitSum(int n) {\n    if (n < 10) {\n        return n;\n    }\n    return digitSum(n / 10) + n % 10;\n}\n\nSystem.out.println(digitSum(1234));', ask: 'returns', call: 'digitSum(1234)', tests: 'n / 10 drops the last digit and n % 10 is the last digit: 1 + 2 + 3 + 4.' },
-  { code: 'static int count(int n) {\n    return 1 + count(n - 1);\n}\n\nSystem.out.println(count(3));', ask: 'mc', q: 'What happens?', choices: [{ text: 'It prints 3.', match: '3\n' }, { text: 'It prints 4.', match: '4\n' }, { text: 'It never reaches a base case: Java throws a StackOverflowError.', match: 'limit' }, { text: 'It does not compile.', match: 'compile-error' }], tests: 'With no base case, every call makes another call. The stack grows until Java runs out of room.' },
-  { code: FIND + 'System.out.println(find(a, 23, 0, 6));', ask: 'calls', tests: 'The first call checks index 3 (12), which is too small, so it searches 4 to 6. The second call checks index 5 and finds 23.' },
-  { code: 'static int total(int[] a, int i) {\n    if (i == a.length) {\n        return 0;\n    }\n    return a[i] + total(a, i + 1);\n}\n\nint[] v = {3, 1, 4};\nSystem.out.println(total(v, 0));', ask: 'depth', tests: 'total(v, 0), total(v, 1), total(v, 2) and total(v, 3) are on the stack together with main: five frames. total(v, 3) is the base case.' },
+  { code: LIST3 + 'list.remove(1);\nSystem.out.println(list);', ask: 'mc', q: 'What does this print?', choices: PRINTED, tests: 'With an int argument, remove(1) removes the element at index 1. It does not look for the value 1.' },
+  { code: LIST3 + 'list.remove(Integer.valueOf(1));\nSystem.out.println(list);', ask: 'output', tests: 'Integer.valueOf(1) is an object, so this is remove by value: it removes the first element equal to 1.' },
+  { code: ABC + 'w.add(1, "x");\nSystem.out.println(w.get(2) + " " + w.size());', ask: 'output', tests: 'add(1, "x") inserts at index 1, and every later element moves one place right: "b" is now at index 2.' },
+  { code: ABC + 'w.set(1, "x");\nSystem.out.println(w + " " + w.size());', ask: 'output', tests: 'set replaces the element at an index. Nothing shifts, and the size stays the same.' },
+  { code: FORWARD, ask: 'output', tests: 'After a removal, the next element slides into index i, and then i++ moves past it. 4 and 8 are never checked.' },
+  { code: FORWARD, ask: 'next', nth: 0, state: 'i is 0, and nums.remove(0) has just removed 2. The list is now [4, 5, 6, 8].', tests: '4 slid into index 0, but the update i++ makes i 1, so the loop checks 5 next. 4 is skipped.' },
+  { code: BACKWARD, ask: 'output', tests: 'Going backward, the elements that shift left have already been checked, so none is skipped.' },
+  { code: ADJUST, ask: 'output', tests: 'i-- undoes the i++ that follows, so the element that slid into index i is checked next.' },
+  { code: ABC + 'for (String s : w) {\n    if (s.equals("a")) {\n        w.remove(s);\n    }\n}\nSystem.out.println(w);', ask: 'mc', q: 'What happens?', choices: [{ text: 'It prints [b, c]', match: '[b, c]\n' }, { text: 'It prints [a, b, c]', match: '[a, b, c]\n' }, { text: 'It throws a ConcurrentModificationException.', match: '|throws:ConcurrentModificationException' }, { text: 'It does not compile.', match: 'compile-error' }], tests: 'An enhanced for loop walks the list with an iterator. Removing from the list inside the loop makes the iterator\'s next step throw.' },
+  { code: ABC + 'for (String s : w) {\n    if (s.equals("b")) {\n        w.remove(s);\n    }\n}\nSystem.out.println(w);', ask: 'mc', q: 'What happens?', choices: [{ text: 'It prints [a, c]', match: '[a, c]\n' }, { text: 'It prints [a, b, c]', match: '[a, b, c]\n' }, { text: 'It throws a ConcurrentModificationException.', match: '|throws:ConcurrentModificationException' }, { text: 'It does not compile.', match: 'compile-error' }], tests: 'A trap: after "b" is removed, the iterator\'s cursor (2) equals the new size (2), so hasNext() is false. The loop ends quietly and "c" is never visited. Do not rely on this.' },
+  { code: 'ArrayList<Integer> v = new ArrayList<Integer>();\nfor (int i = 1; i <= 5; i++) {\n    v.add(i);\n}\nv.remove(1);\nv.remove(1);\nSystem.out.println(v);', ask: 'output', tests: 'After the first remove(1), 3 slides into index 1, so the second remove(1) removes 3.' },
+  { code: 'ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(1);\nv.add(2);\nfor (int i = 0; i < v.size(); i++) {\n    if (v.get(i) < 3) {\n        v.add(v.get(i) + 3);\n    }\n}\nSystem.out.println(v);', ask: 'output', tests: 'The condition calls v.size() again at every check, so the loop also visits the elements added during the loop.' },
 ];
 const TRANSFER = [
-  { code: 'static int power(int b, int e) {\n    if (e == 0) {\n        return 1;\n    }\n    return b * power(b, e - 1);\n}\n\nSystem.out.println(power(2, 5));', ask: 'returns', call: 'power(2, 5)' },
-  { code: 'static void pattern(int n) {\n    if (n <= 0) {\n        return;\n    }\n    System.out.print(n);\n    pattern(n - 2);\n    System.out.print(n);\n}\n\npattern(5);\nSystem.out.println();', ask: 'output' },
-  { code: FIB + 'System.out.println(fib(5));', ask: 'calls' },
-  { code: 'static int countA(String s) {\n    if (s.length() == 0) {\n        return 0;\n    }\n    int rest = countA(s.substring(1));\n    if (s.substring(0, 1).equals("a")) {\n        return 1 + rest;\n    }\n    return rest;\n}\n\nSystem.out.println(countA("banana"));', ask: 'returns', call: 'countA("banana")' },
-  { code: 'static int countA(String s) {\n    if (s.length() == 0) {\n        return 0;\n    }\n    int rest = countA(s.substring(1));\n    if (s.substring(0, 1).equals("a")) {\n        return 1 + rest;\n    }\n    return rest;\n}\n\nSystem.out.println(countA("abc"));', ask: 'copies', name: 's' },
-  { code: 'static int down2(int n) {\n    if (n == 0) {\n        return 0;\n    }\n    return down2(n - 2);\n}\n\nSystem.out.println(down2(5));', ask: 'mc', q: 'What happens?', choices: [{ text: 'It prints 0.', match: '0\n' }, { text: 'It prints -1.', match: '-1\n' }, { text: 'It never reaches the base case: Java throws a StackOverflowError.', match: 'limit' }, { text: 'It does not compile.', match: 'compile-error' }] },
-  { code: 'static int digits(int n) {\n    if (n < 10) {\n        return 1;\n    }\n    return 1 + digits(n / 10);\n}\n\nSystem.out.println(digits(40521));', ask: 'returns', call: 'digits(40521)' },
-  { code: FIND + 'System.out.println(find(a, 2, 0, 6));', ask: 'calls' },
+  { code: 'ArrayList<String> w = new ArrayList<String>();\nw.add("a");\nw.add("a");\nw.add("b");\nw.add("a");\nfor (int i = 0; i < w.size(); i++) {\n    if (w.get(i).equals("a")) {\n        w.remove(i);\n    }\n}\nSystem.out.println(w);', ask: 'output' },
+  { code: 'ArrayList<String> w = new ArrayList<String>();\nw.add("a");\nw.add("a");\nw.add("b");\nw.add("a");\nfor (int i = w.size() - 1; i >= 0; i--) {\n    if (w.get(i).equals("a")) {\n        w.remove(i);\n    }\n}\nSystem.out.println(w);', ask: 'output' },
+  { code: 'ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(2);\nv.add(3);\nv.add(2);\nv.add(4);\nv.remove(2);\nSystem.out.println(v);', ask: 'mc', q: 'What does this print?', choices: [{ text: 'It prints [2, 3, 4]', match: '[2, 3, 4]\n' }, { text: 'It prints [3, 2, 4]', match: '[3, 2, 4]\n' }, { text: 'It prints [3, 4]', match: '[3, 4]\n' }, { text: 'It prints [2, 3, 2]', match: '[2, 3, 2]\n' }] },
+  { code: 'ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(7);\nv.add(3);\nv.add(9);\nv.add(1);\nfor (int i = 0; i < v.size(); i++) {\n    if (v.get(i) > 5) {\n        v.remove(i);\n    }\n}\nSystem.out.println(v);', ask: 'next', nth: 0, state: 'i is 0, and v.remove(0) has just removed 7. The list is now [3, 9, 1].' },
+  { code: 'ArrayList<String> w = new ArrayList<String>();\nw.add(0, "x");\nw.add(0, "y");\nw.add(0, "z");\nw.add(1, "q");\nSystem.out.println(w);', ask: 'output' },
+  { code: 'ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(1);\nv.add(2);\nfor (int x : v) {\n    v.add(x);\n}\nSystem.out.println(v);', ask: 'mc', q: 'What happens?', choices: [{ text: 'It prints [1, 2, 1, 2]', match: '[1, 2, 1, 2]\n' }, { text: 'It runs forever.', match: 'limit' }, { text: 'It throws a ConcurrentModificationException.', match: '|throws:ConcurrentModificationException' }, { text: 'It prints [1, 2]', match: '[1, 2]\n' }] },
+  { code: ABC + 'String old = w.set(1, "z");\nSystem.out.println(old + " " + w);', ask: 'output' },
+  { code: 'ArrayList<Integer> v = new ArrayList<Integer>();\nv.add(7);\nv.add(8);\nv.add(9);\nint r = v.remove(0);\nSystem.out.println(r + " " + v + " " + v.get(0));', ask: 'output' },
 ];
 const PRESETS = [
-  { label: 'Factorial', code: FACT },
-  { label: 'Print on the way down', code: PREDICT[3].code },
-  { label: 'Print on the way back', code: PREDICT[4].code },
-  { label: 'Both', code: PREDICT[5].code },
-  { label: 'Sum with a local variable', code: PREDICT[6].code },
-  { label: 'Reverse a String', code: PREDICT[7].code },
-  { label: 'Fibonacci (a tree of calls)', code: FIB + 'System.out.println(fib(4));' },
-  { label: 'Digit sum', code: PREDICT[9].code },
-  { label: 'Binary search', code: PREDICT[11].code },
-  { label: 'Array total', code: PREDICT[12].code },
-  { label: 'Power', code: TRANSFER[0].code },
-  { label: 'No base case', code: PREDICT[10].code },
+  { label: 'remove(index)', code: PREDICT[0].code },
+  { label: 'remove(value)', code: PREDICT[1].code },
+  { label: 'Insert shifts right', code: PREDICT[2].code },
+  { label: 'set does not shift', code: PREDICT[3].code },
+  { label: 'The skipped element', code: FORWARD },
+  { label: 'Fix: go backward', code: BACKWARD },
+  { label: 'Fix: i-- after remove', code: ADJUST },
+  { label: 'Consecutive matches', code: TRANSFER[0].code },
+  { label: 'for-each + remove: exception', code: PREDICT[8].code },
+  { label: 'for-each + remove: silent skip', code: PREDICT[9].code },
+  { label: 'Adding while looping', code: PREDICT[11].code },
 ];
 // DATA END
 
 TUI.injectCSS();
 const { el, $ } = TUI;
 
-/* ---------- Recursion runner ---------- */
-class RecursionRunner {
+/* ---------- List runner ---------- */
+class ListRunner {
   constructor(host) {
     this.host = host;
     host.innerHTML = `<div class="tui-err hidden"></div><div class="rbody"><div class="runner-grid">
@@ -2266,153 +2290,134 @@ class RecursionRunner {
         <div class="tui-note" aria-live="polite"><div class="phase"></div><p class="text"></p></div>
         <div class="cardbox"></div>
         <div class="colhead">Console</div><div class="tui-console" role="log" aria-label="Console output"></div></div>
-      <div><div class="colhead">Calls so far</div><div class="rtree" aria-label="Tree of calls"></div>
-        <p class="rkey">Blue outline: on the stack. Highlighted: running now. A value after the arrow: what that call returned.</p>
-        <div class="memory" aria-label="Call stack and objects"></div></div>
+      <div><div class="colhead">Lists</div><div class="lists"></div>
+        <div class="colhead">Variables now</div><table class="tui-vars"></table></div>
     </div></div>`;
     this.err = host.querySelector('.tui-err'); this.body = host.querySelector('.rbody');
     this.step = TUI.stepper(host.querySelector('.stepbar'), i => this.render(i));
     this.step.keys(this.body);
-    window.addEventListener('resize', () => { if (this.run && !this.body.classList.contains('hidden')) this.render(this.step.i); });
   }
   set(src) {
     this.src = src; this.run = MJ.run(src);
     const bad = this.run.compileError || this.run.unsupported;
     this.err.classList.toggle('hidden', !bad); this.body.classList.toggle('hidden', !!bad);
     if (bad) { TUI.errorBox(this.err, this.run); return; }
-    this.nodes = callTree(this.run);
     this.step.set(this.run.steps.length, 0);
   }
   render(i) {
     const run = this.run, steps = run.steps, s = i > 0 ? steps[i - 1] : null, k = i - 1;
     const done = new Set(steps.slice(0, Math.max(0, i - 1)).map(x => x.line));
-    const waiting = {};
-    if (s) s.frames.slice(1).forEach(f => { waiting[f.line] = 'called'; });
     const bad = s && (s.kind === 'error' || s.kind === 'limit');
-    TUI.renderCode(this.host.querySelector('.tui-code'), this.src, s ? s.line : 0, done, bad ? 'err' : 'on', waiting);
+    TUI.renderCode(this.host.querySelector('.tui-code'), this.src, s ? s.line : 0, done, bad ? 'err' : 'on');
     const note = this.host.querySelector('.tui-note');
     note.classList.toggle('err', !!bad);
-    note.querySelector('.phase').textContent = s ? this.phaseLabel(s, k) : 'Ready';
-    note.querySelector('.text').textContent = s ? s.note : 'Nothing has run yet. Press Next, or use the arrow keys. A line marked in yellow is waiting for a call to return.';
+    note.querySelector('.phase').textContent = s ? this.phaseLabel(s) : 'Ready';
+    note.querySelector('.text').textContent = s ? s.note : 'Nothing has run yet. Press Next, or use the arrow keys.';
     if (i === steps.length && run.truncated) note.querySelector('.text').textContent += ` (Showing the first ${steps.length} steps.)`;
     this.host.querySelector('.tui-console').textContent = s ? s.out : '';
+    TUI.renderVars(this.host.querySelector('.tui-vars'), s ? s.frames[s.frames.length - 1] : null, s ? s.heap : {}, s ? s.changed || [] : []);
     this.renderCard(s, k);
-    this.renderTree(k);
-    const prev = i > 1 ? steps[i - 2] : null;
-    const ghost = s && s.kind === 'return' && prev && prev.frames.length > s.frames.length
-      ? { frame: prev.frames[prev.frames.length - 1], label: s.returned === undefined ? 'finished · removed' : `returned ${s.returned} · removed` } : null;
-    TUI.renderMemory(this.host.querySelector('.memory'), s, { ghost, entering: s && s.kind === 'call' });
+    this.renderLists(s, k);
   }
-  phaseLabel(s, k) {
+  phaseLabel(s) {
     if (s.kind === 'error') return 'Exception';
     if (s.kind === 'limit') return 'Stopped';
-    const node = activeNode(this.nodes, k);
-    if (s.kind === 'call') return s.frames.length > 2 ? `Going down: new frame for ${node.label}` : `First call: ${node.label}`;
-    if (s.kind === 'return') return s.frames.length === 1 ? 'Back in main' : 'Coming back up';
-    if (!node) return 'main';
-    if (node.base && s.kind === 'returning') return `Base case: ${node.label}`;
-    return node.children.some(c => this.nodes[c].end !== null && this.nodes[c].end < k) ? `Coming back up: finishing ${node.label}` : `Going down: in ${node.label}`;
+    if (s.list) return { add: 'Added at the end', insert: 'Inserted: later elements shift right', remove: 'Removed: later elements shift left', set: 'Replaced: nothing shifts', none: 'Nothing removed' }[s.list.op] || 'List changed';
+    if (s.kind === 'cond' && s.loop !== undefined) return s.value ? 'Loop check: true' : 'Loop check: false';
+    if (s.kind === 'foreach') return 'Enhanced for: next element';
+    return 'Statement';
   }
   renderCard(s, k) {
     const box = this.host.querySelector('.cardbox'); box.textContent = '';
     if (!s) return;
-    const node = activeNode(this.nodes, k);
-    if (s.kind === 'returning' && node && node.base) {
-      const waitingCalls = s.frames.length - 2;
-      box.append(el('div', 'callout', `Base case: ${node.label} returns ${s.value === undefined ? '' : s.value + ' '}without making another call. This is the turning point, not the end: ${waitingCalls === 0 ? 'main is' : `${waitingCalls} call${waitingCalls === 1 ? ' is' : 's are'}`} still waiting, and they finish one at a time, newest first.`));
-      return;
+    const a = afterRemoval(this.run, this.src, k);
+    if (a && a.slid !== null && a.slid !== undefined) {
+      const v = TUI.valueText(a.slid, 'x');
+      const name = loopAt(this.run, this.src, k).var;
+      if (a.skipped) box.append(el('div', 'callout bad', `${v} slid into index ${a.r}, but the loop's update moves ${name} to ${a.next} next. ${v} is never checked: it is skipped.`));
+      else if (a.backward) box.append(el('div', 'callout good', `${v} slid into index ${a.r}, but the loop is going backward: ${name} moves to ${a.next} next. Every element that shifted was already checked, so nothing is skipped.`));
+      else if (!a.ends) box.append(el('div', 'callout good', `${v} slid into index ${a.r}, and the loop checks index ${a.next} next, so ${v} is not skipped.`));
     }
-    if (s.kind === 'return' && s.frames.length > 1) {
-      const back = activeNode(this.nodes, k), top = s.frames[s.frames.length - 1];
-      // Its own parameter values (not references) show that each call kept its own copies.
-      const own = top.vars.filter(v => top.params.includes(v.name) && !(v.v && typeof v.v === 'object')).map(v => `${v.name} = ${TUI.valueText(v.v, v.type, s.heap)}`);
-      const mine = own.length === 1 ? `, and its own ${own[0].replace(' = ', ' is still ')}` : own.length ? `, with its own ${own.join(', ')}` : '';
-      box.append(el('div', 'callout up', `${back.label} was waiting on line ${s.line}. It resumes there with ${s.returned === undefined ? 'the call finished' : `the value ${s.returned}`}${mine}.`));
-    }
+    if (s.kind === 'cond' && s.done && s.iter && /hasNext/.test(s.note)) box.append(el('div', 'callout bad', 'The loop ended early: an element that shifted left was never visited. Changing a list inside an enhanced for loop is never safe, even when it does not throw.'));
+    if (s.kind === 'error' && s.error === 'ConcurrentModificationException') box.append(el('div', 'callout bad', 'To remove while looping, use an index loop that goes backward, or one that does not increase the index after a removal.'));
   }
-  renderTree(k) {
-    const host = this.host.querySelector('.rtree'); host.textContent = '';
-    const cur = k >= 0 ? activeNode(this.nodes, k) : null;
-    const shown = this.nodes.filter(n => n.start <= k);
-    if (!shown.length) { host.append(el('p', 'small', 'No calls yet.')); return; }
-    // A very deep chain keeps its first and last six levels, with a count of the levels between.
-    const maxD = Math.max(...shown.map(n => n.depth)), skip = maxD > 14 ? [6, maxD - 6] : null;
-    const within = (x, n) => { for (let p = x; p; p = p.parent === null ? null : this.nodes[p.parent]) if (p === n) return true; return false; };
-    const draw = n => {
-      const li = el('li'), box = el('span', 'rnode');
-      const open = n.end === null || n.end > k, returned = !open;
-      box.classList.add(open ? 'open' : 'done'); if (n === cur) box.classList.add('cur');
-      box.append(n.label);
-      if (returned) { if (n.value !== undefined) { box.append(' → '); box.append(el('span', 'rv', n.value)); } else box.append(' ✓'); }
-      if (n.base && k >= n.end - 1) box.append(el('span', 'tag base', 'base case'));
-      if (open && n !== cur) box.append(el('span', 'tag wait', 'waiting'));
-      li.append(box);
-      let kids = n.children.map(c => this.nodes[c]).filter(c => c.start <= k);
-      const ul = el('ul');
-      if (skip && n.depth === skip[0] - 1 && kids.length) {
-        ul.append(el('li', 'small', `… ${skip[1] - skip[0]} more levels of calls …`));
-        kids = shown.filter(x => x.depth === skip[1] && within(x, n));
+  renderLists(s, k) {
+    const host = this.host.querySelector('.lists'); host.textContent = '';
+    if (!s) { host.append(el('p', 'small', 'No list yet.')); return; }
+    const lists = Object.values(s.heap).filter(o => o.kind === 'list');
+    if (!lists.length) { host.append(el('p', 'small', 'No list yet.')); return; }
+    const prev = k > 0 ? this.run.steps[k - 1] : null, cur = cursorAt(this.run, this.src, k);
+    const skip = afterRemoval(this.run, this.src, k);
+    const names = hid => s.frames.flatMap(f => f.vars.filter(v => v.v && typeof v.v === 'object' && v.v.ref === hid).map(v => v.name));
+    lists.forEach(o => {
+      const box = el('div', 'lview'), h = el('div', 'lhead');
+      const before = prev && prev.heap[o.hid] ? prev.heap[o.hid].values : null, op = s.list && s.list.hid === o.hid ? s.list : null;
+      h.append(el('span', null, `${names(o.hid).join(', ') || 'ArrayList'} · ${ELEM_OF(o)}`), el('span', null, `size() ${o.values.length}${before && before.length !== o.values.length ? ` (was ${before.length})` : ''}`));
+      box.append(h);
+      const text = v => TUI.valueText(v, o.elem, s.heap);
+      // The list before a shifting change, with the removed element struck out.
+      if (op && before && (op.op === 'remove' || op.op === 'insert')) {
+        const row = el('div', 'lrow before'); row.append(el('span', 'rlabel', 'before'));
+        before.forEach((v, i) => { const c = el('div', 'lcell' + (op.op === 'remove' && i === op.index ? ' gone' : '')); c.append(el('div', 'cv', text(v)), el('div', 'ci', String(i))); const b = el('div', 'cellbox'); b.append(c); row.append(b); });
+        box.append(row);
       }
-      kids.forEach(c => ul.append(draw(c)));
-      if (ul.childNodes.length) li.append(ul);
-      return li;
-    };
-    const ul = el('ul');
-    shown.filter(n => n.parent === null).forEach(n => ul.append(draw(n)));
-    host.append(ul);
+      const row = el('div', 'lrow'); row.append(el('span', 'rlabel', op && (op.op === 'remove' || op.op === 'insert') ? 'after' : 'now'));
+      o.values.forEach((v, i) => {
+        const b = el('div', 'cellbox'), c = el('div', 'lcell');
+        let was = null;
+        if (op && op.op === 'remove' && i >= op.index) { c.classList.add('moved'); was = i + 1; }
+        if (op && op.op === 'insert' && i > op.index) { c.classList.add('moved', 'right'); was = i - 1; }
+        if (op && (op.op === 'insert' || op.op === 'add') && i === op.index) c.classList.add('new');
+        if (op && op.op === 'set' && i === op.index) c.classList.add('set');
+        if (skip && skip.skipped && op && i === skip.r) c.classList.add('skip');
+        c.append(el('div', 'cv', text(v)), el('div', 'ci', String(i)));
+        b.append(c);
+        if (was !== null) b.append(el('div', 'was', `was ${was}`));
+        if (cur && (cur.hid === undefined || cur.hid === o.hid) && cur.at === i) b.append(el('div', 'caret', `▲ ${cur.name === 'for-each' ? 'for-each' : `${cur.name} = ${i}`}`));
+        row.append(b);
+      });
+      if (!o.values.length) row.append(el('span', 'small', 'empty'));
+      if (cur && !cur.iter && cur.at === o.values.length) { const b = el('div', 'cellbox'); b.append(el('div', 'caret past', `▲ ${cur.name} = ${cur.at} (past the end)`)); row.append(b); }
+      box.append(row);
+      host.append(box);
+    });
   }
 }
+const ELEM_OF = o => `ArrayList<${o.elem}>`;
 
 /* ---------- Predict and Transfer ---------- */
 const select = TUI.tabs(['predict', 'explore', 'transfer']);
 function expected(it) {
   const run = MJ.run(it.code);
   if (it.ask === 'output') return run.out;
-  if (it.ask === 'returns') return firstReturn(run);
-  if (it.ask === 'calls') return totalCalls(run);
-  if (it.ask === 'depth') return maxDepth(run);
-  if (it.ask === 'copies') return maxCopies(run, it.name);
-  if (it.after === 'base') return it.choices.findIndex(c => c.key === afterBase(run));
+  if (it.ask === 'next') { const v = nextChecked(run, it.code, it.nth); return v === null ? 'the loop ends' : String(v); }
   return it.choices.findIndex(c => c.match === MJ.label(run));
 }
-const kindOf = it => it.ask === 'returns' ? 'text' : ['calls', 'depth', 'copies'].includes(it.ask) ? 'int' : undefined;
-const withKind = items => items.map(it => ({ ...it, kind: kindOf(it) }));
-const askText = it => ({
-  output: 'What exactly does this print?',
-  returns: `What does ${it.call} return?`,
-  calls: 'How many calls to the recursive method happen in total, counting the first one from main?',
-  depth: 'At the deepest point, how many frames are on the call stack, counting main?',
-  copies: `At the deepest point, how many separate variables named ${it.name} exist at the same time?`,
-})[it.ask] || it.q;
-const predictRunner = new RecursionRunner($('p-view'));
+const withKind = items => items.map(it => ({ ...it, kind: it.ask === 'next' ? 'text' : undefined }));
+const askText = it => it.ask === 'output' ? 'What exactly does this print?' : it.ask === 'next' ? `${it.state} Which value does the loop check next?` : it.q;
+const predictRunner = new ListRunner($('p-view'));
 TUI.questions('p', withKind(PREDICT), {
-  submitLabel: 'Check my prediction', reasonPrompt: 'Why? Write the calls in order, each with its own parameter values.',
+  submitLabel: 'Check my prediction', reasonPrompt: 'Why? Write the list with its indexes after each change.',
   askText, expected,
   onReveal(it) { $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests; predictRunner.set(it.code); },
 });
 TUI.questions('t', withKind(TRANSFER), {
-  submitLabel: 'Check', reasonPrompt: 'Explain it: list each call and what it returns.',
+  submitLabel: 'Check', reasonPrompt: 'Explain it: the list and the index after each change.',
   askText, expected,
   onReveal(it) {
     const run = MJ.run(it.code), m = $('t-model'); m.textContent = '';
-    if (run.compileError) m.append(el('b', null, 'Model working: '), `It does not compile. ${run.compileError}`);
-    else if (run.limit) m.append(el('b', null, 'Model working: '), `The calls never reach the base case: ${callTree(run).slice(0, 4).map(n => n.label).join(', ')}, … Each call makes another, until Java runs out of stack space.`);
-    else {
-      const nodes = callTree(run);
-      const list = nodes.slice(0, 12).map(n => `${'  '.repeat(run.steps[n.start].frames.length - 2)}${n.label}${n.value !== undefined ? ' returns ' + n.value : ''}${n.base ? ' (base case)' : ''}`);
-      m.append(el('b', null, 'Model working:'));
-      m.append(el('pre', 'small', list.join('\n') + (nodes.length > 12 ? `\n… ${nodes.length - 12} more calls` : '')));
-      m.append(el('p', null, `${nodes.length} call${nodes.length === 1 ? '' : 's'} in total.` + (run.out ? ` Output: ${JSON.stringify(run.out)}.` : '')));
-    }
-    m.append(el('p', 'small', 'Compare with your drawing. Did each call keep its own parameter values?'));
+    const changes = run.steps.filter(s => s.list && s.list.op !== 'add').map(s => s.note.split('. ')[0]);
+    const skipped = skippedValues(run, it.code);
+    m.append(el('b', null, 'Model working: '), (changes.length ? changes.join('. ') + '.' : 'The list is built with add.') + (skipped.length ? ` Skipped by the loop: ${skipped.join(', ')}.` : '') + (run.crashed ? ` It throws a ${run.crashed}.` : run.out ? ` Output: ${JSON.stringify(run.out)}.` : ''));
+    m.append(el('p', 'small', 'Compare with your list drawings. Did you shift the later elements after each add or remove?'));
   },
 });
 
 /* ---------- Explore ---------- */
-const exploreRunner = new RecursionRunner($('e-view'));
+const exploreRunner = new ListRunner($('e-view'));
 const ecode = $('e-code');
 PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => { ecode.value = p.code; exploreRunner.set(ecode.value); }); $('e-presets').append(c); });
-ecode.value = PRESETS[0].code;
+ecode.value = PRESETS[4].code;
 ecode.addEventListener('input', () => exploreRunner.set(ecode.value));
 exploreRunner.set(ecode.value);
 const params = new URLSearchParams(location.search);

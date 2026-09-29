@@ -104,5 +104,16 @@
       "2027-03-08"
     ],
     "tests": "recursion"
+  },
+  {
+    "id": "arraylist",
+    "title": "ArrayList Mutation Explorer",
+    "file": "arraylist.html",
+    "dates": [
+      "2027-01-20",
+      "2027-01-26",
+      "2027-02-01"
+    ],
+    "tests": "arraylist"
   }
 ]
