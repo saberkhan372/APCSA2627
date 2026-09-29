@@ -161,7 +161,12 @@ const MJ = (function () {
         } else break;
       }
       if (at('++') || at('--')) throw new Unsupported('++ and -- are supported only as their own statements, such as i++;', s.line);
-      if (at('=') || ['+=', '-=', '*=', '/=', '%='].includes(peek().k)) throw new Unsupported('assignment inside an expression is not supported here.', s.line);
+      // Assignment used as a value: type-checked (so if (x = 5) is the compile error javac gives) but not run.
+      if (at('=') || ['+=', '-=', '*=', '/=', '%='].includes(peek().k)) {
+        const op = next().k;
+        if (e.k !== 'var' && e.k !== 'index') throw new CompileError('unexpected type: the left side of an assignment must be a variable', s.line);
+        return mk({ k: 'assignExpr', op, target: e, e: expr() }, s);
+      }
       return e;
     }
     function primary() {
@@ -372,7 +377,7 @@ const MJ = (function () {
       if (m.params.some(pp => pp.type === 'void')) throw new CompileError("'void' type not allowed here", m.line);
       mtab.set(m.name, m);
     }
-    let scopes, retType;
+    let scopes, retType, deferred = null;   // deferred: valid Java this tool cannot run, reported only if nothing else is wrong
     const lookup = (name, line) => { for (let i = scopes.length - 1; i >= 0; i--) if (scopes[i].has(name)) return scopes[i].get(name); throw new CompileError(`cannot find symbol: variable ${name}`, line); };
     const declare = (name, type, line) => {
       for (const sc of scopes) if (sc.has(name)) throw new CompileError(`variable ${name} is already defined in this method`, line);
@@ -385,6 +390,12 @@ const MJ = (function () {
             if (n.big) throw new CompileError('integer number too large: 2147483648', n.line);
             return n.type;
           case 'var': return lookup(n.name, n.line);
+          case 'assignExpr': {
+            const tt = ty(n.target), t = ty(n.e);
+            if (n.op === '=' ? !assignable(tt, t) : !(tt === 'String' && n.op === '+=') && !(numeric(tt) && numeric(t))) throw new CompileError(`incompatible types: ${t} cannot be converted to ${tt}`, n.line);
+            deferred = deferred || new Unsupported('assignment inside an expression is not supported here.', n.line);
+            return tt;
+          }
           case 'class': throw new CompileError(`${n.name} is a class name, not a value`, n.line);
           case 'unary': {
             if (n.op === '-' && n.e.k === 'lit' && n.e.big) { n.e.type = 'int'; return 'int'; }   // -2147483648 is legal only negated
@@ -643,6 +654,7 @@ const MJ = (function () {
     scopes = [new Map()]; retType = null;
     let ok = true;
     for (const s of prog.main) { if (!ok) throw new CompileError('unreachable statement', s.line); ok = st(s); }
+    if (deferred) throw deferred;
     return mtab;
   }
 

@@ -36,7 +36,8 @@
   ["static boolean t(String s) {\n    System.out.print(s);\n    return true;\n}\n\nstatic boolean f(String s) {\n    System.out.print(s);\n    return false;\n}\n\nif (!f(\"a\") && t(\"b\")) {\n    System.out.print(\"X\");\n}\nSystem.out.println();", "abX\n"],
   ["static boolean t(String s) {\n    System.out.print(s);\n    return true;\n}\n\nstatic boolean f(String s) {\n    System.out.print(s);\n    return false;\n}\n\nboolean r = f(\"a\") && t(\"b\") || f(\"c\") && t(\"d\");\nSystem.out.println(r);", "acfalse\n"],
   ["int x = 5;\nSystem.out.println(x > 3 && 7);", "compile-error"],
-  ["int x = 5;\nif (x = 5) {\n}", "unsupported"],
+  ["int x = 5;\nif (x = 5) {\n}", "compile-error"],
+  ["boolean done = false;\nif (done = true) {\n    System.out.println(\"yes\");\n}", "unsupported"],
   ["String s = \"a\";\nString t = \"a\";\nSystem.out.println(s == t);", "unsupported"],
   ["int x = 5;\nSystem.out.println(x > 3 & x < 9);", "unsupported"],
   ["int x = 5;\nSystem.out.println(x > 3 ? 1 : 2);", "unsupported"]

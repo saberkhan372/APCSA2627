@@ -30,6 +30,7 @@ jobs:
             (cd "$(dirname "$j")" && java "$(basename "$j")") | tee "$j.txt"
             name=$(basename "$j" .java)
             echo "::notice title=$name vs real Java::$(tail -n 1 "$j.txt")"
+            grep '^FAIL' "$j.txt" | head -n 8 | while IFS= read -r line; do echo "::error title=$name::$line"; done
             tail -n 1 "$j.txt" | grep -q '^PASS' || status=1
           done
           exit $status
