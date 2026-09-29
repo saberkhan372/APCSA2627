@@ -52,6 +52,7 @@ h2 { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; margin: 0; 
 .status { font: .75rem var(--mono); color: var(--faint); align-self: start; grid-column: 2; grid-row: 1; white-space: nowrap; }
 .status.live { color: var(--green); }
 .tools li.planned h2 { color: var(--muted); }
+.unithead { font-family: var(--serif); font-size: 1.35rem; margin: 2rem 0 .3rem; }
 .how { margin-top: 2.2rem; border-left: 3px solid var(--accent); padding: .2rem 0 .2rem 1rem; max-width: 70ch; }
 .how p { margin: .3rem 0; }
 </style>
@@ -61,41 +62,80 @@ h2 { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; margin: 0; 
 <header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="../study/index.html">Study</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
 <main id="main" class="wrap" tabindex="-1">
   <header class="page-heading">
-    <p class="kicker">Chapter 2 · Objects and Primitive Data</p>
+    <p class="kicker">All units</p>
     <h1>Visualizers</h1>
-    <p class="lede">Step through what Java actually does. Each tool starts with a prediction, so commit to an answer before you look.</p>
+    <p class="lede">Step through what Java actually does. Each tool starts with a prediction, so commit to an answer before you look. Every answer these tools give is checked against real Java.</p>
   </header>
 
+  <h2 class="unithead">Unit 1 · Using Objects and Methods</h2>
   <ul class="tools">
     <li>
       <h2><a href="compareto.html"><code>compareTo</code> Visualizer</a></h2>
-      <span class="status live">Pilot</span>
-      <p>Watch Java compare two Strings one index at a time, stop at the first mismatch, and fall back to length when one string is a prefix of the other.</p>
+      <span class="status live">Live</span>
+      <p>Watch Java compare two Strings one index at a time, stop at the first mismatch, and fall back to length when one is a prefix of the other.</p>
     </li>
     <li>
       <h2><a href="stringindex.html">String Index Explorer</a></h2>
-      <span class="status live">New</span>
+      <span class="status live">Live</span>
       <p>Boxes for <code>charAt</code>, fence posts for <code>substring</code>, a sliding search for <code>indexOf</code>, and a line-by-line tracer for the WorkingWithStrings lab.</p>
     </li>
     <li>
       <h2><a href="exprtracer.html">Expression and Type Tracer</a></h2>
-      <span class="status live">New</span>
-      <p>Watch an expression reduce one operation at a time, with every value labeled <code>int</code>, <code>double</code> or <code>String</code>: integer division, casts, <code>%</code>, concatenation order, overflow, and code that does not compile.</p>
+      <span class="status live">Live</span>
+      <p>An expression reduces one operation at a time, with every value labeled <code>int</code>, <code>double</code> or <code>String</code>.</p>
     </li>
     <li>
       <h2><a href="memory.html">Memory Diagram</a></h2>
-      <span class="status live">New</span>
-      <p>Variables as arrows to objects, with the course's <code>Player</code> class and Strings: aliasing, reassignment, <code>null</code>, <code>==</code> versus <code>equals</code>, the string pool, and why Strings never change.</p>
+      <span class="status live">Live</span>
+      <p>Variables as arrows to objects: aliasing, <code>null</code>, <code>==</code> versus <code>equals</code>, the string pool, and why Strings never change.</p>
     </li>
     <li>
       <h2><a href="randomrange.html">Math.random Range Builder</a></h2>
-      <span class="status live">New</span>
-      <p>Type any formula with <code>Math.random()</code> and see scale, cast and shift one step at a time, the exact range, and how often each value comes up.</p>
+      <span class="status live">Live</span>
+      <p>Scale, cast and shift one step at a time, the exact range, and how often each value comes up.</p>
     </li>
     <li>
       <h2><a href="output.html">Output Predictor</a></h2>
-      <span class="status live">New</span>
+      <span class="status live">Live</span>
       <p>A console with a visible cursor: <code>print</code> versus <code>println</code>, escape sequences, and exactly what a program prints.</p>
+    </li>
+  </ul>
+
+  <h2 class="unithead">Unit 2 · Selection and Iteration</h2>
+  <ul class="tools">
+    <li>
+      <h2><a href="boolean.html">Boolean and Short-Circuit Explorer</a></h2>
+      <span class="status live">New</span>
+      <p>Evaluate a condition one part at a time: skipped operands stay visibly unevaluated, a null guard works only in the right order, De Morgan equivalence, and dangling <code>else</code>.</p>
+    </li>
+    <li>
+      <h2><a href="loops.html">Loop Tracer</a></h2>
+      <span class="status live">New</span>
+      <p>Initialize, check, body, update: a trace table for every loop, the equivalent <code>while</code> loop, and a grid for nested loops.</p>
+    </li>
+  </ul>
+
+  <h2 class="unithead">Units 3 and 4 · Classes and Data Collections</h2>
+  <ul class="tools">
+    <li class="planned">
+      <h2>Method-Call and Parameter Tracer</h2>
+      <span class="status">Coming</span>
+      <p>Call frames, parameters as copies, return values, and references to shared objects.</p>
+    </li>
+    <li class="planned">
+      <h2>Recursion Call Stack</h2>
+      <span class="status">Coming</span>
+      <p>Calls stack up with their own parameters, stop at the base case, then return one at a time.</p>
+    </li>
+    <li class="planned">
+      <h2>ArrayList Mutation Explorer</h2>
+      <span class="status">Coming</span>
+      <p>Watch later elements shift as you add and remove, and see why an index loop can skip an element.</p>
+    </li>
+    <li class="planned">
+      <h2>Search and Sort Workbench</h2>
+      <span class="status">Coming</span>
+      <p>Predict the next comparison, swap or insertion, and follow binary search’s shrinking interval.</p>
     </li>
   </ul>
 
