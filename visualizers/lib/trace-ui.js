@@ -12,7 +12,7 @@ const TUI = (function () {
 .tui-code li.called { background: var(--extra-bg); border-left-color: var(--extra-line); }
 .tui-note { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
 .tui-note.err { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
-.tui-note .phase { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .06em; color: var(--accent); }
+.tui-note .phase { font: 700 13px var(--sans); color: var(--accent); }
 .tui-note .op { font: 700 15px var(--mono); margin: 2px 0 4px; }
 .tui-note p { margin: 0; }
 .tui-console { background: #10181A; color: #E8EEEC; border-radius: 8px; padding: 8px 12px; font: 15px/1.5 var(--mono); min-height: 2.4em; white-space: pre-wrap; overflow-x: auto; }

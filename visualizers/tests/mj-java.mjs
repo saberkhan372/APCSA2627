@@ -35,6 +35,7 @@ export function splitText(code) {
     const bare = line.replace(/\/\/.*$/, '').replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, '');
     for (const ch of bare) { if (ch === '{') { depth++; opened = true; } else if (ch === '}') depth--; }
     if (inMethod && opened && depth === 0) inMethod = false;
+    if (inMethod && !opened && /;\s*$/.test(bare)) inMethod = false;   // a one-line static variable
   }
   return { methods: methods.join('\n'), main: main.join('\n') };
 }

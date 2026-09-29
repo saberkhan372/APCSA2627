@@ -341,6 +341,7 @@ const MJ = (function () {
         if (!isStatic) throw new Unsupported('this tool supports static methods only.', s.line);
         const ret = parseType();
         const name = expect('id', 'method name').v;
+        if (at('=') || at(';') || at(',')) throw new Unsupported('static variables (fields declared outside a method) are not supported here.', s.line);
         expect('(');
         const params = [];
         if (!at(')')) {
@@ -872,7 +873,8 @@ const MJ = (function () {
       try { execBlockBody(m.body); ret = undefined; }
       catch (e) { if (e instanceof Ret) ret = e.v; else { throw e; } }
       const f = frames.pop();
-      record('return', n, m.ret === 'void' ? `${m.name} finishes. Its frame and its variables are removed, and execution continues in ${fr().name}.` : `${m.name} returns ${showRef(m.ret, ret)} to ${fr().name}, and its frame is removed.`,
+      const to = fr().name === m.name ? `the ${m.name} call that was waiting for it` : fr().name;
+      record('return', n, m.ret === 'void' ? `${m.name} finishes. Its frame and its variables are removed, and execution continues in ${to}.` : `${m.name} returns ${showRef(m.ret, ret)} to ${to}, and its frame is removed.`,
         { returned: m.ret === 'void' ? undefined : showRef(m.ret, ret), retType: m.ret, retValue: m.ret === 'void' ? undefined : snapVal(m.ret, ret), from: f.name, method: m.name });
       return ret;
     }
@@ -1044,7 +1046,7 @@ const MJ = (function () {
         // The browser's own stack can run out before maxDepth; treat that as the same depth limit.
         limit = e instanceof ToolLimit ? e.kind : 'depth';
         const line = e instanceof ToolLimit ? e.line : frames[frames.length - 1].line;
-        steps.push({ kind: 'limit', line, note: limit === 'depth' ? `This tool stops at ${frames.length} method calls deep. Java itself would keep going deeper before stopping with a StackOverflowError.` : `This tool stopped after ${maxOps.toLocaleString()} operations. The program may have an infinite loop.`, out, depth: frames.length, ...snapshot() });
+        steps.push({ kind: 'limit', line, note: limit === 'depth' ? `This tool stops at ${frames.length} frames on the call stack. Java itself would keep going deeper before stopping with a StackOverflowError.` : `This tool stopped after ${maxOps.toLocaleString()} operations. The program may have an infinite loop.`, out, depth: frames.length, ...snapshot() });
       } else throw e;
     }
     return { steps, out, crashed, limit, truncated, prog };

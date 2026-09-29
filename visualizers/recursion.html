@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Loop Tracer</title>
+<title>Recursion Call Stack</title>
 <style>
 /* Palette and chrome match the course site (web/site.css). */
 :root {
@@ -216,28 +216,28 @@ details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
   .col-current .tile { transform: none; }
 }
-/* ---- Loop Tracer ---- */
-.runner-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 12px; }
-@media (max-width: 820px) { .runner-grid { grid-template-columns: minmax(0, 1fr); } }
+/* ---- Recursion Call Stack ---- */
+.runner-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 16px; margin-top: 12px; }
+@media (max-width: 980px) { .runner-grid { grid-template-columns: minmax(0, 1fr); } }
 .colhead { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 12px 0 6px; }
-.tracewrap { overflow-x: auto; }
-table.trace { border-collapse: collapse; font: 13px var(--mono); min-width: 100%; }
-table.trace th, table.trace td { border: 1px solid var(--line); padding: 3px 7px; text-align: center; white-space: nowrap; }
-table.trace th { font: 600 12px var(--sans); color: var(--muted); background: var(--soft); }
-table.trace tr.now td { background: var(--accent-soft); font-weight: 700; }
-table.trace td.f { color: var(--diff-ink); font-weight: 700; }
-table.trace td.t { color: var(--same-ink); }
-table.trace td.na { color: var(--muted); }
-table.trace caption.key { caption-side: bottom; text-align: left; padding-top: 4px; font-family: var(--sans); }
-.tracesel select { font: 15px var(--sans); padding: 5px 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--ink); }
-.grid2 { display: grid; gap: 3px; margin-top: 4px; overflow-x: auto; }
-.gcell { min-width: 30px; height: 28px; border: 1.5px dashed var(--line); border-radius: 4px; font: 12px var(--mono); display: flex; align-items: center; justify-content: center; }
-.gcell.on { border-style: solid; border-color: var(--same-line); background: var(--same-bg); color: var(--same-ink); }
-.gcell.cur { box-shadow: 0 0 0 3px var(--accent); }
-.grow { font: 600 12px var(--mono); color: var(--muted); display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; white-space: nowrap; }
-.gnote { font-size: 14px; margin-top: 6px; }
-.toolbar2 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
-.qstate { font-size: 15px; background: var(--soft); border-radius: 8px; padding: 8px 12px; margin: 6px 0; }
+.rtree { font: 14px/1.5 var(--mono); overflow-x: auto; padding-bottom: 4px; }
+.rtree ul { list-style: none; margin: 0; padding-left: 20px; }
+.rtree > ul { padding-left: 0; }
+.rtree li { position: relative; margin: 3px 0; white-space: nowrap; }
+.rtree ul ul li::before { content: ''; position: absolute; left: -13px; top: -4px; width: 10px; height: 18px; border-left: 2px solid var(--line); border-bottom: 2px solid var(--line); border-bottom-left-radius: 4px; }
+.rnode { display: inline-block; border: 1.5px solid var(--line); border-radius: 5px; padding: 1px 7px; background: var(--panel); }
+.rnode.open { border-color: var(--accent); }
+.rnode.cur { background: var(--accent-soft); border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); font-weight: 700; }
+.rnode.done { color: var(--muted); }
+.rnode .rv { color: var(--same-ink); font-weight: 700; }
+.rnode .tag { font: 600 10px var(--sans); text-transform: uppercase; letter-spacing: .04em; border-radius: 3px; padding: 0 4px; margin-left: 6px; vertical-align: 1px; }
+.rnode .tag.base { color: var(--extra-ink, var(--ink)); background: var(--extra-bg); border: 1px solid var(--extra-line); }
+.rnode .tag.wait { color: var(--accent); border: 1px solid var(--accent); }
+.rkey { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.callout { border-left: 4px solid var(--extra-line); background: var(--extra-bg); border-radius: 0 6px 6px 0; padding: 6px 10px; margin-top: 8px; font-size: 15px; }
+.callout.up { border-left-color: var(--same-line); background: var(--same-bg); }
+.limits { font-size: 14px; color: var(--muted); margin-top: 14px; }
+@media (prefers-reduced-motion: no-preference) { .rnode.cur { transition: box-shadow .2s; } .callout { animation: pop .3s ease-out; } @keyframes pop { from { opacity: .4; } } }
 </style>
 </head>
 <body>
@@ -245,9 +245,9 @@ table.trace caption.key { caption-side: bottom; text-align: left; padding-top: 4
 <header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="../study/index.html">Study</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
 <main id="main" class="wrap" tabindex="-1">
   <header class="page-heading">
-    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 2 · Iteration</p>
-    <h1>Loop Tracer</h1>
-    <p class="lede">A loop repeats four parts in a fixed order: <b>initialize</b> once, then <b>check the condition</b>, run the <b>body</b>, <b>update</b>, and check again. Step through it with a trace table, and see nested loops as a grid.</p>
+    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 4 · Recursion</p>
+    <h1>Recursion Call Stack</h1>
+    <p class="lede">Each recursive call gets its <b>own frame</b> with its own parameters. Calls stack up until one reaches the <b>base case</b>. That is not the end: the waiting calls then <b>finish one at a time</b>, newest first, each using the value returned to it.</p>
   </header>
 
   <div class="tabs" role="tablist" aria-label="Mode">
@@ -268,19 +268,19 @@ table.trace caption.key { caption-side: bottom; text-align: left; padding-top: 4
 
   <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
     <div class="panel">
-      <label class="field">Program <span class="hint">(<code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>, arrays; <code>for</code>, <code>while</code>, enhanced <code>for</code>, <code>if</code>/<code>else</code>; <code>System.out.println</code>)</span>
+      <label class="field">Program <span class="hint">(static methods first, then the statements for <code>main</code>)</span>
         <textarea class="tui-codein" id="e-code" spellcheck="false"></textarea>
       </label>
       <div class="small">Try:</div>
       <div class="presets" id="e-presets"></div>
-      <div class="toolbar2"><button class="btn" type="button" id="e-convert">Show the equivalent while loop</button><span class="small" id="e-convnote"></span></div>
       <div id="e-view"></div>
+      <p class="limits">Supported here: static methods, <code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>, arrays and <code>ArrayList</code>. This tool stops at 200 frames on the call stack; Java itself goes much deeper before it throws a <code>StackOverflowError</code>.</p>
     </div>
   </section>
 
   <section id="mode-transfer" role="tabpanel" aria-labelledby="tab-transfer" class="hidden">
     <div class="panel">
-      <p class="small" style="margin-top:0">No tracer here. Make your own trace table on paper, then check.</p>
+      <p class="small" style="margin-top:0">No tracer here. Draw the calls on paper: one line per call, indented under the call that made it, with the value each one returns. Then check.</p>
       <div class="row"><span class="qmeta" id="t-count"></span><span class="spacer"></span><button class="btn" id="t-prev">← Previous</button><button class="btn" id="t-next">Next question →</button></div>
       <p class="qprompt" id="t-ask"></p>
       <div class="tui-codebox" id="t-code" aria-label="Java code"></div>
@@ -2158,187 +2158,199 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
 // TRACE UI END
 
 // ENGINE START
-// Loop-specific reading of an interpreter run: which loop a step belongs to, and its phase.
-const PHASES = ['The loop body runs', 'The update runs', 'The condition is checked', 'The first statement after the loop runs'];
-function lineOfPos(src, pos) { return src.slice(0, pos).split('\n').length; }
-function phaseOf(run, src, k, loopIndex = 0) {
-  const loops = MJ.loopsOf(run.prog), L = loops[loopIndex], s = run.steps[k];
-  if (!s) return 3;
-  if (s.phase === 'update' && s.line === L.line) return 1;
-  if (s.kind === 'cond' && s.loop === L.id) return 2;
-  if (s.line > L.line && s.line <= lineOfPos(src, L.endPos)) return 0;
-  return 3;
+// The calls of a run as a tree: one node per call, with its arguments, children and returned value.
+function callTree(run) {
+  const nodes = [], open = [];
+  run.steps.forEach((s, k) => {
+    if (s.kind === 'call') {
+      const parent = open.length ? open[open.length - 1] : null;
+      const label = `${s.method}(${s.args.map(a => a.v && typeof a.v === 'object' ? a.src.trim() : a.text).join(', ')})`;
+      const node = { id: nodes.length, method: s.method, label, parent: parent ? parent.id : null, children: [], start: k, end: null, value: undefined };
+      if (parent) parent.children.push(node.id);
+      nodes.push(node); open.push(node);
+    }
+    if (s.kind === 'return') { const node = open.pop(); node.end = k; node.value = s.returned; }
+  });
+  // A base case is a call that finished without making another call.
+  nodes.forEach(n => { n.base = n.end !== null && !n.children.length; n.depth = n.parent === null ? 0 : nodes[n.parent].depth + 1; });
+  return nodes;
 }
-function bodyCount(run, loopIndex = 0) {
-  const L = MJ.loopsOf(run.prog)[loopIndex];
-  return run.steps.filter(s => s.loop === L.id && (s.kind === 'foreach' || (s.kind === 'cond' && s.value))).length;
+// The node running at step k (the newest call that has started and not yet returned).
+function activeNode(nodes, k) {
+  let cur = null;
+  nodes.forEach(n => { if (n.start <= k && (n.end === null || n.end > k)) cur = n; });
+  return cur;
+}
+const totalCalls = run => callTree(run).length;
+const maxDepth = run => Math.max(1, ...run.steps.map(s => s.frames.length));
+// The most copies of one variable name that exist at the same moment (each frame has its own).
+function maxCopies(run, name) { return Math.max(0, ...run.steps.map(s => s.frames.filter(f => f.vars.some(v => v.name === name)).length)); }
+// The value the first call made from main returns, as Java would print it.
+function firstReturn(run) {
+  const s = run.steps.find(x => x.kind === 'return' && x.frames.length === 1 && x.returned !== undefined);
+  return s ? (s.retType === 'String' && s.returned !== 'null' ? JSON.parse(s.returned) : s.returned) : null;
+}
+// What runs right after the first base case returns: 'caller' (a waiting call of the same method resumes) or 'main'.
+function afterBase(run) {
+  const base = callTree(run).find(n => n.base);
+  if (!base) return 'none';
+  const s = run.steps[base.end];
+  return s.frames.length === 1 ? 'main' : 'caller';
 }
 // ENGINE END
 
 // DATA START
-const NEXT = PHASES.map(text => ({ text }));
+const AFTER_BASE = [{ text: 'The program ends: the base case stops the recursion.', key: 'end' }, { text: 'The call that was waiting for this value continues where it left off.', key: 'caller' }, { text: 'main gets the value right away.', key: 'main' }, { text: 'The same call runs again from the top.', key: 'again' }];
+const FACT = 'static int fact(int n) {\n    if (n <= 1) {\n        return 1;\n    }\n    return n * fact(n - 1);\n}\n\nSystem.out.println(fact(4));';
+const FIB = 'static int fib(int n) {\n    if (n <= 1) {\n        return n;\n    }\n    return fib(n - 1) + fib(n - 2);\n}\n\n';
+const FIND = 'static int find(int[] a, int target, int lo, int hi) {\n    if (lo > hi) {\n        return -1;\n    }\n    int mid = (lo + hi) / 2;\n    if (a[mid] == target) {\n        return mid;\n    }\n    if (a[mid] < target) {\n        return find(a, target, mid + 1, hi);\n    }\n    return find(a, target, lo, mid - 1);\n}\n\nint[] a = {2, 5, 8, 12, 16, 23, 38};\n';
 const PREDICT = [
-  { code: 'int count = 0;\nfor (int i = 0; i < 5; i++) {\n    count++;\n}\nSystem.out.println(count);', ask: 'count', tests: 'The condition is checked six times (i = 0 to 5), but the body runs only when it is true: five times.' },
-  { code: 'int x = 2;\nwhile (x < 100) {\n    x *= 5;\n}\nSystem.out.println(x);', ask: 'output', tests: 'The condition is checked only before each iteration, so x can end well past 100.' },
-  { code: 'for (int i = 1; i <= 10; i += 3) {\n    System.out.print(i + " ");\n}', ask: 'output', tests: 'Count the updates: 1, 4, 7, 10. The next value, 13, fails the condition.' },
-  { code: 'for (int i = 1; i <= 10; i += 3) {\n    System.out.print(i + " ");\n}', ask: 'next', after: 3, state: 'The body has just printed "1 ".', choices: NEXT, tests: 'In a for loop, the update runs after the body and before the next check.' },
-  { code: 'int i = 0;\nint last = 0;\nwhile (i < 4) {\n    last = i;\n    i++;\n}\nSystem.out.println(last + " " + i);', ask: 'output', tests: 'The last value used in the body is not the final value of the loop variable. The loop stops when i reaches 4.' },
-  { code: 'int n = 10;\nwhile (n < 5) {\n    n++;\n}\nSystem.out.println(n);', ask: 'output', tests: 'A false condition on the first check means zero iterations. That is allowed.' },
-  { code: 'int sum = 0;\nfor (int k = 1; k <= 5; k++) {\n    sum += k * k;\n}\nSystem.out.println(sum);', ask: 'output', tests: 'Accumulate: 1 + 4 + 9 + 16 + 25.' },
-  { code: 'int count = 0;\nfor (int j = 10; j > 0; j -= 3) {\n    count++;\n}\nSystem.out.println(count);', ask: 'count', tests: 'j takes 10, 7, 4 and 1. The next value, −2, fails the condition.' },
-  { code: 'int i = 5;\nwhile (i > 0) {\n    i -= 2;\n}\nSystem.out.println(i);', ask: 'next', after: 8, state: 'The condition i > 0 has just been checked with i = −1: false.', choices: NEXT, tests: 'When the condition is false, the loop ends and execution continues with the next statement.' },
-  { code: 'int x = 0;\nwhile (x < 100) {\n    x *= 3;\n}', ask: 'mc', choices: [{ text: 'It stops with x = 100.', match: '#stops100' }, { text: 'It stops with x = 243.', match: '#stops243' }, { text: 'It never stops: an infinite loop.', match: 'limit' }, { text: 'It does not compile.', match: 'compile-error' }], tests: '0 × 3 is still 0, so the condition never becomes false.' },
-  { code: 'String s = "banana";\nint count = 0;\nfor (int i = 0; i < s.length(); i++) {\n    if (s.substring(i, i + 1).equals("a")) {\n        count++;\n    }\n}\nSystem.out.println(count);', ask: 'output', tests: 'A String scan: one index at a time, from 0 to length() − 1.' },
-  { code: 'int c = 0;\nfor (int r = 0; r < 3; r++) {\n    for (int k = 0; k < 4; k++) {\n        c++;\n    }\n}\nSystem.out.println(c);', ask: 'output', tests: 'The inner loop runs completely for every outer iteration: 3 rows × 4 = 12.' },
-  { code: 'for (int r = 1; r <= 4; r++) {\n    for (int k = 1; k <= r; k++) {\n        System.out.print("*");\n    }\n    System.out.println();\n}', ask: 'output', tests: 'The inner loop\'s limit depends on r, so each row is longer: a triangle.' },
+  { code: FACT, ask: 'returns', call: 'fact(4)', tests: 'fact(4) = 4 × fact(3) = 4 × 3 × fact(2) = 4 × 3 × 2 × fact(1), and fact(1) is the base case: 1.' },
+  { code: FACT, ask: 'copies', name: 'n', tests: 'fact(4), fact(3), fact(2) and fact(1) are all on the stack at once, and each has its own n.' },
+  { code: FACT, ask: 'mc', q: 'fact(1) has just returned 1. What happens next?', after: 'base', choices: AFTER_BASE, tests: 'Reaching the base case is the turning point, not the end. fact(2) was waiting on its return line, and now it computes 2 × 1.' },
+  { code: 'static void down(int n) {\n    if (n == 0) {\n        return;\n    }\n    System.out.print(n + " ");\n    down(n - 1);\n}\n\ndown(3);', ask: 'output', tests: 'The print comes before the recursive call, so it happens on the way down: 3, 2, 1.' },
+  { code: 'static void up(int n) {\n    if (n == 0) {\n        return;\n    }\n    up(n - 1);\n    System.out.print(n + " ");\n}\n\nup(3);', ask: 'output', tests: 'The print comes after the recursive call, so each call prints only after the calls above it return: 1, 2, 3.' },
+  { code: 'static void both(int n) {\n    if (n == 0) {\n        return;\n    }\n    System.out.print(n);\n    both(n - 1);\n    System.out.print(n);\n}\n\nboth(3);\nSystem.out.println();', ask: 'output', tests: 'Each call prints its n once on the way down and once on the way back up.' },
+  { code: 'static int sum(int n) {\n    if (n == 0) {\n        return 0;\n    }\n    int rest = sum(n - 1);\n    return n + rest;\n}\n\nSystem.out.println(sum(3));', ask: 'returns', call: 'sum(3)', tests: 'Each frame has its own n and its own rest. sum(0) returns 0, then 1 + 0, 2 + 1, 3 + 3.' },
+  { code: 'static String rev(String s) {\n    if (s.length() <= 1) {\n        return s;\n    }\n    return rev(s.substring(1)) + s.substring(0, 1);\n}\n\nSystem.out.println(rev("abc"));', ask: 'returns', call: 'rev("abc")', tests: 'rev("abc") = rev("bc") + "a" = (rev("c") + "b") + "a" = "cba".' },
+  { code: FIB + 'System.out.println(fib(4));', ask: 'calls', tests: 'fib(4) calls fib(3) and fib(2); fib(3) calls fib(2) and fib(1); each fib(2) calls fib(1) and fib(0). That is 9 calls, and fib(2) is computed twice.' },
+  { code: 'static int digitSum(int n) {\n    if (n < 10) {\n        return n;\n    }\n    return digitSum(n / 10) + n % 10;\n}\n\nSystem.out.println(digitSum(1234));', ask: 'returns', call: 'digitSum(1234)', tests: 'n / 10 drops the last digit and n % 10 is the last digit: 1 + 2 + 3 + 4.' },
+  { code: 'static int count(int n) {\n    return 1 + count(n - 1);\n}\n\nSystem.out.println(count(3));', ask: 'mc', q: 'What happens?', choices: [{ text: 'It prints 3.', match: '3\n' }, { text: 'It prints 4.', match: '4\n' }, { text: 'It never reaches a base case: Java throws a StackOverflowError.', match: 'limit' }, { text: 'It does not compile.', match: 'compile-error' }], tests: 'With no base case, every call makes another call. The stack grows until Java runs out of room.' },
+  { code: FIND + 'System.out.println(find(a, 23, 0, 6));', ask: 'calls', tests: 'The first call checks index 3 (12), which is too small, so it searches 4 to 6. The second call checks index 5 and finds 23.' },
+  { code: 'static int total(int[] a, int i) {\n    if (i == a.length) {\n        return 0;\n    }\n    return a[i] + total(a, i + 1);\n}\n\nint[] v = {3, 1, 4};\nSystem.out.println(total(v, 0));', ask: 'depth', tests: 'total(v, 0), total(v, 1), total(v, 2) and total(v, 3) are on the stack together with main: five frames. total(v, 3) is the base case.' },
 ];
 const TRANSFER = [
-  { code: 'int count = 0;\nfor (int i = 3; i < 12; i += 2) {\n    count++;\n}\nSystem.out.println(count);', ask: 'count' },
-  { code: 'int x = 1;\nwhile (x <= 50) {\n    x = x * 2 + 1;\n}\nSystem.out.println(x);', ask: 'output' },
-  { code: 'int p = 1;\nfor (int k = 0; k < 4; k++) {\n    p *= 2;\n}\nSystem.out.println(p + " " + k);', ask: 'mc', choices: [{ text: 'It prints 16 4', match: '16 4\n' }, { text: 'It prints 16 3', match: '16 3\n' }, { text: 'It does not compile.', match: 'compile-error' }, { text: 'It prints 16', match: '16\n' }] },
-  { code: 'for (int i = 10; i >= 0; i -= 4) {\n    System.out.print(i + ",");\n}', ask: 'output' },
-  { code: 'String w = "loop";\nString r = "";\nfor (int i = w.length() - 1; i >= 0; i--) {\n    r += w.substring(i, i + 1);\n}\nSystem.out.println(r);', ask: 'output' },
-  { code: 'int c = 0;\nfor (int a = 1; a <= 3; a++) {\n    for (int b = a; b <= 3; b++) {\n        c++;\n    }\n}\nSystem.out.println(c);', ask: 'output' },
-  { code: 'int x = 20;\nwhile (x > 1) {\n    x /= 3;\n}\nSystem.out.println(x);', ask: 'output' },
-  { code: 'int total = 0;\nfor (int i = 0; i < 6; i++) {\n    for (int j = i; j < 6; j++) {\n        total++;\n    }\n}\nSystem.out.println(total);', ask: 'output' },
+  { code: 'static int power(int b, int e) {\n    if (e == 0) {\n        return 1;\n    }\n    return b * power(b, e - 1);\n}\n\nSystem.out.println(power(2, 5));', ask: 'returns', call: 'power(2, 5)' },
+  { code: 'static void pattern(int n) {\n    if (n <= 0) {\n        return;\n    }\n    System.out.print(n);\n    pattern(n - 2);\n    System.out.print(n);\n}\n\npattern(5);\nSystem.out.println();', ask: 'output' },
+  { code: FIB + 'System.out.println(fib(5));', ask: 'calls' },
+  { code: 'static int countA(String s) {\n    if (s.length() == 0) {\n        return 0;\n    }\n    int rest = countA(s.substring(1));\n    if (s.substring(0, 1).equals("a")) {\n        return 1 + rest;\n    }\n    return rest;\n}\n\nSystem.out.println(countA("banana"));', ask: 'returns', call: 'countA("banana")' },
+  { code: 'static int countA(String s) {\n    if (s.length() == 0) {\n        return 0;\n    }\n    int rest = countA(s.substring(1));\n    if (s.substring(0, 1).equals("a")) {\n        return 1 + rest;\n    }\n    return rest;\n}\n\nSystem.out.println(countA("abc"));', ask: 'copies', name: 's' },
+  { code: 'static int down2(int n) {\n    if (n == 0) {\n        return 0;\n    }\n    return down2(n - 2);\n}\n\nSystem.out.println(down2(5));', ask: 'mc', q: 'What happens?', choices: [{ text: 'It prints 0.', match: '0\n' }, { text: 'It prints -1.', match: '-1\n' }, { text: 'It never reaches the base case: Java throws a StackOverflowError.', match: 'limit' }, { text: 'It does not compile.', match: 'compile-error' }] },
+  { code: 'static int digits(int n) {\n    if (n < 10) {\n        return 1;\n    }\n    return 1 + digits(n / 10);\n}\n\nSystem.out.println(digits(40521));', ask: 'returns', call: 'digits(40521)' },
+  { code: FIND + 'System.out.println(find(a, 2, 0, 6));', ask: 'calls' },
 ];
 const PRESETS = [
-  { label: 'Count to 5', code: PREDICT[0].code },
-  { label: 'Grow by ×5', code: PREDICT[1].code },
-  { label: 'Step by 3', code: PREDICT[2].code },
-  { label: 'Last value vs final i', code: PREDICT[4].code },
-  { label: 'Zero iterations', code: PREDICT[5].code },
-  { label: 'Infinite loop', code: PREDICT[9].code },
-  { label: 'String scan', code: PREDICT[10].code },
-  { label: 'Rectangle (nested)', code: PREDICT[11].code },
-  { label: 'Triangle (nested)', code: PREDICT[12].code },
-  { label: 'Array total', code: 'int[] scores = {8, 5, 9, 6};\nint total = 0;\nfor (int s : scores) {\n    total += s;\n}\nSystem.out.println(total);' },
+  { label: 'Factorial', code: FACT },
+  { label: 'Print on the way down', code: PREDICT[3].code },
+  { label: 'Print on the way back', code: PREDICT[4].code },
+  { label: 'Both', code: PREDICT[5].code },
+  { label: 'Sum with a local variable', code: PREDICT[6].code },
+  { label: 'Reverse a String', code: PREDICT[7].code },
+  { label: 'Fibonacci (a tree of calls)', code: FIB + 'System.out.println(fib(4));' },
+  { label: 'Digit sum', code: PREDICT[9].code },
+  { label: 'Binary search', code: PREDICT[11].code },
+  { label: 'Array total', code: PREDICT[12].code },
+  { label: 'Power', code: TRANSFER[0].code },
+  { label: 'No base case', code: PREDICT[10].code },
 ];
 // DATA END
 
 TUI.injectCSS();
 const { el, $ } = TUI;
 
-/* ---------- Loop runner ---------- */
-class LoopRunner {
+/* ---------- Recursion runner ---------- */
+class RecursionRunner {
   constructor(host) {
     this.host = host;
     host.innerHTML = `<div class="tui-err hidden"></div><div class="rbody"><div class="runner-grid">
       <div><ol class="tui-code" aria-label="Program"></ol><div class="stepbar"></div>
         <div class="tui-note" aria-live="polite"><div class="phase"></div><p class="text"></p></div>
+        <div class="cardbox"></div>
         <div class="colhead">Console</div><div class="tui-console" role="log" aria-label="Console output"></div></div>
-      <div><div class="colhead tracehead">Trace table</div><div class="tracesel"></div><div class="tracewrap"><table class="trace" aria-label="Trace table"></table></div>
-        <div class="gridbox hidden"><div class="colhead">Nested loops: one cell per inner-body run</div><div class="grid2" aria-label="Nested loop grid"></div><p class="gnote"></p></div>
-        <div class="colhead">Variables now</div><table class="tui-vars"></table></div>
+      <div><div class="colhead">Calls so far</div><div class="rtree" aria-label="Tree of calls"></div>
+        <p class="rkey">Blue outline: on the stack. Highlighted: running now. A value after the arrow: what that call returned.</p>
+        <div class="memory" aria-label="Call stack and objects"></div></div>
     </div></div>`;
     this.err = host.querySelector('.tui-err'); this.body = host.querySelector('.rbody');
     this.step = TUI.stepper(host.querySelector('.stepbar'), i => this.render(i));
     this.step.keys(this.body);
-    this.sel = 0;
+    window.addEventListener('resize', () => { if (this.run && !this.body.classList.contains('hidden')) this.render(this.step.i); });
   }
-  set(src, { showAll = false } = {}) {
+  set(src) {
     this.src = src; this.run = MJ.run(src);
     const bad = this.run.compileError || this.run.unsupported;
     this.err.classList.toggle('hidden', !bad); this.body.classList.toggle('hidden', !!bad);
     if (bad) { TUI.errorBox(this.err, this.run); return; }
-    this.loops = MJ.loopsOf(this.run.prog);
-    this.sel = 0;
-    const box = this.host.querySelector('.tracesel'); box.textContent = '';
-    if (this.loops.length > 1) {
-      const s = el('select'); s.setAttribute('aria-label', 'Which loop the trace table follows');
-      this.loops.forEach((L, i) => s.append(new Option(`Loop on line ${L.line}${L.parent !== null ? ' (inner)' : ''}`, i)));
-      s.addEventListener('change', () => { this.sel = +s.value; this.render(this.step.i); });
-      box.append(s);
-    }
-    this.step.set(this.run.steps.length, showAll ? this.run.steps.length : 0);
+    this.nodes = callTree(this.run);
+    this.step.set(this.run.steps.length, 0);
   }
   render(i) {
-    const run = this.run, steps = run.steps, s = i > 0 ? steps[i - 1] : null;
+    const run = this.run, steps = run.steps, s = i > 0 ? steps[i - 1] : null, k = i - 1;
     const done = new Set(steps.slice(0, Math.max(0, i - 1)).map(x => x.line));
-    TUI.renderCode(this.host.querySelector('.tui-code'), this.src, s ? s.line : 0, done, s && (s.kind === 'error' || s.kind === 'limit') ? 'err' : 'on');
+    const waiting = {};
+    if (s) s.frames.slice(1).forEach(f => { waiting[f.line] = 'called'; });
+    const bad = s && (s.kind === 'error' || s.kind === 'limit');
+    TUI.renderCode(this.host.querySelector('.tui-code'), this.src, s ? s.line : 0, done, bad ? 'err' : 'on', waiting);
     const note = this.host.querySelector('.tui-note');
-    note.classList.toggle('err', !!(s && (s.kind === 'error' || s.kind === 'limit')));
-    note.querySelector('.phase').textContent = s ? this.phaseLabel(s) : 'Ready';
-    note.querySelector('.text').textContent = s ? s.note : 'Nothing has run yet. Press Next, or use the arrow keys.';
+    note.classList.toggle('err', !!bad);
+    note.querySelector('.phase').textContent = s ? this.phaseLabel(s, k) : 'Ready';
+    note.querySelector('.text').textContent = s ? s.note : 'Nothing has run yet. Press Next, or use the arrow keys. A line marked in yellow is waiting for a call to return.';
     if (i === steps.length && run.truncated) note.querySelector('.text').textContent += ` (Showing the first ${steps.length} steps.)`;
     this.host.querySelector('.tui-console').textContent = s ? s.out : '';
-    TUI.renderVars(this.host.querySelector('.tui-vars'), s ? s.frames[s.frames.length - 1] : null, s ? s.heap : {}, s ? s.changed || [] : []);
-    this.renderTrace(i);
-    this.renderGrid(i);
+    this.renderCard(s, k);
+    this.renderTree(k);
+    const prev = i > 1 ? steps[i - 2] : null;
+    const ghost = s && s.kind === 'return' && prev && prev.frames.length > s.frames.length
+      ? { frame: prev.frames[prev.frames.length - 1], label: s.returned === undefined ? 'finished · removed' : `returned ${s.returned} · removed` } : null;
+    TUI.renderMemory(this.host.querySelector('.memory'), s, { ghost, entering: s && s.kind === 'call' });
   }
-  phaseLabel(s) {
+  phaseLabel(s, k) {
     if (s.kind === 'error') return 'Exception';
     if (s.kind === 'limit') return 'Stopped';
-    if (s.phase === 'init') return 'Initialize (runs once)';
-    if (s.phase === 'update') return 'Update';
-    if (s.kind === 'cond' && s.loop !== undefined) return s.value ? 'Check the condition: true' : 'Check the condition: false';
-    if (s.kind === 'foreach') return 'Next element';
-    if (s.kind === 'cond') return 'if condition';
-    const inLoop = this.loops.find(L => s.line > L.line && s.line <= lineOfPos(this.src, L.endPos));
-    return inLoop ? 'Loop body' : 'Statement';
+    const node = activeNode(this.nodes, k);
+    if (s.kind === 'call') return s.frames.length > 2 ? `Going down: new frame for ${node.label}` : `First call: ${node.label}`;
+    if (s.kind === 'return') return s.frames.length === 1 ? 'Back in main' : 'Coming back up';
+    if (!node) return 'main';
+    if (node.base && s.kind === 'returning') return `Base case: ${node.label}`;
+    return node.children.some(c => this.nodes[c].end !== null && this.nodes[c].end < k) ? `Coming back up: finishing ${node.label}` : `Going down: in ${node.label}`;
   }
-  renderTrace(i) {
-    const L = this.loops[this.sel], tbl = this.host.querySelector('table.trace');
-    tbl.textContent = '';
-    if (!L) { tbl.append(el('caption', 'small', 'This program has no loop.')); return; }
-    const rows = this.run.steps.map((s, k) => [s, k]).filter(([s]) => s.loop === L.id && (s.kind === 'cond' || s.kind === 'foreach'));
-    const names = [];
-    this.run.steps.forEach(s => (s.frames[s.frames.length - 1].vars || []).forEach(v => { if (!names.includes(v.name) && !v.type.startsWith('ArrayList') && !v.type.endsWith('[]')) names.push(v.name); }));
-    const head = el('tr'); ['Check', ...names, L.k === 'foreach' ? 'Element?' : 'Condition'].forEach(h => head.append(el('th', null, h)));
-    const thead = el('thead'); thead.append(head); tbl.append(thead);
-    const tb = el('tbody');
-    const shown = rows.filter(([, k]) => k < i);
-    let missing = false;
-    shown.forEach(([s, k], n) => {
-      const tr = el('tr', k === i - 1 ? 'now' : '');
-      tr.append(el('td', null, String(n + 1)));
-      const vars = s.frames[s.frames.length - 1].vars;
-      names.forEach(nm => {
-        const v = vars.find(x => x.name === nm);
-        if (v) tr.append(el('td', null, TUI.valueText(v.v, v.type, s.heap)));
-        else { const td = el('td', 'na', '—'); td.title = `${nm} does not exist at this check`; tr.append(td); missing = true; }
-      });
-      const val = s.kind === 'foreach' ? 'yes' : s.done ? 'no more' : String(s.value);
-      tr.append(el('td', s.value === false || s.done ? 'f' : 't', val));
-      tb.append(tr);
-    });
-    if (!shown.length) { const tr = el('tr'); const td = el('td', null, 'The loop has not been reached yet.'); td.colSpan = names.length + 2; tr.append(td); tb.append(tr); }
-    tbl.append(tb);
-    if (missing) tbl.prepend(el('caption', 'small key', '— means the variable does not exist at that check.'));
-  }
-  renderGrid(i) {
-    const box = this.host.querySelector('.gridbox');
-    const inner = this.loops.find(L => L.parent !== null), outer = inner && this.loops.find(L => L.id === inner.parent);
-    box.classList.toggle('hidden', !inner);
-    if (!inner) return;
-    const cells = []; let row = -1, total = 0;
-    this.run.steps.forEach((s, k) => {
-      if (s.loop === outer.id && ((s.kind === 'cond' && s.value) || s.kind === 'foreach')) row++;
-      if (s.loop === inner.id && ((s.kind === 'cond' && s.value) || s.kind === 'foreach')) {
-        const col = cells.filter(c => c.row === row).length;
-        const v = inner.var ? s.frames[s.frames.length - 1].vars.find(x => x.name === inner.var) : null;
-        const ov = outer.var ? s.frames[s.frames.length - 1].vars.find(x => x.name === outer.var) : null;
-        cells.push({ row, col, k, label: v ? TUI.valueText(v.v, v.type) : String(col + 1), rowLabel: ov ? `${outer.var} = ${TUI.valueText(ov.v, ov.type)}` : `outer ${row + 1}` });
-        total++;
-      }
-    });
-    const rows = Math.max(0, ...cells.map(c => c.row + 1)), cols = Math.max(1, ...cells.map(c => c.col + 1));
-    const g = this.host.querySelector('.grid2'); g.textContent = '';
-    g.style.gridTemplateColumns = `auto repeat(${cols}, minmax(30px, 1fr))`;
-    let shown = 0, cur = null;
-    for (let r = 0; r < rows; r++) {
-      const rc = cells.filter(c => c.row === r);
-      g.append(el('div', 'grow', rc.length ? rc[0].rowLabel : `outer ${r + 1}`));
-      for (let c = 0; c < cols; c++) {
-        const cell = rc.find(x => x.col === c);
-        const d = el('div', 'gcell');
-        if (cell && cell.k < i) { d.classList.add('on'); d.textContent = inner.var ? `${inner.var}=${cell.label}` : '✓'; shown++; if (cell.k === Math.max(...cells.filter(x => x.k < i).map(x => x.k))) cur = d; }
-        else if (!cell) d.style.visibility = 'hidden';
-        g.append(d);
-      }
+  renderCard(s, k) {
+    const box = this.host.querySelector('.cardbox'); box.textContent = '';
+    if (!s) return;
+    const node = activeNode(this.nodes, k);
+    if (s.kind === 'returning' && node && node.base) {
+      const waitingCalls = s.frames.length - 2;
+      box.append(el('div', 'callout', `Base case: ${node.label} returns ${s.value === undefined ? '' : s.value + ' '}without making another call. This is the turning point, not the end: ${waitingCalls === 0 ? 'main is' : `${waitingCalls} call${waitingCalls === 1 ? ' is' : 's are'}`} still waiting, and they finish one at a time, newest first.`));
+      return;
     }
-    if (cur) cur.classList.add('cur');
-    this.host.querySelector('.gnote').textContent = `The inner loop's body has run ${shown} time${shown === 1 ? '' : 's'} so far, out of ${total} in total. Each row is one run of the outer loop.`;
+    if (s.kind === 'return' && s.frames.length > 1) {
+      const back = activeNode(this.nodes, k), top = s.frames[s.frames.length - 1];
+      // Its own parameter values (not references) show that each call kept its own copies.
+      const own = top.vars.filter(v => top.params.includes(v.name) && !(v.v && typeof v.v === 'object')).map(v => `${v.name} = ${TUI.valueText(v.v, v.type, s.heap)}`);
+      const mine = own.length === 1 ? `, and its own ${own[0].replace(' = ', ' is still ')}` : own.length ? `, with its own ${own.join(', ')}` : '';
+      box.append(el('div', 'callout up', `${back.label} was waiting on line ${s.line}. It resumes there with ${s.returned === undefined ? 'the call finished' : `the value ${s.returned}`}${mine}.`));
+    }
+  }
+  renderTree(k) {
+    const host = this.host.querySelector('.rtree'); host.textContent = '';
+    const cur = k >= 0 ? activeNode(this.nodes, k) : null;
+    const shown = this.nodes.filter(n => n.start <= k);
+    if (!shown.length) { host.append(el('p', 'small', 'No calls yet.')); return; }
+    // A very deep chain keeps its first and last six levels, with a count of the levels between.
+    const maxD = Math.max(...shown.map(n => n.depth)), skip = maxD > 14 ? [6, maxD - 6] : null;
+    const within = (x, n) => { for (let p = x; p; p = p.parent === null ? null : this.nodes[p.parent]) if (p === n) return true; return false; };
+    const draw = n => {
+      const li = el('li'), box = el('span', 'rnode');
+      const open = n.end === null || n.end > k, returned = !open;
+      box.classList.add(open ? 'open' : 'done'); if (n === cur) box.classList.add('cur');
+      box.append(n.label);
+      if (returned) { if (n.value !== undefined) { box.append(' → '); box.append(el('span', 'rv', n.value)); } else box.append(' ✓'); }
+      if (n.base && k >= n.end - 1) box.append(el('span', 'tag base', 'base case'));
+      if (open && n !== cur) box.append(el('span', 'tag wait', 'waiting'));
+      li.append(box);
+      let kids = n.children.map(c => this.nodes[c]).filter(c => c.start <= k);
+      const ul = el('ul');
+      if (skip && n.depth === skip[0] - 1 && kids.length) {
+        ul.append(el('li', 'small', `… ${skip[1] - skip[0]} more levels of calls …`));
+        kids = shown.filter(x => x.depth === skip[1] && within(x, n));
+      }
+      kids.forEach(c => ul.append(draw(c)));
+      if (ul.childNodes.length) li.append(ul);
+      return li;
+    };
+    const ul = el('ul');
+    shown.filter(n => n.parent === null).forEach(n => ul.append(draw(n)));
+    host.append(ul);
   }
 }
 
@@ -2347,51 +2359,55 @@ const select = TUI.tabs(['predict', 'explore', 'transfer']);
 function expected(it) {
   const run = MJ.run(it.code);
   if (it.ask === 'output') return run.out;
-  if (it.ask === 'count') return bodyCount(run);
-  if (it.ask === 'next') return phaseOf(run, it.code, it.after);
+  if (it.ask === 'returns') return firstReturn(run);
+  if (it.ask === 'calls') return totalCalls(run);
+  if (it.ask === 'depth') return maxDepth(run);
+  if (it.ask === 'copies') return maxCopies(run, it.name);
+  if (it.after === 'base') return it.choices.findIndex(c => c.key === afterBase(run));
   return it.choices.findIndex(c => c.match === MJ.label(run));
 }
-const askText = it => it.ask === 'output' ? 'What exactly does this print?' : it.ask === 'count' ? 'How many times does the loop body run?' : it.ask === 'next' ? `${it.state} What happens next?` : 'What happens when this runs?';
-const predictRunner = new LoopRunner($('p-view'));
-TUI.questions('p', PREDICT, {
-  submitLabel: 'Check my prediction', reasonPrompt: 'Why? Make a quick trace table: the values at each check.',
+const kindOf = it => it.ask === 'returns' ? 'text' : ['calls', 'depth', 'copies'].includes(it.ask) ? 'int' : undefined;
+const withKind = items => items.map(it => ({ ...it, kind: kindOf(it) }));
+const askText = it => ({
+  output: 'What exactly does this print?',
+  returns: `What does ${it.call} return?`,
+  calls: 'How many calls to the recursive method happen in total, counting the first one from main?',
+  depth: 'At the deepest point, how many frames are on the call stack, counting main?',
+  copies: `At the deepest point, how many separate variables named ${it.name} exist at the same time?`,
+})[it.ask] || it.q;
+const predictRunner = new RecursionRunner($('p-view'));
+TUI.questions('p', withKind(PREDICT), {
+  submitLabel: 'Check my prediction', reasonPrompt: 'Why? Write the calls in order, each with its own parameter values.',
   askText, expected,
-  onReveal(it) { $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests; predictRunner.set(it.code); if (it.ask === 'next') predictRunner.step.go(it.after); },
+  onReveal(it) { $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests; predictRunner.set(it.code); },
 });
-TUI.questions('t', TRANSFER, {
-  submitLabel: 'Check', reasonPrompt: 'Explain it: list the loop variable at each condition check.',
+TUI.questions('t', withKind(TRANSFER), {
+  submitLabel: 'Check', reasonPrompt: 'Explain it: list each call and what it returns.',
   askText, expected,
   onReveal(it) {
     const run = MJ.run(it.code), m = $('t-model'); m.textContent = '';
     if (run.compileError) m.append(el('b', null, 'Model working: '), `It does not compile. ${run.compileError}`);
+    else if (run.limit) m.append(el('b', null, 'Model working: '), `The calls never reach the base case: ${callTree(run).slice(0, 4).map(n => n.label).join(', ')}, … Each call makes another, until Java runs out of stack space.`);
     else {
-      const checks = run.steps.filter(s => s.kind === 'cond' && s.loop !== undefined && MJ.loopsOf(run.prog)[0].id === s.loop);
-      m.append(el('b', null, 'Model working: '), `The first loop's condition is checked ${checks.length} time${checks.length === 1 ? '' : 's'}: ${checks.map(c => c.value).join(', ')}. Its body runs ${bodyCount(run)} time${bodyCount(run) === 1 ? '' : 's'}.` + (run.out ? ` Output: ${JSON.stringify(run.out)}.` : ''));
+      const nodes = callTree(run);
+      const list = nodes.slice(0, 12).map(n => `${'  '.repeat(run.steps[n.start].frames.length - 2)}${n.label}${n.value !== undefined ? ' returns ' + n.value : ''}${n.base ? ' (base case)' : ''}`);
+      m.append(el('b', null, 'Model working:'));
+      m.append(el('pre', 'small', list.join('\n') + (nodes.length > 12 ? `\n… ${nodes.length - 12} more calls` : '')));
+      m.append(el('p', null, `${nodes.length} call${nodes.length === 1 ? '' : 's'} in total.` + (run.out ? ` Output: ${JSON.stringify(run.out)}.` : '')));
     }
-    m.append(el('p', 'small', 'Compare with your trace table. Did you include the final false check?'));
+    m.append(el('p', 'small', 'Compare with your drawing. Did each call keep its own parameter values?'));
   },
 });
 
 /* ---------- Explore ---------- */
-const exploreRunner = new LoopRunner($('e-view'));
+const exploreRunner = new RecursionRunner($('e-view'));
 const ecode = $('e-code');
-function exploreUpdate() {
-  exploreRunner.set(ecode.value);
-  let w = null; try { w = MJ.forToWhile(ecode.value); } catch (e) { w = null; }
-  $('e-convert').disabled = !w; $('e-convnote').textContent = '';
-}
-$('e-convert').addEventListener('click', () => {
-  const w = MJ.forToWhile(ecode.value);
-  if (!w) return;
-  ecode.value = w; exploreUpdate();
-  $('e-convnote').textContent = 'Rewritten as a while loop inside its own block, so the loop variable still exists only for the loop. The steps and output are the same.';
-});
-PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => { ecode.value = p.code; exploreUpdate(); }); $('e-presets').append(c); });
+PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => { ecode.value = p.code; exploreRunner.set(ecode.value); }); $('e-presets').append(c); });
 ecode.value = PRESETS[0].code;
-ecode.addEventListener('input', exploreUpdate);
-exploreUpdate();
+ecode.addEventListener('input', () => exploreRunner.set(ecode.value));
+exploreRunner.set(ecode.value);
 const params = new URLSearchParams(location.search);
-if (params.has('code')) { ecode.value = params.get('code'); exploreUpdate(); select('explore'); }
+if (params.has('code')) { ecode.value = params.get('code'); exploreRunner.set(ecode.value); select('explore'); }
 </script>
 </body>
 </html>
