@@ -28,7 +28,7 @@ public class LoopsCheck {
             for (int i = 0; i < 5; i++) {
                 count++;
             }
-            System.out.println(count)
+            System.out.println(count);
         }
     }
 
@@ -39,7 +39,7 @@ public class LoopsCheck {
             while (x < 100) {
                 x *= 5;
             }
-            System.out.println(x)
+            System.out.println(x);
         }
     }
 
@@ -61,7 +61,7 @@ public class LoopsCheck {
                 last = i;
                 i++;
             }
-            System.out.println(last + " " + i)
+            System.out.println(last + " " + i);
         }
     }
 
@@ -72,7 +72,7 @@ public class LoopsCheck {
             while (n < 5) {
                 n++;
             }
-            System.out.println(n)
+            System.out.println(n);
         }
     }
 
@@ -83,7 +83,7 @@ public class LoopsCheck {
             for (int k = 1; k <= 5; k++) {
                 sum += k * k;
             }
-            System.out.println(sum)
+            System.out.println(sum);
         }
     }
 
@@ -94,7 +94,7 @@ public class LoopsCheck {
             for (int j = 10; j > 0; j -= 3) {
                 count++;
             }
-            System.out.println(count)
+            System.out.println(count);
         }
     }
 
@@ -105,7 +105,7 @@ public class LoopsCheck {
             while (i > 0) {
                 i -= 2;
             }
-            System.out.println(i)
+            System.out.println(i);
         }
     }
 
@@ -119,7 +119,7 @@ public class LoopsCheck {
                     count++;
                 }
             }
-            System.out.println(count)
+            System.out.println(count);
         }
     }
 
@@ -132,7 +132,7 @@ public class LoopsCheck {
                     c++;
                 }
             }
-            System.out.println(c)
+            System.out.println(c);
         }
     }
 
@@ -155,7 +155,7 @@ public class LoopsCheck {
             for (int i = 3; i < 12; i += 2) {
                 count++;
             }
-            System.out.println(count)
+            System.out.println(count);
         }
     }
 
@@ -166,7 +166,7 @@ public class LoopsCheck {
             while (x <= 50) {
                 x = x * 2 + 1;
             }
-            System.out.println(x)
+            System.out.println(x);
         }
     }
 
@@ -187,7 +187,7 @@ public class LoopsCheck {
             for (int i = w.length() - 1; i >= 0; i--) {
                 r += w.substring(i, i + 1);
             }
-            System.out.println(r)
+            System.out.println(r);
         }
     }
 
@@ -200,7 +200,7 @@ public class LoopsCheck {
                     c++;
                 }
             }
-            System.out.println(c)
+            System.out.println(c);
         }
     }
 
@@ -211,7 +211,7 @@ public class LoopsCheck {
             while (x > 1) {
                 x /= 3;
             }
-            System.out.println(x)
+            System.out.println(x);
         }
     }
 
@@ -224,7 +224,7 @@ public class LoopsCheck {
                     total++;
                 }
             }
-            System.out.println(total)
+            System.out.println(total);
         }
     }
 
@@ -236,7 +236,7 @@ public class LoopsCheck {
             for (int s : scores) {
                 total += s;
             }
-            System.out.println(total)
+            System.out.println(total);
         }
     }
 
@@ -251,7 +251,7 @@ public class LoopsCheck {
                     i++;
                 }
             }
-            System.out.println(sum)
+            System.out.println(sum);
         }
     }
 
@@ -260,7 +260,7 @@ public class LoopsCheck {
         static void run() {
             int n = 0;
             for (int i = 0; i < 5; i++);
-            System.out.println(n)
+            System.out.println(n);
         }
     }
 
@@ -280,12 +280,12 @@ public class LoopsCheck {
         
         static void run() {
             int x = 7;
-            x += 2.5
-            x -= 1
-            x *= 3
-            x /= 4
-            x %= 4
-            System.out.println(x)
+            x += 2.5;
+            x -= 1;
+            x *= 3;
+            x /= 4;
+            x %= 4;
+            System.out.println(x);
         }
     }
 
@@ -296,7 +296,7 @@ public class LoopsCheck {
             for (int i = 0; i < 3; i++) {
                 d = d / 2;
             }
-            System.out.println(d)
+            System.out.println(d);
         }
     }
 
@@ -320,7 +320,7 @@ public class LoopsCheck {
             for (int v : a) {
                 v = v * 10;
             }
-            System.out.println(a[0] + a[1] + a[2])
+            System.out.println(a[0] + a[1] + a[2]);
         }
     }
 
@@ -331,7 +331,7 @@ public class LoopsCheck {
             while (i < 10 && i * i < 20) {
                 i++;
             }
-            System.out.println(i)
+            System.out.println(i);
         }
     }
 
@@ -346,7 +346,7 @@ public class LoopsCheck {
                     done = true;
                 }
             }
-            System.out.println(n)
+            System.out.println(n);
         }
     }
 
@@ -354,7 +354,7 @@ public class LoopsCheck {
         
         static void run() {
             int[] a = {3, 1, 2};
-            System.out.println(a[3])
+            System.out.println(a[3]);
         }
     }
 

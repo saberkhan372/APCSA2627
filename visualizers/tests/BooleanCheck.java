@@ -26,7 +26,7 @@ public class BooleanCheck {
         static void run() {
             int x = 5;
             int y = 4;
-            System.out.println(x > 3 && y < 2)
+            System.out.println(x > 3 && y < 2);
         }
     }
 
@@ -35,7 +35,7 @@ public class BooleanCheck {
         static void run() {
             int x = 0;
             int y = 10;
-            System.out.println(x != 0 && y / x > 1)
+            System.out.println(x != 0 && y / x > 1);
         }
     }
 
@@ -44,7 +44,7 @@ public class BooleanCheck {
         static void run() {
             int x = 0;
             int y = 10;
-            System.out.println(y / x > 1 && x != 0)
+            System.out.println(y / x > 1 && x != 0);
         }
     }
 
@@ -52,7 +52,7 @@ public class BooleanCheck {
         
         static void run() {
             String s = null;
-            System.out.println(s != null && s.length() > 3)
+            System.out.println(s != null && s.length() > 3);
         }
     }
 
@@ -60,7 +60,7 @@ public class BooleanCheck {
         
         static void run() {
             String s = null;
-            System.out.println(s.length() > 3 && s != null)
+            System.out.println(s.length() > 3 && s != null);
         }
     }
 
@@ -68,7 +68,7 @@ public class BooleanCheck {
         
         static void run() {
             String s = null;
-            System.out.println(s == null || s.length() == 0)
+            System.out.println(s == null || s.length() == 0);
         }
     }
 
@@ -76,7 +76,7 @@ public class BooleanCheck {
         
         static void run() {
             int x = 20;
-            System.out.println(x >= 10 && x <= 20)
+            System.out.println(x >= 10 && x <= 20);
         }
     }
 
@@ -85,7 +85,7 @@ public class BooleanCheck {
         static void run() {
             boolean a = false;
             boolean b = true;
-            System.out.println(!(a || b))
+            System.out.println(!(a || b));
         }
     }
 
@@ -94,7 +94,7 @@ public class BooleanCheck {
         static void run() {
             int x = 8;
             int y = 8;
-            System.out.println(x > 5 || y / 0 > 1)
+            System.out.println(x > 5 || y / 0 > 1);
         }
     }
 
@@ -103,7 +103,7 @@ public class BooleanCheck {
         static void run() {
             int x = 3;
             int y = 8;
-            System.out.println(x > 5 || y / 0 > 1)
+            System.out.println(x > 5 || y / 0 > 1);
         }
     }
 
@@ -111,7 +111,7 @@ public class BooleanCheck {
         
         static void run() {
             String name = "";
-            System.out.println(name != null && name.length() > 0)
+            System.out.println(name != null && name.length() > 0);
         }
     }
 
@@ -119,7 +119,7 @@ public class BooleanCheck {
         
         static void run() {
             int n = 7;
-            System.out.println(n % 2 == 0 || n > 5 && n < 10)
+            System.out.println(n % 2 == 0 || n > 5 && n < 10);
         }
     }
 
@@ -128,7 +128,7 @@ public class BooleanCheck {
         static void run() {
             boolean a = true;
             boolean b = false;
-            System.out.println(!a || !b)
+            System.out.println(!a || !b);
         }
     }
 
@@ -137,7 +137,7 @@ public class BooleanCheck {
         static void run() {
             boolean a = true;
             boolean b = false;
-            System.out.println(!(a && b))
+            System.out.println(!(a && b));
         }
     }
 
@@ -146,7 +146,7 @@ public class BooleanCheck {
         static void run() {
             int x = 6;
             int y = 3;
-            System.out.println(!(x > 5 && y == 3))
+            System.out.println(!(x > 5 && y == 3));
         }
     }
 
@@ -155,7 +155,7 @@ public class BooleanCheck {
         static void run() {
             int x = 6;
             int y = 3;
-            System.out.println(x < 5 || y != 3)
+            System.out.println(x < 5 || y != 3);
         }
     }
 
@@ -170,7 +170,7 @@ public class BooleanCheck {
                     }
                 }
             }
-            System.out.println(diff)
+            System.out.println(diff);
         }
     }
 
@@ -185,7 +185,7 @@ public class BooleanCheck {
                     }
                 }
             }
-            System.out.println(diff)
+            System.out.println(diff);
         }
     }
 
@@ -200,7 +200,7 @@ public class BooleanCheck {
                     }
                 }
             }
-            System.out.println(diff)
+            System.out.println(diff);
         }
     }
 
@@ -215,7 +215,7 @@ public class BooleanCheck {
                     }
                 }
             }
-            System.out.println(diff)
+            System.out.println(diff);
         }
     }
 
@@ -230,7 +230,7 @@ public class BooleanCheck {
                     }
                 }
             }
-            System.out.println(diff)
+            System.out.println(diff);
         }
     }
 
@@ -245,7 +245,7 @@ public class BooleanCheck {
                     }
                 }
             }
-            System.out.println(diff)
+            System.out.println(diff);
         }
     }
 
@@ -260,7 +260,7 @@ public class BooleanCheck {
                     }
                 }
             }
-            System.out.println(diff)
+            System.out.println(diff);
         }
     }
 
@@ -275,7 +275,7 @@ public class BooleanCheck {
                     }
                 }
             }
-            System.out.println(diff)
+            System.out.println(diff);
         }
     }
 
@@ -289,7 +289,7 @@ public class BooleanCheck {
                     System.out.println("x");
             else
                 System.out.println("y");
-            System.out.println("done")
+            System.out.println("done");
         }
     }
 
@@ -307,7 +307,7 @@ public class BooleanCheck {
             if (score >= 70) {
                 grade = "C";
             }
-            System.out.println(grade)
+            System.out.println(grade);
         }
     }
 
@@ -323,7 +323,7 @@ public class BooleanCheck {
             } else if (score >= 70) {
                 grade = "C";
             }
-            System.out.println(grade)
+            System.out.println(grade);
         }
     }
 
@@ -351,7 +351,7 @@ public class BooleanCheck {
                     System.out.println("both");
                 else
                     System.out.println("only a");
-            System.out.println("end")
+            System.out.println("end");
         }
     }
 
@@ -365,7 +365,7 @@ public class BooleanCheck {
             if (n % 5 == 0) {
                 System.out.print("Buzz");
             }
-            System.out.println()
+            System.out.println();
         }
     }
 
@@ -383,7 +383,7 @@ public class BooleanCheck {
             if (f("a") && t("b")) {
                 System.out.print("X");
             }
-            System.out.println()
+            System.out.println();
         }
     }
 
@@ -401,7 +401,7 @@ public class BooleanCheck {
             if (t("a") || t("b")) {
                 System.out.print("X");
             }
-            System.out.println()
+            System.out.println();
         }
     }
 
@@ -419,7 +419,7 @@ public class BooleanCheck {
             if (f("a") || t("b") && f("c")) {
                 System.out.print("X");
             }
-            System.out.println()
+            System.out.println();
         }
     }
 
@@ -437,7 +437,7 @@ public class BooleanCheck {
             if (t("a") && t("b") || t("c")) {
                 System.out.print("X");
             }
-            System.out.println()
+            System.out.println();
         }
     }
 
@@ -455,7 +455,7 @@ public class BooleanCheck {
             if (!f("a") && t("b")) {
                 System.out.print("X");
             }
-            System.out.println()
+            System.out.println();
         }
     }
 
@@ -471,7 +471,7 @@ public class BooleanCheck {
         }
         static void run() {
             boolean r = f("a") && t("b") || f("c") && t("d");
-            System.out.println(r)
+            System.out.println(r);
         }
     }
 

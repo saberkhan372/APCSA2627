@@ -19,7 +19,9 @@ function split(MJ, code) {
   let prog;
   try { prog = MJ.parse(code); } catch (e) { return null; }
   const methods = prog.methods.map(m => code.slice(m.pos, m.end)).join('\n\n');
-  const main = prog.main.map(s => code.slice(s.pos, s.end)).join('\n');
+  // A simple statement's parsed range stops before its semicolon, so include the ';' that ends it.
+  const through = end => { let j = end; while (j < code.length && /\s/.test(code[j])) j++; return code[j] === ';' ? j + 1 : end; };
+  const main = prog.main.map(s => code.slice(s.pos, through(s.end))).join('\n');
   return { methods, main };
 }
 export function writeCheck(casesUrl, className, outUrl) {
@@ -33,6 +35,9 @@ export function writeCheck(casesUrl, className, outUrl) {
     }
     const parts = split(MJ, code);
     if (!parts) throw new Error('cannot split case ' + i);
+    // The pieces copied into Java must still be the same program.
+    const again = MJ.label(MJ.run(parts.methods + '\n' + parts.main));
+    if (again !== MJ.label(MJ.run(code))) throw new Error(`case ${i} changes when split into methods and main (${again}): ${code}`);
     helpers.push(`    static class C${i} {\n${indent(parts.methods, 8)}\n        static void run() {\n${indent(parts.main, 12)}\n        }\n    }`);
     runs.push(`        check(${lit(code)}, ${lit(want)}, C${i}::run);`);
   });
