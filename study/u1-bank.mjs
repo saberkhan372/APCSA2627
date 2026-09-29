@@ -3,7 +3,7 @@
 // visualizer engines. Every executable item carries Java specs that StudyCheck.java runs
 // in real Java; conceptual items are marked for teacher review instead.
 import { writeFileSync } from 'node:fs';
-import { expr, str, cmp } from './lib/engines.mjs';
+import { expr, str, cmp, mem, out, range as rangeEngine } from './lib/engines.mjs';
 
 const items = [];
 const ids = new Set();
@@ -395,5 +395,20 @@ tf('u1-obj-immutable-tf', S6, 'references', 'new', 'Calling w.substring(1) chang
 output('u1-obj-store', S6, 'references', 'new', 'String w = "hello";\nw = w.substring(1);\nSystem.out.println(w);', 'ello\n',
   'This time the result is stored back in w, so w now refers to "ello". The original "hello" is unchanged.');
 
+// Link items to the visualizer that can show them step by step, but only when that tool can run the code.
+for (const it of items) {
+  if (it.link) continue;
+  const rangeSpec = it.java.find(s => s.k === 'range' && (it.format !== 'mc' || it.answer.choices.find(c => c.correct && c.text.replace(/Math\.random\(\)/g, 'r') === s.expr) || it.id === 'u1-met-die'));
+  if (rangeSpec) {
+    const f = rangeSpec.expr.replace(/\br\b/g, 'Math.random()');
+    if (rangeEngine.compileFormula(f).type === 'int') { it.link = `randomrange.html?f=${enc(f)}`; continue; }
+  }
+  if (!it.code || it.format === 'value' || it.format === 'call') continue;
+  const code = it.code;
+  const m = mem.memLabel(mem.runMemory(code));
+  if ((it.section === 'objects' || it.section === 'strings') && m !== 'unsupported' && m !== 'compile-error') { it.link = `memory.html?code=${enc(code)}`; continue; }
+  const o = out.runProgram(code);
+  if (o.steps && !o.crashed && /System\.out/.test(code)) it.link = `output.html?code=${enc(code)}`;
+}
 writeFileSync(new URL('../content/study/u1-bank.json', import.meta.url), JSON.stringify(items, null, 1) + '\n');
 console.log(`Wrote ${items.length} items`);

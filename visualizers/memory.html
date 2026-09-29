@@ -1,0 +1,1030 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memory Diagram</title>
+<style>
+/* Palette and chrome match the course site (web/site.css). */
+:root {
+  --bg: #FAFBFA; --panel: #FFFFFF; --ink: #16211F; --muted: #46524F; --faint: #6F7C79;
+  --line: #D8E0DD; --soft: #EAF0EE;
+  --accent: #0B5570; --accent-ink: #FFFFFF; --accent-soft: #E2EDF3;
+  --same-bg: #E4F1EC; --same-line: #1F7A63; --same-ink: #145443;
+  --diff-bg: #F8E5E1; --diff-line: #A63D2F; --diff-ink: #85291E;
+  --extra-bg: #FBF0DF; --extra-line: #9A5B14; --extra-ink: #6E400C;
+  --skip-ink: #8C9794; --str: #6B4A8C;
+  --serif: "Iowan Old Style", Charter, Georgia, "Times New Roman", serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pad: clamp(1rem, 4vw, 2.75rem);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111917; --panel: #171F1E; --ink: #E6EDEA; --muted: #A9B6B2; --faint: #7B8783;
+    --line: #2A3634; --soft: #1E2827;
+    --accent: #6FBEE2; --accent-ink: #0C1A20; --accent-soft: #0C2734;
+    --same-bg: #10312A; --same-line: #5FCFAF; --same-ink: #A6E6D2;
+    --diff-bg: #3A1D18; --diff-line: #E57A68; --diff-ink: #F4B8AC;
+    --extra-bg: #33270F; --extra-line: #E0A552; --extra-ink: #F0D29A;
+    --skip-ink: #5F6B68; --str: #B497D6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111917; --panel: #171F1E; --ink: #E6EDEA; --muted: #A9B6B2; --faint: #7B8783;
+  --line: #2A3634; --soft: #1E2827;
+  --accent: #6FBEE2; --accent-ink: #0C1A20; --accent-soft: #0C2734;
+  --same-bg: #10312A; --same-line: #5FCFAF; --same-ink: #A6E6D2;
+  --diff-bg: #3A1D18; --diff-line: #E57A68; --diff-ink: #F4B8AC;
+  --extra-bg: #33270F; --extra-line: #E0A552; --extra-ink: #F0D29A;
+  --skip-ink: #5F6B68; --str: #B497D6;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 17px/1.55 var(--sans); -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1040px; margin-inline: auto; padding-inline: var(--pad); }
+main.wrap { padding-block: 2rem 4rem; }
+a { color: var(--accent); }
+.skip-link {
+  position: fixed; top: .5rem; left: .5rem; z-index: 100; transform: translateY(-160%);
+  padding: .45rem .75rem; background: var(--ink); color: var(--panel); border-radius: 2px;
+  font: .76rem var(--mono);
+}
+.skip-link:focus { transform: translateY(0); }
+.masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+.masthead .wrap { display: flex; align-items: baseline; gap: .9rem; flex-wrap: wrap; padding-block: .8rem; }
+.logo { font: 600 .92rem var(--mono); color: var(--ink); text-decoration: none; }
+.masthead nav { margin-left: auto; display: flex; gap: 1rem; flex-wrap: wrap; font: .75rem var(--mono); }
+.masthead nav a { color: var(--faint); text-decoration: none; }
+.masthead nav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.masthead nav a[aria-current="page"] { color: var(--same-line); }
+.page-heading { display: grid; gap: .6rem; margin-bottom: 1.6rem; }
+.kicker { font: .88rem var(--mono); color: var(--accent); letter-spacing: .03em; margin: 0; }
+.kicker a { color: inherit; }
+h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.16; letter-spacing: -.018em; margin: 0; }
+h1 code { font-family: var(--mono); font-weight: 600; font-size: .9em; }
+.lede { font-size: 1.1rem; color: var(--muted); margin: 0; max-width: 66ch; }
+.mono, code { font-family: var(--mono); }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+.tab {
+  appearance: none; border: 1px solid transparent; border-bottom: none; background: none;
+  font: 600 15px var(--sans); color: var(--muted); padding: 9px 14px; border-radius: 3px 3px 0 0;
+  cursor: pointer; position: relative; top: 1px;
+}
+.tab[aria-selected="true"] { background: var(--panel); color: var(--ink); border-color: var(--line); box-shadow: inset 0 3px 0 var(--same-line); }
+.tab .n { font-weight: 400; color: var(--muted); font-size: 13px; margin-left: 4px; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: clamp(14px, 3vw, 22px); }
+.panel + .panel { margin-top: 14px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.spacer { flex: 1; }
+.small { font-size: 14px; color: var(--muted); }
+
+button.btn {
+  appearance: none; font: 600 14px var(--sans); border-radius: 3px; padding: 8px 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+}
+button.btn:hover:not(:disabled) { border-color: var(--accent); }
+button.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.btn:disabled { opacity: .45; cursor: default; }
+:focus-visible { outline: 2px solid var(--same-line); outline-offset: 3px; border-radius: 2px; }
+
+/* Expression line */
+.expr {
+  font: 600 22px/1.4 var(--mono); background: var(--soft); border-radius: 8px; padding: 12px 14px;
+  overflow-x: auto; white-space: pre; margin: 10px 0 14px;
+}
+.expr .s { color: var(--str); }
+.qmeta { font-size: 14px; color: var(--muted); }
+
+/* Forms */
+label.field { display: block; font-weight: 600; font-size: 14px; margin-bottom: 10px; }
+label.field span.hint { font-weight: 400; color: var(--muted); }
+input[type="text"], textarea {
+  display: block; width: 100%; margin-top: 4px; font: 16px var(--sans); color: var(--ink);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+}
+input.num { width: 9em; font-family: var(--mono); font-size: 18px; }
+input.strin { font-family: var(--mono); font-size: 18px; }
+textarea { min-height: 3.2em; resize: vertical; }
+input:disabled, textarea:disabled { opacity: .75; }
+.formerr { color: var(--diff-ink); font-size: 14px; min-height: 1.4em; margin: 2px 0 0; }
+
+.feedback { border-radius: 10px; padding: 12px 14px; margin-top: 12px; border: 1px solid; }
+.feedback.good { background: var(--same-bg); border-color: var(--same-line); color: var(--same-ink); }
+.feedback.part { background: var(--extra-bg); border-color: var(--extra-line); color: var(--extra-ink); }
+.feedback.bad { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
+.feedback p { margin: 4px 0; }
+.feedback .tag { font-weight: 700; }
+.note { background: var(--soft); border-radius: 8px; padding: 10px 12px; font-size: 15px; margin-top: 10px; }
+.note b { font-weight: 700; }
+
+/* Explore inputs */
+.inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .inputs { grid-template-columns: 1fr; } }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.chip {
+  appearance: none; font: 13px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  border-radius: 999px; padding: 4px 10px; cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); }
+
+/* Trace */
+.trace { margin-top: 14px; }
+.trace:focus-visible { outline-offset: 6px; border-radius: 6px; }
+.gridwrap { overflow-x: auto; padding: 4px 2px 8px; }
+.grid { display: grid; gap: 4px; width: max-content; }
+.rl { font: 600 13px var(--sans); color: var(--muted); align-self: center; padding-right: 6px; text-align: right; }
+.rl code { font-size: 12px; }
+.idx { font: 12px var(--mono); color: var(--muted); text-align: center; height: 30px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.idx .ptr { color: var(--accent); font-size: 14px; line-height: 1; visibility: hidden; }
+.col-current .idx .ptr, .idx.col-current .ptr { visibility: visible; }
+.tile {
+  width: 46px; height: 58px; border: 2px solid var(--line); border-radius: 8px; background: var(--panel);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: background-color .25s, border-color .25s, transform .25s;
+}
+.tile .ch { font: 700 20px/1.1 var(--mono); }
+.tile .ch.sp { font-size: 12px; font-weight: 600; color: var(--muted); }
+.tile .cu { font: 12px var(--mono); color: var(--muted); }
+.tile.none { border-style: dashed; background: transparent; }
+.tile.none .ch { font: 12px var(--sans); color: var(--muted); }
+.st { font: 600 11px/1.15 var(--sans); text-align: center; min-height: 28px; }
+.s-same .tile:not(.none) { background: var(--same-bg); border-color: var(--same-line); }
+.st.s-same { color: var(--same-ink); }
+.s-diff .tile:not(.none) { background: var(--diff-bg); border-color: var(--diff-line); }
+.st.s-diff { color: var(--diff-ink); }
+.s-extra .tile:not(.none) { background: var(--extra-bg); border-color: var(--extra-line); }
+.st.s-extra { color: var(--extra-ink); }
+.s-skip .tile { opacity: .45; }
+.st.s-skip { color: var(--skip-ink); font-weight: 400; }
+.col-current .tile { transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent); }
+.empty-note { font-size: 13px; color: var(--muted); margin: 2px 0 0; }
+
+.tracebody { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; margin-top: 8px; }
+@media (max-width: 720px) { .tracebody { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .expr { font-size: 17px; } .op { font-size: 15px; } }
+.stepbox { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.stepcount { font-size: 13px; color: var(--muted); }
+.op { font: 700 17px/1.4 var(--mono); margin: 4px 0 6px; overflow-wrap: anywhere; }
+.expl { margin: 0; }
+.algo { list-style: none; margin: 0; padding: 10px 0; background: var(--soft); border-radius: 10px; font: 13px/1.6 var(--mono); overflow-x: auto; }
+.algo li { padding: 0 12px; white-space: pre; border-left: 4px solid transparent; }
+.algo li.on { background: var(--accent-soft); border-left-color: var(--accent); font-weight: 700; }
+.algo .cap { font: 12px var(--sans); color: var(--muted); padding: 0 12px 4px; white-space: normal; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.keys { font-size: 13px; color: var(--muted); }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--bg); }
+
+/* Result */
+.result { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.resrow { display: flex; flex-wrap: wrap; gap: 18px; align-items: baseline; }
+.big { font: 700 34px/1 var(--mono); }
+.sign { font-weight: 700; }
+.meaning { margin: 6px 0 0; }
+.nline { position: relative; display: grid; grid-template-columns: 1fr 72px 1fr; margin: 16px 0 4px; max-width: 520px; font-size: 13px; text-align: center; }
+.nline > div { border-top: 3px solid var(--line); padding-top: 6px; color: var(--muted); }
+.nline > div.on { border-top-color: var(--accent); color: var(--ink); font-weight: 700; }
+.nline > div.on::before { content: "▼"; display: block; color: var(--accent); margin-top: -26px; margin-bottom: 4px; font-size: 14px; line-height: 1; }
+.apnote { font-size: 14px; color: var(--muted); margin: 10px 0 0; max-width: 70ch; }
+
+/* Reference */
+details.ref { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.refgroup { margin-top: 8px; }
+.refgroup .gl { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+.chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.rc { font: 11px/1.2 var(--mono); border: 1px solid var(--line); border-radius: 4px; padding: 2px 4px; text-align: center; min-width: 30px; }
+.rc b { display: block; font-size: 13px; }
+.rc.hl { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.reffact { font-size: 13px; margin: 8px 0 2px; }
+
+.hidden { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .col-current .tile { transform: none; }
+}
+/* ---- Memory Diagram ---- */
+.code { list-style: none; margin: 0; padding: 10px 0; background: var(--soft); border-radius: 8px; font: 14px/1.7 var(--mono); overflow-x: auto; counter-reset: ln; }
+.code li { padding: 0 12px 0 8px; white-space: pre; border-left: 4px solid transparent; }
+.code li::before { counter-increment: ln; content: counter(ln); display: inline-block; width: 2em; color: var(--faint); font-weight: 400; }
+.code li.done { color: var(--muted); }
+.code li.on { background: var(--accent-soft); border-left-color: var(--accent); font-weight: 700; color: var(--ink); }
+.code li.err { background: var(--diff-bg); border-left-color: var(--diff-line); color: var(--diff-ink); font-weight: 700; }
+.memwrap { position: relative; margin-top: 12px; }
+.mem { position: relative; display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 48px; min-height: 120px; }
+@media (max-width: 560px) { .mem { gap: 30px; } }
+.colhead { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 6px; }
+.var, .obj { position: relative; z-index: 1; border: 2px solid var(--line); border-radius: 8px; background: var(--panel); padding: 6px 10px; margin-bottom: 10px; }
+.var { display: grid; grid-template-columns: auto 1fr; gap: 0 8px; align-items: center; }
+.vname { font: 700 16px var(--mono); }
+.vtype { font: 11px var(--mono); color: var(--muted); grid-column: 1; }
+.slot { grid-column: 2; grid-row: 1 / span 2; justify-self: end; font: 600 16px var(--mono); display: flex; align-items: center; gap: 6px; }
+.slot .target { font: 11px var(--mono); color: var(--muted); }
+.anchor { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); display: inline-block; }
+.nullv { font: 600 14px var(--mono); color: var(--muted); }
+.var.changed { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.obj .ohead { font: 600 13px var(--sans); color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+.obj .field { display: flex; justify-content: space-between; gap: 10px; font: 15px var(--mono); }
+.obj .text { font: 700 17px var(--mono); color: var(--str); white-space: pre; overflow-x: auto; }
+.obj.new { border-color: var(--same-line); background: var(--same-bg); }
+.obj.mutated { border-color: var(--extra-line); background: var(--extra-bg); }
+.obj.garbage { opacity: .55; border-style: dashed; }
+.tag { font: 11px var(--sans); border: 1px solid var(--line); border-radius: 999px; padding: 0 6px; color: var(--muted); }
+svg.arrows { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
+svg.arrows path { fill: none; stroke: var(--muted); stroke-width: 2; }
+svg.arrows path.hot { stroke: var(--accent); stroke-width: 3; }
+svg.arrows path.field { stroke-dasharray: 5 4; }
+svg.arrows path.head { fill: var(--muted); stroke: none; }
+svg.arrows path.head.hot { fill: var(--accent); }
+.consolebox { margin-top: 12px; }
+.console { background: #10181A; color: #E8EEEC; border-radius: 8px; padding: 8px 12px; font: 15px/1.5 var(--mono); min-height: 2.6em; white-space: pre-wrap; }
+.runner-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 16px; margin-top: 12px; }
+@media (max-width: 820px) { .runner-grid { grid-template-columns: minmax(0, 1fr); } }
+.stepnote { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+.stepnote.err { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
+.stepnote .op { margin-top: 0; }
+.bigerr { border: 1px solid var(--diff-line); background: var(--diff-bg); color: var(--diff-ink); border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
+.bignote { border: 1px solid var(--line); background: var(--soft); border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
+textarea.codein { font: 15px/1.5 var(--mono); min-height: 9em; }
+textarea.outin { font: 16px/1.5 var(--mono); min-height: 3.5em; }
+.exprcode { font: 600 15px/1.6 var(--mono); background: var(--soft); border-radius: 8px; padding: 10px 14px; white-space: pre; overflow-x: auto; margin: 10px 0 14px; }
+.choices { border: 0; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
+.choice { display: flex; gap: 8px; align-items: baseline; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+.cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 10px; margin-top: 6px; }
+.cmp pre { margin: 2px 0 0; background: var(--panel); border: 1px solid var(--line); padding: 6px 8px; font: 14px/1.4 var(--mono); white-space: pre-wrap; border-radius: 4px; color: var(--ink); }
+.legendrow { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); margin-top: 8px; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="../study/index.html">Study</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap" tabindex="-1">
+  <header class="page-heading">
+    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 1 · Objects and references</p>
+    <h1>Memory Diagram</h1>
+    <p class="lede">A variable holds a <b>reference</b> (an arrow to an object), never the object itself. Step through code with the course's <code>Player</code> class and Strings to see aliasing, <code>null</code>, <code>==</code> versus <code>equals</code>, and why Strings never change.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Mode">
+    <button class="tab" role="tab" id="tab-predict" aria-controls="mode-predict" aria-selected="true">Predict</button>
+    <button class="tab" role="tab" id="tab-explore" aria-controls="mode-explore" aria-selected="false" tabindex="-1">Explore</button>
+    <button class="tab" role="tab" id="tab-transfer" aria-controls="mode-transfer" aria-selected="false" tabindex="-1">Transfer</button>
+  </div>
+
+  <section id="mode-predict" role="tabpanel" aria-labelledby="tab-predict">
+    <div class="panel">
+      <div class="row"><span class="qmeta" id="p-count"></span><span class="spacer"></span><button class="btn" id="p-prev">← Previous</button><button class="btn" id="p-next">Next question →</button></div>
+      <p class="qprompt" id="p-ask"></p>
+      <div class="exprcode" id="p-code" aria-label="Java code"></div>
+      <form id="p-form" novalidate></form>
+      <div id="p-after" class="hidden"><div id="p-feedback" class="feedback" role="status"></div><div class="note" id="p-tests"></div><div id="p-view"></div></div>
+    </div>
+  </section>
+
+  <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
+    <div class="panel">
+      <label class="field">Program <span class="hint">(<code>int</code>, <code>boolean</code>, <code>String</code> and <code>Player</code> variables; <code>new Player(name, score)</code>, <code>getName()</code>, <code>getScore()</code>, <code>addScore(n)</code>; String <code>length</code>, <code>substring</code>, <code>indexOf</code>, <code>equals</code>, <code>compareTo</code>; <code>==</code>; <code>System.out.println</code>)</span>
+        <textarea class="codein" id="e-code" spellcheck="false"></textarea>
+      </label>
+      <div class="small">Try:</div>
+      <div class="presets" id="e-presets"></div>
+      <div id="e-view"></div>
+    </div>
+  </section>
+
+  <section id="mode-transfer" role="tabpanel" aria-labelledby="tab-transfer" class="hidden">
+    <div class="panel">
+      <p class="small" style="margin-top:0">No diagram here. Draw the boxes and arrows on paper, then check.</p>
+      <div class="row"><span class="qmeta" id="t-count"></span><span class="spacer"></span><button class="btn" id="t-prev">← Previous</button><button class="btn" id="t-next">Next question →</button></div>
+      <p class="qprompt" id="t-ask"></p>
+      <div class="exprcode" id="t-code" aria-label="Java code"></div>
+      <form id="t-form" novalidate></form>
+      <div id="t-after" class="hidden"><div id="t-feedback" class="feedback" role="status"></div><div class="note" id="t-model"></div></div>
+    </div>
+  </section>
+</main>
+
+<script>
+// ENGINE START
+// A small Java interpreter for int, boolean, String and the course's Player class
+// (projects/W06: new Player(String name, int score), getName(), getScore(), addScore(int);
+// Player does not override equals, so equals means "same object").
+// Like javac, the whole program is checked before any of it runs. Strings follow the JLS:
+// literals and literal-only concatenations share one pooled object; other concatenations
+// and new String(...) always create new objects. Valid Java this tool does not model is
+// reported as unsupported, never as a compile error.
+class MemCompileError extends Error { constructor(msg, line) { super(msg); this.line = line; } }
+class MemUnsupported extends Error { constructor(msg, line) { super(msg); this.line = line; } }
+class MemRuntime extends Error { constructor(type, line, why) { super(type); this.javaType = type; this.line = line; this.why = why; } }
+const M_INT_MAX = 2147483647;
+
+function memTokens(src) {
+  const toks = [];
+  let i = 0, line = 1;
+  const OPS = ['==', '!=', '&&', '||', '<=', '>=', '++', '--', '+=', '-=', '*=', '/=', '%=', '->', '::',
+    '+', '-', '*', '/', '%', '(', ')', ',', '.', ';', '=', '<', '>', '!', '{', '}', '[', ']', '?', ':', '&', '|', '^', '~', '@'];
+  const OK = new Set(['==', '!=', '+', '-', '(', ')', ',', '.', ';', '=']);
+  while (i < src.length) {
+    const c = src[i], rest = src.slice(i);
+    if (c === '\n') { line++; i++; continue; }
+    if (' \t\r\f'.includes(c)) { i++; continue; }
+    if (rest.startsWith('//')) { while (i < src.length && src[i] !== '\n') i++; continue; }
+    if (rest.startsWith('/*')) { const end = src.indexOf('*/', i + 2); if (end < 0) throw new MemCompileError('unclosed comment', line); line += src.slice(i, end).split('\n').length - 1; i = end + 2; continue; }
+    if (/\d/.test(c)) {
+      const m = /^\d[\w.]*/.exec(rest)[0];
+      if (!/^\d+$/.test(m)) throw new MemUnsupported(`only whole-number (int) literals are supported here, not ${m}.`, line);
+      if (m.length > 1 && m[0] === '0') throw new MemUnsupported(`${m}: a leading 0 makes Java read the number as octal; this tool does not.`, line);
+      if (Number(m) > M_INT_MAX) throw new MemCompileError(`integer number too large: ${m}`, line);
+      toks.push({ k: 'int', v: Number(m), line }); i += m.length; continue;
+    }
+    if (c === '"') {
+      if (rest.startsWith('"""')) throw new MemUnsupported('text blocks are not supported here.', line);
+      let j = i + 1, v = '';
+      while (j < src.length && src[j] !== '"') {
+        if (src[j] === '\n') throw new MemCompileError('unclosed String literal', line);
+        if (src[j] === '\\') {
+          const e = src[j + 1], simple = { n: '\n', t: '\t', '"': '"', "'": "'", '\\': '\\' };
+          if (!(e in simple)) throw new MemUnsupported(`the escape \\${e} is not supported here.`, line);
+          v += simple[e]; j += 2;
+        } else v += src[j++];
+      }
+      if (j >= src.length) throw new MemCompileError('unclosed String literal', line);
+      toks.push({ k: 'str', v, raw: src.slice(i, j + 1), line }); i = j + 1; continue;
+    }
+    if (c === "'") throw new MemUnsupported('char values are not supported here.', line);
+    const id = /^[A-Za-z_$][\w$]*/.exec(rest);
+    if (id) { toks.push({ k: 'id', v: id[0], line }); i += id[0].length; continue; }
+    const op = OPS.find(o => rest.startsWith(o));
+    if (op) {
+      if (!OK.has(op)) throw new MemUnsupported(`the ${op} operator is not supported here.`, line);
+      toks.push({ k: op, line }); i += op.length; continue;
+    }
+    throw new MemUnsupported(`the character ${JSON.stringify(c)} is not supported here.`, line);
+  }
+  toks.push({ k: 'end', line });
+  return toks;
+}
+
+const M_TYPES = ['int', 'boolean', 'String', 'Player'];
+const M_OTHER_TYPES = ['double', 'char', 'long', 'float', 'short', 'byte', 'var', 'Integer', 'Double', 'Object', 'ArrayList'];
+function memParse(src) {
+  const t = memTokens(src);
+  let p = 0;
+  const peek = (k = 0) => t[p + k], next = () => t[p++];
+  const at = (k, v) => peek().k === k && (v === undefined || peek().v === v);
+  const expect = (k, what) => { if (!at(k)) throw new MemCompileError(`${what || `'${k}'`} expected`, peek().line); return next(); };
+  function expr() {
+    let l = additive();
+    while (at('==') || at('!=')) { const op = next().k; l = { k: 'bin', op, l, r: additive(), line: l.line }; }
+    return l;
+  }
+  function additive() {
+    let l = unary();
+    while (at('+') || at('-')) { const op = next().k; const r = unary(); l = { k: 'bin', op, l, r, line: l.line }; }
+    return l;
+  }
+  function unary() {
+    if (at('-')) { const tk = next(); return { k: 'neg', e: unary(), line: tk.line }; }
+    return postfix();
+  }
+  function args() {
+    expect('(');
+    const a = [];
+    if (!at(')')) { a.push(expr()); while (at(',')) { next(); a.push(expr()); } }
+    expect(')');
+    return a;
+  }
+  function postfix() {
+    let e = primary();
+    while (at('.')) {
+      next();
+      const name = expect('id', 'method name').v;
+      if (!at('(')) throw new MemUnsupported(`fields such as .${name} are not supported here.`, e.line);
+      e = { k: 'call', recv: e, name, args: args(), line: e.line };
+    }
+    return e;
+  }
+  function primary() {
+    const tk = next();
+    if (tk.k === 'int') return { k: 'int', v: tk.v, line: tk.line, konst: true };
+    if (tk.k === 'str') return { k: 'str', v: tk.v, raw: tk.raw, line: tk.line, konst: true };
+    if (tk.k === '(') { const e = expr(); expect(')'); return e; }
+    if (tk.k === 'id') {
+      if (tk.v === 'null') return { k: 'null', line: tk.line };
+      if (tk.v === 'true' || tk.v === 'false') return { k: 'bool', v: tk.v === 'true', line: tk.line };
+      if (tk.v === 'new') {
+        const cls = expect('id', 'class name').v;
+        if (cls !== 'Player' && cls !== 'String') throw new MemUnsupported(`new ${cls}(…) is not supported here (Player and String only).`, tk.line);
+        return { k: 'new', cls, args: args(), line: tk.line };
+      }
+      if (tk.v === 'System' || tk.v === 'Math' || tk.v === 'this') throw new MemUnsupported(`${tk.v} is not supported inside expressions here.`, tk.line);
+      if (at('(')) throw new MemUnsupported(`calling ${tk.v}(…) directly is not supported here.`, tk.line);
+      return { k: 'var', name: tk.v, line: tk.line };
+    }
+    throw new MemCompileError(tk.k === 'end' ? 'the program ends in the middle of an expression' : `illegal start of expression: '${tk.k}'`, tk.line);
+  }
+  const stmts = [];
+  while (!at('end')) {
+    const line = peek().line;
+    let s;
+    if (at('id') && peek(1).k === 'id' && (M_TYPES.includes(peek().v) || M_OTHER_TYPES.includes(peek().v))) {
+      const type = next().v, name = next().v;
+      if (M_OTHER_TYPES.includes(type)) throw new MemUnsupported(`variables of type ${type} are not supported here (int, boolean, String and Player).`, line);
+      if (!at('=')) throw new MemUnsupported('declare each variable with a value, for example Player p = null;', line);
+      next();
+      s = { k: 'decl', type, name, e: expr(), line };
+    } else if (at('id', 'System')) {
+      next(); expect('.'); const out = expect('id'); if (out.v !== 'out') throw new MemUnsupported('only System.out.print and System.out.println are supported here.', line);
+      expect('.'); const m = expect('id').v;
+      if (m !== 'print' && m !== 'println') throw new MemUnsupported('only System.out.print and System.out.println are supported here.', line);
+      const a = args();
+      s = { k: 'print', ln: m === 'println', args: a, line };
+    } else if (at('id') && peek(1).k === '=') {
+      const name = next().v; next();
+      s = { k: 'assign', name, e: expr(), line };
+    } else {
+      const e = expr();
+      s = { k: 'expr', e, line };
+    }
+    if (!at(';')) throw new MemCompileError("';' expected", t[p - 1].line);
+    next();
+    stmts.push(s);
+  }
+  return stmts;
+}
+
+/* ---------- Checking (javac's job): types, names, methods ---------- */
+const PLAYER_METHODS = { getName: { args: [], ret: 'String' }, getScore: { args: [], ret: 'int' }, addScore: { args: ['int'], ret: 'void' } };
+const REF = t => t === 'String' || t === 'Player' || t === 'null';
+function assignable(to, from) { return to === from || (from === 'null' && (to === 'String' || to === 'Player')); }
+// Constant expressions (JLS 15.29): literals and + of constants. Their String value is pooled.
+function memType(n, types) {
+  const T = (() => {
+    switch (n.k) {
+      case 'int': return 'int';
+      case 'str': return 'String';
+      case 'bool': return 'boolean';
+      case 'null': return 'null';
+      case 'var':
+        if (!(n.name in types)) throw new MemCompileError(`cannot find symbol: variable ${n.name}`, n.line);
+        return types[n.name];
+      case 'neg': { const a = memType(n.e, types); if (a !== 'int') throw new MemCompileError(`bad operand type ${a} for unary operator '-'`, n.line); n.konst = n.e.konst; return 'int'; }
+      case 'bin': {
+        const a = memType(n.l, types), b = memType(n.r, types);
+        if (a === 'void' || b === 'void') throw new MemCompileError("'void' type not allowed here", n.line);
+        if (n.op === '+') {
+          if (a === 'String' || b === 'String') {
+            const other = a === 'String' ? b : a;
+            if (other === 'Player') throw new MemUnsupported('joining a Player to a String prints something like Player@1b6d3586, which varies; use getName() or getScore() instead.', n.line);
+            n.konst = !!(n.l.konst && n.r.konst);
+            return 'String';
+          }
+          if (a === 'int' && b === 'int') { n.konst = !!(n.l.konst && n.r.konst); return 'int'; }
+          throw new MemCompileError(`bad operand types for binary operator '+' (${a} and ${b})`, n.line);
+        }
+        if (n.op === '-') {
+          if (a === 'int' && b === 'int') { n.konst = !!(n.l.konst && n.r.konst); return 'int'; }
+          throw new MemCompileError(`bad operand types for binary operator '-' (${a} and ${b})`, n.line);
+        }
+        // == and !=
+        if ((a === 'int' && b === 'int') || (a === 'boolean' && b === 'boolean')) return 'boolean';
+        if (REF(a) && REF(b) && (a === b || a === 'null' || b === 'null')) return 'boolean';
+        throw new MemCompileError(`incomparable types: ${a} and ${b}`, n.line);
+      }
+      case 'new': {
+        const ts = n.args.map(x => memType(x, types));
+        if (n.cls === 'Player') {
+          if (ts.length !== 2 || !assignable('String', ts[0]) || ts[1] !== 'int') throw new MemCompileError('constructor Player cannot be applied to given types: it needs (String name, int score)', n.line);
+          return 'Player';
+        }
+        if (ts.length !== 1 || ts[0] !== 'String') throw new MemUnsupported('this tool supports new String("text") only.', n.line);
+        return 'String';
+      }
+      case 'call': {
+        const rt = memType(n.recv, types), ts = n.args.map(x => memType(x, types));
+        if (rt === 'int' || rt === 'boolean') throw new MemCompileError(`${rt} cannot be dereferenced: an ${rt} is not an object, so it has no methods`, n.line);
+        if (rt === 'null') throw new MemCompileError('<null> cannot be dereferenced', n.line);
+        if (rt === 'void') throw new MemCompileError("'void' type not allowed here", n.line);
+        if (n.name === 'equals') {
+          if (ts.length !== 1) throw new MemCompileError('equals takes exactly one argument', n.line);
+          if (ts[0] === 'void') throw new MemCompileError("'void' type not allowed here", n.line);
+          return 'boolean';
+        }
+        if (rt === 'Player') {
+          const m = PLAYER_METHODS[n.name];
+          if (!m) throw new MemCompileError(`cannot find symbol: method ${n.name} in class Player`, n.line);
+          if (ts.length !== m.args.length || ts.some((t, i) => t !== m.args[i])) throw new MemCompileError(`method ${n.name} in class Player cannot be applied to given types`, n.line);
+          return m.ret;
+        }
+        // String
+        if (n.name === 'length') { if (ts.length) throw new MemCompileError('length() takes no arguments', n.line); return 'int'; }
+        if (n.name === 'substring') {
+          if (ts.length < 1 || ts.length > 2 || ts.some(t => t !== 'int')) throw new MemCompileError('substring needs one or two int arguments', n.line);
+          return 'String';
+        }
+        if (n.name === 'indexOf') {
+          if (ts.length === 1 && ts[0] === 'String') return 'int';
+          throw new MemUnsupported('this tool supports indexOf(String) only.', n.line);
+        }
+        if (n.name === 'compareTo') {
+          if (ts.length === 1 && assignable('String', ts[0])) return 'int';
+          throw new MemCompileError('compareTo needs one String argument', n.line);
+        }
+        throw new MemUnsupported(`the String method ${n.name}(…) is not supported here (length, substring, indexOf, equals and compareTo are).`, n.line);
+      }
+    }
+  })();
+  n.type = T;
+  return T;
+}
+function memCheck(stmts) {
+  const types = {};
+  for (const s of stmts) {
+    if (s.k === 'decl') {
+      if (s.name in types) throw new MemCompileError(`variable ${s.name} is already defined`, s.line);
+      const t = memType(s.e, types);
+      if (!assignable(s.type, t)) throw new MemCompileError(`incompatible types: ${t} cannot be converted to ${s.type}`, s.line);
+      types[s.name] = s.type;
+    } else if (s.k === 'assign') {
+      if (!(s.name in types)) throw new MemCompileError(`cannot find symbol: variable ${s.name}`, s.line);
+      const t = memType(s.e, types);
+      if (!assignable(types[s.name], t)) throw new MemCompileError(`incompatible types: ${t} cannot be converted to ${types[s.name]}`, s.line);
+    } else if (s.k === 'expr') {
+      if (s.e.k !== 'call' && s.e.k !== 'new') throw new MemCompileError('not a statement: only a method call, an assignment or new can stand alone', s.line);
+      memType(s.e, types);
+    } else {
+      if (s.args.length > 1) throw new MemCompileError('print and println take at most one argument', s.line);
+      if (!s.args.length && !s.ln) throw new MemCompileError('System.out.print() needs something to print', s.line);
+      if (s.args.length) {
+        const t = memType(s.args[0], types);
+        if (t === 'void') throw new MemCompileError("'void' type not allowed here", s.line);
+        if (t === 'Player') throw new MemUnsupported('printing a Player shows something like Player@1b6d3586, which varies; print getName() or getScore() instead.', s.line);
+        if (t === 'null') throw new MemUnsupported('println(null) is ambiguous in Java; print a variable instead.', s.line);
+      }
+    }
+  }
+}
+
+/* ---------- Running ---------- */
+function runMemory(src) {
+  let stmts;
+  try { stmts = memParse(src); memCheck(stmts); }
+  catch (e) {
+    if (e instanceof MemCompileError) return { compileError: e.message, line: e.line, steps: [] };
+    if (e instanceof MemUnsupported) return { unsupported: e.message, line: e.line, steps: [] };
+    throw e;
+  }
+  const vars = new Map();          // name -> { type, v } where v is a number, boolean, or an object id (or null)
+  const heap = new Map();          // id -> { id, cls: 'String', text, pooled } | { id, cls: 'Player', name, score, n }
+  const pool = new Map();          // text -> id of the pooled String object
+  let nextId = 1, players = 0, strings = 0, out = '';  // Players and Strings are numbered separately for display
+  const steps = [];
+  let notes, created, mutated;
+  const label = id => { const o = heap.get(id); return o.cls === 'Player' ? `Player #${o.n}` : `the String "${o.text}"`; };
+  const pooled = text => { if (!pool.has(text)) { const id = nextId++; heap.set(id, { id, cls: 'String', text, pooled: true, n: ++strings }); pool.set(text, id); created.push(id); } return pool.get(text); };
+  const fresh = text => { const id = nextId++; heap.set(id, { id, cls: 'String', text, pooled: false, n: ++strings }); created.push(id); return id; };
+  const textOf = (type, v) => type === 'int' || type === 'boolean' ? String(v) : v === null ? 'null' : heap.get(v).text;
+  const npe = (n, what) => { throw new MemRuntime('NullPointerException', n.line, `${describe(n.recv)} is null, so there is no object to call ${what} on.`); };
+  const describe = n => n.k === 'var' ? n.name : 'the value';
+  // The value of a constant expression, worked out without creating objects (javac folds it).
+  function constText(n) {
+    if (n.k === 'str') return n.v;
+    if (n.k === 'int') return String(n.v);
+    if (n.k === 'neg') return String((-Number(constText(n.e))) | 0);
+    if (n.type === 'int') { const a = Number(constText(n.l)), b = Number(constText(n.r)); return String(n.op === '+' ? (a + b) | 0 : (a - b) | 0); }
+    return constText(n.l) + constText(n.r);
+  }
+  // Joins a whole + chain into ONE new String, as Java does (no object for each +).
+  function concatText(n) {
+    if (n.k === 'bin' && n.op === '+' && n.type === 'String' && !n.konst) return concatText(n.l) + concatText(n.r);
+    const v = ev(n);
+    return textOf(n.type, v);
+  }
+  function ev(n) {
+    switch (n.k) {
+      case 'int': return n.v;
+      case 'bool': return n.v;
+      case 'null': return null;
+      case 'str': return pooled(n.v);
+      case 'var': return vars.get(n.name).v;
+      case 'neg': return (-ev(n.e)) | 0;
+      case 'bin': {
+        if (n.op === '+' && n.type === 'String') {
+          if (n.konst) {
+            const text = constText(n);
+            const had = pool.has(text), id = pooled(text);
+            notes.push(`Both parts are constants, so Java joins them when it compiles: the result is the pooled String "${text}"${had ? ', which already exists' : ''}.`);
+            return id;
+          }
+          const text = concatText(n);
+          notes.push(`+ with a variable builds a new String object, "${text}", while the program runs.`);
+          return fresh(text);
+        }
+        const a = ev(n.l), b = ev(n.r);
+        if (n.op === '+') return (a + b) | 0;
+        if (n.op === '-') return (a - b) | 0;
+        const same = a === b, res = n.op === '==' ? same : !same;
+        if (REF(n.l.type) || REF(n.r.type)) notes.push(`== compares references: ${same ? 'both sides refer to the same object' : a === null || b === null ? 'one side is null and the other is not' : 'they refer to different objects'}, so ${n.op} gives ${res}.`);
+        return res;
+      }
+      case 'new': {
+        const a = n.args.map(ev);
+        if (n.cls === 'Player') {
+          const id = nextId++; players++;
+          heap.set(id, { id, cls: 'Player', name: a[0], score: a[1], n: players });
+          created.push(id);
+          notes.push(`new creates Player #${players}, a separate object, and gives back a reference to it.`);
+          return id;
+        }
+        if (a[0] === null) throw new MemRuntime('NullPointerException', n.line, 'new String(null) has no characters to copy.');
+        notes.push(`new always creates a separate String object, even with the same characters as "${heap.get(a[0]).text}".`);
+        return fresh(heap.get(a[0]).text);
+      }
+      case 'call': {
+        const r = ev(n.recv), a = n.args.map(ev);
+        if (r === null) npe(n, `${n.name}()`);
+        const o = heap.get(r);
+        if (n.name === 'equals') {
+          if (o.cls === 'Player') {
+            const res = r === a[0];
+            notes.push(`Player does not define its own equals, so equals works like ==: ${res ? 'same object' : 'not the same object'}, so it gives ${res}.`);
+            return res;
+          }
+          const res = n.args[0].type === 'String' && a[0] !== null && heap.get(a[0]).text === o.text;
+          notes.push(`For Strings, equals compares the characters: ${res ? 'they match' : 'they differ'}, so it gives ${res}.`);
+          return res;
+        }
+        if (o.cls === 'Player') {
+          if (n.name === 'getScore') return o.score;
+          if (n.name === 'getName') { notes.push(`getName() returns the reference stored in ${label(r)}'s name field.`); return o.name; }
+          const old = o.score;
+          o.score = (o.score + a[0]) | 0;
+          mutated.push(r);
+          notes.push(`addScore changes the object ${describe(n.recv)} refers to, ${label(r)}: its score goes from ${old} to ${o.score}. Every variable that refers to ${label(r)} sees the change.`);
+          return undefined;
+        }
+        const s = o.text;
+        if (n.name === 'length') return s.length;
+        if (n.name === 'indexOf') {
+          if (a[0] === null) throw new MemRuntime('NullPointerException', n.line, 'indexOf cannot search for null.');
+          return s.indexOf(heap.get(a[0]).text);
+        }
+        if (n.name === 'compareTo') {
+          if (a[0] === null) throw new MemRuntime('NullPointerException', n.line, 'compareTo cannot compare with null.');
+          const u = heap.get(a[0]).text, lim = Math.min(s.length, u.length);
+          for (let k = 0; k < lim; k++) if (s.charCodeAt(k) !== u.charCodeAt(k)) return s.charCodeAt(k) - u.charCodeAt(k);
+          return s.length - u.length;
+        }
+        // substring
+        const b = a[0], e = a.length > 1 ? a[1] : s.length;
+        if (b < 0 || e > s.length || b > e) throw new MemRuntime('StringIndexOutOfBoundsException', n.line, `substring(${a.join(', ')}) is outside "${s}" (length ${s.length}).`);
+        if (b === 0 && e === s.length) {
+          notes.push('This substring covers the whole String, and Java happens to return the same object in that case. Do not rely on it.');
+          return r;
+        }
+        if (b === e) { notes.push(`substring(${a.join(', ')}) is empty, and Java returns the shared empty String "" for that. The original "${s}" is unchanged.`); return pooled(''); }
+        notes.push(`substring returns a separate String object, "${s.slice(b, e)}". The original "${s}" is unchanged.`);
+        return fresh(s.slice(b, e));
+      }
+    }
+  }
+  const reachable = () => {
+    const seen = new Set();
+    const visit = id => { if (id === null || id === undefined || seen.has(id)) return; seen.add(id); const o = heap.get(id); if (o.cls === 'Player') visit(o.name); };
+    for (const v of vars.values()) if (REF(v.type)) visit(v.v);
+    return seen;
+  };
+  let visible = new Set();
+  const snapshot = (s, extra) => {
+    const live = reachable();
+    // Objects that were on the diagram (or were just made) and now nothing refers to. Pooled Strings stay in the pool, so they just drop off.
+    const garbage = [...new Set([...visible, ...created])].filter(id => !live.has(id) && !heap.get(id).pooled);
+    if (garbage.length) notes.push(`Nothing refers to ${garbage.map(label).join(' or ')} any more, so Java will eventually reclaim ${garbage.length > 1 ? 'them' : 'it'}.`);
+    visible = live;
+    steps.push({
+      line: s.line, out,
+      vars: [...vars.entries()].map(([name, v]) => ({ name, type: v.type, v: v.v })),
+      heap: [...live, ...garbage].sort((x, y) => x - y).map(id => ({ ...heap.get(id), garbage: garbage.includes(id) })),
+      created: created.slice(), mutated: mutated.slice(), changed: extra.changed || [], note: notes.join(' '), ...extra,
+    });
+  };
+  for (const s of stmts) {
+    notes = []; created = []; mutated = [];
+    try {
+      if (s.k === 'decl' || s.k === 'assign') {
+        const type = s.k === 'decl' ? s.type : vars.get(s.name).type;
+        const hadLiteral = s.e.k === 'str' && pool.has(s.e.v);
+        const v = ev(s.e);
+        if (s.e.k === 'str') notes.push(hadLiteral ? `The literal ${s.e.raw} refers to the pooled String object that already exists: every ${s.e.raw} literal in the program shares it.` : `The literal ${s.e.raw} refers to a String object in the string pool.`);
+        const before = s.k === 'assign' ? vars.get(s.name).v : undefined;
+        vars.set(s.name, { type, v });
+        if (type === 'int' || type === 'boolean') notes.push(`${s.name} now holds the value ${v}. A${type === 'int' ? 'n' : ''} ${type} variable stores the value itself, so copying it copies the value.`);
+        else if (v === null) notes.push(`${s.name} now refers to no object (null).`);
+        else if (s.e.k === 'var') notes.push(`${s.name} = ${s.e.name} copies the reference, not the object: both now refer to ${label(v)}, which is still just one object.`);
+        else notes.push(`${s.name} now refers to ${label(v)}${s.k === 'assign' && before !== null && before !== v ? '. It no longer refers to what it did before; that object itself is unchanged' : ''}.`);
+        snapshot(s, { changed: [s.name] });
+      } else if (s.k === 'expr') {
+        const v = ev(s.e);
+        if (v !== undefined && s.e.type === 'String' && created.includes(v)) notes.push('But nothing stores the result, so it is lost. String methods never change the String they are called on.');
+        snapshot(s, {});
+      } else {
+        const text = s.args.length ? textOf(s.args[0].type, ev(s.args[0])) : '';
+        out += text + (s.ln ? '\n' : '');
+        notes.push(`${s.ln ? 'println' : 'print'} shows ${JSON.stringify(text)}${s.ln ? ' and ends the line' : ''}.`);
+        snapshot(s, { printed: text });
+      }
+    } catch (e) {
+      if (!(e instanceof MemRuntime)) throw e;
+      notes.push(e.why + ` Java throws a ${e.javaType} and the program stops.`);
+      snapshot(s, { error: e.javaType });
+      return { steps, out, crashed: e.javaType };
+    }
+  }
+  return { steps, out };
+}
+function memLabel(r) { return r.compileError ? 'compile-error' : r.unsupported ? 'unsupported' : r.crashed ? `${r.out}|throws:${r.crashed}` : r.out; }
+// ENGINE END
+
+// DATA START
+const PLAYER_A = 'Player a = new Player("Ana", 10);\n';
+const PREDICT = [
+  { code: PLAYER_A + 'Player b = a;\nb.addScore(5);\nSystem.out.println(a.getScore());', ask: 'output', tests: '<code>b = a</code> copies the reference, so <code>a</code> and <code>b</code> are two names for one object.' },
+  { code: PLAYER_A + 'Player b = new Player("Ana", 10);\nb.addScore(5);\nSystem.out.println(a.getScore() + " " + b.getScore());', ask: 'output', tests: 'Each <code>new</code> makes a separate object, even with the same values.' },
+  { code: PLAYER_A + 'Player b = a;\na = new Player("Bo", 3);\nb.addScore(1);\nSystem.out.println(a.getName() + " " + b.getScore());', ask: 'output', tests: 'Reassigning <code>a</code> points it at a new object. <code>b</code> still refers to the old one.' },
+  { code: 'int a = 5;\nint b = a;\nb = b + 1;\nSystem.out.println(a + " " + b);', ask: 'output', tests: 'An <code>int</code> variable holds the value itself, so <code>b = a</code> copies the number.' },
+  { code: 'String s = new String("hi");\nString t = new String("hi");\nSystem.out.println(s == t);\nSystem.out.println(s.equals(t));', ask: 'output', tests: '<code>==</code> asks “same object?”; for Strings, <code>equals</code> compares the characters.' },
+  { code: 'String s = "hi";\nString t = "hi";\nSystem.out.println(s == t);', ask: 'output', tests: 'Identical literals share one pooled object, so <code>==</code> happens to be true here. That is why a wrong <code>==</code> test can seem to work. Use <code>equals</code> for Strings.' },
+  { code: 'String w = "hello";\nw.substring(1);\nSystem.out.println(w);', ask: 'output', tests: 'String methods never change the String they are called on. The result here is thrown away.' },
+  { code: 'String w = "hello";\nw = w.substring(1);\nSystem.out.println(w);', ask: 'output', tests: 'Storing the result points <code>w</code> at a new String; the old one is unchanged.' },
+  { code: PLAYER_A + 'Player b = a;\na = null;\nSystem.out.println(b.getScore());', ask: 'output', tests: '<code>a = null</code> only changes the variable <code>a</code>. The object is still there, and <code>b</code> still refers to it.' },
+  { code: 'Player p = null;\nSystem.out.println(p.getScore());', ask: 'mc', choices: [{ text: 'It prints 0.', match: '0\n' }, { text: 'It compiles, then throws a NullPointerException.', match: '|throws:NullPointerException' }, { text: 'It does not compile.', match: 'compile-error' }, { text: 'It prints null.', match: 'null\n' }], tests: 'A method call on <code>null</code> compiles, but crashes when it runs: there is no object.' },
+  { code: PLAYER_A + 'Player b = new Player("Ana", 10);\nSystem.out.println(a.equals(b));', ask: 'output', tests: 'The course’s <code>Player</code> class does not define its own <code>equals</code>, so <code>equals</code> means “same object?”. Strings define <code>equals</code> to compare characters; other classes decide for themselves.' },
+  { code: PLAYER_A + 'Player b = new Player("Bo", 4);\nPlayer c = b;\nb = a;\nc.addScore(1);\nSystem.out.println(a.getScore() + " " + b.getScore() + " " + c.getScore());', ask: 'output', tests: 'Track each arrow separately: reassigning <code>b</code> does not move <code>c</code>.' },
+];
+const TRANSFER = [
+  { code: 'Player x = new Player("Kim", 3);\nPlayer y = x;\nx.addScore(4);\ny.addScore(1);\nSystem.out.println(x.getScore());', ask: 'output' },
+  { code: 'int a = 7;\nint b = a;\na = a - 2;\nSystem.out.println(a + " " + b);', ask: 'output' },
+  { code: 'String s = "cat";\nString t = s;\ns = s + "s";\nSystem.out.println(s + " " + t);', ask: 'output' },
+  { code: 'String p = new String("go");\nString q = "go";\nSystem.out.println(p == q);\nSystem.out.println(p.equals(q));', ask: 'output' },
+  { code: 'Player m = new Player("Max", 2);\nPlayer n = m;\nn = null;\nSystem.out.println(m.getScore());', ask: 'output' },
+  { code: 'String w = "stone";\nString v = w.substring(1, 4);\nSystem.out.println(w + " " + v);', ask: 'output' },
+  { code: 'Player a = new Player("Ana", 1);\nPlayer b = a;\na = new Player("Ana", 1);\nSystem.out.println(a == b);\nSystem.out.println(a.getScore() == b.getScore());', ask: 'output' },
+  { code: 'String s = null;\nSystem.out.println(s.length());', ask: 'mc', choices: [{ text: 'It prints 0.', match: '0\n' }, { text: 'It compiles, then throws a NullPointerException.', match: '|throws:NullPointerException' }, { text: 'It does not compile.', match: 'compile-error' }, { text: 'It prints null.', match: 'null\n' }] },
+];
+const PRESETS = [
+  { label: 'Alias', code: PREDICT[0].code },
+  { label: 'Two objects', code: PREDICT[1].code },
+  { label: 'Reassign', code: PREDICT[2].code },
+  { label: 'ints copy values', code: PREDICT[3].code },
+  { label: 'Literals share an object', code: PREDICT[5].code },
+  { label: 'new String', code: PREDICT[4].code },
+  { label: 'Strings never change', code: 'String w = "hello";\nw.substring(1);\nw = w.substring(1);\nSystem.out.println(w);' },
+  { label: 'Player equals', code: PREDICT[10].code },
+  { label: 'Shared names', code: 'Player m = new Player("Max", 2);\nPlayer n = new Player("Max", 2);\nSystem.out.println(m == n);\nSystem.out.println(m.getName() == n.getName());' },
+  { label: 'null', code: PLAYER_A + 'Player b = a;\na = null;\nSystem.out.println(b.getScore());\nb = null;' },
+];
+// DATA END
+
+/* ---------- Helpers ---------- */
+const $ = id => document.getElementById(id);
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function visible(s) { return s.replace(/ /g, '·').replace(/\t/g, '⇥').replace(/\n/g, '↵\n'); }
+const oname = o => `${o.cls} #${o.n}`;
+
+/* ---------- Diagram runner ---------- */
+class MemView {
+  constructor(host) {
+    this.host = host;
+    host.innerHTML = `<div class="bigerr hidden"></div><div class="rbody"><div class="runner-grid">
+      <div><ol class="code" aria-label="Program"></ol>
+        <div class="controls"><button class="btn" data-act="reset">⟲ Reset</button><button class="btn" data-act="back">← Back</button><button class="btn primary" data-act="next">Next →</button><button class="btn" data-act="end">Run to end</button></div>
+        <div class="stepnote" aria-live="polite"><div class="op"></div><p class="expl"></p></div>
+        <div class="consolebox"><div class="small">Console</div><div class="console" role="log" aria-label="Console output"></div></div></div>
+      <div><div class="memwrap"><div class="mem"><div class="frame"><div class="colhead">Variables</div><div class="vars"></div></div><div class="heapcol"><div class="colhead">Objects</div><div class="objs"></div></div></div>
+        <svg class="arrows" aria-hidden="true"><defs><marker id="ah-${host.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M 0 0 L 10 5 L 0 10 z"></path></marker><marker id="ahhot-${host.id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="head hot" d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs></svg></div>
+        <div class="legendrow"><span>Solid arrow: a variable's reference</span><span>Dashed: a Player's name field</span><span>Green: just created</span><span>Orange: just changed</span><span>Faded: nothing refers to it</span></div></div>
+    </div></div>`;
+    this.err = host.querySelector('.bigerr'); this.body = host.querySelector('.rbody');
+    this.svg = host.querySelector('svg.arrows'); this.wrap = host.querySelector('.memwrap');
+    host.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => this.act(b.dataset.act)));
+    this.body.tabIndex = 0;
+    this.body.addEventListener('keydown', e => { if (e.target.closest('input, textarea')) return; const a = { ArrowRight: 'next', ArrowLeft: 'back', Home: 'reset', End: 'end' }[e.key]; if (a) { e.preventDefault(); this.act(a); } });
+    if (window.ResizeObserver) new ResizeObserver(() => this.drawArrows()).observe(this.wrap);
+  }
+  set(src, { showAll = false } = {}) {
+    this.src = src; this.run = runMemory(src);
+    this.i = showAll ? this.run.steps.length : 0;
+    this.render();
+  }
+  act(a) { const n = this.run.steps.length; this.i = a === 'next' ? Math.min(n, this.i + 1) : a === 'back' ? Math.max(0, this.i - 1) : a === 'reset' ? 0 : n; this.render(); }
+  render() {
+    const r = this.run, bad = r.compileError || r.unsupported;
+    this.err.classList.toggle('hidden', !bad); this.body.classList.toggle('hidden', !!bad);
+    if (bad) {
+      this.err.textContent = '';
+      this.err.append(el('b', null, r.compileError ? `Does not compile (line ${r.line}). ` : `Not supported here (line ${r.line}): `), r.compileError || r.unsupported);
+      if (r.compileError) this.err.append(el('p', 'small', 'Java checks the whole program before running any of it, so nothing runs.'));
+      return;
+    }
+    const steps = r.steps, st = this.i > 0 ? steps[this.i - 1] : null;
+    const code = this.host.querySelector('.code'); code.textContent = '';
+    this.src.split('\n').forEach((t, k) => {
+      const li = el('li', null, t || ' '), n = k + 1;
+      li.className = st && st.line === n ? (st.error ? 'err' : 'on') : steps.slice(0, this.i).some(s => s.line === n) ? 'done' : '';
+      code.append(li);
+    });
+    const note = this.host.querySelector('.stepnote');
+    note.classList.toggle('err', !!(st && st.error));
+    note.querySelector('.op').textContent = st ? `Line ${st.line}${st.error ? ': ' + st.error : ''}` : 'Ready';
+    note.querySelector('.expl').textContent = st ? st.note : 'No variables and no objects yet. Press Next to run the first line.';
+    this.host.querySelector('.console').textContent = st ? st.out : '';
+    // Variables
+    const vbox = this.host.querySelector('.vars'); vbox.textContent = '';
+    const heap = st ? st.heap : [], byId = new Map(heap.map(o => [o.id, o]));
+    (st ? st.vars : []).forEach(v => {
+      const d = el('div', 'var' + (st.changed.includes(v.name) ? ' changed' : ''));
+      d.dataset.name = v.name;
+      d.append(el('span', 'vname', v.name), el('span', 'vtype', v.type));
+      const slot = el('span', 'slot');
+      if (v.type === 'int' || v.type === 'boolean') slot.textContent = String(v.v);
+      else if (v.v === null) slot.append(el('span', 'nullv', 'null'));
+      else { const t = byId.get(v.v); slot.append(el('span', 'target', '→ ' + oname(t)), el('span', 'anchor')); slot.setAttribute('aria-label', `refers to ${oname(t)}`); }
+      d.append(slot);
+      vbox.append(d);
+    });
+    if (!st || !st.vars.length) vbox.append(el('p', 'small', 'None yet.'));
+    // Objects: each Player's name String is placed right after the Player when nothing else refers to it
+    const obox = this.host.querySelector('.objs'); obox.textContent = '';
+    const varRefs = new Set((st ? st.vars : []).map(v => v.v));
+    const order = [];
+    heap.forEach(o => {
+      if (order.includes(o)) return;
+      if (o.cls === 'String' && !varRefs.has(o.id) && heap.some(p => p.cls === 'Player' && p.name === o.id)) return;
+      order.push(o);
+      if (o.cls === 'Player' && byId.has(o.name) && !varRefs.has(o.name) && !order.includes(byId.get(o.name))) order.push(byId.get(o.name));
+    });
+    heap.forEach(o => { if (!order.includes(o)) order.push(o); });
+    order.forEach(o => {
+      const c = el('div', 'obj' + (o.garbage ? ' garbage' : st.created.includes(o.id) ? ' new' : st.mutated.includes(o.id) ? ' mutated' : ''));
+      c.dataset.id = o.id;
+      const head = el('div', 'ohead'); head.append(el('span', null, oname(o)));
+      if (o.cls === 'String' && o.pooled) head.append(el('span', 'tag', 'in the string pool'));
+      if (o.garbage) head.append(el('span', 'tag', 'unreachable'));
+      c.append(head);
+      if (o.cls === 'Player') {
+        const nf = el('div', 'field'); nf.append(el('span', null, 'name'));
+        if (o.name === null) nf.append(el('span', 'nullv', 'null'));
+        else { const s = byId.get(o.name); const v = el('span', null, `"${s ? s.text : '?'}" `); const an = el('span', 'anchor'); an.dataset.field = o.id; v.append(an); nf.append(v); }
+        const sf = el('div', 'field'); sf.append(el('span', null, 'score'), el('span', null, String(o.score)));
+        c.append(nf, sf);
+      } else c.append(el('div', 'text', `"${o.text}"`));
+      c.setAttribute('aria-label', o.cls === 'Player' ? `${oname(o)}, score ${o.score}` : `String "${o.text}"`);
+      obox.append(c);
+    });
+    if (!heap.length) obox.append(el('p', 'small', 'None yet.'));
+    const n = steps.length;
+    this.host.querySelector('[data-act="back"]').disabled = this.host.querySelector('[data-act="reset"]').disabled = this.i === 0;
+    this.host.querySelector('[data-act="next"]').disabled = this.host.querySelector('[data-act="end"]').disabled = this.i === n;
+    this.st = st;
+    requestAnimationFrame(() => this.drawArrows());
+  }
+  drawArrows() {
+    const svg = this.svg, st = this.st;
+    [...svg.querySelectorAll('path.link')].forEach(p => p.remove());
+    if (!st || this.body.classList.contains('hidden')) return;
+    const box = this.wrap.getBoundingClientRect();
+    const add = (d, cls) => { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); p.setAttribute('class', 'link ' + cls); p.setAttribute('marker-end', `url(#${cls === 'hot' ? 'ahhot' : 'ah'}-${this.host.id})`); svg.append(p); };
+    st.vars.forEach(v => {
+      if (v.type === 'int' || v.type === 'boolean' || v.v === null) return;
+      const a = this.host.querySelector(`.var[data-name="${CSS.escape(v.name)}"] .anchor`), t = this.host.querySelector(`.obj[data-id="${v.v}"]`);
+      if (!a || !t) return;
+      const ra = a.getBoundingClientRect(), rt = t.getBoundingClientRect();
+      const x1 = ra.left + ra.width / 2 - box.left, y1 = ra.top + ra.height / 2 - box.top;
+      const x2 = rt.left - box.left - 2, y2 = Math.min(Math.max(y1, rt.top - box.top + 12), rt.bottom - box.top - 12);
+      const dx = Math.max(24, (x2 - x1) / 2);
+      add(`M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`, st.changed.includes(v.name) ? 'hot' : '');
+    });
+    this.host.querySelectorAll('.anchor[data-field]').forEach(a => {
+      const o = st.heap.find(x => x.id === +a.dataset.field), t = this.host.querySelector(`.obj[data-id="${o.name}"]`);
+      if (!t) return;
+      const ra = a.getBoundingClientRect(), rt = t.getBoundingClientRect();
+      const x1 = ra.right - box.left, y1 = ra.top + ra.height / 2 - box.top;
+      const x2 = rt.right - box.left + 2, y2 = rt.top + rt.height / 2 - box.top;
+      const bulge = Math.max(x1, x2) + 28;
+      add(`M ${x1} ${y1} C ${bulge} ${y1}, ${bulge} ${y2}, ${x2} ${y2}`, 'field');
+    });
+  }
+}
+
+/* ---------- Tabs ---------- */
+const TABS = ['predict', 'explore', 'transfer'];
+function selectTab(name, focus) {
+  TABS.forEach(n => { const on = n === name, tab = $('tab-' + n); tab.setAttribute('aria-selected', on); tab.tabIndex = on ? 0 : -1; $('mode-' + n).classList.toggle('hidden', !on); if (on && focus) tab.focus(); });
+  requestAnimationFrame(() => [predictView, exploreView].forEach(v => v.drawArrows()));
+}
+TABS.forEach((n, i) => { const tab = $('tab-' + n); tab.addEventListener('click', () => selectTab(n)); tab.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); selectTab(TABS[(i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length], true); } }); });
+
+/* ---------- Predict and Transfer ---------- */
+function questionMode(prefix, items, opts) {
+  const state = items.map(() => ({ val: '', why: '', done: false }));
+  let idx = 0;
+  const form = $(prefix + '-form');
+  function build(it) {
+    form.innerHTML = '';
+    if (it.ask === 'mc') {
+      const fs = el('fieldset', 'choices'); fs.append(el('legend', 'small', 'Choose one'));
+      it.choices.forEach((c, i) => { const l = el('label', 'choice'); const r = el('input'); r.type = 'radio'; r.name = prefix + '-mc'; r.value = i; l.append(r, el('span', null, c.text)); fs.append(l); });
+      form.append(fs);
+    } else {
+      const l = el('label', 'field'); l.append('Output ', el('span', 'hint', '(type it exactly; press Enter for a new line)'));
+      const ta = el('textarea', 'outin'); ta.id = prefix + '-val'; ta.spellcheck = false; l.append(ta); form.append(l);
+    }
+    const w = el('label', 'field'); w.append(opts.reasonPrompt + ' '); const why = el('textarea'); why.id = prefix + '-why'; why.rows = 2; w.append(why);
+    const row = el('div', 'row'); const b = el('button', 'btn primary', opts.submitLabel); b.type = 'submit'; const err = el('span', 'formerr'); err.id = prefix + '-err'; err.setAttribute('role', 'alert'); row.append(b, err);
+    form.append(w, row);
+  }
+  const readVal = it => it.ask === 'mc' ? ((form.querySelector('input:checked') || {}).value || '') : $(prefix + '-val').value;
+  function show() {
+    const it = items[idx], st = state[idx];
+    $(prefix + '-count').textContent = `Question ${idx + 1} of ${items.length}`;
+    $(prefix + '-prev').disabled = idx === 0; $(prefix + '-next').disabled = idx === items.length - 1;
+    $(prefix + '-ask').textContent = it.ask === 'mc' ? 'What happens when this runs?' : 'What exactly does this print?';
+    $(prefix + '-code').textContent = it.code;
+    build(it);
+    if (it.ask === 'mc') { const r = form.querySelector(`input[value="${st.val}"]`); if (r) r.checked = true; } else $(prefix + '-val').value = st.val;
+    $(prefix + '-why').value = st.why;
+    form.querySelectorAll('input, textarea, button').forEach(x => { x.disabled = st.done; });
+    $(prefix + '-after').classList.toggle('hidden', !st.done);
+    if (st.done) reveal(it, st);
+  }
+  function reveal(it, st) {
+    const run = runMemory(it.code), lab = memLabel(run), fb = $(prefix + '-feedback');
+    let ok, head;
+    if (it.ask === 'mc') { const right = it.choices.findIndex(c => c.match === lab); ok = +st.val === right; head = ok ? 'Correct.' : `Not quite: ${it.choices[right].text}`; }
+    else { const norm = s => s.replace(/\r\n/g, '\n').replace(/\n$/, ''); ok = norm(st.val) === norm(run.out); head = ok ? 'Correct.' : 'Not quite. Compare (· is a space, ↵ a line break):'; }
+    fb.className = 'feedback ' + (ok ? 'good' : 'bad'); fb.textContent = '';
+    const p = el('p'); p.append(el('span', 'tag', head)); fb.append(p);
+    if (!ok && it.ask !== 'mc') {
+      const cmp = el('div', 'cmp');
+      const y = el('div'); y.append(el('div', 'small', 'Yours'), el('pre', null, visible(st.val.replace(/\r\n/g, '\n'))));
+      const j = el('div'); j.append(el('div', 'small', 'Java'), el('pre', null, visible(run.out)));
+      cmp.append(y, j); fb.append(cmp);
+    }
+    fb.append(el('p', null, 'Your reasoning: “' + st.why.trim() + '”'));
+    opts.onReveal(it, run);
+  }
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const it = items[idx], st = state[idx], v = readVal(it), why = $(prefix + '-why').value, err = $(prefix + '-err');
+    if (!v.trim()) { err.textContent = it.ask === 'mc' ? 'Choose an answer first.' : 'Write the output first.'; return; }
+    if (why.trim().length < 3) { err.textContent = 'Write a short reason before checking.'; return; }
+    Object.assign(st, { val: v, why, done: true });
+    show();
+  });
+  const save = () => { const st = state[idx]; if (!st.done) { st.val = readVal(items[idx]); st.why = $(prefix + '-why').value; } };
+  $(prefix + '-prev').addEventListener('click', () => { save(); idx--; show(); });
+  $(prefix + '-next').addEventListener('click', () => { save(); idx++; show(); });
+  show();
+}
+
+const predictView = new MemView(Object.assign($('p-view'), { id: 'p-view' }));
+const exploreView = new MemView(Object.assign($('e-view'), { id: 'e-view' }));
+questionMode('p', PREDICT, {
+  submitLabel: 'Check my prediction', reasonPrompt: 'Why? Which objects do the variables refer to?',
+  onReveal(it) { $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests; predictView.set(it.code); },
+});
+questionMode('t', TRANSFER, {
+  submitLabel: 'Check', reasonPrompt: 'Explain it: draw the arrows. Which objects does each variable refer to?',
+  onReveal(it, run) {
+    const m = $('t-model'); m.textContent = '';
+    m.append(el('b', null, 'Model working: '), run.steps.map(s => `Line ${s.line}: ${s.note}`).join(' '));
+    m.append(el('p', 'small', 'Compare with yours. Did you track each variable\'s arrow separately?'));
+  },
+});
+
+/* ---------- Explore ---------- */
+const ecode = $('e-code');
+function exploreUpdate() { exploreView.set(ecode.value); }
+PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => { ecode.value = p.code; exploreUpdate(); }); $('e-presets').append(c); });
+ecode.value = PRESETS[0].code;
+ecode.addEventListener('input', exploreUpdate);
+exploreUpdate();
+// Study-guide links open a specific program in Explore: ?code=<program>
+const params = new URLSearchParams(location.search);
+if (params.has('code')) { ecode.value = params.get('code'); exploreUpdate(); selectTab('explore'); }
+</script>
+</body>
+</html>

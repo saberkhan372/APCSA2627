@@ -28,5 +28,36 @@
       "2026-09-28"
     ],
     "tests": "expr"
+  },
+  {
+    "id": "memory",
+    "title": "Memory Diagram",
+    "file": "memory.html",
+    "dates": [
+      "2026-09-17",
+      "2026-09-24",
+      "2026-09-28"
+    ],
+    "tests": "memory"
+  },
+  {
+    "id": "randomrange",
+    "title": "Math.random Range Builder",
+    "file": "randomrange.html",
+    "dates": [
+      "2026-09-15",
+      "2026-09-28"
+    ],
+    "tests": "range"
+  },
+  {
+    "id": "output",
+    "title": "Output Predictor",
+    "file": "output.html",
+    "dates": [
+      "2026-09-24",
+      "2026-09-28"
+    ],
+    "tests": "output"
   }
 ]

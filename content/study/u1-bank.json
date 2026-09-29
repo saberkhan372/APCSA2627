@@ -1116,7 +1116,8 @@
     "code": "System.out.print(\"Rain\");\nSystem.out.println(\"bow \" + \"Road\");\nSystem.out.println(\"Sun\" + \"  set\");",
     "out": "Rainbow Road\nSun  set\n"
    }
-  ]
+  ],
+  "link": "output.html?code=System.out.print(%22Rain%22)%3B%0ASystem.out.println(%22bow%20%22%20%2B%20%22Road%22)%3B%0ASystem.out.println(%22Sun%22%20%2B%20%22%20%20set%22)%3B"
  },
  {
   "id": "u1-out-lines",
@@ -1136,7 +1137,8 @@
     "code": "System.out.println(\"one\\ttwo\\nthree\\\\four\");",
     "out": "one\ttwo\nthree\\four\n"
    }
-  ]
+  ],
+  "link": "output.html?code=System.out.println(%22one%5Cttwo%5Cnthree%5C%5Cfour%22)%3B"
  },
  {
   "id": "u1-out-quote",
@@ -1360,7 +1362,8 @@
     "label": "String:10"
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "output.html?code=System.out.println(%22Score%3A%20%22%20%2B%208%20%2B%202)%3B"
  },
  {
   "id": "u1-out-repair",
@@ -1425,7 +1428,8 @@
     "label": "String:7Sum: "
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "output.html?code=int%20a%20%3D%202%3B%0Aint%20b%20%3D%205%3B%0ASystem.out.println(%22Sum%3A%20%22%20%2B%20a%20%2B%20b)%3B"
  },
  {
   "id": "u1-out-mc",
@@ -1471,7 +1475,8 @@
     "out": "3345\n"
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "output.html?code=System.out.println(1%20%2B%202%20%2B%20%223%22%20%2B%204%20%2B%205)%3B"
  },
  {
   "id": "u1-out-cursor",
@@ -1491,7 +1496,8 @@
     "code": "String name = \"Kai\";\nSystem.out.print(\"Hi, \");\nSystem.out.print(name);\nSystem.out.println(\"!\");\nSystem.out.println(\"Bye\");",
     "out": "Hi, Kai!\nBye\n"
    }
-  ]
+  ],
+  "link": "output.html?code=String%20name%20%3D%20%22Kai%22%3B%0ASystem.out.print(%22Hi%2C%20%22)%3B%0ASystem.out.print(name)%3B%0ASystem.out.println(%22!%22)%3B%0ASystem.out.println(%22Bye%22)%3B"
  },
  {
   "id": "u1-out-space-tf",
@@ -1957,7 +1963,8 @@
     "code": "String s = \"Lin Wei\";\nint sp = s.indexOf(\" \");\nSystem.out.println(s.substring(sp + 1) + \", \" + s.substring(0, sp));",
     "out": "Wei, Lin\n"
    }
-  ]
+  ],
+  "link": "memory.html?code=String%20s%20%3D%20%22Lin%20Wei%22%3B%0Aint%20sp%20%3D%20s.indexOf(%22%20%22)%3B%0ASystem.out.println(s.substring(sp%20%2B%201)%20%2B%20%22%2C%20%22%20%2B%20s.substring(0%2C%20sp))%3B"
  },
  {
   "id": "u1-str-type1",
@@ -2140,7 +2147,8 @@
     "max": 10
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "randomrange.html?f=(int)%20(Math.random()%20*%208)%20%2B%203"
  },
  {
   "id": "u1-met-min",
@@ -2162,7 +2170,8 @@
     "max": 15
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "randomrange.html?f=(int)%20(Math.random()%20*%206)%20%2B%2010"
  },
  {
   "id": "u1-met-formula",
@@ -2227,7 +2236,8 @@
     "max": 49
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "randomrange.html?f=(int)%20(Math.random()%20*%2011)%20%2B%2020"
  },
  {
   "id": "u1-met-die",
@@ -2280,7 +2290,8 @@
     "max": 6
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "randomrange.html?f=(int)%20Math.random()%20*%206%20%2B%201"
  },
  {
   "id": "u1-met-sig1",
@@ -2559,7 +2570,8 @@
     "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = a;\nb.addScore(5);\nSystem.out.println(a.getScore());",
     "out": "15\n"
    }
-  ]
+  ],
+  "link": "memory.html?code=Player%20a%20%3D%20new%20Player(%22Ana%22%2C%2010)%3B%0APlayer%20b%20%3D%20a%3B%0Ab.addScore(5)%3B%0ASystem.out.println(a.getScore())%3B"
  },
  {
   "id": "u1-obj-two",
@@ -2579,7 +2591,8 @@
     "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = new Player(\"Ana\", 10);\nb.addScore(5);\nSystem.out.println(a.getScore() + \" \" + b.getScore());",
     "out": "10 15\n"
    }
-  ]
+  ],
+  "link": "memory.html?code=Player%20a%20%3D%20new%20Player(%22Ana%22%2C%2010)%3B%0APlayer%20b%20%3D%20new%20Player(%22Ana%22%2C%2010)%3B%0Ab.addScore(5)%3B%0ASystem.out.println(a.getScore()%20%2B%20%22%20%22%20%2B%20b.getScore())%3B"
  },
  {
   "id": "u1-obj-reassign",
@@ -2599,7 +2612,8 @@
     "code": "Player a = new Player(\"Ana\", 10);\nPlayer b = a;\na = new Player(\"Bo\", 3);\nb.addScore(1);\nSystem.out.println(a.getName() + \" \" + b.getScore());",
     "out": "Bo 11\n"
    }
-  ]
+  ],
+  "link": "memory.html?code=Player%20a%20%3D%20new%20Player(%22Ana%22%2C%2010)%3B%0APlayer%20b%20%3D%20a%3B%0Aa%20%3D%20new%20Player(%22Bo%22%2C%203)%3B%0Ab.addScore(1)%3B%0ASystem.out.println(a.getName()%20%2B%20%22%20%22%20%2B%20b.getScore())%3B"
  },
  {
   "id": "u1-obj-null",
@@ -2645,7 +2659,8 @@
     "type": "NullPointerException"
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "memory.html?code=Player%20p%20%3D%20null%3B%0ASystem.out.println(p.getScore())%3B"
  },
  {
   "id": "u1-obj-equals",
@@ -2691,7 +2706,8 @@
     "out": "true false\n"
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "memory.html?code=String%20s%20%3D%20new%20String(%22hi%22)%3B%0AString%20t%20%3D%20new%20String(%22hi%22)%3B%0ASystem.out.println(s.equals(t)%20%2B%20%22%20%22%20%2B%20(s%20%3D%3D%20t))%3B"
  },
  {
   "id": "u1-obj-swapref",
@@ -2737,7 +2753,8 @@
     "out": "10 10 5\n"
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "memory.html?code=Player%20a%20%3D%20new%20Player(%22Ana%22%2C%2010)%3B%0APlayer%20b%20%3D%20new%20Player(%22Bo%22%2C%204)%3B%0APlayer%20c%20%3D%20b%3B%0Ab%20%3D%20a%3B%0Ac.addScore(1)%3B%0ASystem.out.println(a.getScore()%20%2B%20%22%20%22%20%2B%20b.getScore()%20%2B%20%22%20%22%20%2B%20c.getScore())%3B"
  },
  {
   "id": "u1-obj-nullafter",
@@ -2783,7 +2800,8 @@
     "out": "10\n"
    }
   ],
-  "conceptual": false
+  "conceptual": false,
+  "link": "memory.html?code=Player%20a%20%3D%20new%20Player(%22Ana%22%2C%2010)%3B%0APlayer%20b%20%3D%20a%3B%0Aa%20%3D%20null%3B%0ASystem.out.println(b.getScore())%3B"
  },
  {
   "id": "u1-obj-copy-tf",
@@ -2845,6 +2863,7 @@
     "code": "String w = \"hello\";\nw = w.substring(1);\nSystem.out.println(w);",
     "out": "ello\n"
    }
-  ]
+  ],
+  "link": "memory.html?code=String%20w%20%3D%20%22hello%22%3B%0Aw%20%3D%20w.substring(1)%3B%0ASystem.out.println(w)%3B"
  }
 ]
