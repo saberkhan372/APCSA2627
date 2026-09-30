@@ -26,13 +26,16 @@ jobs:
       - name: Real Java matches every case table and study item
         run: |
           status=0
+          summary=""
           for j in visualizers/tests/*Check.java study/tests/*Check.java; do
             (cd "$(dirname "$j")" && java "$(basename "$j")") | tee "$j.txt"
             name=$(basename "$j" .java)
-            echo "::notice title=$name vs real Java::$(tail -n 1 "$j.txt")"
+            summary="$summary%0A$name: $(tail -n 1 "$j.txt")"
             grep '^FAIL' "$j.txt" | head -n 8 | while IFS= read -r line; do echo "::error title=$name::$line"; done
             tail -n 1 "$j.txt" | grep -q '^PASS' || status=1
           done
+          # One notice for all files: GitHub shows only the first 10 annotations of a step.
+          echo "::notice title=Real Java checks::$summary"
           exit $status
       - name: Code tasks - the solution passes and the unfinished starter does not
         run: |
