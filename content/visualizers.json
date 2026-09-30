@@ -115,5 +115,17 @@
       "2027-02-01"
     ],
     "tests": "arraylist"
+  },
+  {
+    "id": "sorting",
+    "title": "Search and Sort Workbench",
+    "file": "sorting.html",
+    "dates": [
+      "2027-02-22",
+      "2027-02-24",
+      "2027-02-26",
+      "2027-03-08"
+    ],
+    "tests": "sorting"
   }
 ]

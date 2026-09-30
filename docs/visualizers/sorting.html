@@ -1,0 +1,2488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search and Sort Workbench</title>
+<style>
+/* Palette and chrome match the course site (web/site.css). */
+:root {
+  --bg: #FAFBFA; --panel: #FFFFFF; --ink: #16211F; --muted: #46524F; --faint: #6F7C79;
+  --line: #D8E0DD; --soft: #EAF0EE;
+  --accent: #0B5570; --accent-ink: #FFFFFF; --accent-soft: #E2EDF3;
+  --same-bg: #E4F1EC; --same-line: #1F7A63; --same-ink: #145443;
+  --diff-bg: #F8E5E1; --diff-line: #A63D2F; --diff-ink: #85291E;
+  --extra-bg: #FBF0DF; --extra-line: #9A5B14; --extra-ink: #6E400C;
+  --skip-ink: #8C9794; --str: #6B4A8C;
+  --serif: "Iowan Old Style", Charter, Georgia, "Times New Roman", serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --pad: clamp(1rem, 4vw, 2.75rem);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111917; --panel: #171F1E; --ink: #E6EDEA; --muted: #A9B6B2; --faint: #7B8783;
+    --line: #2A3634; --soft: #1E2827;
+    --accent: #6FBEE2; --accent-ink: #0C1A20; --accent-soft: #0C2734;
+    --same-bg: #10312A; --same-line: #5FCFAF; --same-ink: #A6E6D2;
+    --diff-bg: #3A1D18; --diff-line: #E57A68; --diff-ink: #F4B8AC;
+    --extra-bg: #33270F; --extra-line: #E0A552; --extra-ink: #F0D29A;
+    --skip-ink: #5F6B68; --str: #B497D6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111917; --panel: #171F1E; --ink: #E6EDEA; --muted: #A9B6B2; --faint: #7B8783;
+  --line: #2A3634; --soft: #1E2827;
+  --accent: #6FBEE2; --accent-ink: #0C1A20; --accent-soft: #0C2734;
+  --same-bg: #10312A; --same-line: #5FCFAF; --same-ink: #A6E6D2;
+  --diff-bg: #3A1D18; --diff-line: #E57A68; --diff-ink: #F4B8AC;
+  --extra-bg: #33270F; --extra-line: #E0A552; --extra-ink: #F0D29A;
+  --skip-ink: #5F6B68; --str: #B497D6;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 17px/1.55 var(--sans); -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1040px; margin-inline: auto; padding-inline: var(--pad); }
+main.wrap { padding-block: 2rem 4rem; }
+a { color: var(--accent); }
+.skip-link {
+  position: fixed; top: .5rem; left: .5rem; z-index: 100; transform: translateY(-160%);
+  padding: .45rem .75rem; background: var(--ink); color: var(--panel); border-radius: 2px;
+  font: .76rem var(--mono);
+}
+.skip-link:focus { transform: translateY(0); }
+.masthead { border-bottom: 1px solid var(--line); background: var(--panel); }
+.masthead .wrap { display: flex; align-items: baseline; gap: .9rem; flex-wrap: wrap; padding-block: .8rem; }
+.logo { font: 600 .92rem var(--mono); color: var(--ink); text-decoration: none; }
+.masthead nav { margin-left: auto; display: flex; gap: 1rem; flex-wrap: wrap; font: .75rem var(--mono); }
+.masthead nav a { color: var(--faint); text-decoration: none; }
+.masthead nav a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.masthead nav a[aria-current="page"] { color: var(--same-line); }
+.page-heading { display: grid; gap: .6rem; margin-bottom: 1.6rem; }
+.kicker { font: .88rem var(--mono); color: var(--accent); letter-spacing: .03em; margin: 0; }
+.kicker a { color: inherit; }
+h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.16; letter-spacing: -.018em; margin: 0; }
+h1 code { font-family: var(--mono); font-weight: 600; font-size: .9em; }
+.lede { font-size: 1.1rem; color: var(--muted); margin: 0; max-width: 66ch; }
+.mono, code { font-family: var(--mono); }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+.tab {
+  appearance: none; border: 1px solid transparent; border-bottom: none; background: none;
+  font: 600 15px var(--sans); color: var(--muted); padding: 9px 14px; border-radius: 3px 3px 0 0;
+  cursor: pointer; position: relative; top: 1px;
+}
+.tab[aria-selected="true"] { background: var(--panel); color: var(--ink); border-color: var(--line); box-shadow: inset 0 3px 0 var(--same-line); }
+.tab .n { font-weight: 400; color: var(--muted); font-size: 13px; margin-left: 4px; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: clamp(14px, 3vw, 22px); }
+.panel + .panel { margin-top: 14px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.spacer { flex: 1; }
+.small { font-size: 14px; color: var(--muted); }
+
+button.btn {
+  appearance: none; font: 600 14px var(--sans); border-radius: 3px; padding: 8px 14px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+}
+button.btn:hover:not(:disabled) { border-color: var(--accent); }
+button.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.btn:disabled { opacity: .45; cursor: default; }
+:focus-visible { outline: 2px solid var(--same-line); outline-offset: 3px; border-radius: 2px; }
+
+/* Expression line */
+.expr {
+  font: 600 22px/1.4 var(--mono); background: var(--soft); border-radius: 8px; padding: 12px 14px;
+  overflow-x: auto; white-space: pre; margin: 10px 0 14px;
+}
+.expr .s { color: var(--str); }
+.qmeta { font-size: 14px; color: var(--muted); }
+
+/* Forms */
+label.field { display: block; font-weight: 600; font-size: 14px; margin-bottom: 10px; }
+label.field span.hint { font-weight: 400; color: var(--muted); }
+input[type="text"], textarea {
+  display: block; width: 100%; margin-top: 4px; font: 16px var(--sans); color: var(--ink);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+}
+input.num { width: 9em; font-family: var(--mono); font-size: 18px; }
+input.strin { font-family: var(--mono); font-size: 18px; }
+textarea { min-height: 3.2em; resize: vertical; }
+input:disabled, textarea:disabled { opacity: .75; }
+.formerr { color: var(--diff-ink); font-size: 14px; min-height: 1.4em; margin: 2px 0 0; }
+
+.feedback { border-radius: 10px; padding: 12px 14px; margin-top: 12px; border: 1px solid; }
+.feedback.good { background: var(--same-bg); border-color: var(--same-line); color: var(--same-ink); }
+.feedback.part { background: var(--extra-bg); border-color: var(--extra-line); color: var(--extra-ink); }
+.feedback.bad { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
+.feedback p { margin: 4px 0; }
+.feedback .tag { font-weight: 700; }
+.note { background: var(--soft); border-radius: 8px; padding: 10px 12px; font-size: 15px; margin-top: 10px; }
+.note b { font-weight: 700; }
+
+/* Explore inputs */
+.inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .inputs { grid-template-columns: 1fr; } }
+.presets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.chip {
+  appearance: none; font: 13px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  border-radius: 999px; padding: 4px 10px; cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); }
+
+/* Trace */
+.trace { margin-top: 14px; }
+.trace:focus-visible { outline-offset: 6px; border-radius: 6px; }
+.gridwrap { overflow-x: auto; padding: 4px 2px 8px; }
+.grid { display: grid; gap: 4px; width: max-content; }
+.rl { font: 600 13px var(--sans); color: var(--muted); align-self: center; padding-right: 6px; text-align: right; }
+.rl code { font-size: 12px; }
+.idx { font: 12px var(--mono); color: var(--muted); text-align: center; height: 30px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.idx .ptr { color: var(--accent); font-size: 14px; line-height: 1; visibility: hidden; }
+.col-current .idx .ptr, .idx.col-current .ptr { visibility: visible; }
+.tile {
+  width: 46px; height: 58px; border: 2px solid var(--line); border-radius: 8px; background: var(--panel);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: background-color .25s, border-color .25s, transform .25s;
+}
+.tile .ch { font: 700 20px/1.1 var(--mono); }
+.tile .ch.sp { font-size: 12px; font-weight: 600; color: var(--muted); }
+.tile .cu { font: 12px var(--mono); color: var(--muted); }
+.tile.none { border-style: dashed; background: transparent; }
+.tile.none .ch { font: 12px var(--sans); color: var(--muted); }
+.st { font: 600 11px/1.15 var(--sans); text-align: center; min-height: 28px; }
+.s-same .tile:not(.none) { background: var(--same-bg); border-color: var(--same-line); }
+.st.s-same { color: var(--same-ink); }
+.s-diff .tile:not(.none) { background: var(--diff-bg); border-color: var(--diff-line); }
+.st.s-diff { color: var(--diff-ink); }
+.s-extra .tile:not(.none) { background: var(--extra-bg); border-color: var(--extra-line); }
+.st.s-extra { color: var(--extra-ink); }
+.s-skip .tile { opacity: .45; }
+.st.s-skip { color: var(--skip-ink); font-weight: 400; }
+.col-current .tile { transform: translateY(-3px); box-shadow: 0 0 0 3px var(--accent); }
+.empty-note { font-size: 13px; color: var(--muted); margin: 2px 0 0; }
+
+.tracebody { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 14px; margin-top: 8px; }
+@media (max-width: 720px) { .tracebody { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .expr { font-size: 17px; } .op { font-size: 15px; } }
+.stepbox { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.stepcount { font-size: 13px; color: var(--muted); }
+.op { font: 700 17px/1.4 var(--mono); margin: 4px 0 6px; overflow-wrap: anywhere; }
+.expl { margin: 0; }
+.algo { list-style: none; margin: 0; padding: 10px 0; background: var(--soft); border-radius: 10px; font: 13px/1.6 var(--mono); overflow-x: auto; }
+.algo li { padding: 0 12px; white-space: pre; border-left: 4px solid transparent; }
+.algo li.on { background: var(--accent-soft); border-left-color: var(--accent); font-weight: 700; }
+.algo .cap { font: 12px var(--sans); color: var(--muted); padding: 0 12px 4px; white-space: normal; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+.keys { font-size: 13px; color: var(--muted); }
+kbd { font: 12px var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--bg); }
+
+/* Result */
+.result { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.resrow { display: flex; flex-wrap: wrap; gap: 18px; align-items: baseline; }
+.big { font: 700 34px/1 var(--mono); }
+.sign { font-weight: 700; }
+.meaning { margin: 6px 0 0; }
+.nline { position: relative; display: grid; grid-template-columns: 1fr 72px 1fr; margin: 16px 0 4px; max-width: 520px; font-size: 13px; text-align: center; }
+.nline > div { border-top: 3px solid var(--line); padding-top: 6px; color: var(--muted); }
+.nline > div.on { border-top-color: var(--accent); color: var(--ink); font-weight: 700; }
+.nline > div.on::before { content: "▼"; display: block; color: var(--accent); margin-top: -26px; margin-bottom: 4px; font-size: 14px; line-height: 1; }
+.apnote { font-size: 14px; color: var(--muted); margin: 10px 0 0; max-width: 70ch; }
+
+/* Reference */
+details.ref { margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.refgroup { margin-top: 8px; }
+.refgroup .gl { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+.chips { display: flex; flex-wrap: wrap; gap: 3px; }
+.rc { font: 11px/1.2 var(--mono); border: 1px solid var(--line); border-radius: 4px; padding: 2px 4px; text-align: center; min-width: 30px; }
+.rc b { display: block; font-size: 13px; }
+.rc.hl { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.reffact { font-size: 13px; margin: 8px 0 2px; }
+
+.hidden { display: none !important; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+  .col-current .tile { transform: none; }
+}
+/* ---- Search and Sort Workbench ---- */
+.runner-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px; margin-top: 12px; }
+@media (max-width: 980px) { .runner-grid { grid-template-columns: minmax(0, 1fr); } }
+.colhead { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 12px 0 6px; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.seg button { font: 600 14px var(--sans); padding: 6px 12px; border: 1.5px solid var(--line); border-radius: 999px; background: var(--panel); color: var(--ink); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.inputs { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.inputs .field { margin: 0; }
+.inputs input { font: 15px var(--mono); }
+input.datain { width: min(22rem, 100%); }
+input.targetin { width: 6rem; }
+.warn { border-left: 4px solid var(--diff-line); background: var(--diff-bg); color: var(--diff-ink); border-radius: 0 6px 6px 0; padding: 6px 10px; margin-top: 8px; font-size: 15px; }
+.bars { display: flex; align-items: flex-end; gap: 4px; min-height: 150px; padding: 8px 4px 0; overflow-x: auto; }
+.bar { flex: 1 1 0; min-width: 30px; max-width: 56px; display: flex; flex-direction: column; align-items: center; }
+.bar .v { font: 700 14px var(--mono); margin-bottom: 2px; }
+.bar .col { width: 100%; border: 1.5px solid var(--line); border-bottom: 0; border-radius: 4px 4px 0 0; background: var(--soft); transition: height .25s; }
+.bar .ix { font: 11px var(--mono); color: var(--muted); border-top: 2px solid var(--line); width: 100%; text-align: center; padding-top: 2px; }
+.bar .mk { font: 700 11px var(--mono); color: var(--accent); min-height: 1.3em; text-align: center; line-height: 1.2; }
+.bar.sorted .col { background: var(--same-bg); border-color: var(--same-line); }
+.bar.cmp .col { background: var(--accent-soft); border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.bar.write .col { background: var(--extra-bg); border-color: var(--extra-line); box-shadow: 0 0 0 2px var(--extra-line); }
+.bar.out { opacity: .35; }
+.bar.found .col { background: var(--same-bg); border-color: var(--same-line); box-shadow: 0 0 0 3px var(--same-line); }
+.bar.hole .col { border-style: dashed; background: transparent; }
+.keybox { font: 700 14px var(--mono); color: var(--extra-line); min-height: 1.4em; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; margin-top: 8px; }
+.counts b { font-family: var(--mono); }
+.passwrap { overflow-x: auto; }
+table.passes { border-collapse: collapse; font: 14px var(--mono); }
+table.passes th, table.passes td { border: 1px solid var(--line); padding: 3px 8px; text-align: center; }
+table.passes th { font: 600 12px var(--sans); color: var(--muted); background: var(--soft); }
+table.passes td.set { background: var(--same-bg); color: var(--same-ink); }
+table.passes tr.now td { font-weight: 700; }
+.jump { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.limits { font-size: 14px; color: var(--muted); margin-top: 14px; }
+@media (prefers-reduced-motion: reduce) { .bar .col { transition: none; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="../study/index.html">Study</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
+<main id="main" class="wrap" tabindex="-1">
+  <header class="page-heading">
+    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 4 · Searching and sorting</p>
+    <h1>Search and Sort Workbench</h1>
+    <p class="lede">Run the standard AP versions of linear search, binary search, selection sort and insertion sort on your own data. Predict the next comparison, swap or shift, watch the <b>sorted part</b> grow one <b>pass</b> at a time, and follow binary search's <b>shrinking interval</b>.</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Mode">
+    <button class="tab" role="tab" id="tab-predict" aria-controls="mode-predict" aria-selected="true">Predict</button>
+    <button class="tab" role="tab" id="tab-explore" aria-controls="mode-explore" aria-selected="false" tabindex="-1">Explore</button>
+    <button class="tab" role="tab" id="tab-transfer" aria-controls="mode-transfer" aria-selected="false" tabindex="-1">Transfer</button>
+  </div>
+
+  <section id="mode-predict" role="tabpanel" aria-labelledby="tab-predict">
+    <div class="panel">
+      <div class="row"><span class="qmeta" id="p-count"></span><span class="spacer"></span><button class="btn" id="p-prev">← Previous</button><button class="btn" id="p-next">Next question →</button></div>
+      <p class="qprompt" id="p-ask"></p>
+      <div class="tui-codebox" id="p-code" aria-label="Algorithm and data"></div>
+      <form id="p-form" novalidate></form>
+      <div id="p-after" class="hidden"><div id="p-feedback" class="feedback" role="status"></div><div class="note" id="p-tests"></div><div id="p-view"></div></div>
+    </div>
+  </section>
+
+  <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
+    <div class="panel">
+      <div class="seg" role="group" aria-label="Algorithm" id="e-algos"></div>
+      <div class="inputs">
+        <label class="field">Data <span class="hint">(up to 12 whole numbers, separated by commas)</span><input type="text" class="datain" id="e-data" spellcheck="false" autocomplete="off"></label>
+        <label class="field" id="e-targetf">Target <input type="text" class="targetin" id="e-target" inputmode="numeric" spellcheck="false" autocomplete="off"></label>
+      </div>
+      <div class="small">Try:</div>
+      <div class="presets" id="e-presets"></div>
+      <div id="e-msg"></div>
+      <div id="e-view"></div>
+      <p class="limits">The code is the standard version from class, run step by step by the same Java interpreter as the other tools. A comparison here means one comparison between array elements, or between an element and the target.</p>
+    </div>
+  </section>
+
+  <section id="mode-transfer" role="tabpanel" aria-labelledby="tab-transfer" class="hidden">
+    <div class="panel">
+      <p class="small" style="margin-top:0">No workbench here. Trace it on paper: write the array after each pass, or low, mid and high for each check. Then check.</p>
+      <div class="row"><span class="qmeta" id="t-count"></span><span class="spacer"></span><button class="btn" id="t-prev">← Previous</button><button class="btn" id="t-next">Next question →</button></div>
+      <p class="qprompt" id="t-ask"></p>
+      <div class="tui-codebox" id="t-code" aria-label="Algorithm and data"></div>
+      <form id="t-form" novalidate></form>
+      <div id="t-after" class="hidden"><div id="t-feedback" class="feedback" role="status"></div><div class="note" id="t-model"></div></div>
+    </div>
+  </section>
+</main>
+
+<script>
+// EXPR ENGINE START (copied from exprtracer.html by visualizers/tests/sync-expr-engine.mjs; do not edit here)
+// A small Java expression evaluator for int, double and String, following the JLS:
+// everything is parsed and type-checked first (like javac), then evaluated left to right
+// with 32-bit int arithmetic, truncating division, and Java's Double.toString formatting.
+// Anything the tool cannot judge is reported as unsupported, never as a Java error.
+const INT_MAX = 2147483647, INT_MIN = -2147483648;
+
+class JavaCompileError extends Error {}
+class Unsupported extends Error {}
+class JavaRuntimeError extends Error { constructor(type, msg) { super(msg); this.javaType = type; } }
+
+const RESERVED = new Set(('abstract assert boolean break byte case catch char class const continue default do double else enum ' +
+  'extends final finally float for goto if implements import instanceof int interface long native new package private ' +
+  'protected public return short static strictfp super switch synchronized this throw throws transient try void volatile ' +
+  'while true false null _').split(' '));
+const OTHER_TYPES = new Set(['boolean', 'char', 'byte', 'short', 'long', 'float', 'var']);
+
+/* ---------- Double.toString (Java 19 and later) ---------- */
+// Exact rationals with BigInt, used to compare decimal candidates against the exact double value.
+function exactOf(x) {
+  const dv = new DataView(new ArrayBuffer(8));
+  dv.setFloat64(0, x);
+  const hi = dv.getUint32(0), lo = dv.getUint32(4), bits = (hi >>> 20) & 0x7ff;
+  let m = (BigInt(hi & 0xfffff) << 32n) | BigInt(lo), e;
+  if (bits === 0) e = -1074; else { m |= 1n << 52n; e = bits - 1075; }
+  return e >= 0 ? { n: m << BigInt(e), d: 1n } : { n: m, d: 1n << BigInt(-e) };
+}
+function decimalOf(n, q) { return q >= 0 ? { n: n * 10n ** BigInt(q), d: 1n } : { n, d: 10n ** BigInt(-q) }; }
+function distance(a, b) { const t = a.n * b.d - b.n * a.d; return { n: t < 0n ? -t : t, d: a.d * b.d }; }
+function compare(a, b) { const l = a.n * b.d, r = b.n * a.d; return l < r ? -1 : l > r ? 1 : 0; }
+
+// Java prints the shortest decimal that rounds back to the double, but when that is a single
+// digit it also considers two-digit decimals and keeps whichever is closest to the exact value
+// (so Double.MIN_VALUE prints as 4.9E-324 where JavaScript prints 5e-324).
+function javaDouble(d) {
+  if (Number.isNaN(d)) return 'NaN';
+  if (d === Infinity) return 'Infinity';
+  if (d === -Infinity) return '-Infinity';
+  if (d === 0) return Object.is(d, -0) ? '-0.0' : '0.0';
+  const sign = d < 0 ? '-' : '', a = Math.abs(d);
+  const [mant, expStr] = a.toExponential().split('e');
+  let digits = mant.replace('.', ''), exp = parseInt(expStr, 10);
+  if (digits.length === 1) {
+    const x = exactOf(a);
+    const [m2, e2s] = a.toExponential(1).split('e');
+    const n2 = BigInt(m2.replace('.', '')), q = parseInt(e2s, 10) - 1;
+    const above = compare(decimalOf(n2, q), x) > 0;
+    const cands = [[n2, q], above ? (n2 === 10n ? [99n, q - 1] : [n2 - 1n, q]) : [n2 + 1n, q]];
+    let best = null;
+    for (const [n, qq] of cands) {
+      if (Number(`${n}e${qq}`) !== a) continue;
+      const dist = distance(decimalOf(n, qq), x);
+      const c = best ? compare(dist, best.dist) : -1;
+      if (c < 0 || (c === 0 && n % 2n === 0n)) best = { n, q: qq, dist };
+    }
+    if (best) {
+      const s = best.n.toString();
+      exp = best.q + s.length - 1;
+      digits = s.replace(/0+$/, '') || '0';
+    }
+  }
+  if (a >= 1e-3 && a < 1e7) {
+    let intPart, frac;
+    if (exp >= 0) { intPart = digits.slice(0, exp + 1).padEnd(exp + 1, '0'); frac = digits.slice(exp + 1); }
+    else { intPart = '0'; frac = '0'.repeat(-exp - 1) + digits; }
+    return sign + intPart + '.' + (frac || '0');
+  }
+  return sign + digits[0] + '.' + (digits.slice(1) || '0') + 'E' + exp;
+}
+function javaEscape(s) {
+  return s.replace(/[\\"\n\t\r\b\f]/g, c => ({ '\\': '\\\\', '"': '\\"', '\n': '\\n', '\t': '\\t', '\r': '\\r', '\b': '\\b', '\f': '\\f' }[c]));
+}
+function show(type, v) { return type === 'String' ? '"' + javaEscape(v) + '"' : type === 'double' ? javaDouble(v) : String(v); }
+function asText(type, v) { return type === 'String' ? v : type === 'double' ? javaDouble(v) : String(v); }
+
+/* ---------- Tokenizer ---------- */
+// Every Java operator is recognized, so unsupported ones are reported as unsupported, not as errors.
+const OPERATORS = ['>>>=', '<<=', '>>=', '>>>', '...', '->', '::', '++', '--', '&&', '||', '==', '!=', '<=', '>=',
+  '+=', '-=', '*=', '/=', '%=', '&=', '|=', '^=', '<<', '>>', '+', '-', '*', '/', '%', '(', ')', ',', ';', '=',
+  '<', '>', '!', '~', '?', ':', '&', '|', '^', '[', ']', '{', '}', '.', '@'];
+const SUPPORTED_OPS = new Set(['+', '-', '*', '/', '%', '(', ')', ',']);
+const UNSUPPORTED_OP_NOTE = {
+  '++': 'the ++ operator', '--': 'the -- operator', '=': 'assignment inside an expression',
+  '.': 'method calls and fields such as .length()', ';': 'more than one statement',
+};
+
+function tokenize(src) {
+  const toks = [];
+  let i = 0;
+  while (i < src.length) {
+    const c = src[i], rest = src.slice(i);
+    if (' \t\n\r\f'.includes(c)) { i++; continue; }
+    if (rest.startsWith('//') || rest.startsWith('/*')) throw new Unsupported('this tool does not read comments.');
+    if (/^(\d|\.\d)/.test(rest)) {
+      const raw = /^(?:\d|\.\d)(?:[eEpP][+-]|[\w.])*/.exec(rest)[0];
+      toks.push({ k: 'num', raw, pos: i }); i += raw.length; continue;
+    }
+    const id = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*/.exec(rest);
+    if (id) { toks.push({ k: 'id', raw: id[0], pos: i }); i += id[0].length; continue; }
+    if (c === "'") throw new Unsupported('char values such as \'a\' are not supported here (this tool handles int, double and String).');
+    if (c === '"') {
+      if (rest.startsWith('"""')) throw new Unsupported('text blocks (""") are not supported here.');
+      let j = i + 1, val = '';
+      while (j < src.length && src[j] !== '"') {
+        if (src[j] === '\n' || src[j] === '\r') throw new JavaCompileError('unclosed String literal: a String cannot continue onto the next line.');
+        if (src[j] !== '\\') { val += src[j++]; continue; }
+        const e = src[j + 1];
+        const simple = { b: '\b', t: '\t', n: '\n', f: '\f', r: '\r', s: ' ', '"': '"', "'": "'", '\\': '\\' };
+        if (e in simple) { val += simple[e]; j += 2; continue; }
+        if (e === 'u') throw new Unsupported('unicode escapes such as \\u0041 are not supported here.');
+        const oct = /^[0-3][0-7]{0,2}|^[4-7][0-7]?/.exec(src.slice(j + 1));
+        if (oct) { val += String.fromCharCode(parseInt(oct[0], 8)); j += 1 + oct[0].length; continue; }
+        throw new JavaCompileError(`illegal escape character in a String literal: \\${e === undefined ? '' : e}`);
+      }
+      if (j >= src.length) throw new JavaCompileError('unclosed String literal: a closing " is missing.');
+      toks.push({ k: 'str', value: val, raw: src.slice(i, j + 1), pos: i });
+      i = j + 1; continue;
+    }
+    const op = OPERATORS.find(o => rest.startsWith(o));
+    if (op) {
+      if (!SUPPORTED_OPS.has(op)) throw new Unsupported(`${UNSUPPORTED_OP_NOTE[op] || `the ${op} operator`}.`);
+      toks.push({ k: op, raw: op, pos: i }); i += op.length; continue;
+    }
+    throw new Unsupported(`this tool does not handle the character ${JSON.stringify(c)}.`);
+  }
+  toks.push({ k: 'end', raw: '', pos: src.length });
+  return toks;
+}
+
+/* ---------- Parser ---------- */
+let nodeId = 0;
+function numberNode(raw, mk) {
+  if (/^\d+$/.test(raw)) {
+    if (raw.length > 1 && raw[0] === '0') {
+      if (!/^[0-7]+$/.test(raw)) throw new Unsupported(`${raw}: a leading 0 makes Java read a number as octal (base 8), which has no digits 8 or 9. This tool does not evaluate it.`);
+      const v = parseInt(raw, 8);
+      if (v > INT_MAX) throw new Unsupported(`octal literals this large are not supported here.`);
+      return mk({ k: 'num', type: 'int', value: v, raw, octal: true });
+    }
+    const v = Number(raw);
+    if (v > INT_MAX) throw new JavaCompileError(`integer number too large: ${raw}`);
+    return mk({ k: 'num', type: 'int', value: v, raw });
+  }
+  if (/^(\d+\.\d*|\d+)([eE][+-]?\d+)?$/.test(raw)) {
+    const v = Number(raw);
+    if (v === Infinity) throw new JavaCompileError(`floating-point number too large: ${raw}`);
+    if (v === 0 && /[1-9]/.test(raw.replace(/[eE].*$/, ''))) throw new JavaCompileError(`floating-point number too small: ${raw}`);
+    return mk({ k: 'num', type: 'double', value: v, raw });
+  }
+  throw new Unsupported(`this tool does not handle the number ${raw} (hex, binary, underscores, a leading dot, or suffixes such as L, f or d).`);
+}
+
+function parseExpression(src) {
+  const toks = tokenize(src);
+  let p = 0;
+  const peek = (k = 0) => toks[p + k], next = () => toks[p++];
+  const expect = k => {
+    if (peek().k !== k) throw new JavaCompileError(`expected ${k === 'end' ? 'the end of the expression' : `"${k}"`} but found ${peek().raw ? `"${peek().raw}"` : 'the end'}.`);
+    return next();
+  };
+  const mk = o => ({ id: nodeId++, ...o });
+  function additive() {
+    let l = multiplicative();
+    while (peek().k === '+' || peek().k === '-') { const op = next().k; l = mk({ k: 'bin', op, l, r: multiplicative() }); }
+    return l;
+  }
+  function multiplicative() {
+    let l = unary();
+    while (peek().k === '*' || peek().k === '/' || peek().k === '%') { const op = next().k; l = mk({ k: 'bin', op, l, r: unary() }); }
+    return l;
+  }
+  function unary() {
+    const t = peek();
+    if (t.k === '-' || t.k === '+') {
+      next();
+      if (t.k === '-' && peek().k === 'num') {
+        // -2147483648 is legal only as a negated literal; any -literal reads as one value.
+        if (peek().raw === '2147483648') { next(); return mk({ k: 'num', type: 'int', value: INT_MIN, raw: '-2147483648' }); }
+        const lit = numberNode(next().raw, o => o);
+        return mk({ ...lit, value: lit.type === 'int' ? (-lit.value) | 0 : -lit.value, raw: '-' + lit.raw });
+      }
+      return mk({ k: 'neg', op: t.k, e: unary() });
+    }
+    if (t.k === '(' && peek(1).k === 'id' && peek(2).k === ')') {
+      const name = peek(1).raw;
+      if (name === 'int' || name === 'double') { next(); next(); next(); return mk({ k: 'cast', to: name, e: unary() }); }
+      if (OTHER_TYPES.has(name) || /^[A-Z]/.test(name)) throw new Unsupported(`casts to ${name} are not supported here.`);
+    }
+    return primary();
+  }
+  function primary() {
+    const t = next();
+    if (t.k === 'num') return numberNode(t.raw, mk);
+    if (t.k === 'str') return mk({ k: 'str', value: t.value, raw: t.raw });
+    if (t.k === '(') { const e = additive(); expect(')'); return mk({ k: 'group', e }); }
+    if (t.k === 'id') {
+      if (t.raw === 'Integer.MAX_VALUE' || t.raw === 'Integer.MIN_VALUE') return mk({ k: 'const', name: t.raw, type: 'int', value: t.raw === 'Integer.MAX_VALUE' ? INT_MAX : INT_MIN });
+      if (/^Math\.(abs|pow|sqrt)$/.test(t.raw) && peek().k === '(') {
+        next();
+        const args = [];
+        if (peek().k !== ')') { args.push(additive()); while (peek().k === ',') { next(); args.push(additive()); } }
+        expect(')');
+        return mk({ k: 'call', fn: t.raw.slice(5), args });
+      }
+      if (t.raw.includes('.') || peek().k === '(') throw new Unsupported(`this tool supports Math.abs, Math.pow, Math.sqrt, Integer.MAX_VALUE and Integer.MIN_VALUE, not ${t.raw}${peek().k === '(' ? '(…)' : ''}.`);
+      if (RESERVED.has(t.raw) || t.raw === 'var') throw new Unsupported(`${t.raw} is not supported here (this tool handles int, double and String values).`);
+      return mk({ k: 'var', name: t.raw });
+    }
+    throw new JavaCompileError(t.k === 'end' ? 'the expression ends too early.' : `unexpected "${t.raw}".`);
+  }
+  const e = additive();
+  expect('end');
+  return e;
+}
+
+function checkName(name) {
+  if (RESERVED.has(name)) throw new JavaCompileError(`${name} is a reserved word in Java and cannot be a variable name.`);
+}
+// "int x = 5 / 2;" or a bare expression. Returns { target: {type, name} | null, expr }.
+function parseStatement(src) {
+  const m = /^\s*(int|double|String)\s+([A-Za-z_$][\w$]*)\s*=(?!=)([\s\S]*)$/.exec(src);
+  if (!m) {
+    const other = /^\s*([A-Za-z_$][\w$.]*(?:<[^>]*>)?(?:\[\])*)\s+([A-Za-z_$][\w$]*)\s*(=|;|$)/.exec(src);
+    if (other && (OTHER_TYPES.has(other[1]) || !RESERVED.has(other[1]))) throw new Unsupported(`declarations of type ${other[1]} are not supported here (use int, double or String).`);
+  }
+  if (m) checkName(m[2]);
+  const body = (m ? m[3] : src).replace(/;\s*$/, '');
+  if (!body.trim()) throw new JavaCompileError('there is no expression to evaluate.');
+  return { target: m ? { type: m[1], name: m[2] } : null, expr: parseExpression(body) };
+}
+
+// Declarations such as "int x = 50; int y = 20;", split outside String literals.
+function splitDecls(src) {
+  const parts = [];
+  let cur = '', inStr = false;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (inStr) { cur += c; if (c === '\\' && i + 1 < src.length) cur += src[++i]; else if (c === '"') inStr = false; continue; }
+    if (c === '"') { inStr = true; cur += c; continue; }
+    if (c === ';' || c === '\n') { parts.push(cur); cur = ''; continue; }
+    cur += c;
+  }
+  parts.push(cur);
+  return parts.filter(x => x.trim());
+}
+function parseDecls(src) {
+  return splitDecls(src).map(part => {
+    const m = /^\s*(int|double|String)\s+([A-Za-z_$][\w$]*)\s*=(?!=)([\s\S]+)$/.exec(part);
+    if (!m) throw new Unsupported(`this tool reads variables written like int x = 5; and cannot read "${part.trim()}".`);
+    checkName(m[2]);
+    return { type: m[1], name: m[2], expr: parseExpression(m[3]), src: `${m[1]} ${m[2]} = ${m[3].trim()};` };
+  });
+}
+
+/* ---------- Type checking (what javac does before anything runs) ---------- */
+const NUM = t => t === 'int' || t === 'double';
+function typeOf(node, types) {
+  const t = (() => {
+    switch (node.k) {
+      case 'num': return node.type;
+      case 'str': return 'String';
+      case 'const': return 'int';
+      case 'var':
+        if (!(node.name in types)) throw new JavaCompileError(`cannot find symbol: variable ${node.name}. Declare it first.`);
+        return types[node.name];
+      case 'group': return typeOf(node.e, types);
+      case 'neg': {
+        const a = typeOf(node.e, types);
+        if (!NUM(a)) throw new JavaCompileError(`bad operand type String for unary operator '${node.op}'.`);
+        return a;
+      }
+      case 'cast': {
+        const a = typeOf(node.e, types);
+        if (!NUM(a)) throw new JavaCompileError(`incompatible types: String cannot be converted to ${node.to}.`);
+        return node.to;
+      }
+      case 'bin': {
+        const a = typeOf(node.l, types), b = typeOf(node.r, types);
+        if (node.op === '+' && (a === 'String' || b === 'String')) return 'String';
+        if (!NUM(a) || !NUM(b)) throw new JavaCompileError(`bad operand types for binary operator '${node.op}' (${a} and ${b}). Only + works with a String.`);
+        return a === 'double' || b === 'double' ? 'double' : 'int';
+      }
+      case 'call': {
+        const ts = node.args.map(x => typeOf(x, types));
+        const need = node.fn === 'pow' ? 2 : 1;
+        if (ts.length !== need) throw new JavaCompileError(`Math.${node.fn} takes ${need} argument${need > 1 ? 's' : ''}, not ${ts.length}.`);
+        if (!ts.every(NUM)) throw new JavaCompileError(`Math.${node.fn} needs numbers; a String cannot be converted to ${node.fn === 'abs' ? 'int' : 'double'}.`);
+        return node.fn === 'abs' ? ts[0] : 'double';
+      }
+    }
+  })();
+  node.type = t;
+  return t;
+}
+function checkAssign(target, t) {
+  if (target === t) return;
+  if (target === 'double' && t === 'int') return;
+  if (target === 'int' && t === 'double') throw new JavaCompileError('incompatible types: possible lossy conversion from double to int. Java will not silently drop the fraction; a cast is required.');
+  throw new JavaCompileError(`incompatible types: ${t} cannot be converted to ${target}.`);
+}
+
+/* ---------- Evaluation with steps ---------- */
+// "| 0" keeps every int a 32-bit Java int, which also turns JavaScript's -0 into 0.
+function toInt32(x) { return x | 0; }
+function castToInt(d) { if (Number.isNaN(d)) return 0; if (d >= INT_MAX) return INT_MAX; if (d <= INT_MIN) return INT_MIN; return Math.trunc(d) | 0; }
+function fmtN(type, v) { return type === 'double' ? javaDouble(v) : v < 0 ? '−' + (-v) : String(v); }
+
+function evaluate(node, env, steps) {
+  const record = (value, type, op, why) => {
+    if (type === 'int') value |= 0;
+    steps.push({ id: node.id, value, type, op, why });
+    return { value, type };
+  };
+  switch (node.k) {
+    case 'num': return { value: node.value, type: node.type };
+    case 'str': return { value: node.value, type: 'String' };
+    case 'const': return record(node.value, 'int', `${node.name} → ${fmtN('int', node.value)}`, node.name === 'Integer.MAX_VALUE' ? 'The largest value an int can hold.' : 'The smallest value an int can hold.');
+    case 'var': { const v = env[node.name]; return record(v.value, v.type, `${node.name} → ${show(v.type, v.value)}`, `Look up the variable ${node.name} (${v.type}).`); }
+    case 'group': return evaluate(node.e, env, steps);
+    case 'neg': {
+      const a = evaluate(node.e, env, steps);
+      if (node.op === '+') return record(a.value, a.type, `+${fmtN(a.type, a.value)} → ${fmtN(a.type, a.value)}`, 'Unary plus leaves the value unchanged.');
+      const v = a.type === 'int' ? toInt32(-a.value) : -a.value;
+      const wrap = a.type === 'int' && a.value === INT_MIN;
+      return record(v, a.type, `−(${fmtN(a.type, a.value)}) → ${fmtN(a.type, v)}`, wrap ? 'The true answer 2147483648 does not fit in an int, so it wraps around to −2147483648.' : 'Negation keeps the type.');
+    }
+    case 'cast': {
+      const a = evaluate(node.e, env, steps);
+      if (node.to === 'int') {
+        const v = a.type === 'int' ? a.value : castToInt(a.value);
+        const why = a.type === 'int' ? 'It is already an int, so nothing changes.'
+          : Number.isInteger(a.value) && Math.abs(a.value) <= INT_MAX ? `Casting to int: ${javaDouble(a.value)} becomes ${fmtN('int', v)}. The type changes; there was no fraction to lose.`
+          : Number.isNaN(a.value) ? 'Casting NaN to int gives 0.'
+          : Math.abs(a.value) > INT_MAX ? `${javaDouble(a.value)} is outside the int range, so the cast gives the nearest int limit, ${fmtN('int', v)}.`
+          : `Casting to int chops off the fraction, toward zero. It does not round: ${javaDouble(a.value)} becomes ${fmtN('int', v)}.`;
+        return record(v, 'int', `(int) ${fmtN(a.type, a.value)} → ${fmtN('int', v)}`, why);
+      }
+      return record(a.value, 'double', `(double) ${fmtN(a.type, a.value)} → ${javaDouble(a.value)}`, a.type === 'double' ? 'It is already a double, so nothing changes.' : `Casting to double: ${fmtN('int', a.value)} becomes ${javaDouble(a.value)}. Same value, new type. It cannot bring back a fraction that was already lost.`);
+    }
+    case 'call': {
+      const as = node.args.map(x => evaluate(x, env, steps));
+      const shown = as.map(a => fmtN(a.type, a.value)).join(', ');
+      if (node.fn === 'abs') {
+        const a = as[0];
+        const v = a.type === 'int' ? toInt32(Math.abs(a.value)) : Math.abs(a.value);
+        return record(v, a.type, `Math.abs(${shown}) → ${fmtN(a.type, v)}`, `Math.abs returns the same type it is given (${a.type}).` + (a.type === 'int' && a.value === INT_MIN ? ' Surprise: 2147483648 does not fit in an int, so the answer wraps back to −2147483648.' : ''));
+      }
+      if (node.fn === 'sqrt') { const v = Math.sqrt(as[0].value); return record(v, 'double', `Math.sqrt(${shown}) → ${javaDouble(v)}`, 'Math.sqrt always returns a double.' + (as[0].value < 0 ? ' The square root of a negative number is NaN ("not a number").' : '')); }
+      const v = Math.pow(as[0].value, as[1].value);
+      return record(v, 'double', `Math.pow(${shown}) → ${javaDouble(v)}`, 'Math.pow always returns a double, even when the answer is a whole number.');
+    }
+    case 'bin': {
+      const a = evaluate(node.l, env, steps), b = evaluate(node.r, env, steps);
+      const op = node.op, sym = { '+': '+', '-': '−', '*': '×', '/': '÷', '%': '%' }[op];
+      if (node.type === 'String') {
+        const v = asText(a.type, a.value) + asText(b.type, b.value);
+        const conv = a.type !== 'String' ? `the ${a.type} ${fmtN(a.type, a.value)} becomes "${asText(a.type, a.value)}"` : b.type !== 'String' ? `the ${b.type} ${fmtN(b.type, b.value)} becomes "${asText(b.type, b.value)}"` : '';
+        return record(v, 'String', `${show(a.type, a.value)} + ${show(b.type, b.value)} → ${show('String', v)}`, conv ? `One side is a String, so + joins text: ${conv}.` : 'Both sides are Strings, so + joins them.');
+      }
+      if (node.type === 'double') {
+        const promo = a.type === 'int' ? `The int ${fmtN('int', a.value)} is promoted to ${javaDouble(a.value)} first. ` : b.type === 'int' ? `The int ${fmtN('int', b.value)} is promoted to ${javaDouble(b.value)} first. ` : '';
+        const v = op === '+' ? a.value + b.value : op === '-' ? a.value - b.value : op === '*' ? a.value * b.value : op === '/' ? a.value / b.value : a.value % b.value;
+        let why = promo + (op === '/' ? 'double division keeps the fraction.' : 'double arithmetic.');
+        if (op === '/' && b.value === 0) why = promo + 'Dividing a double by zero does not crash: the result is ' + javaDouble(v) + '.';
+        if (op === '%') why = promo + 'The remainder works for doubles too.';
+        return record(v, 'double', `${fmtN(a.type, a.value)} ${sym} ${fmtN(b.type, b.value)} → ${javaDouble(v)}`, why);
+      }
+      const x = a.value, y = b.value;
+      if ((op === '/' || op === '%') && y === 0) {
+        steps.push({ id: node.id, error: true, op: `${fmtN('int', x)} ${sym} 0 → ArithmeticException`, why: 'Integer division by zero has no answer, so Java throws an ArithmeticException while the program runs. It compiled fine: the compiler does not check the values.' });
+        throw new JavaRuntimeError('ArithmeticException', '/ by zero');
+      }
+      let v, why, exact;
+      if (op === '/') {
+        v = toInt32(Math.trunc(x / y));
+        exact = x / y;
+        why = Number.isInteger(exact) ? 'int ÷ int gives an int. This one divides evenly.'
+          : `int ÷ int gives an int. The exact answer ${+exact.toFixed(4)} is truncated toward zero${exact < 0 ? ` (to ${fmtN('int', v)}, not ${fmtN('int', Math.floor(exact))})` : ''}. It is not rounded.`;
+      } else if (op === '%') {
+        v = toInt32(x % y);
+        why = `% gives the remainder after int division: ${fmtN('int', x)} = ${fmtN('int', toInt32(Math.trunc(x / y)))} × ${fmtN('int', y)} + ${fmtN('int', v)}.` + (x < 0 && v !== 0 ? ' The remainder takes the sign of the left operand.' : '');
+      } else {
+        exact = op === '+' ? x + y : op === '-' ? x - y : x * y;
+        v = op === '*' ? Math.imul(x, y) : toInt32(exact);
+        why = exact !== v
+          ? `The true answer ${exact} does not fit in an int (−2147483648 to 2147483647), so it wraps around to ${fmtN('int', v)}. No error is reported.`
+          : 'int arithmetic gives an int.';
+      }
+      return record(v, 'int', `${fmtN('int', x)} ${sym} ${fmtN('int', y)} → ${fmtN('int', v)}`, why);
+    }
+  }
+}
+
+// The whole pipeline, in Java's order: parse and type-check everything, then run.
+// Returns { ok, compileError | unsupported | runtimeError (+ declError), steps, stmt, type, value, label }.
+function runJava(declSrc, stmtSrc) {
+  nodeId = 0;
+  let decls, stmt;
+  try {
+    decls = parseDecls(declSrc || '');
+    const types = {};
+    for (const d of decls) {
+      if (d.name in types) throw new JavaCompileError(`variable ${d.name} is already defined.`);
+      checkAssign(d.type, typeOf(d.expr, types));
+      types[d.name] = d.type;
+    }
+    stmt = parseStatement(stmtSrc);
+    const t = typeOf(stmt.expr, types);
+    if (stmt.target) {
+      if (stmt.target.name in types) throw new JavaCompileError(`variable ${stmt.target.name} is already defined.`);
+      checkAssign(stmt.target.type, t);
+    }
+  } catch (e) {
+    if (e instanceof JavaCompileError) return { ok: false, compileError: e.message, steps: [], stmt, label: 'compile-error' };
+    if (e instanceof Unsupported) return { ok: false, unsupported: e.message, steps: [], stmt, label: 'unsupported' };
+    throw e;
+  }
+  const env = {};
+  for (const d of decls) {
+    try {
+      const r = evaluate(d.expr, env, []);
+      env[d.name] = { type: d.type, value: r.value };
+    } catch (e) {
+      if (e instanceof JavaRuntimeError) return { ok: false, runtimeError: e.javaType, declError: d.src, steps: [], stmt, env, label: 'throws:' + e.javaType };
+      throw e;
+    }
+  }
+  const steps = [];
+  let r;
+  try { r = evaluate(stmt.expr, env, steps); }
+  catch (e) {
+    if (e instanceof JavaRuntimeError) return { ok: false, runtimeError: e.javaType, steps, stmt, env, label: 'throws:' + e.javaType };
+    throw e;
+  }
+  let type = r.type;
+  const value = r.value;
+  if (stmt.target) {
+    const tt = stmt.target.type;
+    const why = tt === 'double' && type === 'int'
+      ? `Assignment happens last, after the right side is finished. The int ${fmtN('int', value)} is widened to ${javaDouble(value)} to fit in the double ${stmt.target.name}. Any fraction lost earlier does not come back.`
+      : `Assignment happens last: the finished value is stored in ${stmt.target.name}.`;
+    steps.push({ id: 'assign', value, type: tt, op: `${stmt.target.name} = ${show(tt, value)}`, why, assign: true });
+    type = tt;
+  }
+  return { ok: true, steps, stmt, env, type, value, label: `${type}:${asText(type, value)}` };
+}
+// EXPR ENGINE END
+// MINIJAVA START (copied from lib/minijava.js by visualizers/tests/sync-expr-engine.mjs; do not edit here)
+// A small Java interpreter for teaching traces. It follows the JLS for the subset it accepts:
+// the whole program is parsed and type-checked first (as javac does), then run one step at a time,
+// recording a snapshot of every step for the visualizers.
+//   Types: int, double, boolean, String, 1-D arrays, ArrayList<Integer|String|Double>, the course's
+//   Player class. Statements: declarations with a value, assignment (= += -= *= /= %=), ++ and --,
+//   if/else, while, for, enhanced for, static methods with return, System.out.print/println.
+// Valid Java outside this subset is reported as unsupported, never as a compile error.
+// Relies on javaDouble, castToInt and toInt32 from the Expression Tracer engine (embedded beside it).
+const MJ = (function () {
+  class CompileError extends Error { constructor(msg, line) { super(msg); this.line = line; } }
+  class Unsupported extends Error { constructor(msg, line) { super(msg); this.line = line; } }
+  class JavaThrow extends Error { constructor(type, line, why) { super(type); this.javaType = type; this.line = line; this.why = why; } }
+  class ToolLimit extends Error { constructor(kind, line) { super(kind); this.kind = kind; this.line = line; } }
+  const INT_MAX = 2147483647, INT_MIN = -2147483648;
+
+  /* ---------------- Tokens ---------------- */
+  const OPS = ['>>>=', '<<=', '>>=', '>>>', '...', '->', '::', '++', '--', '&&', '||', '==', '!=', '<=', '>=', '+=', '-=', '*=', '/=', '%=',
+    '&=', '|=', '^=', '<<', '>>', '+', '-', '*', '/', '%', '=', '<', '>', '!', '(', ')', '{', '}', '[', ']', ',', '.', ';', ':', '?', '&', '|', '^', '~', '@'];
+  const UNSUPPORTED_OPS = { '?': 'the ?: operator', '&': 'the & operator', '|': 'the | operator', '^': 'the ^ operator', '~': 'the ~ operator',
+    '<<': 'bit shifts', '>>': 'bit shifts', '>>>': 'bit shifts', '<<=': 'bit shifts', '>>=': 'bit shifts', '>>>=': 'bit shifts',
+    '&=': 'the &= operator', '|=': 'the |= operator', '^=': 'the ^= operator', '->': 'lambdas', '::': 'method references', '...': 'varargs', '@': 'annotations' };
+  function lex(src) {
+    const toks = [];
+    let i = 0, line = 1;
+    while (i < src.length) {
+      const c = src[i], rest = src.slice(i);
+      if (c === '\n') { line++; i++; continue; }
+      if (' \t\r\f'.includes(c)) { i++; continue; }
+      if (rest.startsWith('//')) { while (i < src.length && src[i] !== '\n') i++; continue; }
+      if (rest.startsWith('/*')) {
+        const e = src.indexOf('*/', i + 2);
+        if (e < 0) throw new CompileError('unclosed comment', line);
+        line += src.slice(i, e).split('\n').length - 1; i = e + 2; continue;
+      }
+      const num = /^(?:\d+(?:\.\d*)?(?:[eE][+-]?\d+)?[\w.]*|\.\d[\w]*)/.exec(rest);
+      if (num) {
+        const raw = num[0];
+        let tok;
+        if (/^\d+$/.test(raw)) {
+          if (raw.length > 1 && raw[0] === '0') throw new Unsupported(`${raw}: a leading 0 makes Java read the number as octal; this tool does not.`, line);
+          if (Number(raw) > 2147483648) throw new CompileError(`integer number too large: ${raw}`, line);
+          tok = { k: 'int', v: Number(raw) };
+        } else if (/^(\d+\.\d*|\d+)([eE][+-]?\d+)?$/.test(raw)) {
+          const v = Number(raw);
+          if (v === Infinity) throw new CompileError(`floating-point number too large: ${raw}`, line);
+          tok = { k: 'double', v };
+        } else throw new Unsupported(`the number ${raw} is not supported here (hex, underscores, a leading dot, or a suffix such as L or f).`, line);
+        toks.push({ ...tok, raw, line, pos: i, end: i + raw.length }); i += raw.length; continue;
+      }
+      if (c === '"') {
+        let j = i + 1, v = '';
+        while (j < src.length && src[j] !== '"') {
+          if (src[j] === '\n') throw new CompileError('unclosed String literal', line);
+          if (src[j] === '\\') {
+            const e = src[j + 1], map = { n: '\n', t: '\t', '"': '"', "'": "'", '\\': '\\' };
+            if (!(e in map)) throw new Unsupported(`the escape \\${e} is not supported here.`, line);
+            v += map[e]; j += 2;
+          } else v += src[j++];
+        }
+        if (j >= src.length) throw new CompileError('unclosed String literal', line);
+        toks.push({ k: 'str', v, raw: src.slice(i, j + 1), line, pos: i, end: j + 1 }); i = j + 1; continue;
+      }
+      if (c === "'") throw new Unsupported('char values are not supported here.', line);
+      const id = /^[A-Za-z_$][\w$]*/.exec(rest);
+      if (id) { toks.push({ k: 'id', v: id[0], line, pos: i, end: i + id[0].length }); i += id[0].length; continue; }
+      const op = OPS.find(o => rest.startsWith(o));
+      if (op) {
+        if (UNSUPPORTED_OPS[op]) throw new Unsupported(`${UNSUPPORTED_OPS[op]} ${/s$/.test(UNSUPPORTED_OPS[op]) ? 'are' : 'is'} not supported here.`, line);
+        toks.push({ k: op, line, pos: i, end: i + op.length }); i += op.length; continue;
+      }
+      throw new Unsupported(`the character ${JSON.stringify(c)} is not supported here.`, line);
+    }
+    toks.push({ k: 'end', line, pos: src.length, end: src.length });
+    return toks;
+  }
+
+  /* ---------------- Parser ---------------- */
+  const PRIM = ['int', 'double', 'boolean'];
+  const BASE_TYPES = ['int', 'double', 'boolean', 'String', 'void', 'Player', 'Integer', 'Double'];
+  const OTHER_TYPES = ['char', 'long', 'float', 'short', 'byte', 'var', 'Object', 'Boolean', 'List', 'Scanner', 'Random', 'HashMap', 'Map', 'Set', 'StringBuilder', 'Character'];
+  const RESERVED_UNSUPPORTED = ['break', 'continue', 'do', 'switch', 'try', 'throw', 'class', 'new', 'this', 'super', 'final', 'instanceof', 'case', 'default'];
+  let nodeSeq = 0;
+  function parse(src) {
+    const t = lex(src);
+    let p = 0;
+    const peek = (k = 0) => t[p + k], next = () => t[p++];
+    const at = (k, v) => peek().k === k && (v === undefined || peek().v === v);
+    const atId = v => at('id', v);
+    const expect = (k, what) => { if (!at(k)) throw new CompileError(`${what || `'${k}'`} expected`, peek().line); return next(); };
+    const mk = (o, startTok) => ({ id: nodeSeq++, line: startTok.line, pos: startTok.pos, ...o, end: t[p - 1].end, get src() { return src.slice(this.pos, this.end); } });
+
+    function isTypeStart(k = 0) {
+      const tk = peek(k);
+      return tk.k === 'id' && (BASE_TYPES.includes(tk.v) || tk.v === 'ArrayList' || OTHER_TYPES.includes(tk.v));
+    }
+    function parseType() {
+      const tk = next();
+      if (OTHER_TYPES.includes(tk.v)) throw new Unsupported(`the type ${tk.v} is not supported here.`, tk.line);
+      let type = tk.v;
+      if (type === 'ArrayList') {
+        expect('<', "'<' (ArrayList needs an element type, such as ArrayList<Integer>)");
+        const e = expect('id', 'element type').v;
+        if (['int', 'double', 'boolean', 'char', 'long', 'float', 'short', 'byte'].includes(e)) throw new CompileError(`unexpected type: ArrayList needs a class type such as ${e === 'int' ? 'Integer' : e === 'double' ? 'Double' : 'Boolean'}, not the primitive ${e}`, tk.line);
+        if (!['Integer', 'String', 'Double'].includes(e)) throw new Unsupported(`ArrayList<${e}> is not supported here (Integer, String or Double).`, tk.line);
+        expect('>');
+        type = `ArrayList<${e}>`;
+      }
+      if (at('[')) {
+        next(); expect(']');
+        if (at('[')) throw new Unsupported('2-D arrays are not supported here.', tk.line);
+        if (type === 'void' || type.startsWith('ArrayList')) throw new Unsupported(`arrays of ${type} are not supported here.`, tk.line);
+        type += '[]';
+      }
+      return type;
+    }
+    // Expressions, lowest precedence first. Assignments and ++/-- are statements only.
+    function expr() { return orExpr(); }
+    function bin(nextFn, ops) {
+      return function () {
+        const s = peek();
+        let l = nextFn();
+        while (ops.includes(peek().k)) { const op = next().k; const r = nextFn(); l = mk({ k: 'bin', op, l, r }, s); }
+        return l;
+      };
+    }
+    function unary() {
+      const s = peek();
+      if (at('-') || at('+') || at('!')) { const op = next().k; return mk({ k: 'unary', op, e: unary() }, s); }
+      if (at('++') || at('--')) throw new Unsupported('++ and -- are supported only as their own statements, such as i++;', s.line);
+      if (at('(') && peek(1).k === 'id' && (peek(1).v === 'int' || peek(1).v === 'double') && peek(2).k === ')') {
+        next(); const to = next().v; next();
+        return mk({ k: 'cast', to, e: unary() }, s);
+      }
+      if (at('(') && peek(1).k === 'id' && (BASE_TYPES.includes(peek(1).v) || OTHER_TYPES.includes(peek(1).v)) && peek(2).k === ')') throw new Unsupported(`casts to ${peek(1).v} are not supported here.`, s.line);
+      return postfix();
+    }
+    const mul = bin(unary, ['*', '/', '%']);
+    const add = bin(mul, ['+', '-']);
+    const rel = bin(add, ['<', '<=', '>', '>=']);
+    const eq = bin(rel, ['==', '!=']);
+    const andExpr = bin(eq, ['&&']);
+    const orExpr = bin(andExpr, ['||']);
+    function args() {
+      expect('(');
+      const a = [];
+      if (!at(')')) { a.push(expr()); while (at(',')) { next(); a.push(expr()); } }
+      expect(')');
+      return a;
+    }
+    function postfix() {
+      const s = peek();
+      let e = primary();
+      for (;;) {
+        if (at('.')) {
+          next();
+          const name = expect('id', 'a name after the dot').v;
+          if (at('(')) e = mk({ k: 'call', recv: e, name, args: args() }, s);
+          else e = mk({ k: 'field', recv: e, name }, s);
+        } else if (at('[')) {
+          next(); const i = expr(); expect(']');
+          e = mk({ k: 'index', arr: e, i }, s);
+        } else break;
+      }
+      if (at('++') || at('--')) throw new Unsupported('++ and -- are supported only as their own statements, such as i++;', s.line);
+      // Assignment used as a value: type-checked (so if (x = 5) is the compile error javac gives) but not run.
+      if (at('=') || ['+=', '-=', '*=', '/=', '%='].includes(peek().k)) {
+        const op = next().k;
+        if (e.k !== 'var' && e.k !== 'index') throw new CompileError('unexpected type: the left side of an assignment must be a variable', s.line);
+        return mk({ k: 'assignExpr', op, target: e, e: expr() }, s);
+      }
+      return e;
+    }
+    function primary() {
+      const s = next();
+      if (s.k === 'int') return mk({ k: 'lit', type: 'int', v: s.v === 2147483648 ? null : s.v, big: s.v === 2147483648 }, s);
+      if (s.k === 'double') return mk({ k: 'lit', type: 'double', v: s.v }, s);
+      if (s.k === 'str') return mk({ k: 'lit', type: 'String', v: s.v }, s);
+      if (s.k === '(') { const e = expr(); expect(')'); return e; }
+      if (s.k === '{') throw new Unsupported('an array initializer { … } is supported only in a declaration, such as int[] a = {1, 2, 3};', s.line);
+      if (s.k === 'id') {
+        if (s.v === 'true' || s.v === 'false') return mk({ k: 'lit', type: 'boolean', v: s.v === 'true' }, s);
+        if (s.v === 'null') return mk({ k: 'lit', type: 'null', v: null }, s);
+        if (s.v === 'new') return creation(s);
+        if (RESERVED_UNSUPPORTED.includes(s.v)) throw new Unsupported(`${s.v} is not supported here.`, s.line);
+        if (s.v === 'Math' || s.v === 'Integer' || s.v === 'System' || s.v === 'Double' || s.v === 'String') return mk({ k: 'class', name: s.v }, s);
+        if (at('(')) return mk({ k: 'scall', name: s.v, args: args() }, s);
+        return mk({ k: 'var', name: s.v }, s);
+      }
+      throw new CompileError(s.k === 'end' ? 'the program ends in the middle of an expression' : `illegal start of expression: '${s.k}'`, s.line);
+    }
+    function creation(s) {
+      if (!isTypeStart()) { const n = peek(); throw new Unsupported(`new ${n.v || n.k} is not supported here.`, s.line); }
+      const base = next().v;
+      if (OTHER_TYPES.includes(base)) throw new Unsupported(`new ${base} is not supported here.`, s.line);
+      if (base === 'ArrayList') {
+        expect('<');
+        let e = null;
+        if (!at('>')) { e = expect('id').v; if (!['Integer', 'String', 'Double'].includes(e)) throw new Unsupported(`ArrayList<${e}> is not supported here.`, s.line); }
+        expect('>');
+        const a = args();
+        if (a.length) throw new Unsupported('new ArrayList with arguments is not supported here.', s.line);
+        return mk({ k: 'newList', elem: e }, s);
+      }
+      if (at('[')) {
+        next();
+        if (at(']')) {
+          next();
+          if (!at('{')) throw new CompileError('array dimension missing', s.line);
+          return mk({ k: 'arrInit', elem: base, items: initItems() }, s);
+        }
+        const n = expr(); expect(']');
+        if (at('[')) throw new Unsupported('2-D arrays are not supported here.', s.line);
+        return mk({ k: 'newArr', elem: base, n }, s);
+      }
+      if (base === 'Player') return mk({ k: 'newPlayer', args: args() }, s);
+      if (base === 'String') throw new Unsupported('new String(…) is not supported in this tool; the Memory Diagram shows it.', s.line);
+      throw new Unsupported(`new ${base}(…) is not supported here.`, s.line);
+    }
+    function initItems() {
+      expect('{');
+      const items = [];
+      if (!at('}')) { items.push(expr()); while (at(',')) { next(); if (at('}')) break; items.push(expr()); } }
+      expect('}');
+      return items;
+    }
+    // Statements
+    function block() {
+      const s = expect('{');
+      const body = [];
+      while (!at('}')) { if (at('end')) throw new CompileError("reached end of file while parsing: a '}' is missing", peek().line); body.push(statement()); }
+      next();
+      return mk({ k: 'block', body }, s);
+    }
+    function varDecl(s, needSemi) {
+      const type = parseType();
+      const name = expect('id', 'variable name').v;
+      if (at('[')) throw new Unsupported('put the [] after the type, as in int[] a, not after the name.', s.line);
+      if (!at('=')) {
+        if (at(',')) throw new Unsupported('declare one variable per statement here.', s.line);
+        throw new Unsupported('declare each variable with a starting value here, for example int count = 0;', s.line);
+      }
+      next();
+      let init;
+      if (at('{')) { if (!type.endsWith('[]')) throw new CompileError('illegal initializer: { … } is only for arrays', s.line); init = mk({ k: 'arrInit', elem: type.slice(0, -2), items: initItems() }, s); }
+      else init = expr();
+      if (at(',')) throw new Unsupported('declare one variable per statement here.', s.line);
+      if (needSemi) expect(';', "';'");
+      return mk({ k: 'decl', type, name, init }, s);
+    }
+    // An expression statement: assignment, compound assignment, ++/--, a method call, or a print.
+    function simple(s) {
+      if (at('++') || at('--')) { const op = next().k; const target = postfix(); return mk({ k: 'incdec', op, target, prefix: true }, s); }
+      if (atId('System')) {
+        next(); expect('.'); const o = expect('id');
+        if (o.v !== 'out') throw new Unsupported('only System.out.print and System.out.println are supported here.', s.line);
+        expect('.'); const m = expect('id').v;
+        if (m !== 'print' && m !== 'println') throw new Unsupported(`System.out.${m} is not supported here.`, s.line);
+        return mk({ k: 'print', ln: m === 'println', args: args() }, s);
+      }
+      const save = p;
+      let target;
+      const e1 = peek();
+      // Parse a primary/postfix chain without the "no assignment" guard.
+      target = (function () {
+        let e = primary();
+        for (;;) {
+          if (at('.')) { next(); const name = expect('id', 'a name after the dot').v; if (at('(')) e = mk({ k: 'call', recv: e, name, args: args() }, e1); else e = mk({ k: 'field', recv: e, name }, e1); }
+          else if (at('[')) { next(); const i = expr(); expect(']'); e = mk({ k: 'index', arr: e, i }, e1); }
+          else break;
+        }
+        return e;
+      })();
+      if (at('=') || ['+=', '-=', '*=', '/=', '%='].includes(peek().k)) {
+        const op = next().k;
+        if (target.k !== 'var' && target.k !== 'index') throw new CompileError('unexpected type: the left side of an assignment must be a variable', s.line);
+        if (at('{')) throw new Unsupported('an array initializer { … } is supported only in a declaration.', s.line);
+        return mk({ k: 'assign', op, target, e: expr() }, s);
+      }
+      if (at('++') || at('--')) {
+        const op = next().k;
+        if (target.k !== 'var' && target.k !== 'index') throw new CompileError(`unexpected type: ${op} needs a variable`, s.line);
+        return mk({ k: 'incdec', op, target, prefix: false }, s);
+      }
+      if (target.k === 'call' || target.k === 'scall' || target.k === 'newPlayer' || target.k === 'newList') {
+        // Allow the rest of a larger expression to be flagged: a call followed by an operator is "not a statement".
+        if (!at(';') && !at(')')) { p = save; const e = expr(); return mk({ k: 'exprStmt', e }, s); }
+        return mk({ k: 'exprStmt', e: target }, s);
+      }
+      p = save;
+      const e = expr();
+      return mk({ k: 'exprStmt', e }, s);
+    }
+    function statement() {
+      const s = peek();
+      if (at('{')) return block();
+      if (at(';')) { next(); return mk({ k: 'empty' }, s); }
+      if (atId('if')) {
+        next(); expect('('); const cond = expr(); expect(')', "')'");
+        const then = statement();
+        let els = null;
+        if (atId('else')) { next(); els = statement(); }
+        return mk({ k: 'if', cond, then, els }, s);
+      }
+      if (atId('while')) { next(); expect('('); const cond = expr(); expect(')', "')'"); return mk({ k: 'while', cond, body: statement() }, s); }
+      if (atId('for')) {
+        next(); expect('(');
+        if (isTypeStart() && peek(1).k === 'id' && peek(2).k === ':') {
+          const type = parseType(); const name = next().v; next();
+          const iter = expr(); expect(')', "')'");
+          return mk({ k: 'foreach', type, name, iter, body: statement() }, s);
+        }
+        let init = null, cond = null, update = null;
+        if (!at(';')) { const is = peek(); init = isTypeStart() && peek(1).k === 'id' ? varDecl(is, false) : simple(is); if (at(',')) throw new Unsupported('more than one statement in a for header is not supported here.', s.line); }
+        expect(';', "';'");
+        if (!at(';')) cond = expr();
+        expect(';', "';'");
+        if (!at(')')) { update = simple(peek()); if (at(',')) throw new Unsupported('more than one update in a for header is not supported here.', s.line); }
+        expect(')', "')'");
+        return mk({ k: 'for', init, cond, update, body: statement() }, s);
+      }
+      if (atId('return')) { next(); const e = at(';') ? null : expr(); expect(';', "';'"); return mk({ k: 'return', e }, s); }
+      if (at('id') && ['break', 'continue', 'do', 'switch', 'try', 'throw', 'class', 'final'].includes(peek().v)) throw new Unsupported(`${peek().v} is not supported here.`, s.line);
+      if (at('id') && ['public', 'private', 'static', 'protected'].includes(peek().v)) throw new CompileError('illegal start of expression: methods must be declared outside other methods and statements', s.line);
+      if (isTypeStart() && (peek(1).k === 'id' || peek(1).k === '<' || (peek(1).k === '[' && peek(2).k === ']'))) return varDecl(s, true);
+      const st = simple(s);
+      expect(';', "';'");
+      return st;
+    }
+    function isMethodStart() {
+      let k = 0;
+      while (peek(k).k === 'id' && ['public', 'private', 'protected', 'static', 'final'].includes(peek(k).v)) k++;
+      if (k === 0) return false;
+      return true;
+    }
+    const methods = [], main = [];
+    while (!at('end')) {
+      const s = peek();
+      if (atId('class') || (atId('public') && peek(1).k === 'id' && peek(1).v === 'class')) throw new Unsupported('write methods and statements directly; this tool supplies the class around them.', s.line);
+      if (isMethodStart()) {
+        let isStatic = false;
+        while (at('id') && ['public', 'private', 'protected', 'static', 'final'].includes(peek().v)) { if (next().v === 'static') isStatic = true; }
+        if (!isStatic) throw new Unsupported('this tool supports static methods only.', s.line);
+        const ret = parseType();
+        const name = expect('id', 'method name').v;
+        if (at('=') || at(';') || at(',')) throw new Unsupported('static variables (fields declared outside a method) are not supported here.', s.line);
+        expect('(');
+        const params = [];
+        if (!at(')')) {
+          do { if (at(',')) next(); const pt = parseType(); const pn = expect('id', 'parameter name').v; params.push({ type: pt, name: pn }); } while (at(','));
+        }
+        expect(')', "')'");
+        const body = block();
+        methods.push(mk({ k: 'method', ret, name, params, body }, s));
+      } else main.push(statement());
+    }
+    return { methods, main };
+  }
+
+  /* ---------------- Types (javac's job) ---------------- */
+  const ELEM = t => t.endsWith('[]') ? t.slice(0, -2) : t.startsWith('ArrayList<') ? t.slice(10, -1) : null;
+  const UNBOX = { Integer: 'int', Double: 'double' };
+  // Real ArrayList methods beyond the AP subset: valid Java this tool does not run.
+  const ARRAYLIST_METHODS = ['contains', 'indexOf', 'lastIndexOf', 'isEmpty', 'clear', 'addAll', 'removeAll', 'retainAll', 'containsAll', 'removeIf', 'sort', 'toArray', 'iterator', 'listIterator', 'forEach', 'subList', 'equals', 'hashCode', 'toString', 'stream', 'clone', 'replaceAll', 'ensureCapacity', 'trimToSize', 'spliterator', 'getClass', 'reversed', 'getFirst', 'getLast', 'addFirst', 'addLast', 'removeFirst', 'removeLast'];
+  const numeric = t => t === 'int' || t === 'double' || t === 'Integer' || t === 'Double';
+  const prim = t => UNBOX[t] || t;
+  const isRef = t => !PRIM.includes(t) && t !== 'void';
+  function assignable(to, from) {
+    if (to === from) return true;
+    if (from === 'null') return isRef(to);
+    if (to === 'double' && (from === 'int' || from === 'Integer' || from === 'Double')) return true;
+    if (to === 'int' && from === 'Integer') return true;
+    if (to === 'Integer' && from === 'int') return true;
+    if (to === 'Double' && from === 'double') return true;
+    return false;
+  }
+  function check(prog) {
+    const mtab = new Map();
+    for (const m of prog.methods) {
+      if (m.name === 'main') throw new Unsupported('write the statements for main directly; this tool supplies main.', m.line);
+      if (mtab.has(m.name)) throw new Unsupported('overloaded methods (two methods with the same name) are not supported here.', m.line);
+      if (m.params.some(pp => pp.type === 'void')) throw new CompileError("'void' type not allowed here", m.line);
+      mtab.set(m.name, m);
+    }
+    let scopes, retType, deferred = null;   // deferred: valid Java this tool cannot run, reported only if nothing else is wrong
+    const lookup = (name, line) => { for (let i = scopes.length - 1; i >= 0; i--) if (scopes[i].has(name)) return scopes[i].get(name); throw new CompileError(`cannot find symbol: variable ${name}`, line); };
+    const declare = (name, type, line) => {
+      for (const sc of scopes) if (sc.has(name)) throw new CompileError(`variable ${name} is already defined in this method`, line);
+      scopes[scopes.length - 1].set(name, type);
+    };
+    function ty(n) {
+      const T = (() => {
+        switch (n.k) {
+          case 'lit':
+            if (n.big) throw new CompileError('integer number too large: 2147483648', n.line);
+            return n.type;
+          case 'var': return lookup(n.name, n.line);
+          case 'assignExpr': {
+            const tt = ty(n.target), t = ty(n.e);
+            if (n.op === '=' ? !assignable(tt, t) : !(tt === 'String' && n.op === '+=') && !(numeric(tt) && numeric(t))) throw new CompileError(`incompatible types: ${t} cannot be converted to ${tt}`, n.line);
+            deferred = deferred || new Unsupported('assignment inside an expression is not supported here.', n.line);
+            return tt;
+          }
+          case 'class': throw new CompileError(`${n.name} is a class name, not a value`, n.line);
+          case 'unary': {
+            if (n.op === '-' && n.e.k === 'lit' && n.e.big) { n.e.type = 'int'; return 'int'; }   // -2147483648 is legal only negated
+            const a = ty(n.e);
+            if (n.op === '!') { if (a !== 'boolean') throw new CompileError(`bad operand type ${a} for unary operator '!'`, n.line); return 'boolean'; }
+            if (!numeric(a)) throw new CompileError(`bad operand type ${a} for unary operator '${n.op}'`, n.line);
+            return prim(a);
+          }
+          case 'cast': { const a = ty(n.e); if (!numeric(a)) throw new CompileError(`incompatible types: ${a} cannot be converted to ${n.to}`, n.line); return n.to; }
+          case 'bin': {
+            const a = ty(n.l), b = ty(n.r), op = n.op;
+            if (a === 'void' || b === 'void') throw new CompileError("'void' type not allowed here", n.line);
+            if (op === '&&' || op === '||') { if (a !== 'boolean' || b !== 'boolean') throw new CompileError(`bad operand types for binary operator '${op}' (${a} and ${b})`, n.line); return 'boolean'; }
+            if (op === '+' && (a === 'String' || b === 'String')) {
+              const other = a === 'String' ? b : a;
+              if (other === 'Player' || other.endsWith('[]')) throw new Unsupported(`joining ${other === 'Player' ? 'a Player' : 'an array'} to a String prints something like ${other === 'Player' ? 'Player' : '[I'}@1b6d3586, which varies.`, n.line);
+              return 'String';
+            }
+            if (['+', '-', '*', '/', '%'].includes(op)) {
+              if (!numeric(a) || !numeric(b)) throw new CompileError(`bad operand types for binary operator '${op}' (${a} and ${b})`, n.line);
+              return prim(a) === 'double' || prim(b) === 'double' ? 'double' : 'int';
+            }
+            if (['<', '<=', '>', '>='].includes(op)) {
+              if (!numeric(a) || !numeric(b)) throw new CompileError(`bad operand types for binary operator '${op}' (${a} and ${b})`, n.line);
+              return 'boolean';
+            }
+            // == and !=
+            if (numeric(a) && numeric(b)) {
+              if ((a === 'Integer' || a === 'Double') && (b === 'Integer' || b === 'Double')) throw new Unsupported('comparing two Integer objects with == depends on object identity; use equals, or compare int values.', n.line);
+              return 'boolean';
+            }
+            if (a === 'boolean' && b === 'boolean') return 'boolean';
+            if (a === 'String' && b === 'String') throw new Unsupported('comparing two Strings with == compares object identity; use equals (the Memory Diagram shows why).', n.line);
+            if (isRef(a) && isRef(b) && (a === b || a === 'null' || b === 'null')) return 'boolean';
+            throw new CompileError(`incomparable types: ${a} and ${b}`, n.line);
+          }
+          case 'index': {
+            const a = ty(n.arr), i = ty(n.i);
+            if (!a.endsWith('[]')) throw new CompileError(`array required, but ${a} found`, n.line);
+            if (prim(i) !== 'int') throw new CompileError(`incompatible types: ${i} cannot be converted to int`, n.line);
+            return ELEM(a);
+          }
+          case 'field': {
+            if (n.recv.k === 'class' && n.recv.name === 'Integer' && (n.name === 'MAX_VALUE' || n.name === 'MIN_VALUE')) return 'int';
+            if (n.recv.k === 'class') throw new Unsupported(`${n.recv.name}.${n.name} is not supported here.`, n.line);
+            const r = ty(n.recv);
+            if (r.endsWith('[]') && n.name === 'length') return 'int';
+            if (r === 'String' && n.name === 'length') throw new CompileError('cannot find symbol: length is a method for Strings, so write length()', n.line);
+            if (r.startsWith('ArrayList') && (n.name === 'length' || n.name === 'size')) throw new CompileError(`cannot find symbol: ${n.name}. An ArrayList uses the method size()`, n.line);
+            throw new CompileError(`cannot find symbol: ${n.name}`, n.line);
+          }
+          case 'newArr': { if (prim(ty(n.n)) !== 'int') throw new CompileError('incompatible types: the array size must be an int', n.line); return n.elem + '[]'; }
+          case 'arrInit': {
+            for (const it of n.items) { const t2 = ty(it); if (!assignable(n.elem, t2)) throw new CompileError(`incompatible types: ${t2} cannot be converted to ${n.elem}`, it.line); }
+            return n.elem + '[]';
+          }
+          case 'newList': return n.elem ? `ArrayList<${n.elem}>` : 'ArrayList<?>';
+          case 'newPlayer': {
+            const ts = n.args.map(ty);
+            if (ts.length !== 2 || !assignable('String', ts[0]) || !assignable('int', ts[1])) throw new CompileError('constructor Player cannot be applied to given types: it needs (String name, int score)', n.line);
+            return 'Player';
+          }
+          case 'scall': {
+            const m = mtab.get(n.name);
+            if (!m) throw new CompileError(`cannot find symbol: method ${n.name}`, n.line);
+            const ts = n.args.map(ty);
+            if (ts.length !== m.params.length || ts.some((t2, i) => !assignable(m.params[i].type, t2))) throw new CompileError(`method ${n.name} cannot be applied to given types: it needs (${m.params.map(q => q.type).join(', ')})`, n.line);
+            n.method = m;
+            return m.ret;
+          }
+          case 'call': return callType(n);
+        }
+      })();
+      n.type = T;
+      return T;
+    }
+    function callType(n) {
+      if (n.recv.k === 'class') {
+        const ts = n.args.map(ty);
+        if (n.recv.name === 'Math') {
+          if (n.name === 'random') throw new Unsupported('Math.random() is not supported in this tool, because each run would differ; the Range Builder covers it.', n.line);
+          const need = { abs: 1, sqrt: 1, pow: 2 }[n.name];
+          if (!need) throw new Unsupported(`Math.${n.name} is not supported here (abs, pow and sqrt are).`, n.line);
+          if (ts.length !== need || !ts.every(numeric)) throw new CompileError(`Math.${n.name} cannot be applied to these arguments`, n.line);
+          return n.name === 'abs' ? prim(ts[0]) : 'double';
+        }
+        if (n.recv.name === 'Integer' && n.name === 'valueOf' && ts.length === 1 && prim(ts[0]) === 'int') return 'Integer';
+        throw new Unsupported(`${n.recv.name}.${n.name}(…) is not supported here.`, n.line);
+      }
+      const r = ty(n.recv), ts = n.args.map(ty);
+      if (PRIM.includes(r)) throw new CompileError(`${r} cannot be dereferenced: an ${r} is not an object, so it has no methods`, n.line);
+      if (r === 'null' || r === 'void') throw new CompileError(`${r} cannot be dereferenced`, n.line);
+      if (r === 'String') {
+        if (n.name === 'length' && !ts.length) return 'int';
+        if (n.name === 'substring' && (ts.length === 1 || ts.length === 2) && ts.every(x => prim(x) === 'int')) return 'String';
+        if (n.name === 'indexOf' && ts.length === 1 && ts[0] === 'String') return 'int';
+        if (n.name === 'equals' && ts.length === 1) return 'boolean';
+        if (n.name === 'compareTo' && ts.length === 1 && assignable('String', ts[0])) return 'int';
+        if (['length', 'substring', 'compareTo'].includes(n.name)) throw new CompileError(`method ${n.name} in class String cannot be applied to these arguments`, n.line);
+        throw new Unsupported(`the String method ${n.name}(…) is not supported here (length, substring, indexOf, equals and compareTo are).`, n.line);
+      }
+      if (r === 'Player') {
+        const sig = { getName: [[], 'String'], getScore: [[], 'int'], addScore: [['int'], 'void'] }[n.name];
+        if (n.name === 'equals' && ts.length === 1) return 'boolean';
+        if (!sig) throw new CompileError(`cannot find symbol: method ${n.name} in class Player`, n.line);
+        if (ts.length !== sig[0].length || ts.some((x, i) => !assignable(sig[0][i], x))) throw new CompileError(`method ${n.name} in class Player cannot be applied to given types`, n.line);
+        return sig[1];
+      }
+      if (r.startsWith('ArrayList')) {
+        const e = ELEM(r);
+        if (e === '?') throw new Unsupported('give the ArrayList an element type, such as new ArrayList<Integer>().', n.line);
+        switch (n.name) {
+          case 'size': if (!ts.length) return 'int'; break;
+          case 'get': if (ts.length === 1 && prim(ts[0]) === 'int') return e; break;
+          case 'set': if (ts.length === 2 && prim(ts[0]) === 'int' && assignable(e, ts[1])) return e; break;
+          case 'add':
+            if (ts.length === 1 && assignable(e, ts[0])) return 'boolean';
+            if (ts.length === 2 && prim(ts[0]) === 'int' && assignable(e, ts[1])) return 'void';
+            break;
+          case 'remove':
+            if (ts.length === 1 && ts[0] === 'int') { n.byIndex = true; return e; }
+            // Any other argument boxes to an object: remove(Object) removes by value.
+            // equals() is true only for the same boxed class: Double 4.0 never equals Integer 4.
+            if (ts.length === 1 && ts[0] !== 'void') { n.byIndex = false; n.argBox = { double: 'Double', boolean: 'Boolean' }[ts[0]] || ts[0]; return 'boolean'; }
+            break;
+          default:
+            if (!ARRAYLIST_METHODS.includes(n.name)) throw new CompileError(`cannot find symbol: method ${n.name}(…) in class ArrayList`, n.line);
+            throw new Unsupported(`the ArrayList method ${n.name}(…) is not supported here (size, get, set, add and remove are).`, n.line);
+        }
+        throw new CompileError(`method ${n.name} in class ArrayList<${e}> cannot be applied to these arguments`, n.line);
+      }
+      if (r.endsWith('[]')) throw new CompileError(`cannot find symbol: method ${n.name}; arrays have a length field, not methods`, n.line);
+      if (r === 'Integer' || r === 'Double') throw new Unsupported(`calling methods on ${r} objects is not supported here.`, n.line);
+      throw new CompileError(`cannot find symbol: method ${n.name}`, n.line);
+    }
+    const constVal = n => {
+      if (n.k === 'lit' && n.type === 'boolean') return n.v;
+      if (n.k === 'unary' && n.op === '!') { const v = constVal(n.e); return v === undefined ? undefined : !v; }
+      if (n.k === 'bin' && (n.op === '&&' || n.op === '||')) { const a = constVal(n.l), b = constVal(n.r); if (a === undefined || b === undefined) return undefined; return n.op === '&&' ? a && b : a || b; }
+      if (n.k === 'bin' && ['<', '<=', '>', '>=', '==', '!='].includes(n.op) && n.l.k === 'lit' && n.r.k === 'lit' && numeric(n.l.type) && numeric(n.r.type)) {
+        const a = n.l.v, b = n.r.v;
+        return { '<': a < b, '<=': a <= b, '>': a > b, '>=': a >= b, '==': a === b, '!=': a !== b }[n.op];
+      }
+      return undefined;
+    };
+    // Returns whether the statement can complete normally (JLS 14.22), reporting unreachable code.
+    function st(n) {
+      switch (n.k) {
+        case 'block': {
+          scopes.push(new Map());
+          let ok = true;
+          for (const s of n.body) {
+            if (!ok) throw new CompileError('unreachable statement', s.line);
+            ok = st(s);
+          }
+          scopes.pop();
+          return ok;
+        }
+        case 'empty': return true;
+        case 'decl': {
+          if (n.type === 'void') throw new CompileError("'void' type not allowed here", n.line);
+          const t = ty(n.init);
+          if (t === 'ArrayList<?>' && n.type.startsWith('ArrayList<')) { n.init.type = n.type; n.init.elem = ELEM(n.type); }
+          else if (!assignable(n.type, t)) throw new CompileError(`incompatible types: ${t} cannot be converted to ${n.type}`, n.line);
+          declare(n.name, n.type, n.line);
+          return true;
+        }
+        case 'assign': {
+          const tt = n.target.k === 'var' ? lookup(n.target.name, n.line) : ty(n.target);
+          n.target.type = tt;
+          const t = ty(n.e);
+          if (n.op === '=') {
+            if (t === 'ArrayList<?>' && tt.startsWith('ArrayList<')) { n.e.type = tt; n.e.elem = ELEM(tt); }
+            else if (!assignable(tt, t)) throw new CompileError(`incompatible types: ${t} cannot be converted to ${tt}`, n.line);
+          } else {
+            // Compound assignment: E1 op= E2 means E1 = (T) (E1 op E2) (JLS 15.26.2).
+            if (n.op === '+=' && tt === 'String') return true;
+            if (!numeric(tt) || !numeric(t)) throw new CompileError(`bad operand types for binary operator '${n.op[0]}' (${tt} and ${t})`, n.line);
+            if (tt === 'Integer' || tt === 'Double') throw new Unsupported(`compound assignment on ${tt} variables is not supported here.`, n.line);
+          }
+          return true;
+        }
+        case 'incdec': {
+          const tt = n.target.k === 'var' ? lookup(n.target.name, n.line) : ty(n.target);
+          n.target.type = tt;
+          if (!numeric(tt)) throw new CompileError(`bad operand type ${tt} for unary operator '${n.op}'`, n.line);
+          if (tt === 'Integer' || tt === 'Double') throw new Unsupported(`${n.op} on ${tt} variables is not supported here.`, n.line);
+          return true;
+        }
+        case 'print': {
+          if (n.args.length > 1) throw new CompileError('print and println take at most one argument', n.line);
+          if (!n.args.length && !n.ln) throw new CompileError('System.out.print() needs something to print', n.line);
+          if (n.args.length) {
+            const t = ty(n.args[0]);
+            if (t === 'void') throw new CompileError("'void' type not allowed here", n.line);
+            if (t === 'Player' || t.endsWith('[]')) throw new Unsupported(`printing ${t === 'Player' ? 'a Player' : 'an array'} directly shows something like ${t === 'Player' ? 'Player' : '[I'}@1b6d3586, which varies.`, n.line);
+            if (t === 'null') throw new Unsupported('println(null) is ambiguous in Java; print a variable instead.', n.line);
+          }
+          return true;
+        }
+        case 'exprStmt': {
+          const e = n.e;
+          if (!['call', 'scall', 'newPlayer', 'newList'].includes(e.k)) throw new CompileError('not a statement', n.line);
+          ty(e);
+          return true;
+        }
+        case 'if': {
+          if (ty(n.cond) !== 'boolean') throw new CompileError(`incompatible types: ${n.cond.type} cannot be converted to boolean`, n.line);
+          scopes.push(new Map()); const a = st(n.then); scopes.pop();
+          if (!n.els) return true;
+          scopes.push(new Map()); const b = st(n.els); scopes.pop();
+          return a || b;
+        }
+        case 'while': {
+          if (ty(n.cond) !== 'boolean') throw new CompileError(`incompatible types: ${n.cond.type} cannot be converted to boolean`, n.line);
+          const c = constVal(n.cond);
+          if (c === false) throw new CompileError('unreachable statement: the loop condition is always false, so the body can never run', n.body.line);
+          scopes.push(new Map()); st(n.body); scopes.pop();
+          return c !== true;
+        }
+        case 'for': {
+          scopes.push(new Map());
+          if (n.init) st(n.init);
+          let c;
+          if (n.cond) {
+            if (ty(n.cond) !== 'boolean') throw new CompileError(`incompatible types: ${n.cond.type} cannot be converted to boolean`, n.line);
+            c = constVal(n.cond);
+            if (c === false) throw new CompileError('unreachable statement: the loop condition is always false, so the body can never run', n.body.line);
+          } else c = true;
+          if (n.update) st(n.update);
+          scopes.push(new Map()); st(n.body); scopes.pop();
+          scopes.pop();
+          return c !== true;
+        }
+        case 'foreach': {
+          const it = ty(n.iter), e = ELEM(it);
+          if (!e || it === 'ArrayList<?>') throw new CompileError(`for-each not applicable to expression type ${it}`, n.line);
+          if (!assignable(n.type, e)) throw new CompileError(`incompatible types: ${e} cannot be converted to ${n.type}`, n.line);
+          scopes.push(new Map()); declare(n.name, n.type, n.line); st(n.body); scopes.pop();
+          return true;
+        }
+        case 'return': {
+          if (retType === null) throw new Unsupported('return in the main statements is not supported here.', n.line);
+          if (retType === 'void') { if (n.e) throw new CompileError('incompatible types: unexpected return value in a void method', n.line); return false; }
+          if (!n.e) throw new CompileError('missing return value', n.line);
+          const t = ty(n.e);
+          if (!assignable(retType, t)) throw new CompileError(`incompatible types: ${t} cannot be converted to ${retType}`, n.line);
+          return false;
+        }
+      }
+      throw new Unsupported('this statement is not supported here.', n.line);
+    }
+    for (const m of prog.methods) {
+      scopes = [new Map()]; retType = m.ret;
+      for (const q of m.params) declare(q.name, q.type, m.line);
+      const completes = st(m.body);
+      if (completes && m.ret !== 'void') throw new CompileError(`missing return statement in ${m.name}`, m.body.end ? m.line : m.line);
+    }
+    scopes = [new Map()]; retType = null;
+    let ok = true;
+    for (const s of prog.main) { if (!ok) throw new CompileError('unreachable statement', s.line); ok = st(s); }
+    if (deferred) throw deferred;
+    return mtab;
+  }
+
+  /* ---------------- Running ---------------- */
+  function run(src, opts = {}) {
+    const maxOps = opts.maxOps || 200000, maxSteps = opts.maxSteps || 3000, maxDepth = opts.maxDepth || 200;
+    nodeSeq = 0;
+    let prog, mtab;
+    try { prog = parse(src); mtab = check(prog); }
+    catch (e) {
+      if (e instanceof CompileError) return { compileError: e.message, line: e.line, steps: [] };
+      if (e instanceof Unsupported) return { unsupported: e.message, line: e.line, steps: [] };
+      throw e;
+    }
+    const steps = [];
+    let out = '', ops = 0, heapSeq = 0, truncated = false;
+    const frames = [{ name: 'main', scopes: [new Map()], line: 0 }];
+    const loops = new Map();   // loop node id -> { line, kind, iterations of the current run }
+    const fr = () => frames[frames.length - 1];
+    const tick = line => { if (++ops > maxOps) throw new ToolLimit('steps', line); };
+    const newObj = o => ({ hid: ++heapSeq, ...o });
+    const text = (t, v) => {
+      if (v === null) return 'null';
+      if (t === 'double' || t === 'Double') return javaDouble(v);
+      if (t && t.startsWith('ArrayList')) { const e = ELEM(t); return '[' + v.values.map(x => text(e, x)).join(', ') + ']'; }
+      return String(v);
+    };
+    const show = (t, v) => {
+      if (v !== null && typeof v === 'object' && v.kind !== 'list') return `→ ${v.kind === 'player' ? 'Player' : 'array'} #${v.hid}`;
+      return t === 'String' && v !== null ? JSON.stringify(v) : text(t, v);
+    };
+    // For call and return notes: a reference reads as the object it points to.
+    const showRef = (t, v) => v !== null && typeof v === 'object' ? `→ ${v.kind === 'player' ? 'Player' : v.kind === 'list' ? 'ArrayList' : 'array'} #${v.hid}` : show(t, v);
+    const snapVal = (t, v) => (v !== null && typeof v === 'object') ? { ref: v.hid } : v;
+    function snapshot() {
+      const heap = {};
+      const visit = o => {
+        if (!o || typeof o !== 'object' || heap[o.hid]) return;
+        if (o.kind === 'array' || o.kind === 'list') {
+          heap[o.hid] = { hid: o.hid, kind: o.kind, elem: o.elem, values: o.values.map(x => snapVal(o.elem, x)) };
+          if (o.elem === 'Player') o.values.forEach(visit);
+        } else if (o.kind === 'player') heap[o.hid] = { hid: o.hid, kind: 'player', name: o.name, score: o.score };
+      };
+      const fs = frames.map(f => {
+        const vars = [];
+        for (const sc of f.scopes) for (const [name, cell] of sc) { vars.push({ name, type: cell.type, v: snapVal(cell.type, cell.v) }); visit(cell.v); }
+        return { name: f.name, line: f.line, vars, args: f.args, params: f.params || [] };
+      });
+      return { frames: fs, heap };
+    }
+    function record(kind, node, note, extra = {}) {
+      if (steps.length >= maxSteps) { truncated = true; return; }
+      steps.push({ kind, line: node.line, note, out, depth: frames.length, ...snapshot(), ...extra });
+    }
+    const lookupCell = name => { const f = fr(); for (let i = f.scopes.length - 1; i >= 0; i--) if (f.scopes[i].has(name)) return f.scopes[i].get(name); throw new Error('unknown variable ' + name); };
+    const npe = (line, what) => { throw new JavaThrow('NullPointerException', line, `${what} is null, so there is no object to use.`); };
+    function num(t, v) { return v; }
+    function arith(op, a, b, t, line) {
+      if (t === 'int') {
+        if ((op === '/' || op === '%') && b === 0) throw new JavaThrow('ArithmeticException', line, 'Integer division by zero has no answer.');
+        if (op === '+') return (a + b) | 0;
+        if (op === '-') return (a - b) | 0;
+        if (op === '*') return Math.imul(a, b);
+        if (op === '/') return toInt32(Math.trunc(a / b));
+        return (a % b) | 0;
+      }
+      return op === '+' ? a + b : op === '-' ? a - b : op === '*' ? a * b : op === '/' ? a / b : a % b;
+    }
+    function conv(to, from, v, line) {
+      if ((to === 'int' || to === 'double') && (from === 'Integer' || from === 'Double') && v === null)
+        npe(line, 'the ' + from + ' value being converted to ' + to);
+      return v;
+    }
+    // Condition trees: which parts of a boolean expression were evaluated, and their values.
+    let treeRec = null;
+    function ev(n) {
+      tick(n.line);
+      let v;
+      try { v = ev0(n); }
+      catch (e) { if (e instanceof JavaThrow && e.node === undefined) e.node = n.id; throw e; }
+      if (treeRec) treeRec.set(n.id, v);
+      return v;
+    }
+    function ev0(n) {
+      switch (n.k) {
+        case 'lit': return n.v;
+        case 'var': return lookupCell(n.name).v;
+        case 'unary': {
+          if (n.e.big) return INT_MIN;
+          const a = n.op === '!' ? ev(n.e) : conv(prim(n.e.type), n.e.type, ev(n.e), n.line);
+          if (n.op === '!') return !a;
+          if (n.op === '+') return a;
+          return n.type === 'int' ? (-a) | 0 : -a;
+        }
+        case 'cast': { const a = conv(n.to, n.e.type, ev(n.e), n.line); return n.to === 'int' ? (n.e.type === 'int' || n.e.type === 'Integer' ? a : castToInt(a)) : a; }
+        case 'bin': {
+          if (n.op === '&&') { const a = ev(n.l); return a ? ev(n.r) : false; }
+          if (n.op === '||') { const a = ev(n.l); return a ? true : ev(n.r); }
+          const a = ev(n.l), b = ev(n.r), lt = n.l.type, rt = n.r.type;
+          if (n.type === 'String') return text(lt, a) + text(rt, b);
+          // Unboxing a null Integer or Double for arithmetic or a numeric comparison throws.
+          const numericOp = ['+', '-', '*', '/', '%', '<', '<=', '>', '>='].includes(n.op) || (numeric(lt) && numeric(rt));
+          if (numericOp) {
+            if ((lt === 'Integer' || lt === 'Double') && a === null) npe(n.line, n.l.src);
+            if ((rt === 'Integer' || rt === 'Double') && b === null) npe(n.line, n.r.src);
+          }
+          if (['+', '-', '*', '/', '%'].includes(n.op)) return arith(n.op, a, b, n.type, n.line);
+          if (['<', '<=', '>', '>='].includes(n.op)) return { '<': a < b, '<=': a <= b, '>': a > b, '>=': a >= b }[n.op];
+          const same = a === b;
+          return n.op === '==' ? same : !same;
+        }
+        case 'index': {
+          const arr = ev(n.arr), i = conv('int', n.i.type, ev(n.i), n.line);
+          if (arr === null) npe(n.line, n.arr.src);
+          if (i < 0 || i >= arr.values.length) throw new JavaThrow('ArrayIndexOutOfBoundsException', n.line, `Index ${i} is outside the array, whose indexes run from 0 to ${arr.values.length - 1}.`);
+          return arr.values[i];
+        }
+        case 'field': {
+          if (n.recv.k === 'class') return n.name === 'MAX_VALUE' ? INT_MAX : INT_MIN;
+          const r = ev(n.recv);
+          if (r === null) npe(n.line, n.recv.src);
+          return r.values.length;
+        }
+        case 'newArr': {
+          const len = conv('int', n.n.type, ev(n.n), n.line);
+          if (len < 0) throw new JavaThrow('NegativeArraySizeException', n.line, `An array cannot have ${len} elements.`);
+          const d = n.elem === 'int' ? 0 : n.elem === 'double' ? 0 : n.elem === 'boolean' ? false : null;
+          return newObj({ kind: 'array', elem: n.elem, values: new Array(len).fill(d) });
+        }
+        case 'arrInit': return newObj({ kind: 'array', elem: n.elem, values: n.items.map(it => conv(n.elem, it.type, ev(it), it.line)) });
+        case 'newList': return newObj({ kind: 'list', elem: n.elem, values: [], modCount: 0 });
+        case 'newPlayer': { const a = n.args.map(ev); return newObj({ kind: 'player', name: a[0], score: conv('int', n.args[1].type, a[1], n.line) }); }
+        case 'scall': return invoke(n);
+        case 'call': return method(n);
+      }
+    }
+    function method(n) {
+      if (n.recv.k === 'class') {
+        const a = n.args.map(ev);
+        if (n.recv.name === 'Integer') return conv('int', n.args[0].type, a[0], n.line);
+        const nums = a.map((v, i) => conv(prim(n.args[i].type), n.args[i].type, v, n.line));
+        if (n.name === 'abs') return n.type === 'int' ? toInt32(Math.abs(nums[0])) : Math.abs(nums[0]);
+        if (n.name === 'sqrt') return Math.sqrt(nums[0]);
+        return Math.pow(nums[0], nums[1]);
+      }
+      const r = ev(n.recv), a = n.args.map(ev);
+      if (r === null) npe(n.line, n.recv.src);
+      const rt = n.recv.type;
+      if (rt === 'String') {
+        if (n.name === 'length') return r.length;
+        if (n.name === 'equals') return n.args[0].type === 'String' && a[0] === r;
+        if (n.name === 'indexOf') { if (a[0] === null) npe(n.line, n.args[0].src); return r.indexOf(a[0]); }
+        if (n.name === 'compareTo') {
+          if (a[0] === null) npe(n.line, n.args[0].src);
+          const lim = Math.min(r.length, a[0].length);
+          for (let k = 0; k < lim; k++) if (r.charCodeAt(k) !== a[0].charCodeAt(k)) return r.charCodeAt(k) - a[0].charCodeAt(k);
+          return r.length - a[0].length;
+        }
+        const b = conv('int', n.args[0].type, a[0], n.line), e = a.length > 1 ? conv('int', n.args[1].type, a[1], n.line) : r.length;
+        if (b < 0 || e > r.length || b > e) throw new JavaThrow('StringIndexOutOfBoundsException', n.line, `substring(${a.join(', ')}) is outside ${JSON.stringify(r)}, whose length is ${r.length}.`);
+        return r.slice(b, e);
+      }
+      if (rt === 'Player') {
+        if (n.name === 'equals') return n.args[0].type === 'Player' && r === a[0];
+        if (n.name === 'getName') return r.name;
+        if (n.name === 'getScore') return r.score;
+        const old = r.score; r.score = (r.score + conv('int', n.args[0].type, a[0], n.line)) | 0;
+        record('mutate', n, `addScore changes the Player that ${n.recv.src} refers to: its score goes from ${old} to ${r.score}.`, { obj: r.hid });
+        return undefined;
+      }
+      // ArrayList
+      const L = r.values, size = L.length, e = ELEM(rt);
+      if (['get', 'set'].includes(n.name) || n.name === 'add' && a.length === 2 || n.name === 'remove' && n.byIndex) a[0] = conv('int', n.args[0].type, a[0], n.line);
+      const oob = (i, hi) => { throw new JavaThrow('IndexOutOfBoundsException', n.line, `Index ${i} is out of bounds for length ${size}: valid indexes here are 0 to ${hi}.`); };
+      switch (n.name) {
+        case 'size': return size;
+        case 'get': if (a[0] < 0 || a[0] >= size) oob(a[0], size - 1); return L[a[0]];
+        case 'set': {
+          if (a[0] < 0 || a[0] >= size) oob(a[0], size - 1);
+          const old = L[a[0]]; L[a[0]] = a[1];
+          record('list', n, `set(${a[0]}, ${show(e, a[1])}) replaces ${show(e, old)} at index ${a[0]}. Nothing moves, and the size stays ${size}.`, { list: { hid: r.hid, op: 'set', index: a[0] } });
+          return old;
+        }
+        case 'add':
+          if (a.length === 1) {
+            L.push(a[0]); r.modCount++;
+            record('list', n, `add(${show(e, a[0])}) puts it at the end, index ${size}. The size becomes ${size + 1}.`, { list: { hid: r.hid, op: 'add', index: size } });
+            return true;
+          }
+          if (a[0] < 0 || a[0] > size) oob(a[0], size);
+          L.splice(a[0], 0, a[1]); r.modCount++;
+          record('list', n, `add(${a[0]}, ${show(e, a[1])}) inserts it at index ${a[0]}.` + (a[0] < size ? ` The elements from index ${a[0]} on each move one place right, to a higher index.` : ''), { list: { hid: r.hid, op: 'insert', index: a[0] } });
+          return undefined;
+        case 'remove': {
+          if (n.byIndex) {
+            if (a[0] < 0 || a[0] >= size) oob(a[0], size - 1);
+            const old = L.splice(a[0], 1)[0]; r.modCount++;
+            record('list', n, `remove(${a[0]}) removes the element at index ${a[0]}, ${show(e, old)}.` + (a[0] < size - 1 ? ` Every later element moves one place left, so the one that was at index ${a[0] + 1} is now at index ${a[0]}.` : ''), { list: { hid: r.hid, op: 'remove', index: a[0] } });
+            return old;
+          }
+          const k = n.argBox !== e && n.argBox !== 'null' ? -1 : L.findIndex(x => e === 'Double' ? Object.is(x, a[0]) : x === a[0]);
+          if (k < 0) { record('list', n, `remove(${n.args[0].src.trim()}) looks for an element equal to ${show(e, a[0])}, finds none, and returns false. The list is unchanged.`, { list: { hid: r.hid, op: 'none' } }); return false; }
+          L.splice(k, 1); r.modCount++;
+          record('list', n, `remove(${n.args[0].src.trim()}) removes the first element equal to ${show(e, a[0])}, found at index ${k}, and returns true. This is remove by value, not by index.` + (k < size - 1 ? ` Later elements move one place left.` : ''), { list: { hid: r.hid, op: 'remove', index: k } });
+          return true;
+        }
+      }
+    }
+    function invoke(n) {
+      const m = n.method, a = n.args.map((arg, i) => conv(m.params[i].type, arg.type, ev(arg), arg.line));
+      if (frames.length >= maxDepth) throw new ToolLimit('depth', n.line);
+      const scope = new Map();
+      m.params.forEach((q, i) => scope.set(q.name, { type: q.type, v: a[i] }));
+      const caller = fr().name;
+      frames.push({ name: m.name, ret: m.ret, scopes: [scope], line: n.line, params: m.params.map(q => q.name), args: m.params.map((q, i) => `${q.name} = ${showRef(q.type, a[i])}`) });
+      const argText = m.params.map((q, i) => `${q.name} = ${showRef(q.type, a[i])}`).join(', ');
+      const hasRef = m.params.some(q => isRef(q.type) && q.type !== 'String');
+      record('call', m, `Call ${m.name}(${n.args.map(x => x.src.trim()).join(', ')}): a new frame${m.params.length ? ` where ${argText}` : ''}. ${hasRef ? 'A reference parameter gets a copy of the reference, so it refers to the same object as the argument.' : m.params.length ? 'Each parameter gets a copy of its argument.' : ''}`.trim(),
+        { callLine: n.line, method: m.name, caller, args: m.params.map((q, i) => ({ name: q.name, type: q.type, src: n.args[i].src, v: snapVal(q.type, a[i]), text: showRef(q.type, a[i]) })) });
+      let ret;
+      try { execBlockBody(m.body); ret = undefined; }
+      catch (e) { if (e instanceof Ret) ret = e.v; else { throw e; } }
+      const f = frames.pop();
+      const to = fr().name === m.name ? `the ${m.name} call that was waiting for it` : fr().name;
+      record('return', n, m.ret === 'void' ? `${m.name} finishes. Its frame and its variables are removed, and execution continues in ${to}.` : `${m.name} returns ${showRef(m.ret, ret)} to ${to}, and its frame is removed.`,
+        { returned: m.ret === 'void' ? undefined : showRef(m.ret, ret), retType: m.ret, retValue: m.ret === 'void' ? undefined : snapVal(m.ret, ret), from: f.name, method: m.name });
+      return ret;
+    }
+    class Ret { constructor(v) { this.v = v; } }
+    function execBlockBody(b) { fr().scopes.push(new Map()); try { for (const s of b.body) exec(s); } finally { fr().scopes.pop(); } }
+    let lastArr = null;   // the array an element assignment just changed
+    function assignTo(target, v, n) {
+      if (target.k === 'var') { lookupCell(target.name).v = v; return; }
+      const arr = ev(target.arr), i = conv('int', target.i.type, ev(target.i), n.line);
+      if (arr === null) npe(n.line, target.arr.src);
+      if (i < 0 || i >= arr.values.length) throw new JavaThrow('ArrayIndexOutOfBoundsException', n.line, `Index ${i} is outside the array, whose indexes run from 0 to ${arr.values.length - 1}.`);
+      arr.values[i] = v;
+      lastArr = arr.hid;
+      return i;
+    }
+    function condition(n, node) {
+      treeRec = new Map();
+      const v = ev(n);
+      const tree = treeRec; treeRec = null;
+      return { v, tree: [...tree.entries()] };
+    }
+    function exec(n) {
+      tick(n.line);
+      switch (n.k) {
+        case 'block': execBlockBody(n); return;
+        case 'empty': return;
+        case 'decl': {
+          const v = conv(n.type, n.init.type, ev(n.init), n.line);
+          fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
+          record('decl', n, `Creates ${n.name} (${n.type}) and stores ${describe(n.type, v)}.`, { changed: [n.name] });
+          return;
+        }
+        case 'assign': {
+          const tt = n.target.type;
+          const old = n.target.k === 'var' ? lookupCell(n.target.name).v : undefined;
+          let v;
+          if (n.op === '=') v = ev(n.e);
+          else {
+            const cur = ev(n.target), rhs = ev(n.e), op = n.op[0];
+            if (tt === 'String') v = text('String', cur) + text(n.e.type, rhs);
+            else {
+              const t = prim(tt) === 'double' || prim(n.e.type) === 'double' ? 'double' : 'int';
+              v = arith(op, cur, rhs, t, n.line);
+              if (prim(tt) === 'int' && t === 'double') v = castToInt(v);
+            }
+          }
+          if (n.op === '=') v = conv(tt, n.e.type, v, n.line);
+          const idx = assignTo(n.target, v, n);
+          const who = n.target.k === 'var' ? n.target.name : `${n.target.arr.src}[${idx}]`;
+          const note = n.op === '='
+            ? `${who} becomes ${describe(tt, v)}${n.target.k === 'var' && old !== undefined && old !== v && (typeof v !== 'object') ? ` (it was ${show(tt, old)})` : ''}.`
+            : `${n.op} updates ${who}: it becomes ${show(tt, v)}.` + (prim(tt) === 'int' && prim(n.e.type) === 'double' ? ' The result is cast back to int automatically.' : '');
+          record('assign', n, note, { changed: [n.target.k === 'var' ? n.target.name : n.target.arr.src], arrayIndex: idx, obj: n.target.k === 'index' ? lastArr : undefined });
+          return;
+        }
+        case 'incdec': {
+          const cur = ev(n.target), tt = n.target.type;
+          const v = n.op === '++' ? (prim(tt) === 'int' ? (cur + 1) | 0 : cur + 1) : (prim(tt) === 'int' ? (cur - 1) | 0 : cur - 1);
+          const idx = assignTo(n.target, v, n);
+          const who = n.target.k === 'var' ? n.target.name : `${n.target.arr.src}[${idx}]`;
+          record(n.forUpdate ? 'update' : 'assign', n, `${n.src.trim()} ${n.op === '++' ? 'adds' : 'subtracts'} 1: ${who} goes from ${show(tt, cur)} to ${show(tt, v)}.`, { changed: [n.target.k === 'var' ? n.target.name : n.target.arr.src], arrayIndex: idx, obj: n.target.k === 'index' ? lastArr : undefined });
+          return;
+        }
+        case 'print': {
+          const s = n.args.length ? text(n.args[0].type, ev(n.args[0])) : '';
+          out += s + (n.ln ? '\n' : '');
+          record('print', n, n.args.length ? `${n.ln ? 'println' : 'print'} shows ${JSON.stringify(s)}${n.ln ? ' and ends the line' : ''}.` : 'println() ends the line.', { printed: s });
+          return;
+        }
+        case 'exprStmt': {
+          const v = ev(n.e);
+          if (n.e.k === 'scall' && n.e.type !== 'void') record('discard', n, `The value ${show(n.e.type, v)} returned by ${n.e.name} is not used.`);
+          if (n.e.k === 'call' && n.e.type === 'String') record('discard', n, 'The String returned is not stored, so it is lost. String methods never change the String they are called on.');
+          return;
+        }
+        case 'if': {
+          const c = condition(n.cond);
+          record('cond', n, `The condition ${n.cond.src} is ${c.v}, so ${c.v ? 'the if branch runs' : n.els ? 'the else branch runs' : 'the if body is skipped'}.`, { cond: n.cond.id, value: c.v, tree: c.tree, branch: c.v ? 'then' : n.els ? 'else' : 'skip' });
+          fr().scopes.push(new Map());
+          try { if (c.v) exec(n.then); else if (n.els) exec(n.els); } finally { fr().scopes.pop(); }
+          return;
+        }
+        case 'while': {
+          let it = 0;
+          for (;;) {
+            const c = condition(n.cond);
+            record('cond', n, c.v ? `Check ${n.cond.src}: true, so the body runs${it ? ' again' : ''} (iteration ${it + 1}).` : `Check ${n.cond.src}: false, so the loop ends after ${it} iteration${it === 1 ? '' : 's'}.`, { loop: n.id, iteration: it + 1, value: c.v, tree: c.tree, cond: n.cond.id });
+            if (!c.v) break;
+            it++;
+            fr().scopes.push(new Map());
+            try { exec(n.body); } finally { fr().scopes.pop(); }
+          }
+          return;
+        }
+        case 'for': {
+          fr().scopes.push(new Map());
+          try {
+            if (n.init) { if (n.init.k === 'decl') exec(n.init); else exec(n.init); steps.length && (steps[steps.length - 1].phase = 'init'); }
+            let it = 0;
+            for (;;) {
+              let v = true, tree = [];
+              if (n.cond) { const c = condition(n.cond); v = c.v; tree = c.tree; }
+              record('cond', n, v ? `Check ${n.cond ? n.cond.src : '(no condition)'}: true, so the body runs (iteration ${it + 1}).` : `Check ${n.cond.src}: false, so the loop ends after ${it} iteration${it === 1 ? '' : 's'}.`, { loop: n.id, iteration: it + 1, value: v, tree, cond: n.cond && n.cond.id, phase: 'cond' });
+              if (!v) break;
+              it++;
+              fr().scopes.push(new Map());
+              try { exec(n.body); } finally { fr().scopes.pop(); }
+              if (n.update) { n.update.forUpdate = true; exec(n.update); if (steps.length) steps[steps.length - 1].phase = 'update'; }
+            }
+          } finally { fr().scopes.pop(); }
+          return;
+        }
+        case 'foreach': {
+          const coll = ev(n.iter);
+          if (coll === null) npe(n.line, n.iter.src);
+          const e = ELEM(n.iter.type);
+          fr().scopes.push(new Map());
+          try {
+            if (coll.kind === 'array') {
+              for (let i = 0; i < coll.values.length; i++) {
+                const v = conv(n.type, e, coll.values[i], n.line);
+                fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
+                record('foreach', n, `${n.name} gets a copy of the next element, ${show(e, v)} (index ${i}).`, { loop: n.id, iteration: i + 1, changed: [n.name], index: i });
+                fr().scopes.push(new Map());
+                try { exec(n.body); } finally { fr().scopes.pop(); }
+              }
+            } else {
+              // The iterator that an enhanced for uses on an ArrayList: hasNext() then next(), which checks
+              // whether the list was structurally changed (added to or removed from) since the loop began.
+              let cursor = 0, it = 0;
+              const expected = coll.modCount;
+              while (cursor !== coll.values.length) {
+                if (coll.modCount !== expected) throw new JavaThrow('ConcurrentModificationException', n.line, 'The list was changed (an add or remove) while the enhanced for loop was walking through it.');
+                const v = conv(n.type, e, coll.values[cursor++], n.line);
+                fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
+                record('foreach', n, `${n.name} gets the next element, ${show(e, v)} (index ${cursor - 1}).`, { loop: n.id, iteration: ++it, changed: [n.name], index: cursor - 1, iter: { hid: coll.hid, cursor } });
+                fr().scopes.push(new Map());
+                try { exec(n.body); } finally { fr().scopes.pop(); }
+              }
+              const size = coll.values.length;
+              record('cond', n, it < size || coll.modCount !== expected ? `hasNext() is false: the iterator's cursor is at index ${cursor}, which equals size() ${size}, so the loop ends.` : 'No more elements, so the loop ends.', { loop: n.id, value: false, done: true, iter: { hid: coll.hid, cursor } });
+              return;
+            }
+            record('cond', n, 'No more elements, so the loop ends.', { loop: n.id, value: false, done: true });
+          } finally { fr().scopes.pop(); }
+          return;
+        }
+        case 'return': {
+          const v = n.e ? conv(fr().ret, n.e.type, ev(n.e), n.line) : undefined;
+          const t = n.e ? n.e.type : 'void';
+          record('returning', n, n.e ? `return ${n.e.src.trim()}: the value is ${showRef(t, v)}. ${fr().name} stops here, and this value goes back to the call.` : `return; ends ${fr().name} here.`, { value: n.e ? showRef(t, v) : undefined, method: fr().name });
+          throw new Ret(v);
+        }
+      }
+    }
+    function describe(t, v) {
+      if (v === null) return 'null (no object)';
+      if (typeof v === 'object') {
+        if (v.kind === 'array') return `a reference to a new array of ${v.values.length} ${v.elem}${v.values.length === 1 ? '' : 's'}`;
+        if (v.kind === 'list') return `a reference to an ArrayList with ${v.values.length} element${v.values.length === 1 ? '' : 's'}`;
+        if (v.kind === 'player') return `a reference to a Player (${v.name}, ${v.score})`;
+      }
+      return show(t, v);
+    }
+    let crashed = null, limit = null;
+    try { for (const s of prog.main) exec(s); }
+    catch (e) {
+      if (e instanceof JavaThrow) {
+        crashed = e.javaType;
+        // Keep the part of a condition that was evaluated before it threw, and where it threw.
+        steps.push({ kind: 'error', line: e.line, note: `${e.why} Java throws a${/^[AEIOU]/.test(e.javaType) ? 'n' : ''} ${e.javaType}, and the program stops.`, out, error: e.javaType, depth: frames.length, failNode: e.node, tree: treeRec ? [...treeRec.entries()] : null, ...snapshot() });
+      } else if (e instanceof ToolLimit || e instanceof RangeError && /call stack/i.test(e.message) || e && e.name === 'InternalError') {
+        // The browser's own stack can run out before maxDepth; treat that as the same depth limit.
+        limit = e instanceof ToolLimit ? e.kind : 'depth';
+        const line = e instanceof ToolLimit ? e.line : frames[frames.length - 1].line;
+        steps.push({ kind: 'limit', line, note: limit === 'depth' ? `This tool stops at ${frames.length} frames on the call stack. Java itself would keep going deeper before stopping with a StackOverflowError.` : `This tool stopped after ${maxOps.toLocaleString()} operations. The program may have an infinite loop.`, out, depth: frames.length, ...snapshot() });
+      } else throw e;
+    }
+    return { steps, out, crashed, limit, truncated, prog };
+  }
+  function label(r) {
+    if (r.compileError) return 'compile-error';
+    if (r.unsupported) return 'unsupported';
+    if (r.limit) return 'limit';
+    return r.crashed ? `${r.out}|throws:${r.crashed}` : r.out;
+  }
+  // The loops in a program with their nesting, for the loop and nested-loop views.
+  function loopsOf(prog) {
+    const found = [];
+    const walk = (n, parent) => {
+      if (!n || typeof n !== 'object') return;
+      if (['while', 'for', 'foreach'].includes(n.k)) { found.push({ id: n.id, k: n.k, line: n.line, bodyLine: n.body.line, endPos: n.end, parent, var: n.k === 'for' && n.init && n.init.k === 'decl' ? n.init.name : n.k === 'foreach' ? n.name : null }); parent = n.id; }
+      for (const key of ['body', 'then', 'els', 'main']) { const c = n[key]; if (Array.isArray(c)) c.forEach(x => walk(x, parent)); else if (c) walk(c, parent); }
+      if (n.k === 'block') n.body.forEach(x => walk(x, parent));
+    };
+    prog.methods.forEach(m => walk(m.body, null));
+    prog.main.forEach(s => walk(s, null));
+    return found;
+  }
+  // Rewrites every for loop whose body is a block as the equivalent while loop, wrapped in its own
+  // block so the loop variable keeps its limited scope: for (init; cond; update) { body } becomes
+  // { init; while (cond) { body update; } }.
+  function forToWhile(src) {
+    // Rewrite one loop at a time (the last one in the text, so an inner loop goes before its outer
+    // loop), re-parsing after each rewrite so every position is current.
+    const findFors = text => {
+      nodeSeq = 0;
+      const prog = parse(text), fors = [];
+      const walk = n => {
+        if (!n || typeof n !== 'object') return;
+        if (n.k === 'for') fors.push(n);
+        for (const key of ['body', 'then', 'els', 'init', 'update']) { const c = n[key]; if (Array.isArray(c)) c.forEach(walk); else if (c && typeof c === 'object') walk(c); }
+      };
+      prog.methods.forEach(m => walk(m.body)); prog.main.forEach(walk);
+      return fors.filter(f => f.body.k === 'block' && f.cond);
+    };
+    let out = src, changed = false;
+    for (let guard = 0; guard < 50; guard++) {
+      const fors = findFors(out);
+      if (!fors.length) break;
+      const f = fors.sort((a, b) => b.pos - a.pos)[0];
+      const indent = (/[ \t]*$/.exec(out.slice(0, f.pos)) || [''])[0];
+      const inner = out.slice(f.body.pos + 1, f.body.end - 1).replace(/^[ \t]*\n/, '').replace(/\s+$/, '');
+      const pad = indent + '    ';
+      const lines = ['{'];
+      if (f.init) lines.push(pad + f.init.src.trim().replace(/;$/, '') + ';');
+      lines.push(`${pad}while (${f.cond.src}) {`);
+      if (inner) lines.push(inner.split('\n').map(l => l.trim() ? '    ' + l : l).join('\n'));
+      if (f.update) lines.push(`${pad}    ${f.update.src.trim().replace(/;$/, '')};`);
+      lines.push(`${pad}}`, `${indent}}`);
+      out = out.slice(0, f.pos) + lines.join('\n') + out.slice(f.end);
+      changed = true;
+    }
+    return changed ? out : null;
+  }
+  return { run, label, parse, loopsOf, forToWhile, CompileError, Unsupported };
+})();
+// MINIJAVA END
+// TRACE UI START (copied from lib/trace-ui.js by visualizers/tests/sync-expr-engine.mjs; do not edit here)
+// Shared pieces for the trace visualizers: code panel, stepping controls, variable table, call frames
+// with arrows to objects, console, tabs, and Predict/Transfer question sets. Styles use each page's
+// color tokens (--ink, --line, --accent and so on).
+const TUI = (function () {
+  const CSS = `
+.tui-code { list-style: none; margin: 0; padding: 10px 0; background: var(--soft); border-radius: 8px; font: 14px/1.7 var(--mono); overflow-x: auto; counter-reset: ln; }
+.tui-code li { padding: 0 12px 0 8px; white-space: pre; border-left: 4px solid transparent; }
+.tui-code li::before { counter-increment: ln; content: counter(ln); display: inline-block; width: 2em; color: var(--faint); font-weight: 400; }
+.tui-code li.done { color: var(--muted); }
+.tui-code li.on { background: var(--accent-soft); border-left-color: var(--accent); font-weight: 700; color: var(--ink); }
+.tui-code li.err { background: var(--diff-bg); border-left-color: var(--diff-line); color: var(--diff-ink); font-weight: 700; }
+.tui-code li.called { background: var(--extra-bg); border-left-color: var(--extra-line); }
+.tui-note { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+.tui-note.err { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
+.tui-note .phase { font: 700 13px var(--sans); color: var(--accent); }
+.tui-note .op { font: 700 15px var(--mono); margin: 2px 0 4px; }
+.tui-note p { margin: 0; }
+.tui-console { background: #10181A; color: #E8EEEC; border-radius: 8px; padding: 8px 12px; font: 15px/1.5 var(--mono); min-height: 2.4em; white-space: pre-wrap; overflow-x: auto; }
+.tui-vars { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tui-vars th { text-align: left; font: 600 12px var(--sans); color: var(--muted); border-bottom: 1px solid var(--line); padding: 4px 6px; }
+.tui-vars td { padding: 4px 6px; border-bottom: 1px solid var(--line); font-family: var(--mono); white-space: pre; }
+.tui-vars td.t { color: var(--muted); font-size: 12px; }
+.tui-vars tr.changed td { background: var(--same-bg); color: var(--same-ink); font-weight: 700; }
+.tui-stack { position: relative; }
+.tui-mem { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; }
+.tui-frame { position: relative; z-index: 1; border: 2px solid var(--line); border-radius: 8px; background: var(--panel); padding: 6px 10px; margin-bottom: 10px; }
+.tui-frame.top { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.tui-frame.old { opacity: .75; }
+.tui-frame.ghost { border-style: dashed; opacity: .6; background: transparent; }
+.tui-frame .ptag { font: 600 10px var(--sans); text-transform: uppercase; letter-spacing: .04em; color: var(--accent); border: 1px solid var(--accent); border-radius: 3px; padding: 0 3px; margin-right: 5px; vertical-align: 1px; }
+.tui-frame .ghostnote { font: 600 12px var(--sans); color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .tui-frame.enter { animation: tui-in .35s ease-out; } @keyframes tui-in { from { transform: translateY(-8px); opacity: 0; } } }
+.tui-frame .fhead { font: 600 13px var(--mono); color: var(--muted); margin-bottom: 4px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 6px; }
+.tui-frame .fvar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 8px; font: 14px var(--mono); padding: 1px 0; }
+.tui-frame .fvar > span:last-child { margin-left: auto; white-space: nowrap; }
+.tui-frame .fvar.changed { background: var(--same-bg); color: var(--same-ink); font-weight: 700; border-radius: 3px; }
+.tui-frame .fvar .ty { color: var(--muted); font-size: 11px; margin-right: 4px; }
+.tui-anchor { width: 11px; height: 11px; border-radius: 50%; background: var(--accent); display: inline-block; vertical-align: middle; }
+.tui-obj { position: relative; z-index: 1; border: 2px solid var(--line); border-radius: 8px; background: var(--panel); padding: 6px 10px; margin-bottom: 10px; }
+.tui-obj .ohead { font: 600 12px var(--sans); color: var(--muted); }
+.tui-obj.changed { border-color: var(--extra-line); background: var(--extra-bg); }
+.tui-cells { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.tui-cell { min-width: 38px; border: 1.5px solid var(--line); border-radius: 5px; text-align: center; padding: 2px 4px; background: var(--panel); }
+.tui-cell .cv { font: 700 15px var(--mono); }
+.tui-cell .ci { font: 11px var(--mono); color: var(--muted); }
+.tui-cell.hot { border-color: var(--extra-line); background: var(--extra-bg); }
+.tui-cell.new { border-color: var(--same-line); background: var(--same-bg); }
+.tui-cell.cur { box-shadow: 0 0 0 3px var(--accent); }
+svg.tui-arrows { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
+svg.tui-arrows path.link { fill: none; stroke: var(--muted); stroke-width: 2; }
+svg.tui-arrows path.head { fill: var(--muted); }
+.tui-choices { border: 0; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
+.tui-choice { display: flex; gap: 8px; align-items: baseline; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+.tui-choice code { font-size: 14px; white-space: pre-wrap; }
+.tui-cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 10px; margin-top: 6px; }
+.tui-cmp pre { margin: 2px 0 0; background: var(--panel); border: 1px solid var(--line); padding: 6px 8px; font: 14px/1.4 var(--mono); white-space: pre-wrap; border-radius: 4px; color: var(--ink); }
+.tui-err { border: 1px solid var(--diff-line); background: var(--diff-bg); color: var(--diff-ink); border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
+.tui-codebox { font: 600 14px/1.6 var(--mono); background: var(--soft); border-radius: 8px; padding: 10px 14px; white-space: pre; overflow-x: auto; margin: 10px 0 14px; }
+textarea.tui-codein { font: 14px/1.5 var(--mono); min-height: 10em; }
+textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
+@media (max-width: 560px) { .tui-mem { gap: 26px; } }
+`;
+  function injectCSS() { if (document.getElementById('tui-css')) return; const s = document.createElement('style'); s.id = 'tui-css'; s.textContent = CSS; document.head.append(s); }
+  const $ = id => document.getElementById(id);
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  const visible = s => s.replace(/ /g, '·').replace(/\t/g, '⇥').replace(/\n/g, '↵\n');
+
+  function tabs(names, onSwitch) {
+    const select = (name, focus) => {
+      names.forEach(n => { const on = n === name, t = $('tab-' + n); t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; $('mode-' + n).classList.toggle('hidden', !on); if (on && focus) t.focus(); });
+      if (onSwitch) onSwitch(name);
+    };
+    names.forEach((n, i) => {
+      const t = $('tab-' + n);
+      t.addEventListener('click', () => select(n));
+      t.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); select(names[(i + (e.key === 'ArrowRight' ? 1 : names.length - 1)) % names.length], true); } });
+    });
+    return select;
+  }
+
+  // Code panel: numbered lines with the current line highlighted.
+  function renderCode(ol, src, current, doneLines, cls = 'on', extra = {}) {
+    ol.textContent = '';
+    src.split('\n').forEach((t, k) => {
+      const n = k + 1, li = el('li', null, t || ' ');
+      li.className = n === current ? cls : extra[n] || (doneLines && doneLines.has(n) ? 'done' : '');
+      ol.append(li);
+    });
+    const on = ol.querySelector('li.' + cls);
+    if (on && on.scrollIntoViewIfNeeded) on.scrollIntoViewIfNeeded(false);
+  }
+
+  // Stepping controls with keyboard support; calls onChange(i) with 0 = before the first step.
+  function stepper(host, onChange, labels = {}) {
+    host.classList.add('controls');
+    host.innerHTML = `<button class="btn" type="button" data-a="reset">⟲ Reset</button><button class="btn" type="button" data-a="back">← Back</button><button class="btn primary" type="button" data-a="next">${labels.next || 'Next →'}</button><button class="btn" type="button" data-a="end">${labels.end || 'Run to end'}</button>`;
+    const st = { i: 0, n: 0 };
+    const go = i => { st.i = Math.max(0, Math.min(st.n, i)); sync(); onChange(st.i); };
+    const sync = () => {
+      host.querySelector('[data-a="back"]').disabled = host.querySelector('[data-a="reset"]').disabled = st.i === 0;
+      host.querySelector('[data-a="next"]').disabled = host.querySelector('[data-a="end"]').disabled = st.i === st.n;
+    };
+    host.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => { const a = b.dataset.a; go(a === 'next' ? st.i + 1 : a === 'back' ? st.i - 1 : a === 'reset' ? 0 : st.n); }));
+    return {
+      set(n, i = 0) { st.n = n; go(i); },
+      go, get i() { return st.i; },
+      keys(target) {
+        target.tabIndex = 0;
+        target.addEventListener('keydown', e => {
+          if (e.target.closest('input, textarea, select')) return;
+          const a = { ArrowRight: st.i + 1, ArrowLeft: st.i - 1, Home: 0, End: st.n }[e.key];
+          if (a !== undefined) { e.preventDefault(); go(a); }
+        });
+      },
+    };
+  }
+
+  // How a variable's value reads in a table or frame.
+  function valueText(v, type, heap) {
+    if (v === null) return 'null';
+    if (v !== undefined && typeof v === 'object' && 'ref' in v) {
+      const o = heap && heap[v.ref];
+      if (!o) return '→ object';
+      if (o.kind === 'array') return `→ array #${v.ref}`;
+      if (o.kind === 'list') return `→ list #${v.ref}`;
+      if (o.kind === 'player') return `→ Player #${v.ref}`;
+    }
+    if (type === 'double' || type === 'Double') return javaDouble(v);
+    if (type === 'String') return JSON.stringify(v);
+    return String(v);
+  }
+  function renderVars(table, frame, heap, changed = []) {
+    table.textContent = '';
+    const head = el('tr'); ['Variable', 'Type', 'Value'].forEach(h => head.append(el('th', null, h)));
+    const thead = el('thead'); thead.append(head); table.append(thead);
+    const tb = el('tbody');
+    (frame ? frame.vars : []).forEach(v => {
+      const tr = el('tr', changed.includes(v.name) ? 'changed' : '');
+      tr.append(el('td', null, v.name), el('td', 't', v.type), el('td', null, valueText(v.v, v.type, heap)));
+      tb.append(tr);
+    });
+    if (!frame || !frame.vars.length) { const tr = el('tr'); const td = el('td', 't', 'No variables yet.'); td.colSpan = 3; tr.append(td); tb.append(tr); }
+    table.append(tb);
+  }
+
+  // Call frames (top of the stack first) and the objects they refer to, with arrows.
+  function renderMemory(host, step, opts = {}) {
+    host.textContent = '';
+    host.classList.add('tui-stack');
+    const mem = el('div', 'tui-mem'), left = el('div'), right = el('div');
+    left.append(el('div', 'colhead', opts.framesLabel || 'Call stack (newest on top)'));
+    right.append(el('div', 'colhead', 'Objects'));
+    mem.append(left, right); host.append(mem);
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'tui-arrows'); svg.setAttribute('aria-hidden', 'true');
+    const mid = 'tuih' + Math.random().toString(36).slice(2, 7);
+    svg.innerHTML = `<defs><marker id="${mid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs>`;
+    host.append(svg);
+    if (!step) { left.append(el('p', 'small', 'Nothing has run yet.')); return; }
+    const frames = step.frames.slice().reverse();
+    const changed = step.changed || [];
+    const head = f => f.name === 'main' ? 'main' : `${f.name}(${(f.params || []).join(', ') || ''})`;
+    // A frame that a return just removed: drawn dashed above the stack for this one step.
+    if (opts.ghost) {
+      const g = el('div', 'tui-frame ghost'), h = el('div', 'fhead');
+      h.append(el('span', null, head(opts.ghost.frame)), el('span', 'ghostnote', opts.ghost.label));
+      g.append(h); left.append(g);
+    }
+    // A very deep stack shows its newest frames, a count of the hidden ones, and the oldest two.
+    const hidden = frames.length > 12 ? frames.length - 8 : 0;
+    frames.forEach((f, k) => {
+      if (hidden && k >= 6 && k < 6 + hidden) { if (k === 6) left.append(el('div', 'tui-frame ghost', `… ${hidden} more frames …`)); return; }
+      const box = el('div', 'tui-frame' + (k === 0 ? ' top' : ' old') + (k === 0 && opts.entering ? ' enter' : ''));
+      const h = el('div', 'fhead'); h.append(el('span', null, head(f)), el('span', null, k === 0 ? 'running' : 'waiting'));
+      box.append(h);
+      if (!f.vars.length) box.append(el('div', 'small', 'no variables'));
+      f.vars.forEach(v => {
+        const row = el('div', 'fvar' + (k === 0 && changed.includes(v.name) ? ' changed' : ''));
+        const name = el('span');
+        if ((f.params || []).includes(v.name)) { const t = el('span', 'ptag', 'param'); t.title = 'A parameter: it got a copy of the argument when the method was called.'; name.append(t); }
+        name.append(el('span', 'ty', v.type), v.name);
+        const val = el('span');
+        if (v.v && typeof v.v === 'object' && 'ref' in v.v) { const full = 'refers to ' + valueText(v.v, v.type, step.heap).replace('→ ', ''); val.title = full; val.setAttribute('aria-label', full); val.append(`#${v.v.ref} `); const an = el('span', 'tui-anchor'); an.dataset.ref = v.v.ref; val.append(an); }
+        else val.textContent = valueText(v.v, v.type, step.heap);
+        row.append(name, val); box.append(row);
+      });
+      left.append(box);
+    });
+    const objs = Object.values(step.heap);
+    if (!objs.length) right.append(el('p', 'small', 'None.'));
+    objs.forEach(o => {
+      const box = el('div', 'tui-obj' + (step.list && step.list.hid === o.hid ? ' changed' : ''));
+      box.dataset.hid = o.hid;
+      if (o.kind === 'player') { box.append(el('div', 'ohead', `Player #${o.hid}`)); box.append(el('div', 'small', `name "${o.name}", score ${o.score}`)); }
+      else {
+        box.append(el('div', 'ohead', `${o.kind === 'array' ? 'array' : 'ArrayList'} #${o.hid} · ${o.kind === 'array' ? 'length' : 'size()'} ${o.values.length}`));
+        const cells = el('div', 'tui-cells');
+        o.values.forEach((v, i) => {
+          const c = el('div', 'tui-cell' + (step.arrayIndex === i && changed.length ? ' hot' : '') + (step.list && step.list.hid === o.hid && step.list.index === i ? ' new' : '') + (opts.cursor && opts.cursor(o, i) ? ' cur' : ''));
+          c.append(el('div', 'cv', valueText(v, o.elem, step.heap)), el('div', 'ci', String(i)));
+          cells.append(c);
+        });
+        if (!o.values.length) cells.append(el('span', 'small', 'empty'));
+        box.append(cells);
+      }
+      right.append(box);
+    });
+    requestAnimationFrame(() => drawArrows(host, svg, mid));
+  }
+  function drawArrows(host, svg, mid) {
+    [...svg.querySelectorAll('path.link')].forEach(p => p.remove());
+    const box = host.getBoundingClientRect();
+    host.querySelectorAll('.tui-anchor[data-ref]').forEach(a => {
+      const t = host.querySelector(`.tui-obj[data-hid="${a.dataset.ref}"]`);
+      if (!t) return;
+      const ra = a.getBoundingClientRect(), rt = t.getBoundingClientRect();
+      const x1 = ra.left + ra.width / 2 - box.left, y1 = ra.top + ra.height / 2 - box.top;
+      const x2 = rt.left - box.left - 2, y2 = Math.min(Math.max(y1, rt.top - box.top + 12), rt.bottom - box.top - 12);
+      const dx = Math.max(20, (x2 - x1) / 2);
+      const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      p.setAttribute('d', `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`);
+      p.setAttribute('class', 'link'); p.setAttribute('marker-end', `url(#${mid})`);
+      svg.append(p);
+    });
+  }
+
+  // Predict / Transfer: items have { code, ask, … }; expected(it) gives the answer, and kinds are
+  // 'output' (exact text), 'int', 'text', 'mc' (any item with choices: [{ text }]; expected is the index), 'line'.
+  // opts.same(answer, expected), if given, decides whether a 'text' answer matches.
+  function questions(prefix, items, opts) {
+    const state = items.map(() => ({ val: '', why: '', done: false }));
+    let idx = 0;
+    const form = $(prefix + '-form');
+    const kind = it => it.ask === 'output' ? 'output' : it.ask === 'mc' || it.choices ? 'mc' : it.kind || 'int';
+    function build(it) {
+      form.innerHTML = '';
+      const k = kind(it);
+      if (k === 'mc') {
+        const fs = el('fieldset', 'tui-choices'); fs.append(el('legend', 'small', 'Choose one'));
+        it.choices.forEach((c, i) => { const l = el('label', 'tui-choice'); const r = el('input'); r.type = 'radio'; r.name = prefix + '-mc'; r.value = i; l.append(r, c.code ? el('code', null, c.text) : el('span', null, c.text)); fs.append(l); });
+        form.append(fs);
+      } else {
+        const l = el('label', 'field'); l.append(k === 'output' ? 'Output ' : 'Answer ', el('span', 'hint', k === 'output' ? '(type it exactly; press Enter for a new line)' : k === 'text' ? '(exactly, without quotes)' : ''));
+        const inp = k === 'output' ? el('textarea', 'tui-outin') : el('input');
+        if (k !== 'output') { inp.type = 'text'; inp.className = k === 'text' ? 'strin' : 'num'; if (k !== 'text') inp.inputMode = 'numeric'; }
+        inp.id = prefix + '-val'; inp.spellcheck = false; inp.autocomplete = 'off';
+        l.append(inp); form.append(l);
+      }
+      const w = el('label', 'field'); w.append(opts.reasonPrompt + ' '); const why = el('textarea'); why.id = prefix + '-why'; why.rows = 2; w.append(why);
+      const row = el('div', 'row'); const b = el('button', 'btn primary', opts.submitLabel); b.type = 'submit'; const err = el('span', 'formerr'); err.id = prefix + '-err'; err.setAttribute('role', 'alert'); row.append(b, err);
+      form.append(w, row);
+    }
+    const readVal = it => kind(it) === 'mc' ? ((form.querySelector('input:checked') || {}).value || '') : $(prefix + '-val').value;
+    function show() {
+      const it = items[idx], st = state[idx];
+      $(prefix + '-count').textContent = `Question ${idx + 1} of ${items.length}`;
+      $(prefix + '-prev').disabled = idx === 0; $(prefix + '-next').disabled = idx === items.length - 1;
+      $(prefix + '-ask').textContent = opts.askText(it);
+      $(prefix + '-code').textContent = it.code;
+      build(it);
+      if (kind(it) === 'mc') { const r = form.querySelector(`input[value="${st.val}"]`); if (r) r.checked = true; } else $(prefix + '-val').value = st.val;
+      $(prefix + '-why').value = st.why;
+      form.querySelectorAll('input, textarea, button').forEach(x => { x.disabled = st.done; });
+      $(prefix + '-after').classList.toggle('hidden', !st.done);
+      if (st.done) reveal(it, st);
+    }
+    function reveal(it, st) {
+      const want = opts.expected(it), fb = $(prefix + '-feedback'), k = kind(it);
+      let ok;
+      if (k === 'output') { const norm = s => s.replace(/\r\n/g, '\n').replace(/\n$/, ''); ok = norm(st.val) === norm(want); }
+      else if (k === 'mc') ok = +st.val === want;
+      else if (k === 'text') ok = opts.same ? opts.same(st.val, want) : st.val === want;
+      else ok = parseInt(String(st.val).replace('−', '-'), 10) === want;
+      fb.className = 'feedback ' + (ok ? 'good' : 'bad'); fb.textContent = '';
+      const head = ok ? 'Correct.' : k === 'mc' ? `Not quite: the answer is “${it.choices[want].text}”.` : k === 'output' ? 'Not quite. Compare (· is a space, ↵ a line break):' : `Not quite: the answer is ${want}.`;
+      const p = el('p'); p.append(el('span', 'tag', head)); fb.append(p);
+      if (!ok && k === 'output') {
+        const cmp = el('div', 'tui-cmp');
+        const y = el('div'); y.append(el('div', 'small', 'Yours'), el('pre', null, visible(st.val.replace(/\r\n/g, '\n'))));
+        const j = el('div'); j.append(el('div', 'small', 'Java'), el('pre', null, visible(want)));
+        cmp.append(y, j); fb.append(cmp);
+      }
+      fb.append(el('p', null, 'Your reasoning: “' + st.why.trim() + '”'));
+      opts.onReveal(it, want);
+    }
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const it = items[idx], st = state[idx], v = readVal(it), why = $(prefix + '-why').value, err = $(prefix + '-err'), k = kind(it);
+      if (String(v).trim() === '' && k !== 'text') { err.textContent = k === 'mc' ? 'Choose an answer first.' : 'Write your answer first.'; return; }
+      if ((k === 'int' || k === 'line') && !/^\s*[−-]?\d+\s*$/.test(v)) { err.textContent = 'Enter a whole number.'; return; }
+      if (why.trim().length < 3) { err.textContent = 'Write a short reason before checking.'; return; }
+      Object.assign(st, { val: v, why, done: true });
+      show();
+    });
+    const save = () => { const st = state[idx]; if (!st.done) { st.val = readVal(items[idx]); st.why = $(prefix + '-why').value; } };
+    $(prefix + '-prev').addEventListener('click', () => { save(); idx--; show(); });
+    $(prefix + '-next').addEventListener('click', () => { save(); idx++; show(); });
+    show();
+  }
+  function errorBox(host, r) {
+    host.textContent = '';
+    host.append(el('b', null, r.compileError ? `Does not compile (line ${r.line}). ` : `Not supported here (line ${r.line}): `), r.compileError || r.unsupported);
+    if (r.compileError) host.append(el('p', 'small', 'Java checks the whole program before running any of it, so nothing runs.'));
+  }
+  return { injectCSS, el, $, tabs, renderCode, stepper, renderVars, renderMemory, valueText, questions, errorBox, visible };
+})();
+// TRACE UI END
+
+// ENGINE START
+// The standard algorithms, run by the interpreter. Events are read from the lines they execute.
+const ALGOS = {
+  linear: { title: 'Linear search', method: 'linearSearch', search: true, code: 'static int linearSearch(int[] arr, int target) {\n    for (int i = 0; i < arr.length; i++) {\n        if (arr[i] == target) {\n            return i;\n        }\n    }\n    return -1;\n}' },
+  binary: { title: 'Binary search', method: 'binarySearch', search: true, code: 'static int binarySearch(int[] arr, int target) {\n    int low = 0;\n    int high = arr.length - 1;\n    while (low <= high) {\n        int mid = (low + high) / 2;\n        if (arr[mid] == target) {\n            return mid;\n        } else if (arr[mid] < target) {\n            low = mid + 1;\n        } else {\n            high = mid - 1;\n        }\n    }\n    return -1;\n}' },
+  selection: { title: 'Selection sort', method: 'selectionSort', code: 'static void selectionSort(int[] arr) {\n    for (int i = 0; i < arr.length - 1; i++) {\n        int minIndex = i;\n        for (int j = i + 1; j < arr.length; j++) {\n            if (arr[j] < arr[minIndex]) {\n                minIndex = j;\n            }\n        }\n        int temp = arr[i];\n        arr[i] = arr[minIndex];\n        arr[minIndex] = temp;\n    }\n}' },
+  insertion: { title: 'Insertion sort', method: 'insertionSort', code: 'static void insertionSort(int[] arr) {\n    for (int i = 1; i < arr.length; i++) {\n        int key = arr[i];\n        int j = i - 1;\n        while (j >= 0 && arr[j] > key) {\n            arr[j + 1] = arr[j];\n            j--;\n        }\n        arr[j + 1] = key;\n    }\n}' },
+};
+function programFor(algo, data, target) {
+  const A = ALGOS[algo];
+  return `${A.code}\n\nint[] data = {${data.join(', ')}};\n` + (A.search ? `System.out.println(${A.method}(data, ${target}));` : `${A.method}(data);`);
+}
+const lineWith = (code, text) => code.split('\n').findIndex(l => l.includes(text)) + 1;
+const vars = s => { const f = s.frames[s.frames.length - 1], o = {}; f.vars.forEach(v => { o[v.name] = v.v; }); return o; };
+// One event per interpreter step: what the algorithm is doing there, and the array at that moment.
+function events(run, algo) {
+  const code = ALGOS[algo].code, L = t => lineWith(code, t);
+  const main = run.steps.length ? run.steps.find(s => s.frames[0].vars.some(v => v.name === 'data')) : null;
+  const hid = main ? main.frames[0].vars.find(v => v.name === 'data').v.ref : null;
+  let pass = 0;
+  return run.steps.map(s => {
+    const v = vars(s), arr = hid !== null && s.heap[hid] ? s.heap[hid].values.slice() : [];
+    const e = { arr, v, type: 'step', pass };
+    if (s.frames.length < 2) { e.type = s.kind === 'print' ? 'result' : 'main'; return e; }
+    if (algo === 'selection') {
+      if (s.kind === 'cond' && s.line === L('if (arr[j] < arr[minIndex])')) Object.assign(e, { type: 'compare', a: v.j, b: v.minIndex, result: s.value });
+      else if (s.kind === 'assign' && (s.line === L('arr[i] = arr[minIndex]') || s.line === L('arr[minIndex] = temp'))) Object.assign(e, { type: 'write', at: s.arrayIndex, swap: true });
+      else if (s.kind === 'update' && s.line === L('for (int i = 0')) Object.assign(e, { type: 'pass', pass: ++pass });
+    } else if (algo === 'insertion') {
+      if (s.kind === 'decl' && s.line === L('int key')) Object.assign(e, { type: 'key' });
+      else if (s.kind === 'cond' && s.line === L('while (j >= 0')) Object.assign(e, v.j >= 0 ? { type: 'compare', a: v.j, result: s.value } : { type: 'edge' });
+      else if (s.kind === 'assign' && s.line === L('arr[j + 1] = arr[j]')) Object.assign(e, { type: 'write', at: s.arrayIndex, shift: true });
+      else if (s.kind === 'assign' && s.line === L('arr[j + 1] = key')) Object.assign(e, { type: 'write', at: s.arrayIndex, insert: true });
+      else if (s.kind === 'update' && s.line === L('for (int i = 1')) Object.assign(e, { type: 'pass', pass: ++pass });
+    } else if (algo === 'binary') {
+      if (s.kind === 'decl' && s.line === L('int mid')) Object.assign(e, { type: 'probe', at: v.mid });
+      else if (s.kind === 'cond' && s.line === L('arr[mid] == target')) Object.assign(e, { type: 'compare', a: v.mid, result: s.value });
+      else if (s.kind === 'returning') Object.assign(e, { type: 'done', found: s.value !== '-1' });
+    } else if (algo === 'linear') {
+      if (s.kind === 'cond' && s.line === L('arr[i] == target')) Object.assign(e, { type: 'compare', a: v.i, result: s.value });
+      else if (s.kind === 'returning') Object.assign(e, { type: 'done', found: s.value !== '-1' });
+    }
+    return e;
+  });
+}
+// Totals for a whole run.
+function summary(run, algo) {
+  const ev = events(run, algo);
+  return {
+    passes: ev.filter(e => e.type === 'pass').map(e => e.arr),
+    comparisons: ev.filter(e => e.type === 'compare').length,
+    swaps: ev.filter(e => e.swap).length / 2,
+    shifts: ev.filter(e => e.shift).length,
+    checked: algo === 'binary' ? ev.filter(e => e.type === 'probe').map(e => e.at) : algo === 'linear' ? ev.filter(e => e.type === 'compare').map(e => e.a) : [],
+    result: run.out.trim(),
+  };
+}
+const isSorted = a => a.every((x, i) => i === 0 || a[i - 1] <= x);
+// ENGINE END
+
+// DATA START
+const D1 = [5, 3, 8, 1, 9], D2 = [4, 9, 2, 7, 1], SORTED10 = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91], SORTED7 = [3, 6, 9, 12, 15, 18, 21];
+const PREDICT = [
+  { algo: 'selection', data: D1, ask: 'pass', n: 1, tests: 'Pass 1 finds the smallest value, 1, and swaps it into index 0. Everything else stays where it was, except the 5 it traded places with.' },
+  { algo: 'selection', data: D1, ask: 'pass', n: 3, tests: 'After pass k, the first k positions hold the k smallest values in their final places.' },
+  { algo: 'selection', data: D1, ask: 'comparisons', tests: 'Selection sort always compares every remaining pair: 4 + 3 + 2 + 1 = 10, no matter how the data starts.' },
+  { algo: 'insertion', data: D1, ask: 'pass', n: 3, tests: 'Pass 3 takes 1 and shifts 8, 5 and 3 right to make room at index 0.' },
+  { algo: 'insertion', data: D1, ask: 'shifts', tests: 'Pass 1 shifts 5; pass 2 shifts nothing; pass 3 shifts 8, 5 and 3; pass 4 shifts nothing. That is 4 shifts.' },
+  { algo: 'insertion', data: [1, 2, 3, 4, 5], ask: 'comparisons', tests: 'On sorted data, each pass makes one comparison and stops: 4 comparisons. That is insertion sort\'s best case.' },
+  { algo: 'insertion', data: [5, 4, 3, 2, 1], ask: 'comparisons', tests: 'Reversed data is the worst case: each new value is compared with every value before it, 1 + 2 + 3 + 4 = 10.' },
+  { algo: 'binary', data: SORTED10, target: 23, ask: 'checked', tests: 'mid = (0 + 9) / 2 = 4 (16 is too small), then (5 + 9) / 2 = 7 (56 is too big), then (5 + 6) / 2 = 5: found.' },
+  { algo: 'binary', data: SORTED10, target: 10, ask: 'count', tests: 'Checks 16, 5, 8 and 12. Then low is 3 and high is 2, so the interval is empty and the search returns -1.' },
+  { algo: 'binary', data: [9, 2, 8, 1, 5], target: 1, ask: 'mc', q: 'What does binarySearch(data, 1) return?', choices: [{ text: '3', match: '3' }, { text: '-1', match: '-1' }, { text: '0', match: '0' }, { text: 'It throws an exception.', match: 'throws' }], tests: 'The data is not sorted. 8 at index 2 is bigger than 1, so the search throws away the right half, which is where 1 is. Binary search needs sorted data.' },
+  { algo: 'linear', data: [7, 3, 9, 4, 6, 2], target: 5, ask: 'count', tests: 'The target is missing, so linear search checks every element: 6 comparisons.' },
+];
+const TRANSFER = [
+  { algo: 'selection', data: D2, ask: 'pass', n: 2 },
+  { algo: 'insertion', data: D2, ask: 'pass', n: 2 },
+  { algo: 'binary', data: SORTED7, target: 21, ask: 'checked' },
+  { algo: 'insertion', data: [3, 1, 2], ask: 'shifts' },
+  { algo: 'selection', data: [6, 1, 5, 2, 4, 3, 7], ask: 'comparisons' },
+  { algo: 'linear', data: [8, 6, 4, 2], target: 4, ask: 'count' },
+  { algo: 'binary', data: SORTED7, target: 4, ask: 'count' },
+  { algo: 'insertion', data: [2, 4, 6, 8, 10, 12], ask: 'comparisons' },
+];
+const PRESETS = [
+  { label: 'Mixed', data: D1, target: 8 },
+  { label: 'Already sorted', data: [1, 2, 3, 4, 5, 6], target: 6 },
+  { label: 'Reversed', data: [6, 5, 4, 3, 2, 1], target: 1 },
+  { label: 'Duplicates', data: [4, 2, 4, 1, 2], target: 2 },
+  { label: 'Sorted, ten values', data: SORTED10, target: 23 },
+  { label: 'Target missing', data: SORTED10, target: 10 },
+  { label: 'Unsorted (binary search fails)', data: [9, 2, 8, 1, 5], target: 1 },
+];
+// DATA END
+
+TUI.injectCSS();
+const { el, $ } = TUI;
+
+/* ---------- Workbench runner ---------- */
+class Bench {
+  constructor(host) {
+    this.host = host;
+    host.innerHTML = `<div class="rbody"><div class="runner-grid">
+      <div><ol class="tui-code" aria-label="Program"></ol><div class="stepbar"></div>
+        <div class="jump"><button class="btn" type="button" data-j="compare">Next comparison</button><button class="btn" type="button" data-j="pass">Next pass</button></div>
+        <div class="tui-note" aria-live="polite"><div class="phase"></div><p class="text"></p></div>
+        <div class="counts" aria-live="polite"></div></div>
+      <div><div class="colhead">Array</div><div class="keybox"></div><div class="bars" role="img"></div>
+        <div class="colhead passhead">After each pass</div><div class="passwrap"></div></div>
+    </div></div>`;
+    this.step = TUI.stepper(host.querySelector('.stepbar'), i => this.render(i));
+    this.step.keys(host.querySelector('.rbody'));
+    host.querySelectorAll('[data-j]').forEach(b => b.addEventListener('click', () => {
+      const from = this.step.i, want = b.dataset.j;
+      const k = this.ev.findIndex((e, n) => n >= from && e.type === want);
+      this.step.go(k < 0 ? this.ev.length : k + 1);
+    }));
+  }
+  set(algo, data, target) {
+    this.algo = algo; this.src = programFor(algo, data, target); this.target = target;
+    this.run = MJ.run(this.src); this.ev = events(this.run, algo);
+    this.total = summary(this.run, algo);
+    this.host.querySelector('[data-j="pass"]').classList.toggle('hidden', !!ALGOS[algo].search);
+    this.host.querySelector('.passhead').classList.toggle('hidden', !!ALGOS[algo].search);
+    this.step.set(this.run.steps.length, 0);
+  }
+  render(i) {
+    const run = this.run, s = i > 0 ? run.steps[i - 1] : null, e = i > 0 ? this.ev[i - 1] : null;
+    const done = new Set(run.steps.slice(0, Math.max(0, i - 1)).map(x => x.line));
+    TUI.renderCode(this.host.querySelector('.tui-code'), this.src, s ? s.line : 0, done, s && s.kind === 'error' ? 'err' : 'on');
+    const note = this.host.querySelector('.tui-note');
+    note.querySelector('.phase').textContent = e ? this.phase(e) : 'Ready';
+    note.querySelector('.text').textContent = s ? s.note : 'Nothing has run yet. Press Next, or jump to the next comparison.';
+    const seen = this.ev.slice(0, i);
+    const c = this.host.querySelector('.counts'); c.textContent = '';
+    const add = (label, n) => { const x = el('span'); x.append(label + ': ', el('b', null, String(n))); c.append(x); };
+    if (ALGOS[this.algo].search) add('Elements checked', seen.filter(x => x.type === (this.algo === 'binary' ? 'probe' : 'compare')).length);
+    else add('Comparisons', seen.filter(x => x.type === 'compare').length);
+    if (this.algo === 'selection') add('Swaps', seen.filter(x => x.swap).length / 2 | 0);
+    if (this.algo === 'insertion') add('Shifts', seen.filter(x => x.shift).length);
+    if (!ALGOS[this.algo].search) add('Passes', `${seen.filter(x => x.type === 'pass').length} of ${this.total.passes.length}`);
+    if (ALGOS[this.algo].search && i === run.steps.length) add('Returns', this.total.result);
+    this.renderBars(i, e);
+    this.renderPasses(i);
+  }
+  phase(e) {
+    const v = e.v, A = e.arr;
+    if (e.type === 'compare') {
+      if (this.algo === 'selection') return `Compare arr[${e.a}] = ${A[e.a]} with the smallest so far, arr[${e.b}] = ${A[e.b]}: ${e.result ? 'new smallest' : 'keep'}`;
+      if (this.algo === 'insertion') return `Compare arr[${e.a}] = ${A[e.a]} with key ${v.key}: ${e.result ? 'shift it right' : 'stop'}`;
+      return `Compare arr[${e.a}] = ${A[e.a]} with the target ${v.target}: ${e.result ? 'found' : 'not equal'}`;
+    }
+    if (e.type === 'probe') return `Check the middle of indexes ${v.low} to ${v.high}: mid = ${e.at}`;
+    if (e.type === 'write') return e.swap ? 'Swap' : e.shift ? `Shift arr[${e.at - 1}] right into index ${e.at}` : `Insert the key at index ${e.at}`;
+    if (e.type === 'key') return `Pass ${e.pass + 1}: take out the key, ${v.key}`;
+    if (e.type === 'edge') return 'j is -1: no more elements to compare';
+    if (e.type === 'pass') return `Pass ${e.pass} is done`;
+    if (e.type === 'done') return e.found ? 'Found' : 'Not found: return -1';
+    if (e.type === 'result') return 'main prints the returned value';
+    if (e.type === 'main') return 'main';
+    return 'Step';
+  }
+  renderBars(i, e) {
+    const box = this.host.querySelector('.bars'); box.textContent = '';
+    const arr = e ? e.arr : this.ev.length ? this.ev[0].arr : [], v = e ? e.v : {};
+    const lo = Math.min(0, ...arr), hi = Math.max(1, ...arr);
+    const inMethod = e && e.type !== 'main' && e.type !== 'result';
+    const keyBox = this.host.querySelector('.keybox');
+    keyBox.textContent = this.algo === 'insertion' && inMethod && v.key !== undefined ? `key = ${v.key}` : '';
+    const marks = {};
+    const mark = (at, t) => { if (typeof at === 'number') (marks[at] = marks[at] || []).push(t); };
+    if (inMethod) {
+      if (this.algo === 'selection') { mark(v.i, 'i'); mark(v.j, 'j'); mark(v.minIndex, 'min'); }
+      if (this.algo === 'insertion') { mark(v.i, 'i'); mark(v.j, 'j'); }
+      if (this.algo === 'binary') { mark(v.low, 'low'); mark(v.mid, 'mid'); mark(v.high, 'high'); }
+      if (this.algo === 'linear') mark(v.i, 'i');
+    }
+    const passes = this.ev.slice(0, i).filter(x => x.type === 'pass').length, finished = i === this.ev.length;
+    // Insertion sort's free slot: where the key will go if the shifting stopped now.
+    const hole = this.algo !== 'insertion' || !inMethod || v.key === undefined || typeof v.j !== 'number' || e.type === 'pass' || e.insert ? -1 : e.shift ? e.at - 1 : v.j + 1;
+    arr.forEach((x, k) => {
+      const b = el('div', 'bar'), col = el('div', 'col');
+      col.style.height = `${12 + Math.round(110 * (x - lo) / (hi - lo || 1))}px`;
+      if (this.algo === 'selection' && (finished || k < passes)) b.classList.add('sorted');
+      if (this.algo === 'insertion' && (finished || k <= passes)) b.classList.add('sorted');
+      if (this.algo === 'binary' && inMethod && typeof v.low === 'number' && (k < v.low || k > v.high)) b.classList.add('out');
+      if (this.algo === 'linear' && inMethod && typeof v.i === 'number' && k < v.i) b.classList.add('out');
+      if (e && e.type === 'compare' && (k === e.a || k === e.b)) b.classList.add(e.result && ALGOS[this.algo].search ? 'found' : 'cmp');
+      if (e && e.type === 'probe' && k === e.at) b.classList.add('cmp');
+      if (e && e.type === 'write' && (k === e.at || (e.swap && (k === v.i || k === v.minIndex)))) b.classList.add('write');
+      if (k === hole) b.classList.add('hole');
+      b.append(el('div', 'v', String(x)), col, el('div', 'ix', String(k)), el('div', 'mk', (marks[k] || []).join(' ')));
+      box.append(b);
+    });
+    box.setAttribute('aria-label', `Array: ${arr.join(', ')}`);
+  }
+  renderPasses(i) {
+    const host = this.host.querySelector('.passwrap'); host.textContent = '';
+    if (ALGOS[this.algo].search) return;
+    const rows = this.ev.slice(0, i).filter(x => x.type === 'pass');
+    if (!rows.length) { host.append(el('p', 'small', 'No pass has finished yet.')); return; }
+    const t = el('table', 'passes'), h = el('tr'); h.append(el('th', null, 'Pass'));
+    rows[0].arr.forEach((_, k) => h.append(el('th', null, String(k))));
+    t.append(h);
+    rows.forEach((r, n) => {
+      const tr = el('tr', n === rows.length - 1 ? 'now' : ''); tr.append(el('td', null, String(n + 1)));
+      // After pass n + 1: selection sort has settled indexes 0..n; insertion sort has sorted 0..n + 1.
+      r.arr.forEach((x, k) => tr.append(el('td', k <= n + (this.algo === 'insertion' ? 1 : 0) ? 'set' : '', String(x))));
+      t.append(tr);
+    });
+    host.append(t);
+    host.append(el('p', 'small', this.algo === 'selection' ? 'Green: settled in its final place.' : 'Green: sorted among themselves (later values may still be inserted between them).'));
+  }
+}
+
+/* ---------- Predict and Transfer ---------- */
+const select = TUI.tabs(['predict', 'explore', 'transfer']);
+const runOf = it => MJ.run(programFor(it.algo, it.data, it.target));
+function expected(it) {
+  const sum = summary(runOf(it), it.algo);
+  if (it.ask === 'pass') return sum.passes[it.n - 1].join(' ');
+  if (it.ask === 'comparisons') return sum.comparisons;
+  if (it.ask === 'shifts') return sum.shifts;
+  if (it.ask === 'checked') return sum.checked.join(' ');
+  if (it.ask === 'count') return sum.checked.length;
+  return it.choices.findIndex(c => c.match === sum.result);
+}
+const describe = it => `${ALGOS[it.algo].title} on {${it.data.join(', ')}}${ALGOS[it.algo].search ? `, target ${it.target}` : ''}`;
+const askText = it => ({
+  pass: `What does the array look like after pass ${it.n}? List the values in order.`,
+  comparisons: 'How many comparisons does it make in total?',
+  shifts: 'How many shifts (arr[j + 1] = arr[j]) happen in total?',
+  checked: 'Which indexes does it check, in order?',
+  count: 'How many array elements does it check before it returns?',
+})[it.ask] || it.q;
+const kindOf = it => ['pass', 'checked'].includes(it.ask) ? 'text' : it.choices ? undefined : 'int';
+const shown = items => items.map(it => ({ ...it, kind: kindOf(it), code: describe(it) + '\n\n' + ALGOS[it.algo].code }));
+const sameNums = (a, b) => (String(a).match(/-?\d+/g) || []).join(' ') === String(b);
+const predictBench = new Bench($('p-view'));
+TUI.questions('p', shown(PREDICT), {
+  submitLabel: 'Check my prediction', reasonPrompt: 'Why? Write the array or the indexes step by step.',
+  askText, expected, same: sameNums,
+  onReveal(it) { $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests; predictBench.set(it.algo, it.data, it.target); },
+});
+TUI.questions('t', shown(TRANSFER), {
+  submitLabel: 'Check', reasonPrompt: 'Explain it: the array after each pass, or low, mid and high at each check.',
+  askText, expected, same: sameNums,
+  onReveal(it) {
+    const sum = summary(runOf(it), it.algo), m = $('t-model'); m.textContent = '';
+    m.append(el('b', null, 'Model working: '));
+    if (ALGOS[it.algo].search) m.append(`It checks index${sum.checked.length === 1 ? '' : 'es'} ${sum.checked.join(', ')} (${sum.checked.length} element${sum.checked.length === 1 ? '' : 's'}) and returns ${sum.result}.`);
+    else {
+      m.append(`${sum.comparisons} comparisons${it.algo === 'insertion' ? `, ${sum.shifts} shifts` : `, ${sum.swaps} swaps`}. After each pass:`);
+      m.append(el('pre', 'small', sum.passes.map((p, n) => `pass ${n + 1}: ${p.join(' ')}`).join('\n')));
+    }
+    m.append(el('p', 'small', 'Compare with your trace. Did you finish each pass before starting the next?'));
+  },
+});
+
+/* ---------- Explore ---------- */
+const bench = new Bench($('e-view'));
+let algo = 'selection';
+Object.entries(ALGOS).forEach(([id, A]) => {
+  const b = el('button', null, A.title); b.type = 'button'; b.dataset.algo = id;
+  b.addEventListener('click', () => { algo = id; update(); });
+  $('e-algos').append(b);
+});
+function parseData() {
+  const parts = $('e-data').value.split(',').map(x => x.trim()).filter(x => x !== '');
+  if (!parts.length) return { error: 'Enter at least one number.' };
+  if (parts.length > 12) return { error: 'Use at most 12 numbers.' };
+  if (parts.some(x => !/^-?\d{1,3}$/.test(x))) return { error: 'Use whole numbers from -999 to 999, separated by commas.' };
+  return { data: parts.map(Number) };
+}
+function update() {
+  document.querySelectorAll('#e-algos button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.algo === algo)));
+  const search = ALGOS[algo].search;
+  $('e-targetf').classList.toggle('hidden', !search);
+  const msg = $('e-msg'); msg.textContent = '';
+  const p = parseData(), t = $('e-target').value.trim();
+  if (p.error) { msg.append(el('div', 'warn', p.error)); $('e-view').classList.add('hidden'); return; }
+  if (search && !/^-?\d{1,3}$/.test(t)) { msg.append(el('div', 'warn', 'Enter a whole-number target from -999 to 999.')); $('e-view').classList.add('hidden'); return; }
+  if (algo === 'binary' && !isSorted(p.data)) msg.append(el('div', 'warn', 'This data is not sorted. Binary search assumes sorted data, so watch what goes wrong.'));
+  $('e-view').classList.remove('hidden');
+  bench.set(algo, p.data, search ? Number(t) : undefined);
+}
+PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => { $('e-data').value = p.data.join(', '); $('e-target').value = String(p.target); if (/binary/.test(p.label)) algo = 'binary'; update(); }); $('e-presets').append(c); });
+$('e-data').value = D1.join(', '); $('e-target').value = '8';
+['e-data', 'e-target'].forEach(id => $(id).addEventListener('input', update));
+update();
+</script>
+</body>
+</html>
