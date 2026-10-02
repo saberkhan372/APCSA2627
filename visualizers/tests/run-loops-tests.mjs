@@ -1,7 +1,7 @@
 // Runs the interpreter against loops-cases.json and checks the Loop Tracer's questions.
 import { loadPage, engineCopyProblem } from './lib-page.mjs';
 import { runCases } from './mj-java.mjs';
-import { presetPrograms, probeOf } from './lib-compare.mjs';
+import { presetPrograms, probeOf, LONG_PROGRAMS } from './lib-compare.mjs';
 const { html, api } = loadPage('loops.html', ['MJ', 'bodyCount', 'phaseOf', 'PREDICT', 'TRANSFER', 'PRESETS', 'COMPARE_PRESETS', 'compareLoops', 'summarizeRun', 'parseValues']);
 const { cases, problems, MJ } = runCases(new URL('loops-cases.json', import.meta.url));
 const copy = engineCopyProblem(html); if (copy) problems.push(copy);
@@ -29,7 +29,7 @@ for (const p of api.COMPARE_PRESETS) {
     if (!probe) { problems.push(`${p.label}: no probe for ${JSON.stringify(r.code)}`); continue; }
     if (!known.has(probe)) problems.push(`uncovered compare probe: ${p.label}, n = ${r.n}`);
     if (s.problem) { problems.push(`${p.label}: ${s.problem}`); continue; }
-    if (s.end === 'never stops (the tool gave up)') continue;
+    if (s.inconclusive) continue;
     const m = /visits=(\d+)\n$/.exec(MJ.run(probe).out);
     if (!m || +m[1] !== s.iterations) problems.push(`${p.label}, n = ${r.n}: the tool counts ${s.iterations} body runs, the probe counted ${m && m[1]}`);
     if (s.end === 'finishes normally' && s.checks !== s.iterations + 1) problems.push(`${p.label}, n = ${r.n}: ${s.checks} checks for ${s.iterations} body runs`);
@@ -42,7 +42,7 @@ const EXPECT = {
   'Up vs down': { n: [0, 1, 5, 6], out: [0, 0, 0, 0], vars: [0, 0, 0, 0], work: [0, 0, 0, 0], end: [0, 0, 0, 0] },
   'Shifted start and bound': { n: [1, 3, 5], out: [1, 1, 1], vars: [1, 1, 1], work: [0, 0, 0], end: [0, 0, 0] },
   'First item outside the loop': { n: [1, 2, 5, 0], out: [0, 0, 0, 1], vars: [0, 0, 0, 1], work: [1, 1, 1, 0], end: [0, 0, 0, 0] },
-  'Never ends for some n': { n: [3, 0, -2], out: [0, 0, 1], vars: [1, 1, 1], work: [0, 0, 1], end: [0, 0, 1] },
+  'Never ends for some n': { n: [3, 0, -2], out: [0, 0, 2], vars: [1, 1, 2], work: [0, 0, 2], end: [0, 0, 2] },
 };
 for (const p of api.COMPARE_PRESETS) {
   const want = EXPECT[p.label];
@@ -50,7 +50,7 @@ for (const p of api.COMPARE_PRESETS) {
   const c = api.compareLoops(p.setup, p.a, p.b, api.parseValues(p.values).values);
   if (JSON.stringify(c.runs.map(r => r.n)) !== JSON.stringify(want.n)) { problems.push(`${p.label}: values ${JSON.stringify(c.runs.map(r => r.n))}`); continue; }
   for (const k of ['out', 'vars', 'work', 'end']) {
-    const got = c.runs.map(r => r[k] ? 0 : 1);
+    const got = c.runs.map(r => r.inconclusive ? 2 : r[k] ? 0 : 1);
     if (JSON.stringify(got) !== JSON.stringify(want[k])) problems.push(`${p.label}: "${k}" differs as ${JSON.stringify(got)}, expected ${JSON.stringify(want[k])}`);
   }
 }
@@ -63,6 +63,27 @@ if (JSON.stringify(api.parseValues('0, −3, 7').values) !== '[0,-3,7]') problem
 const same = api.compareLoops('int n = 3;', 'int t = 0;\nfor (int i = 0; i < n; i++) { t += 2; }\nSystem.out.println(t);', 'int t = 0;\nint i = 0;\nwhile (i < n) { t += 2; i++; }\nSystem.out.println(t);', [3]);
 if (!same.runs[0].out || !same.runs[0].work || same.runs[0].vars) problems.push('compare: for and while should match in output and looping but differ in leftover variables');
 if (!html.includes('id="m-cmp"') || !html.includes("'#compare'")) problems.push('missing the Compare two loops entry');
+
+for (const src of LONG_PROGRAMS) { const pr = probeOf(MJ, src), sm = api.summarizeRun(src); if (!known.has(src) || !known.has(pr)) problems.push('long program not in the Java table (run gen-loops-compare.mjs)'); const m = /visits=(\d+)\n$/.exec(MJ.run(pr).out); if (!m || +m[1] !== sm.iterations) problems.push('long program: the tool counts ' + sm.iterations + ' body runs, the probe counted ' + (m && m[1])); }
+// A long run: the saved steps stop at a cap, but the totals and final variables must not.
+{
+  const long = api.summarizeRun('int s = 0;\nfor (int i = 0; i < 9999; i++) {\n    s++;\n}\nSystem.out.println(s);');
+  if (long.out !== '9999\n' || long.iterations !== 9999 || long.checks !== 10000 || long.vars !== 's = 9999') problems.push('long loop summary: ' + JSON.stringify(long));
+  const longRun = MJ.run('int s = 0;\nfor (int i = 0; i < 9999; i++) {\n    s++;\n}');
+  if (!longRun.truncated) problems.push('the long-loop reproduction should exceed the step cap');
+  const whileLong = api.summarizeRun('int s = 0;\nint i = 0;\nwhile (i < 5000) {\n    s += 2;\n    i++;\n}\nSystem.out.println(s);');
+  if (whileLong.iterations !== 5000 || whileLong.vars !== 's = 10000; i = 5000') problems.push('long while summary: ' + JSON.stringify(whileLong));
+  const each = api.summarizeRun('int[] a = {4, 5, 6};\nint t = 0;\nfor (int v : a) {\n    t += v;\n}\nSystem.out.println(t);');
+  if (each.iterations !== 3 || each.checks !== 4 || each.vars !== 'a = [4, 5, 6]; t = 15') problems.push('foreach summary: ' + JSON.stringify(each));
+  // Two finite loops that need more operations than the tool allows: inconclusive, never "differ" or "agree".
+  const big = (v) => `int c = 0;\nfor (int i = 0; i < 1000; i++) {\n    for (int j = 0; j < 1000; j++) {\n        c++;\n    }\n}\nSystem.out.println(${v});`;
+  const cmp = api.compareLoops('int n = 1;', big('1'), big('2'), [1]);
+  if (!cmp.runs[0].inconclusive || 'out' in cmp.runs[0]) problems.push('over-limit runs must be inconclusive and make no agreement claim');
+  if (/never stops/.test(JSON.stringify(cmp.runs[0].A))) problems.push('over-limit runs must not be called endless');
+  // A finished run beside one that hit the limit is also inconclusive.
+  const mixed = api.compareLoops('int n = 1;', 'System.out.println(1);', 'while (n > 0) {\n    n++;\n}\nSystem.out.println(1);', [1]);
+  if (!mixed.runs[0].inconclusive) problems.push('a finished run next to a limit run should be inconclusive');
+}
 problems.forEach(p => console.log('FAIL ' + p));
 console.log(problems.length ? `${problems.length} problem(s)` : `PASS: ${cases.length} programs, ${items.length} page items covered`);
 process.exit(problems.length ? 1 : 0);

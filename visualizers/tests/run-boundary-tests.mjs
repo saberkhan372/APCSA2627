@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { loadPage, engineCopyProblem } from './lib-page.mjs';
 import { runCases } from './mj-java.mjs';
 import { batchProgram, variants, withFix } from './lib-boundary.mjs';
-const { html, api } = loadPage('boundary.html', ['MJ', 'ITEMS', 'TRANSFER', 'runCall', 'exposing', 'inputGrid', 'compareMethods', 'specAt', 'specText', 'buggyText', 'MAX_INPUT', 'MAX_COMBOS']);
+const { html, api } = loadPage('boundary.html', ['MJ', 'ITEMS', 'TRANSFER', 'runCall', 'exposing', 'inputGrid', 'compareMethods', 'specAt', 'specText', 'buggyText', 'MAX_INPUT', 'MAX_COMBOS', 'verdictOf', 'unfinished', 'LIMIT']);
 const { cases, problems, MJ } = runCases(new URL('boundary-cases.json', import.meta.url));
 const copy = engineCopyProblem(html); if (copy) problems.push(copy);
 const known = new Map(cases.map(c => [c[0], c[1]]));
@@ -116,13 +116,36 @@ if (!thrower.rows.some(r => /throws ArithmeticException/.test(r.a)) || !thrower.
 // Guards: huge inputs and ranges are refused, and an endless loop reads as such, not as a number.
 if (!api.compareMethods('static int f(int x) { return x; }', 'static int f(int x) { return x; }', [[0, api.MAX_INPUT + 1]]).error) problems.push('compare: an input beyond the limit should be refused');
 if (!api.compareMethods('static int f(int x) { return x; }', 'static int f(int x) { return x; }', [[0, api.MAX_COMBOS]]).error) problems.push('compare: more than the allowed number of inputs should be refused');
-if (api.runCall('static int f(int x) {\n    while (true) {\n        x++;\n    }\n}', 'f', [1]) !== 'never stops (the tool gave up)') problems.push('an endless loop should read "never stops"');
+if (api.runCall('static int f(int x) {\n    while (true) {\n        x++;\n    }\n}', 'f', [1]) !== api.LIMIT) problems.push('an endless loop should read as did-not-finish');
 { const sum = api.ITEMS.find(i => i.id === 'sumto'), t0 = Date.now(); api.runCall(api.buggyText(sum), 'sumTo', [api.MAX_INPUT]); if (Date.now() - t0 > 2000) problems.push('the largest allowed input is too slow'); }
 // Every Explore preset opens within the limits and shows what its item says it exposes.
 for (const it of api.ITEMS) {
   const rs = (it.exploreRanges || it.ranges).map(r => [r[0], r[1]]), c = api.compareMethods(api.buggyText(it), api.specText(it), rs);
   if (c.error) problems.push(`${it.id}: its Explore preset is refused: ${c.error}`);
   else if (!c.diffs.length) problems.push(`${it.id}: its Explore preset shows no difference`);
+}
+
+// A call that runs out of the tool's steps is inconclusive, never "the same" or "different" (and never "endless").
+{
+  const big = v => `static int f(int x) {\n    int c = 0;\n    for (int i = 0; i < 1000; i++) {\n        for (int j = 0; j < 1000; j++) {\n            c++;\n        }\n    }\n    return ${v};\n}`;
+  if (api.runCall(big(1), 'f', [1]) !== api.LIMIT || /never stops/.test(api.LIMIT)) problems.push('a finite method that needs too many steps must read as did-not-finish, not endless');
+  const c = api.compareMethods(big(1), big(2), [[0, 1]]);
+  if (c.diffs.length || c.rows.some(r => r.same) || c.unknown.length !== 2) problems.push('compare: two over-limit methods must be inconclusive, not agreeing or differing');
+  if (api.verdictOf(api.LIMIT, '5') !== 'unknown' || api.verdictOf('5', api.LIMIT) !== 'unknown' || api.verdictOf(api.LIMIT, api.LIMIT) !== 'unknown') problems.push('verdictOf should be unknown whenever either side hit the limit');
+  const mixed = api.compareMethods('static int f(int x) {\n    if (x == 0) {\n        while (true) {\n            x++;\n        }\n    }\n    return x;\n}', 'static int f(int x) {\n    return x;\n}', [[0, 2]]);
+  if (mixed.unknown.length !== 1 || mixed.diffs.length !== 0) problems.push('compare: one over-limit input should be left out, the rest compared');
+}
+// No item's grid may hit the limit in any version, so its claims never rest on an unfinished call.
+for (const it of all) for (const v of variants(it)) if (api.unfinished(it, v.method).length) problems.push(`${it.id} ${v.label}: some inputs in its grid hit the step limit`);
+// The roller-coaster explanation must match short-circuit evaluation: with age 10 the buggy age > 10 is false
+// and height is never evaluated; the correct age >= 10 passes and the height check decides.
+{
+  const ride = api.ITEMS.find(i => i.id === 'ride');
+  const cond = src => { const r = MJ.run(`int age = 10;\nint height = 100;\nif (${src}) {\n}`), n = r.prog.main[2].cond, st = r.steps.find(s => s.kind === 'cond'), seen = new Set(st.tree.map(e => e[0])); return { right: seen.has(n.r.id), left: st.tree.find(e => e[0] === n.l.id)[1] }; };
+  const bug = cond('age > 10 && height >= 120'), good = cond('age >= 10 && height >= 120');
+  if (bug.left !== false || bug.right) problems.push('buggy ride condition: the height should never be evaluated for age 10');
+  if (good.left !== true || !good.right) problems.push('correct ride condition: age passes and the height is checked');
+  if (/height check fails first/.test(ride.insight) || !/never looks at the height/.test(ride.insight)) problems.push('the roller-coaster insight must describe short-circuit evaluation correctly');
 }
 // Every Find item has a distinct way to be wrong, and the page offers the deep link and the hint.
 if (!html.includes("params.get('item')")) problems.push('missing the ?item= deep link');

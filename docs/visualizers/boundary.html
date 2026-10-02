@@ -1479,6 +1479,10 @@ const MJ = (function () {
     }
     const steps = [];
     let out = '', ops = 0, heapSeq = 0, truncated = false;
+    // Loop totals are counted as the program runs, not read back from the saved steps, so they stay right
+    // when the step list is full (maxSteps) and the animation stops recording.
+    let loopChecks = 0, loopBodies = 0;
+    const lc = ran => { loopChecks++; if (ran) loopBodies++; };
     const frames = [{ name: 'main', scopes: [new Map()], line: 0 }];
     const loops = new Map();   // loop node id -> { line, kind, iterations of the current run }
     const fr = () => frames[frames.length - 1];
@@ -1774,6 +1778,7 @@ const MJ = (function () {
           let it = 0;
           for (;;) {
             const c = condition(n.cond);
+            lc(c.v);
             record('cond', n, c.v ? `Check ${n.cond.src}: true, so the body runs${it ? ' again' : ''} (iteration ${it + 1}).` : `Check ${n.cond.src}: false, so the loop ends after ${it} iteration${it === 1 ? '' : 's'}.`, { loop: n.id, iteration: it + 1, value: c.v, tree: c.tree, cond: n.cond.id });
             if (!c.v) break;
             it++;
@@ -1790,6 +1795,7 @@ const MJ = (function () {
             for (;;) {
               let v = true, tree = [];
               if (n.cond) { const c = condition(n.cond); v = c.v; tree = c.tree; }
+              lc(v);
               record('cond', n, v ? `Check ${n.cond ? n.cond.src : '(no condition)'}: true, so the body runs (iteration ${it + 1}).` : `Check ${n.cond.src}: false, so the loop ends after ${it} iteration${it === 1 ? '' : 's'}.`, { loop: n.id, iteration: it + 1, value: v, tree, cond: n.cond && n.cond.id, phase: 'cond' });
               if (!v) break;
               it++;
@@ -1810,6 +1816,7 @@ const MJ = (function () {
               for (let i = 0; i < coll.values.length; i++) {
                 const v = conv(n.type, e, coll.values[i], n.line);
                 fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
+                lc(true);
                 record('foreach', n, `${n.name} gets a copy of the next element, ${show(e, v)} (index ${i}).`, { loop: n.id, iteration: i + 1, changed: [n.name], index: i });
                 fr().scopes.push(new Map());
                 try { exec(n.body); } finally { fr().scopes.pop(); }
@@ -1823,14 +1830,17 @@ const MJ = (function () {
                 if (coll.modCount !== expected) throw new JavaThrow('ConcurrentModificationException', n.line, 'The list was changed (an add or remove) while the enhanced for loop was walking through it.');
                 const v = conv(n.type, e, coll.values[cursor++], n.line);
                 fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
+                lc(true);
                 record('foreach', n, `${n.name} gets the next element, ${show(e, v)} (index ${cursor - 1}).`, { loop: n.id, iteration: ++it, changed: [n.name], index: cursor - 1, iter: { hid: coll.hid, cursor } });
                 fr().scopes.push(new Map());
                 try { exec(n.body); } finally { fr().scopes.pop(); }
               }
+              lc(false);
               const size = coll.values.length;
               record('cond', n, it < size || coll.modCount !== expected ? `hasNext() is false: the iterator's cursor is at index ${cursor}, which equals size() ${size}, so the loop ends.` : 'No more elements, so the loop ends.', { loop: n.id, value: false, done: true, iter: { hid: coll.hid, cursor } });
               return;
             }
+            lc(false);
             record('cond', n, 'No more elements, so the loop ends.', { loop: n.id, value: false, done: true });
           } finally { fr().scopes.pop(); }
           return;
@@ -1866,7 +1876,10 @@ const MJ = (function () {
         steps.push({ kind: 'limit', line, note: limit === 'depth' ? `This tool stops at ${frames.length} frames on the call stack. Java itself would keep going deeper before stopping with a StackOverflowError.` : `This tool stopped after ${maxOps.toLocaleString()} operations. The program may have an infinite loop.`, out, depth: frames.length, ...snapshot() });
       } else throw e;
     }
-    return { steps, out, crashed, limit, truncated, prog };
+    // The variables of main as they stand when the run ends (after any block scopes have closed), also
+    // independent of the saved steps.
+    const end = snapshot();
+    return { steps, out, crashed, limit, truncated, prog, stats: { checks: loopChecks, iterations: loopBodies }, finalFrame: { vars: end.frames[0].vars, heap: end.heap } };
   }
   function label(r) {
     if (r.compileError) return 'compile-error';
@@ -2244,11 +2257,15 @@ const MAX_INPUT = 10000, MAX_COMBOS = 800;
 const values = ([lo, hi, step = 1]) => { const v = []; for (let x = lo; x <= hi; x += step) v.push(x); return v; };
 // Every combination of the ranges, in order (the first parameter changes slowest).
 const inputGrid = ranges => ranges.map(values).reduce((acc, vs) => acc.flatMap(a => vs.map(v => [...a, v])), [[]]);
+// A call that hits the tool's step limit did not finish. That says nothing about whether the method would
+// ever stop (a finite method can need more steps than the tool allows), so it is never "the same" or "different".
+const LIMIT = 'did not finish (the tool hit its step limit)';
+const verdictOf = (a, b) => a === LIMIT || b === LIMIT ? 'unknown' : a === b ? 'agree' : 'differ';
 function runCall(method, name, args) {
   const r = MJ.run(`${method}\nSystem.out.println(${name}(${args.join(', ')}));`);
   if (r.compileError) return 'compile error: ' + r.compileError;
   if (r.unsupported) return 'not supported here: ' + r.unsupported;
-  if (r.limit) return 'never stops (the tool gave up)';
+  if (r.limit) return LIMIT;
   return MJ.label(r).replace(/\n$/, '').replace('|throws:', 'throws ');
 }
 // The buggy method with the lines the repair replaces swapped for another text.
@@ -2266,7 +2283,9 @@ function specAt(item, args) {
   return specCache.get(key);
 }
 // The inputs (in the item's range) where a version of the method disagrees with the specification.
-function exposing(item, method) { return inputGrid(item.ranges).filter(a => runCall(method, item.name, a) !== specAt(item, a)); }
+function exposing(item, method) { return inputGrid(item.ranges).filter(a => verdictOf(runCall(method, item.name, a), specAt(item, a)) === 'differ'); }
+// The inputs where the method (or the specification) hit the step limit: left out of every claim.
+function unfinished(item, method) { return inputGrid(item.ranges).filter(a => verdictOf(runCall(method, item.name, a), specAt(item, a)) === 'unknown'); }
 const argText = (item, args) => args.map((a, i) => (item.params.length > 1 ? item.params[i] + ' = ' : '') + a).join(', ');
 // Two methods compared on a range of inputs.
 function compareMethods(a, b, ranges) {
@@ -2281,8 +2300,8 @@ function compareMethods(a, b, ranges) {
   const total = rs.reduce((n, [lo, hi]) => n * (hi - lo + 1), 1);
   if (rs.some(r => Math.max(Math.abs(r[0]), Math.abs(r[1])) > MAX_INPUT)) return { error: `Keep every value between −${MAX_INPUT.toLocaleString()} and ${MAX_INPUT.toLocaleString()}: a loop with a bigger input takes too long to run here.` };
   if (total > MAX_COMBOS) return { error: `That is ${total.toLocaleString()} inputs. Narrow the ranges to ${MAX_COMBOS} or fewer.` };
-  const rows = inputGrid(rs).map(args => { const ra = runCall(a, name, args), rb = runCall(b, name, args); return { args, a: ra, b: rb, same: ra === rb }; });
-  return { name, params: params.map(p => p[1]), rows, diffs: rows.filter(r => !r.same), total };
+  const rows = inputGrid(rs).map(args => { const ra = runCall(a, name, args), rb = runCall(b, name, args); const v = verdictOf(ra, rb); return { args, a: ra, b: rb, same: v === 'agree', unknown: v === 'unknown' }; });
+  return { name, params: params.map(p => p[1]), rows, diffs: rows.filter(r => !r.same && !r.unknown), unknown: rows.filter(r => r.unknown), total };
 }
 // ENGINE END
 
@@ -2325,7 +2344,7 @@ const ITEMS = [
     spec: 'canRide(age, height) is true only when age is 10 or more and height is 120 or more.',
     buggy: ['static boolean canRide(int age, int height) {', '    return age > 10 && height >= 120;', '}'],
     fix: { from: 1, to: 1 }, fixes: ['    return age >= 10 || height >= 120;', '    return age >= 10 && height > 120;', '    return age > 10 && height > 120;', '    return age >= 10 && height >= 120;'], answer: 3,
-    insight: 'With && both halves must be true for the answer to be true, so to expose a bug in one half you must make the other half true. Age 10 with height 100 gives false in both versions, because the height check fails first. Age 10 with height 120 or more is where they disagree.' },
+    insight: 'With && the answer is true only when both halves are true, and Java stops at the first half that is false. Age 10 with height 100 gives false in both versions, but for different reasons: the buggy code stops at age > 10 and never looks at the height, while the correct code passes the age check and then fails on the height. The bug stays hidden whenever the other half is already false. To expose it, make the half you are not testing true: age 10 with height 120 or more is where the two versions disagree.' },
   { id: 'size', title: 'Sizes in the wrong order', name: 'size', params: ['n'], ret: 'String', ranges: [[-3, 120]],
     spec: 'size(n) returns "small" below 10, "medium" for 10 through 99, and "large" for 100 or more.',
     buggy: ['static String size(int n) {', '    if (n < 100) {', '        return "medium";', '    } else if (n < 10) {', '        return "small";', '    }', '    return "large";', '}'],
@@ -2442,12 +2461,13 @@ function renderLog() {
   st.attempts.forEach(a => {
     const tr = el('tr', a.exposes ? 'hit' : '');
     a.args.forEach(v => tr.append(el('td', null, String(v))));
-    tr.append(el('td', null, a.pred + (a.predOk ? ' ✓' : ' ✗')), el('td', null, a.buggy), el('td', null, a.spec), el('td', null, a.exposes ? 'EXPOSES THE BUG' : 'agree'));
+    tr.append(el('td', null, a.pred + (a.predOk ? ' ✓' : ' ✗')), el('td', null, a.buggy), el('td', null, a.spec), el('td', null, a.exposes ? 'EXPOSES THE BUG' : a.unknown ? 'INCONCLUSIVE' : 'agree'));
     t.append(tr);
   });
   box.append(wrapTable(t));
   const last = st.attempts[st.attempts.length - 1], fb = el('div', 'feedback ' + (last.exposes ? 'good' : 'part'));
-  fb.append(el('p', null, last.predOk ? 'Your prediction of the code was right.' : `Your prediction was off: the code returns ${last.buggy}.`));
+  if (last.unknown) { fb.append(el('p', null, 'Inconclusive: the tool ran out of steps on this input, so it cannot say whether the code and the specification agree. That does not mean the method never stops. Try a smaller input.')); box.append(fb); return; }
+  fb.append(el('p', null, last.unknown ? '' : last.predOk ? 'Your prediction of the code was right.' : `Your prediction was off: the code returns ${last.buggy}.`));
   fb.append(el('p', null, last.exposes ? `This input exposes the bug. ${verdictText(it, last.args, last.buggy, last.spec)}` : `The code and the specification agree here (${last.buggy}), so this input cannot reveal the bug. Try another.`));
   box.append(fb);
   if (!st.found && st.attempts.length >= 2) {
@@ -2482,6 +2502,8 @@ function renderRepairFeedback() {
   if (r.ok) {
     const n = inputGrid(it.ranges).length;
     fb.append(para(el('span', 'tag', 'Correct. '), `The repaired method agrees with the specification on all ${n} inputs tried. That is strong evidence rather than a proof: the inputs not tried could still hide a bug.`));
+  } else if (r.inconclusive) {
+    fb.append(para(el('span', 'tag', 'Inconclusive. '), 'With this replacement, some inputs ran out of the tool\'s steps, so it cannot confirm the repair.'));
   } else {
     fb.append(para(el('span', 'tag', 'Not quite. '), `With this replacement, ${verdictText(it, r.counter.args, r.counter.got, r.counter.want)} ` + r.note));
   }
@@ -2492,8 +2514,9 @@ $('f-form').addEventListener('submit', e => {
   if (!v) return;
   const buggy = runCall(buggyText(it), it.name, v.args), spec = specAt(it, v.args);
   const predOk = v.pred.replace('−', '-').replace(/^"|"$/g, '') === buggy;
-  st.attempts.push({ args: v.args, pred: v.pred, predOk, buggy, spec, exposes: buggy !== spec, why: v.why });
-  if (buggy !== spec) st.found = true;
+  const vd = verdictOf(buggy, spec);
+  st.attempts.push({ args: v.args, pred: v.pred, predOk, buggy, spec, exposes: vd === 'differ', unknown: vd === 'unknown', why: v.why });
+  if (vd === 'differ') st.found = true;
   renderFind();
 });
 $('r-form').addEventListener('submit', e => {
@@ -2501,8 +2524,9 @@ $('r-form').addEventListener('submit', e => {
   const it = ITEMS[fi], st = fstate[fi], pick = $('r-form').querySelector('input:checked');
   if (!pick) { $('r-err').textContent = 'Choose a replacement first.'; return; }
   const choice = +pick.value, method = withFix(it, it.fixes[choice]), grid = inputGrid(it.ranges);
-  const bad = exposing(it, method);
-  if (!bad.length) st.repair = { choice, ok: true };
+  const bad = exposing(it, method), open = unfinished(it, method);
+  if (!bad.length && open.length) st.repair = { choice, ok: false, inconclusive: true };
+  else if (!bad.length) st.repair = { choice, ok: true };
   else {
     const was = new Set(exposing(it, buggyText(it)).map(String));
     const first = bad[0], broke = bad.filter(a => !was.has(String(a))), same = bad.length === was.size && bad.every(a => was.has(String(a)));
@@ -2538,9 +2562,11 @@ function exploreUpdate(opts = {}) {
   const c = compareMethods(a, b, ranges);
   xv.textContent = '';
   if (c.error) { xv.append(el('div', 'tui-err', c.error)); return; }
-  const v = el('p', 'verdict ' + (c.diffs.length ? 'no' : 'ok'), c.diffs.length ? `They disagree on ${c.diffs.length} of ${c.total} inputs.` : `They agree on all ${c.total} inputs tried.`);
+  const nU = c.unknown.length;
+  const v = el('p', 'verdict ' + (c.diffs.length ? 'no' : nU ? '' : 'ok'), c.diffs.length ? `They disagree on ${c.diffs.length} of ${c.total} inputs.` : nU ? `No disagreement on the ${c.total - nU} inputs that finished.` : `They agree on all ${c.total} inputs tried.`);
   xv.append(v);
-  xv.append(el('p', 'small', c.diffs.length ? 'The inputs where they disagree are the ones worth keeping as tests. Look for where the disagreement starts and stops: that is the boundary.' : 'Agreeing on these inputs is evidence, not a proof for every int. Widen the ranges, and test the boundary values of every comparison and loop.'));
+  if (nU) xv.append(el('p', 'small', `${nU} input${nU === 1 ? '' : 's'} (for example ${c.params.map((p, i) => p + ' = ' + c.unknown[0].args[i]).join(', ')}) ran out of the tool's steps in one of the methods. Those are inconclusive: they are left out of the comparison, and it does not mean the method never stops.`));
+  xv.append(el('p', 'small', nU && !c.diffs.length ? 'Narrow the ranges to inputs that finish to get a comparison.' : c.diffs.length ? 'The inputs where they disagree are the ones worth keeping as tests. Look for where the disagreement starts and stops: that is the boundary.' : 'Agreeing on these inputs is evidence, not a proof for every int. Widen the ranges, and test the boundary values of every comparison and loop.'));
   if (!c.diffs.length) return;
   const t = el('table', 'tt'), h = el('tr');
   [...c.params, 'Method A returns', 'Method B returns'].forEach(x => h.append(el('th', null, x)));
@@ -2574,10 +2600,11 @@ function renderTransfer() {
 }
 function renderTransferFeedback() {
   const it = TRANSFER[ti], st = tstate[ti], fb = $('t-feedback');
-  const got = runCall(buggyText(it), it.name, st.args), want = specAt(it, st.args), ok = got !== want;
+  const got = runCall(buggyText(it), it.name, st.args), want = specAt(it, st.args), vd = verdictOf(got, want), ok = vd === 'differ';
   const set = exposing(it, buggyText(it)), total = inputGrid(it.ranges).length;
-  fb.className = 'feedback ' + (ok ? 'good' : 'bad'); fb.textContent = '';
-  fb.append(para(el('span', 'tag', ok ? 'Yes, that input exposes the bug. ' : 'Not quite. '), ok ? verdictText(it, st.args, got, want) : `The code and the specification agree here (both give ${got}), so this input cannot expose the bug.`));
+  fb.className = 'feedback ' + (ok ? 'good' : vd === 'unknown' ? 'part' : 'bad'); fb.textContent = '';
+  if (vd === 'unknown') fb.append(para(el('span', 'tag', 'Inconclusive. '), 'The tool ran out of steps on that input, so it cannot say whether the code and the specification agree. Try a smaller input.'));
+  else fb.append(para(el('span', 'tag', ok ? 'Yes, that input exposes the bug. ' : 'Not quite. '), ok ? verdictText(it, st.args, got, want) : `The code and the specification agree here (both give ${got}), so this input cannot expose the bug.`));
   fb.append(el('p', null, 'Your reasoning: “' + st.why.trim() + '”'));
   const note = el('div', 'note'); note.append(el('b', null, 'Every input that exposes it: '), setChips(it, set, total), el('p', null, it.insight));
   fb.append(note);

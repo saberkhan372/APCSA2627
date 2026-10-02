@@ -90,5 +90,9 @@
   ["int n = -2;\nint total = 0;\nfor (int i = 0; i < n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "0\n"],
   ["int visits = 0;\nint n = -2;\nint total = 0;\nfor (int i = 0; i < n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "0\nvisits=0\n"],
   ["int n = -2;\nint total = 0;\nint i = 0;\nwhile (i != n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "limit"],
-  ["int visits = 0;\nint n = -2;\nint total = 0;\nint i = 0;\nwhile (i != n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "limit"]
+  ["int visits = 0;\nint n = -2;\nint total = 0;\nint i = 0;\nwhile (i != n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "limit"],
+  ["int s = 0;\nfor (int i = 0; i < 9999; i++) {\n    s++;\n}\nSystem.out.println(s);", "9999\n"],
+  ["int visits = 0;\nint s = 0;\nfor (int i = 0; i < 9999; i++) { visits++;\n    s++;\n}\nSystem.out.println(s);\nSystem.out.println(\"visits=\" + visits);", "9999\nvisits=9999\n"],
+  ["int s = 0;\nint i = 0;\nwhile (i < 5000) {\n    s += 2;\n    i++;\n}\nSystem.out.println(s);", "10000\n"],
+  ["int visits = 0;\nint s = 0;\nint i = 0;\nwhile (i < 5000) { visits++;\n    s += 2;\n    i++;\n}\nSystem.out.println(s);\nSystem.out.println(\"visits=\" + visits);", "10000\nvisits=5000\n"]
 ]

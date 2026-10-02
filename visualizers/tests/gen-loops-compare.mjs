@@ -4,11 +4,12 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { loadPage } from './lib-page.mjs';
 import { loadMJ } from './lib-mj.mjs';
-import { presetPrograms, probeOf } from './lib-compare.mjs';
+import { presetPrograms, probeOf, LONG_PROGRAMS } from './lib-compare.mjs';
 const { api } = loadPage('loops.html', ['COMPARE_PRESETS', 'parseValues']);
 const MJ = loadMJ(), file = new URL('loops-cases.json', import.meta.url);
 const cases = JSON.parse(readFileSync(file, 'utf8')), known = new Set(cases.map(c => c[0]));
 let added = 0;
+for (const src of LONG_PROGRAMS) for (const prog of [src, probeOf(MJ, src)]) { if (known.has(prog)) continue; cases.push([prog, MJ.label(MJ.run(prog))]); known.add(prog); added++; }
 for (const p of api.COMPARE_PRESETS) for (const r of presetPrograms(api, p)) for (const prog of [r.src, probeOf(MJ, r.src)]) {
   if (!prog || known.has(prog)) continue;
   cases.push([prog, MJ.label(MJ.run(prog))]); known.add(prog); added++;

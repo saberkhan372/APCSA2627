@@ -1092,6 +1092,58 @@ public class LoopsCheck {
         }
     }
 
+    static class C92 {
+
+        static void run() {
+            int s = 0;
+            for (int i = 0; i < 9999; i++) {
+                s++;
+            }
+            System.out.println(s);
+        }
+    }
+
+    static class C93 {
+
+        static void run() {
+            int visits = 0;
+            int s = 0;
+            for (int i = 0; i < 9999; i++) { visits++;
+                s++;
+            }
+            System.out.println(s);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C94 {
+
+        static void run() {
+            int s = 0;
+            int i = 0;
+            while (i < 5000) {
+                s += 2;
+                i++;
+            }
+            System.out.println(s);
+        }
+    }
+
+    static class C95 {
+
+        static void run() {
+            int visits = 0;
+            int s = 0;
+            int i = 0;
+            while (i < 5000) { visits++;
+                s += 2;
+                i++;
+            }
+            System.out.println(s);
+            System.out.println("visits=" + visits);
+        }
+    }
+
     static int passed = 0, failed = 0;
     static String capture(Runnable r) {
         PrintStream old = System.out;
@@ -1200,6 +1252,10 @@ public class LoopsCheck {
         check("int visits = 0;\nint n = 0;\nint total = 0;\nint i = 0;\nwhile (i != n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "0\nvisits=0\n", C87::run);
         check("int n = -2;\nint total = 0;\nfor (int i = 0; i < n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "0\n", C88::run);
         check("int visits = 0;\nint n = -2;\nint total = 0;\nfor (int i = 0; i < n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "0\nvisits=0\n", C89::run);
+        check("int s = 0;\nfor (int i = 0; i < 9999; i++) {\n    s++;\n}\nSystem.out.println(s);", "9999\n", C92::run);
+        check("int visits = 0;\nint s = 0;\nfor (int i = 0; i < 9999; i++) { visits++;\n    s++;\n}\nSystem.out.println(s);\nSystem.out.println(\"visits=\" + visits);", "9999\nvisits=9999\n", C93::run);
+        check("int s = 0;\nint i = 0;\nwhile (i < 5000) {\n    s += 2;\n    i++;\n}\nSystem.out.println(s);", "10000\n", C94::run);
+        check("int visits = 0;\nint s = 0;\nint i = 0;\nwhile (i < 5000) { visits++;\n    s += 2;\n    i++;\n}\nSystem.out.println(s);\nSystem.out.println(\"visits=\" + visits);", "10000\nvisits=5000\n", C95::run);
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         if (javac == null) throw new IllegalStateException("A JDK is needed to check compile claims.");
         compileCheck(javac, "int x = 0;\nwhile (x < 100) {\n    x *= 3;\n}", "import java.util.ArrayList;\npublic class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\n\nstatic void run() {\nint x = 0;\nwhile (x < 100) {\n    x *= 3;\n}\n}\n}", true);

@@ -1437,6 +1437,10 @@ const MJ = (function () {
     }
     const steps = [];
     let out = '', ops = 0, heapSeq = 0, truncated = false;
+    // Loop totals are counted as the program runs, not read back from the saved steps, so they stay right
+    // when the step list is full (maxSteps) and the animation stops recording.
+    let loopChecks = 0, loopBodies = 0;
+    const lc = ran => { loopChecks++; if (ran) loopBodies++; };
     const frames = [{ name: 'main', scopes: [new Map()], line: 0 }];
     const loops = new Map();   // loop node id -> { line, kind, iterations of the current run }
     const fr = () => frames[frames.length - 1];
@@ -1732,6 +1736,7 @@ const MJ = (function () {
           let it = 0;
           for (;;) {
             const c = condition(n.cond);
+            lc(c.v);
             record('cond', n, c.v ? `Check ${n.cond.src}: true, so the body runs${it ? ' again' : ''} (iteration ${it + 1}).` : `Check ${n.cond.src}: false, so the loop ends after ${it} iteration${it === 1 ? '' : 's'}.`, { loop: n.id, iteration: it + 1, value: c.v, tree: c.tree, cond: n.cond.id });
             if (!c.v) break;
             it++;
@@ -1748,6 +1753,7 @@ const MJ = (function () {
             for (;;) {
               let v = true, tree = [];
               if (n.cond) { const c = condition(n.cond); v = c.v; tree = c.tree; }
+              lc(v);
               record('cond', n, v ? `Check ${n.cond ? n.cond.src : '(no condition)'}: true, so the body runs (iteration ${it + 1}).` : `Check ${n.cond.src}: false, so the loop ends after ${it} iteration${it === 1 ? '' : 's'}.`, { loop: n.id, iteration: it + 1, value: v, tree, cond: n.cond && n.cond.id, phase: 'cond' });
               if (!v) break;
               it++;
@@ -1768,6 +1774,7 @@ const MJ = (function () {
               for (let i = 0; i < coll.values.length; i++) {
                 const v = conv(n.type, e, coll.values[i], n.line);
                 fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
+                lc(true);
                 record('foreach', n, `${n.name} gets a copy of the next element, ${show(e, v)} (index ${i}).`, { loop: n.id, iteration: i + 1, changed: [n.name], index: i });
                 fr().scopes.push(new Map());
                 try { exec(n.body); } finally { fr().scopes.pop(); }
@@ -1781,14 +1788,17 @@ const MJ = (function () {
                 if (coll.modCount !== expected) throw new JavaThrow('ConcurrentModificationException', n.line, 'The list was changed (an add or remove) while the enhanced for loop was walking through it.');
                 const v = conv(n.type, e, coll.values[cursor++], n.line);
                 fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
+                lc(true);
                 record('foreach', n, `${n.name} gets the next element, ${show(e, v)} (index ${cursor - 1}).`, { loop: n.id, iteration: ++it, changed: [n.name], index: cursor - 1, iter: { hid: coll.hid, cursor } });
                 fr().scopes.push(new Map());
                 try { exec(n.body); } finally { fr().scopes.pop(); }
               }
+              lc(false);
               const size = coll.values.length;
               record('cond', n, it < size || coll.modCount !== expected ? `hasNext() is false: the iterator's cursor is at index ${cursor}, which equals size() ${size}, so the loop ends.` : 'No more elements, so the loop ends.', { loop: n.id, value: false, done: true, iter: { hid: coll.hid, cursor } });
               return;
             }
+            lc(false);
             record('cond', n, 'No more elements, so the loop ends.', { loop: n.id, value: false, done: true });
           } finally { fr().scopes.pop(); }
           return;
@@ -1824,7 +1834,10 @@ const MJ = (function () {
         steps.push({ kind: 'limit', line, note: limit === 'depth' ? `This tool stops at ${frames.length} frames on the call stack. Java itself would keep going deeper before stopping with a StackOverflowError.` : `This tool stopped after ${maxOps.toLocaleString()} operations. The program may have an infinite loop.`, out, depth: frames.length, ...snapshot() });
       } else throw e;
     }
-    return { steps, out, crashed, limit, truncated, prog };
+    // The variables of main as they stand when the run ends (after any block scopes have closed), also
+    // independent of the saved steps.
+    const end = snapshot();
+    return { steps, out, crashed, limit, truncated, prog, stats: { checks: loopChecks, iterations: loopBodies }, finalFrame: { vars: end.frames[0].vars, heap: end.heap } };
   }
   function label(r) {
     if (r.compileError) return 'compile-error';

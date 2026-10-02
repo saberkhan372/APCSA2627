@@ -104,6 +104,14 @@ if (!api.PROG_PRESETS.find(x => x.label === 'Grade ladder · 85')) problems.push
   if (api.whyUnchecked(never.st, 0, never.run) !== 'the loop body never ran.') problems.push('loop never entered reason');
   if (sum('int a = 1;').entries.length !== 0) problems.push('a program with no if should have an empty branch map');
 }
+
+// A run longer than the saved-step cap cannot be read from the steps, so the page must not show a branch map for it.
+{
+  const longSrc = 'int c = 0;\nfor (int i = 0; i < 5000; i++) {\n    c++;\n}\nif (c > 0) {\n    System.out.println(c);\n}';
+  const r = MJ.run(longSrc);
+  if (!r.truncated) problems.push('the long-run reproduction should exceed the step cap');
+  if (!/if \(this\.run\.truncated\)/.test(html)) problems.push('the branch map must be skipped when the run is truncated');
+}
 problems.forEach(p => console.log('FAIL ' + p));
 console.log(problems.length ? `${problems.length} problem(s)` : `PASS: ${cases.length} programs, ${items.length} page items covered`);
 process.exit(problems.length ? 1 : 0);

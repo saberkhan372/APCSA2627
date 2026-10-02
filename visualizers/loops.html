@@ -1449,6 +1449,10 @@ const MJ = (function () {
     }
     const steps = [];
     let out = '', ops = 0, heapSeq = 0, truncated = false;
+    // Loop totals are counted as the program runs, not read back from the saved steps, so they stay right
+    // when the step list is full (maxSteps) and the animation stops recording.
+    let loopChecks = 0, loopBodies = 0;
+    const lc = ran => { loopChecks++; if (ran) loopBodies++; };
     const frames = [{ name: 'main', scopes: [new Map()], line: 0 }];
     const loops = new Map();   // loop node id -> { line, kind, iterations of the current run }
     const fr = () => frames[frames.length - 1];
@@ -1744,6 +1748,7 @@ const MJ = (function () {
           let it = 0;
           for (;;) {
             const c = condition(n.cond);
+            lc(c.v);
             record('cond', n, c.v ? `Check ${n.cond.src}: true, so the body runs${it ? ' again' : ''} (iteration ${it + 1}).` : `Check ${n.cond.src}: false, so the loop ends after ${it} iteration${it === 1 ? '' : 's'}.`, { loop: n.id, iteration: it + 1, value: c.v, tree: c.tree, cond: n.cond.id });
             if (!c.v) break;
             it++;
@@ -1760,6 +1765,7 @@ const MJ = (function () {
             for (;;) {
               let v = true, tree = [];
               if (n.cond) { const c = condition(n.cond); v = c.v; tree = c.tree; }
+              lc(v);
               record('cond', n, v ? `Check ${n.cond ? n.cond.src : '(no condition)'}: true, so the body runs (iteration ${it + 1}).` : `Check ${n.cond.src}: false, so the loop ends after ${it} iteration${it === 1 ? '' : 's'}.`, { loop: n.id, iteration: it + 1, value: v, tree, cond: n.cond && n.cond.id, phase: 'cond' });
               if (!v) break;
               it++;
@@ -1780,6 +1786,7 @@ const MJ = (function () {
               for (let i = 0; i < coll.values.length; i++) {
                 const v = conv(n.type, e, coll.values[i], n.line);
                 fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
+                lc(true);
                 record('foreach', n, `${n.name} gets a copy of the next element, ${show(e, v)} (index ${i}).`, { loop: n.id, iteration: i + 1, changed: [n.name], index: i });
                 fr().scopes.push(new Map());
                 try { exec(n.body); } finally { fr().scopes.pop(); }
@@ -1793,14 +1800,17 @@ const MJ = (function () {
                 if (coll.modCount !== expected) throw new JavaThrow('ConcurrentModificationException', n.line, 'The list was changed (an add or remove) while the enhanced for loop was walking through it.');
                 const v = conv(n.type, e, coll.values[cursor++], n.line);
                 fr().scopes[fr().scopes.length - 1].set(n.name, { type: n.type, v });
+                lc(true);
                 record('foreach', n, `${n.name} gets the next element, ${show(e, v)} (index ${cursor - 1}).`, { loop: n.id, iteration: ++it, changed: [n.name], index: cursor - 1, iter: { hid: coll.hid, cursor } });
                 fr().scopes.push(new Map());
                 try { exec(n.body); } finally { fr().scopes.pop(); }
               }
+              lc(false);
               const size = coll.values.length;
               record('cond', n, it < size || coll.modCount !== expected ? `hasNext() is false: the iterator's cursor is at index ${cursor}, which equals size() ${size}, so the loop ends.` : 'No more elements, so the loop ends.', { loop: n.id, value: false, done: true, iter: { hid: coll.hid, cursor } });
               return;
             }
+            lc(false);
             record('cond', n, 'No more elements, so the loop ends.', { loop: n.id, value: false, done: true });
           } finally { fr().scopes.pop(); }
           return;
@@ -1836,7 +1846,10 @@ const MJ = (function () {
         steps.push({ kind: 'limit', line, note: limit === 'depth' ? `This tool stops at ${frames.length} frames on the call stack. Java itself would keep going deeper before stopping with a StackOverflowError.` : `This tool stopped after ${maxOps.toLocaleString()} operations. The program may have an infinite loop.`, out, depth: frames.length, ...snapshot() });
       } else throw e;
     }
-    return { steps, out, crashed, limit, truncated, prog };
+    // The variables of main as they stand when the run ends (after any block scopes have closed), also
+    // independent of the saved steps.
+    const end = snapshot();
+    return { steps, out, crashed, limit, truncated, prog, stats: { checks: loopChecks, iterations: loopBodies }, finalFrame: { vars: end.frames[0].vars, heap: end.heap } };
   }
   function label(r) {
     if (r.compileError) return 'compile-error';
@@ -2223,18 +2236,21 @@ function bodyCount(run, loopIndex = 0) {
 // Two programs run from the same setup and compared on what they did: output, the variables left at the
 // end, how much looping happened, and how the run ended.
 const cmpValue = (v, type, heap) => v === null ? 'null' : v && typeof v === 'object' && 'ref' in v ? '[' + ((heap[v.ref] || { values: [] }).values.join(', ')) + ']' : type === 'double' ? javaDouble(v) : typeof v === 'string' ? JSON.stringify(v) : String(v);
+// Totals and the final variables come from the interpreter's own counters (run.stats, run.finalFrame), not
+// from the saved animation steps, which stop at a cap. A run that hits the tool's limit did not finish:
+// nothing about how it would end is known, so it is inconclusive and left out of every agreement claim.
 function summarizeRun(src) {
   const run = MJ.run(src);
   if (run.compileError) return { problem: 'does not compile: ' + run.compileError };
   if (run.unsupported) return { problem: 'is not supported here: ' + run.unsupported };
-  const last = run.steps[run.steps.length - 1], loopSteps = run.steps.filter(s => s.kind === 'cond' && s.loop !== undefined);
-  const endless = !!run.limit;
+  if (run.limit) return { inconclusive: true, out: run.out, end: `did not finish within the tool's ${run.limit === 'depth' ? 'call-depth' : 'step'} limit` };
+  const f = run.finalFrame;
   return {
     out: run.out,
-    vars: last ? last.frames[0].vars.map(v => `${v.name} = ${cmpValue(v.v, v.type, last.heap)}`).join('; ') || '(none)' : '(none)',
-    checks: endless ? null : loopSteps.length,
-    iterations: endless ? null : run.steps.filter(s => s.kind === 'foreach' || (s.kind === 'cond' && s.loop !== undefined && s.value)).length,
-    end: endless ? 'never stops (the tool gave up)' : run.crashed ? `throws ${run.crashed}` : 'finishes normally',
+    vars: f.vars.map(v => `${v.name} = ${cmpValue(v.v, v.type, f.heap)}`).join('; ') || '(none)',
+    checks: run.stats.checks,
+    iterations: run.stats.iterations,
+    end: run.crashed ? `throws ${run.crashed}` : 'finishes normally',
   };
 }
 const N_DECL = /\bint\s+n\s*=\s*-?\d+\s*;/;
@@ -2251,7 +2267,8 @@ function compareLoops(setup, a, b, values) {
     const s = v === null ? setup : setup.replace(N_DECL, `int n = ${v};`);
     const A = summarizeRun(`${s}\n${a}`), B = summarizeRun(`${s}\n${b}`);
     const row = { n: v, A, B };
-    if (!A.problem && !B.problem) Object.assign(row, { out: A.out === B.out, vars: A.vars === B.vars, work: A.checks === B.checks && A.iterations === B.iterations, end: A.end === B.end });
+    if (!A.problem && !B.problem && (A.inconclusive || B.inconclusive)) row.inconclusive = true;
+    else if (!A.problem && !B.problem) Object.assign(row, { out: A.out === B.out, vars: A.vars === B.vars, work: A.checks === B.checks && A.iterations === B.iterations, end: A.end === B.end });
     return row;
   });
   return { hasN, runs, problem: runs.find(r => r.A.problem || r.B.problem) || null };
@@ -2302,7 +2319,7 @@ const COMPARE_PRESETS = [
   { label: 'Up vs down', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'for (int i = n; i >= 1; i--) {\n    total += i;\n}\nSystem.out.println(total);', values: '0, 1, 5, 6', note: 'Different loops, same results: the values are added in a different order, which does not change a sum.' },
   { label: 'Shifted start and bound', setup: 'int n = 5;\nint total = 0;', a: 'int i = 0;\nwhile (i < n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', b: 'int i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '1, 3, 5', note: 'The same number of passes, but A adds 0 through n − 1 and B adds 1 through n. Different output, same amount of looping.' },
   { label: 'First item outside the loop', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'total = 1;\nfor (int i = 2; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', values: '1, 2, 5, 0', note: 'They agree for 1, 2 and 5, so matching runs look convincing. Then n = 0 breaks it: B adds the 1 before checking anything. One different result is proof that two loops are not equivalent.' },
-  { label: 'Never ends for some n', setup: 'int n = 3;\nint total = 0;', a: 'for (int i = 0; i < n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'int i = 0;\nwhile (i != n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '3, 0, -2', note: 'i < n and i != n agree while n is 0 or more. For a negative n, i never equals n, so B counts up forever.' },
+  { label: 'Never ends for some n', setup: 'int n = 3;\nint total = 0;', a: 'for (int i = 0; i < n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'int i = 0;\nwhile (i != n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '3, 0, -2', note: 'i < n and i != n agree while n is 0 or more. For a negative n, i never equals n, so B counts up with no end in sight. The tool cannot prove a loop is endless: it stops after 200,000 operations and calls that run inconclusive.' },
 ];
 // DATA END
 
@@ -2504,12 +2521,17 @@ function renderCompare() {
   if (cmpNote) box.append(el('div', 'qstate', cmpNote));
   const runs = c.runs, label = r => r.n === null ? 'this run' : 'n = ' + r.n;
   const list = rs => rs.map(label).join(', ');
-  const outDiff = runs.filter(r => !r.out), varDiff = runs.filter(r => !r.vars), workDiff = runs.filter(r => !r.work), endDiff = runs.filter(r => !r.end);
-  box.append(el('p', 'verdict ' + (outDiff.length ? 'no' : 'ok'), outDiff.length ? `The outputs differ for ${list(outDiff)}.` : `The outputs match on ${runs.length === 1 ? 'this run' : 'all ' + runs.length + ' runs'}.`));
-  const facts = el('ul', 'small');
-  [['Variables left at the end', varDiff], ['Amount of looping (condition checks and body runs)', workDiff], ['How the run ended', endDiff]].forEach(([name, d]) => facts.append(el('li', null, d.length ? `${name}: different for ${list(d)}.` : `${name}: the same.`)));
-  box.append(facts);
-  box.append(el('p', 'small', outDiff.length || endDiff.length ? 'A single difference in the results proves the two loops are not equivalent.' : 'Matching on the values tried is evidence, not proof: two loops can agree on every value you pick and still differ on one you did not. Try the boundary values, such as 0 and negative numbers.'));
+  const done = runs.filter(r => !r.inconclusive), open = runs.filter(r => r.inconclusive);
+  const outDiff = done.filter(r => !r.out), varDiff = done.filter(r => !r.vars), workDiff = done.filter(r => !r.work), endDiff = done.filter(r => !r.end);
+  if (!done.length) box.append(el('p', 'verdict', 'Inconclusive: no run finished within the tool\'s limit, so there is nothing to compare.'));
+  else box.append(el('p', 'verdict ' + (outDiff.length ? 'no' : 'ok'), outDiff.length ? `The outputs differ for ${list(outDiff)}.` : `The outputs match on ${done.length === 1 ? (open.length ? 'the one run that finished' : 'this run') : (open.length ? done.length + ' runs that finished' : 'all ' + done.length + ' runs')}.`));
+  if (open.length) box.append(el('p', 'small', `Inconclusive for ${list(open)}: at least one loop did not finish within the tool's limit (${open.length ? '200,000 operations' : ''}). It might be an endless loop or just a very long one, and the tool cannot tell which, so these runs are left out of the comparison.`));
+  if (done.length) {
+    const facts = el('ul', 'small');
+    [['Variables left at the end', varDiff], ['Amount of looping (condition checks and body runs)', workDiff], ['How the run ended', endDiff]].forEach(([name, d]) => facts.append(el('li', null, d.length ? `${name}: different for ${list(d)}.` : `${name}: the same.`)));
+    box.append(facts);
+    box.append(el('p', 'small', outDiff.length || endDiff.length ? 'A single difference in the results proves the two loops are not equivalent.' : 'Matching on the values tried is evidence, not proof: two loops can agree on every value you pick and still differ on one you did not. Try the boundary values, such as 0 and negative numbers.'));
+  }
   cmpPick = Math.min(cmpPick, runs.length - 1);
   if (runs.length > 1) {
     const t = el('table', 'cmp'), h = el('tr');
@@ -2518,7 +2540,8 @@ function renderCompare() {
     runs.forEach((r, k) => {
       const tr = el('tr', k === cmpPick ? 'pick' : '');
       const td = el('td'), b = el('button', 'link', label(r)); b.type = 'button'; b.addEventListener('click', () => { cmpPick = k; renderCompare(); }); td.append(b); tr.append(td);
-      [r.out, r.vars, r.work, r.end].forEach(same => tr.append(el('td', same ? 'same' : 'diff', same ? 'same' : 'different')));
+      if (r.inconclusive) { const t2 = el('td', null, 'inconclusive'); t2.colSpan = 4; tr.append(t2); }
+      else [r.out, r.vars, r.work, r.end].forEach(same => tr.append(el('td', same ? 'same' : 'diff', same ? 'same' : 'different')));
       t.append(tr);
     });
     box.append(el('div', 'colhead', 'Every value tried (select one to see the details)'), wrapTable(t));
@@ -2526,12 +2549,13 @@ function renderCompare() {
   const r = runs[cmpPick], d = el('table', 'cmp'), hd = el('tr');
   ['', 'Loop A', 'Loop B'].forEach(x => hd.append(el('th', null, x)));
   d.append(hd);
-  const row = (name, a, b, same) => { const tr = el('tr'); tr.append(el('th', null, name), el('td', same ? 'same' : 'diff', a), el('td', same ? 'same' : 'diff', b)); d.append(tr); };
-  const work = x => x.checks === null ? '—' : `${x.checks} condition check${x.checks === 1 ? '' : 's'}, ${x.iterations} body run${x.iterations === 1 ? '' : 's'}`;
-  row('Output', cmpOut(r.A.out), cmpOut(r.B.out), r.out);
-  row('Variables at the end', r.A.vars, r.B.vars, r.vars);
-  row('Looping', work(r.A), work(r.B), r.work);
-  row('How it ended', r.A.end, r.B.end, r.end);
+  const row = (name, a, b, same) => { const tr = el('tr'), c = same === null ? '' : same ? 'same' : 'diff'; tr.append(el('th', null, name), el('td', c, a), el('td', c, b)); d.append(tr); };
+  const work = x => x.inconclusive ? 'unknown (did not finish)' : `${x.checks} condition check${x.checks === 1 ? '' : 's'}, ${x.iterations} body run${x.iterations === 1 ? '' : 's'}`;
+  const inc = r.inconclusive;
+  row('Output', cmpOut(r.A.out) + (r.A.inconclusive ? '\n(partial: the run stopped)' : ''), cmpOut(r.B.out) + (r.B.inconclusive ? '\n(partial: the run stopped)' : ''), inc ? null : r.out);
+  row('Variables at the end', r.A.inconclusive ? 'unknown' : r.A.vars, r.B.inconclusive ? 'unknown' : r.B.vars, inc ? null : r.vars);
+  row('Looping', work(r.A), work(r.B), inc ? null : r.work);
+  row('How it ended', r.A.end, r.B.end, inc ? null : r.end);
   box.append(el('div', 'colhead', `Details for ${label(r)}`), wrapTable(d));
 }
 function setCompare(p) {

@@ -16,3 +16,9 @@ export function probeOf(MJ, src) {
   if (!body) return null;
   return 'int visits = 0;\n' + src.slice(0, body.pos + 1) + ' visits++;' + src.slice(body.pos + 1) + '\nSystem.out.println("visits=" + visits);';
 }
+// Long runs, past the step cap of the saved animation: their totals must still be right, so Java runs them too
+// (with the same body-run counter probe).
+export const LONG_PROGRAMS = [
+  'int s = 0;\nfor (int i = 0; i < 9999; i++) {\n    s++;\n}\nSystem.out.println(s);',
+  'int s = 0;\nint i = 0;\nwhile (i < 5000) {\n    s += 2;\n    i++;\n}\nSystem.out.println(s);',
+];
