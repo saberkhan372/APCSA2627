@@ -238,6 +238,22 @@ table.trace caption.key { caption-side: bottom; text-align: left; padding-top: 4
 .gnote { font-size: 14px; margin-top: 6px; }
 .toolbar2 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
 .qstate { font-size: 15px; background: var(--soft); border-radius: 8px; padding: 8px 12px; margin: 6px 0; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.seg button { appearance: none; font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 3px; padding: 6px 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.cmpgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 760px) { .cmpgrid { grid-template-columns: 1fr; } }
+textarea.code { font: 14px/1.5 var(--mono); min-height: 8em; white-space: pre; }
+table.cmp { border-collapse: collapse; font: 13px var(--mono); margin-top: 8px; width: 100%; }
+table.cmp th, table.cmp td { border: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; white-space: pre-wrap; }
+table.cmp th { font: 600 12px var(--sans); color: var(--muted); background: var(--soft); }
+table.cmp td.diff { background: var(--diff-bg); color: var(--diff-ink); font-weight: 700; }
+table.cmp td.same { color: var(--same-ink); }
+table.cmp tr.pick td { background: var(--accent-soft); }
+table.cmp button.link { appearance: none; border: 0; background: none; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
+.verdict { font-weight: 700; margin: 8px 0 2px; }
+.verdict.ok { color: var(--same-ink); } .verdict.no { color: var(--diff-ink); }
+.tablewrap { overflow-x: auto; max-width: 100%; }
 </style>
 </head>
 <body>
@@ -268,6 +284,8 @@ table.trace caption.key { caption-side: bottom; text-align: left; padding-top: 4
 
   <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
     <div class="panel">
+      <div class="seg" id="compare" role="group" aria-label="Explore"><button type="button" id="m-one" aria-pressed="true">One loop</button><button type="button" id="m-cmp" aria-pressed="false">Compare two loops</button></div>
+      <div id="one-mode">
       <label class="field">Program <span class="hint">(<code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>, arrays; <code>for</code>, <code>while</code>, enhanced <code>for</code>, <code>if</code>/<code>else</code>; <code>System.out.println</code>)</span>
         <textarea class="tui-codein" id="e-code" spellcheck="false"></textarea>
       </label>
@@ -275,6 +293,18 @@ table.trace caption.key { caption-side: bottom; text-align: left; padding-top: 4
       <div class="presets" id="e-presets"></div>
       <div class="toolbar2"><button class="btn" type="button" id="e-convert">Show the equivalent while loop</button><span class="small" id="e-convnote"></span></div>
       <div id="e-view"></div>
+      </div>
+      <div id="cmp-mode" class="hidden">
+        <p class="small" style="margin-top:0">Run two versions from the same starting point and compare what they print, what their variables hold at the end, how much looping they do, and how they end. If the setup declares <code>int n = …;</code>, both are run for each value of <code>n</code> you list.</p>
+        <div class="small">Try:</div><div class="presets" id="c-presets"></div>
+        <label class="field" style="margin-top:10px">Shared setup <span class="hint">(runs before each loop)</span><textarea class="code" id="c-setup" spellcheck="false" style="min-height:4em"></textarea></label>
+        <div class="cmpgrid">
+          <label class="field">Loop A<textarea class="code" id="c-a" spellcheck="false"></textarea></label>
+          <label class="field">Loop B<textarea class="code" id="c-b" spellcheck="false"></textarea></label>
+        </div>
+        <label class="field">Values of n to try <span class="hint">(whole numbers separated by commas, up to 8)</span><input type="text" class="strin" id="c-vals" autocomplete="off" spellcheck="false" style="max-width:20em"></label>
+        <div id="c-view"></div>
+      </div>
     </div>
   </section>
 
@@ -2190,6 +2220,42 @@ function bodyCount(run, loopIndex = 0) {
   const L = MJ.loopsOf(run.prog)[loopIndex];
   return run.steps.filter(s => s.loop === L.id && (s.kind === 'foreach' || (s.kind === 'cond' && s.value))).length;
 }
+// Two programs run from the same setup and compared on what they did: output, the variables left at the
+// end, how much looping happened, and how the run ended.
+const cmpValue = (v, type, heap) => v === null ? 'null' : v && typeof v === 'object' && 'ref' in v ? '[' + ((heap[v.ref] || { values: [] }).values.join(', ')) + ']' : type === 'double' ? javaDouble(v) : typeof v === 'string' ? JSON.stringify(v) : String(v);
+function summarizeRun(src) {
+  const run = MJ.run(src);
+  if (run.compileError) return { problem: 'does not compile: ' + run.compileError };
+  if (run.unsupported) return { problem: 'is not supported here: ' + run.unsupported };
+  const last = run.steps[run.steps.length - 1], loopSteps = run.steps.filter(s => s.kind === 'cond' && s.loop !== undefined);
+  const endless = !!run.limit;
+  return {
+    out: run.out,
+    vars: last ? last.frames[0].vars.map(v => `${v.name} = ${cmpValue(v.v, v.type, last.heap)}`).join('; ') || '(none)' : '(none)',
+    checks: endless ? null : loopSteps.length,
+    iterations: endless ? null : run.steps.filter(s => s.kind === 'foreach' || (s.kind === 'cond' && s.loop !== undefined && s.value)).length,
+    end: endless ? 'never stops (the tool gave up)' : run.crashed ? `throws ${run.crashed}` : 'finishes normally',
+  };
+}
+const N_DECL = /\bint\s+n\s*=\s*-?\d+\s*;/;
+function parseValues(text) {
+  const parts = text.split(',').map(x => x.trim()).filter(Boolean);
+  if (!parts.length) return { error: 'List at least one value of n.' };
+  if (parts.length > 8) return { error: 'Try at most 8 values.' };
+  if (!parts.every(x => /^[−-]?\d{1,4}$/.test(x))) return { error: 'The values of n must be whole numbers with at most four digits: a loop over a bigger n would hit the tool\'s step limit and look endless.' };
+  return { values: parts.map(x => parseInt(x.replace('−', '-'), 10)) };
+}
+function compareLoops(setup, a, b, values) {
+  const hasN = N_DECL.test(setup);
+  const runs = (hasN ? values : [null]).map(v => {
+    const s = v === null ? setup : setup.replace(N_DECL, `int n = ${v};`);
+    const A = summarizeRun(`${s}\n${a}`), B = summarizeRun(`${s}\n${b}`);
+    const row = { n: v, A, B };
+    if (!A.problem && !B.problem) Object.assign(row, { out: A.out === B.out, vars: A.vars === B.vars, work: A.checks === B.checks && A.iterations === B.iterations, end: A.end === B.end });
+    return row;
+  });
+  return { hasN, runs, problem: runs.find(r => r.A.problem || r.B.problem) || null };
+}
 // ENGINE END
 
 // DATA START
@@ -2230,6 +2296,13 @@ const PRESETS = [
   { label: 'Rectangle (nested)', code: PREDICT[11].code },
   { label: 'Triangle (nested)', code: PREDICT[12].code },
   { label: 'Array total', code: 'int[] scores = {8, 5, 9, 6};\nint total = 0;\nfor (int s : scores) {\n    total += s;\n}\nSystem.out.println(total);' },
+];
+const COMPARE_PRESETS = [
+  { label: 'for vs while', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'int i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '0, 1, 5, 6', note: 'The same output and the same looping. The difference: i still exists after the while loop, because it was declared outside it.' },
+  { label: 'Up vs down', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'for (int i = n; i >= 1; i--) {\n    total += i;\n}\nSystem.out.println(total);', values: '0, 1, 5, 6', note: 'Different loops, same results: the values are added in a different order, which does not change a sum.' },
+  { label: 'Shifted start and bound', setup: 'int n = 5;\nint total = 0;', a: 'int i = 0;\nwhile (i < n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', b: 'int i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '1, 3, 5', note: 'The same number of passes, but A adds 0 through n − 1 and B adds 1 through n. Different output, same amount of looping.' },
+  { label: 'First item outside the loop', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'total = 1;\nfor (int i = 2; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', values: '1, 2, 5, 0', note: 'They agree for 1, 2 and 5, so matching runs look convincing. Then n = 0 breaks it: B adds the 1 before checking anything. One different result is proof that two loops are not equivalent.' },
+  { label: 'Never ends for some n', setup: 'int n = 3;\nint total = 0;', a: 'for (int i = 0; i < n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'int i = 0;\nwhile (i != n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '3, 0, -2', note: 'i < n and i != n agree while n is 0 or more. For a negative n, i never equals n, so B counts up forever.' },
 ];
 // DATA END
 
@@ -2409,6 +2482,66 @@ ecode.addEventListener('input', exploreUpdate);
 exploreUpdate();
 const params = new URLSearchParams(location.search);
 if (params.has('code')) { ecode.value = params.get('code'); exploreUpdate(); select('explore'); }
+
+/* ---------- Compare two loops ---------- */
+function exploreMode(m) {
+  $('m-one').setAttribute('aria-pressed', m === 'one'); $('m-cmp').setAttribute('aria-pressed', m === 'cmp');
+  $('one-mode').classList.toggle('hidden', m !== 'one'); $('cmp-mode').classList.toggle('hidden', m !== 'cmp');
+}
+$('m-one').addEventListener('click', () => exploreMode('one')); $('m-cmp').addEventListener('click', () => exploreMode('cmp'));
+let cmpPick = 0, cmpNote = '';
+const wrapTable = t => { const w = el('div', 'tablewrap'); w.append(t); return w; };
+const cmpOut = t => TUI.visible(t.replace(/\n$/, '')) || '(nothing)';
+function renderCompare() {
+  const box = $('c-view'); box.textContent = '';
+  const setup = $('c-setup').value, hasN = N_DECL.test(setup), pv = parseValues($('c-vals').value);
+  if (hasN && pv.error) { box.append(el('div', 'tui-err', pv.error)); return; }
+  const c = compareLoops(setup, $('c-a').value, $('c-b').value, hasN ? pv.values : []);
+  if (c.problem) {
+    const r = c.problem, which = r.A.problem ? ['Loop A', r.A.problem] : ['Loop B', r.B.problem];
+    box.append(el('div', 'tui-err', `${which[0]} ${which[1]}`)); return;
+  }
+  if (cmpNote) box.append(el('div', 'qstate', cmpNote));
+  const runs = c.runs, label = r => r.n === null ? 'this run' : 'n = ' + r.n;
+  const list = rs => rs.map(label).join(', ');
+  const outDiff = runs.filter(r => !r.out), varDiff = runs.filter(r => !r.vars), workDiff = runs.filter(r => !r.work), endDiff = runs.filter(r => !r.end);
+  box.append(el('p', 'verdict ' + (outDiff.length ? 'no' : 'ok'), outDiff.length ? `The outputs differ for ${list(outDiff)}.` : `The outputs match on ${runs.length === 1 ? 'this run' : 'all ' + runs.length + ' runs'}.`));
+  const facts = el('ul', 'small');
+  [['Variables left at the end', varDiff], ['Amount of looping (condition checks and body runs)', workDiff], ['How the run ended', endDiff]].forEach(([name, d]) => facts.append(el('li', null, d.length ? `${name}: different for ${list(d)}.` : `${name}: the same.`)));
+  box.append(facts);
+  box.append(el('p', 'small', outDiff.length || endDiff.length ? 'A single difference in the results proves the two loops are not equivalent.' : 'Matching on the values tried is evidence, not proof: two loops can agree on every value you pick and still differ on one you did not. Try the boundary values, such as 0 and negative numbers.'));
+  cmpPick = Math.min(cmpPick, runs.length - 1);
+  if (runs.length > 1) {
+    const t = el('table', 'cmp'), h = el('tr');
+    ['Value', 'Output', 'Variables at the end', 'Looping', 'Ending'].forEach(x => h.append(el('th', null, x)));
+    t.append(h);
+    runs.forEach((r, k) => {
+      const tr = el('tr', k === cmpPick ? 'pick' : '');
+      const td = el('td'), b = el('button', 'link', label(r)); b.type = 'button'; b.addEventListener('click', () => { cmpPick = k; renderCompare(); }); td.append(b); tr.append(td);
+      [r.out, r.vars, r.work, r.end].forEach(same => tr.append(el('td', same ? 'same' : 'diff', same ? 'same' : 'different')));
+      t.append(tr);
+    });
+    box.append(el('div', 'colhead', 'Every value tried (select one to see the details)'), wrapTable(t));
+  }
+  const r = runs[cmpPick], d = el('table', 'cmp'), hd = el('tr');
+  ['', 'Loop A', 'Loop B'].forEach(x => hd.append(el('th', null, x)));
+  d.append(hd);
+  const row = (name, a, b, same) => { const tr = el('tr'); tr.append(el('th', null, name), el('td', same ? 'same' : 'diff', a), el('td', same ? 'same' : 'diff', b)); d.append(tr); };
+  const work = x => x.checks === null ? '—' : `${x.checks} condition check${x.checks === 1 ? '' : 's'}, ${x.iterations} body run${x.iterations === 1 ? '' : 's'}`;
+  row('Output', cmpOut(r.A.out), cmpOut(r.B.out), r.out);
+  row('Variables at the end', r.A.vars, r.B.vars, r.vars);
+  row('Looping', work(r.A), work(r.B), r.work);
+  row('How it ended', r.A.end, r.B.end, r.end);
+  box.append(el('div', 'colhead', `Details for ${label(r)}`), wrapTable(d));
+}
+function setCompare(p) {
+  $('c-setup').value = p.setup; $('c-a').value = p.a; $('c-b').value = p.b; $('c-vals').value = p.values; cmpPick = 0; cmpNote = p.note || '';
+  renderCompare();
+}
+COMPARE_PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => setCompare(p)); $('c-presets').append(c); });
+['c-setup', 'c-a', 'c-b', 'c-vals'].forEach(id => $(id).addEventListener('input', () => { cmpNote = ''; renderCompare(); }));
+setCompare(COMPARE_PRESETS[0]);
+if (location.hash === '#compare') { exploreMode('cmp'); select('explore'); }
 </script>
 </body>
 </html>

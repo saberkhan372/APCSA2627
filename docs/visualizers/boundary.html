@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Loop Tracer</title>
+<title>Boundary-Case Tester</title>
 <style>
 /* Palette and chrome match the course site (web/site.css). */
 :root {
@@ -216,43 +216,72 @@ details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
   .col-current .tile { transform: none; }
 }
-/* ---- Loop Tracer ---- */
+/* ---- Boolean Explorer ---- */
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+.seg button { appearance: none; font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 3px; padding: 6px 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+input.condin { font: 17px var(--mono); }
+textarea.declin { font: 15px var(--mono); min-height: 4em; }
+.tree { margin-top: 14px; overflow-x: auto; padding: 4px 2px 8px; }
+.bx { display: inline-flex; align-items: stretch; gap: 6px; border: 2px solid var(--line); border-radius: 8px; padding: 6px; vertical-align: top; }
+.bx.and, .bx.or { background: var(--panel); }
+.bx .opx { align-self: center; font: 700 16px var(--mono); color: var(--accent); padding: 0 2px; }
+.leaf { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; border: 1.5px solid var(--line); border-radius: 6px; padding: 5px 8px; font: 15px var(--mono); background: var(--panel); vertical-align: top; white-space: pre; }
+.chip { font: 700 12px var(--mono); border-radius: 999px; padding: 1px 8px; }
+.chip.t { background: var(--same-bg); color: var(--same-ink); border: 1px solid var(--same-line); }
+.chip.f { background: var(--diff-bg); color: var(--diff-ink); border: 1px solid var(--diff-line); }
+.chip.n { background: var(--soft); color: var(--muted); border: 1px solid var(--line); }
+.chip.x { background: var(--diff-line); color: #fff; }
+.skipped { opacity: .45; border-style: dashed !important; }
+.threw { border-color: var(--diff-line) !important; box-shadow: 0 0 0 3px var(--diff-bg); }
+.cur { box-shadow: 0 0 0 3px var(--accent); }
+.valrow { display: flex; align-items: center; justify-content: flex-end; }
+.valrow .chip, .leaf .chip { white-space: nowrap; }
+.equiv { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+table.tt { border-collapse: collapse; font: 13px var(--mono); margin-top: 6px; }
+table.tt th, table.tt td { border: 1px solid var(--line); padding: 3px 8px; text-align: center; }
+table.tt th { background: var(--soft); font: 600 12px var(--sans); color: var(--muted); }
+table.tt tr.bad td { background: var(--diff-bg); }
+.verdict { font-weight: 700; margin-top: 6px; }
+.verdict.ok { color: var(--same-ink); } .verdict.no { color: var(--diff-ink); }
 .runner-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 12px; }
 @media (max-width: 820px) { .runner-grid { grid-template-columns: minmax(0, 1fr); } }
 .colhead { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 12px 0 6px; }
-.tracewrap { overflow-x: auto; }
-table.trace { border-collapse: collapse; font: 13px var(--mono); min-width: 100%; }
-table.trace th, table.trace td { border: 1px solid var(--line); padding: 3px 7px; text-align: center; white-space: nowrap; }
-table.trace th { font: 600 12px var(--sans); color: var(--muted); background: var(--soft); }
-table.trace tr.now td { background: var(--accent-soft); font-weight: 700; }
-table.trace td.f { color: var(--diff-ink); font-weight: 700; }
-table.trace td.t { color: var(--same-ink); }
-table.trace td.na { color: var(--muted); }
-table.trace caption.key { caption-side: bottom; text-align: left; padding-top: 4px; font-family: var(--sans); }
-.tracesel select { font: 15px var(--sans); padding: 5px 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--ink); }
-.grid2 { display: grid; gap: 3px; margin-top: 4px; overflow-x: auto; }
-.gcell { min-width: 30px; height: 28px; border: 1.5px dashed var(--line); border-radius: 4px; font: 12px var(--mono); display: flex; align-items: center; justify-content: center; }
-.gcell.on { border-style: solid; border-color: var(--same-line); background: var(--same-bg); color: var(--same-ink); }
-.gcell.cur { box-shadow: 0 0 0 3px var(--accent); }
-.grow { font: 600 12px var(--mono); color: var(--muted); display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; white-space: nowrap; }
-.gnote { font-size: 14px; margin-top: 6px; }
-.toolbar2 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
-.qstate { font-size: 15px; background: var(--soft); border-radius: 8px; padding: 8px 12px; margin: 6px 0; }
-.seg { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
-.seg button { appearance: none; font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 3px; padding: 6px 12px; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.reindent { font: 14px/1.6 var(--mono); background: var(--soft); border-radius: 8px; padding: 10px 14px; white-space: pre; overflow-x: auto; }
+.entry { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 10px; margin: 0 0 18px; }
+.entry a { display: block; text-decoration: none; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+.entry a:hover, .entry a:focus-visible { border-color: var(--accent); }
+.entry a[aria-current="true"] { border-color: var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+.entry b { display: block; color: var(--accent); }
+.entry span { font-size: 14px; color: var(--muted); }
+.bmap { display: grid; gap: 4px; }
+.brow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 4px 8px; font: 14px var(--mono); }
+.brow .btxt { white-space: pre-wrap; }
+.brow.cur { box-shadow: 0 0 0 3px var(--accent-soft); border-color: var(--accent); }
+.brow.never { border-style: dashed; background: var(--soft); }
+.brow .why { flex-basis: 100%; font: 14px var(--sans); color: var(--muted); }
+.brow .chip.w { background: var(--extra-bg); color: var(--extra-ink); border: 1px solid var(--extra-line); }
+.bkey { font-size: 14px; color: var(--muted); margin: 6px 0 0; }
+.specbox { background: var(--soft); border-left: 4px solid var(--accent); border-radius: 4px; padding: 10px 14px; margin: 10px 0; }
+.specbox b { color: var(--accent); }
+.inrow { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 8px; }
+.inrow label.field { margin-bottom: 0; }
+.inrow input.num { width: 7em; }
+select.pick { font: 16px var(--mono); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); margin-top: 4px; display: block; }
+.stephead { font: 700 15px var(--sans); margin: 18px 0 6px; }
+.stephead .n { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--accent); color: var(--accent-ink); margin-right: 6px; font-size: 13px; }
+.setchips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.setchips .chip { cursor: default; font: 600 13px var(--mono); }
+.setchips .chip.hit { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
+table.tt td.l, table.tt th.l { text-align: left; }
+table.tt tr.hit td { background: var(--diff-bg); }
+.cands { display: grid; gap: 6px; margin: 8px 0; }
+.cand { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+.cand pre { margin: 0; font: 14px/1.5 var(--mono); white-space: pre-wrap; }
+.mini { width: 6em; display: inline-block; margin: 0 6px; font: 15px var(--mono); }
 .cmpgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 760px) { .cmpgrid { grid-template-columns: 1fr; } }
-textarea.code { font: 14px/1.5 var(--mono); min-height: 8em; white-space: pre; }
-table.cmp { border-collapse: collapse; font: 13px var(--mono); margin-top: 8px; width: 100%; }
-table.cmp th, table.cmp td { border: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; white-space: pre-wrap; }
-table.cmp th { font: 600 12px var(--sans); color: var(--muted); background: var(--soft); }
-table.cmp td.diff { background: var(--diff-bg); color: var(--diff-ink); font-weight: 700; }
-table.cmp td.same { color: var(--same-ink); }
-table.cmp tr.pick td { background: var(--accent-soft); }
-table.cmp button.link { appearance: none; border: 0; background: none; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
-.verdict { font-weight: 700; margin: 8px 0 2px; }
-.verdict.ok { color: var(--same-ink); } .verdict.no { color: var(--diff-ink); }
+textarea.code { font: 14px/1.5 var(--mono); min-height: 9em; white-space: pre; }
 .tablewrap { overflow-x: auto; max-width: 100%; }
 </style>
 </head>
@@ -261,61 +290,61 @@ table.cmp button.link { appearance: none; border: 0; background: none; color: va
 <header class="masthead"><div class="wrap"><a href="../index.html" class="logo">AP CS A 2026–27</a><nav aria-label="Primary"><a href="../index.html">Schedule</a><a href="../units.html">Units</a><a href="../materials.html">Materials</a><a href="../teaching.html">Notes &amp; slides</a><a href="../study/index.html">Study</a><a href="index.html" aria-current="page">Visualizers</a><a href="../setup.html">Setup</a></nav></div></header>
 <main id="main" class="wrap" tabindex="-1">
   <header class="page-heading">
-    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 2 · Iteration</p>
-    <h1>Loop Tracer</h1>
-    <p class="lede">A loop repeats four parts in a fixed order: <b>initialize</b> once, then <b>check the condition</b>, run the <b>body</b>, <b>update</b>, and check again. Step through it with a trace table, and see nested loops as a grid.</p>
+    <p class="kicker"><a href="index.html">Visualizers</a> · Unit 2 · Selection and iteration</p>
+    <h1>Boundary-Case Tester</h1>
+    <p class="lede">Testing is not trying random numbers. A bug usually shows up at a boundary: the value where a comparison changes sides, or where a loop starts or stops. Choose the input that exposes each bug, predict what the buggy code returns, then repair it.</p>
   </header>
 
   <div class="tabs" role="tablist" aria-label="Mode">
-    <button class="tab" role="tab" id="tab-predict" aria-controls="mode-predict" aria-selected="true">Predict</button>
+    <button class="tab" role="tab" id="tab-find" aria-controls="mode-find" aria-selected="true">Find the bug</button>
     <button class="tab" role="tab" id="tab-explore" aria-controls="mode-explore" aria-selected="false" tabindex="-1">Explore</button>
     <button class="tab" role="tab" id="tab-transfer" aria-controls="mode-transfer" aria-selected="false" tabindex="-1">Transfer</button>
   </div>
 
-  <section id="mode-predict" role="tabpanel" aria-labelledby="tab-predict">
+  <section id="mode-find" role="tabpanel" aria-labelledby="tab-find">
     <div class="panel">
-      <div class="row"><span class="qmeta" id="p-count"></span><span class="spacer"></span><button class="btn" id="p-prev">← Previous</button><button class="btn" id="p-next">Next question →</button></div>
-      <p class="qprompt" id="p-ask"></p>
-      <div class="tui-codebox" id="p-code" aria-label="Java code"></div>
-      <form id="p-form" novalidate></form>
-      <div id="p-after" class="hidden"><div id="p-feedback" class="feedback" role="status"></div><div class="note" id="p-tests"></div><div id="p-view"></div></div>
+      <div class="row"><span class="qmeta" id="f-count"></span><span class="spacer"></span><button class="btn" id="f-prev">← Previous</button><button class="btn" id="f-next">Next item →</button></div>
+      <h2 id="f-title" style="margin:.6rem 0 0;font-size:1.25rem"></h2>
+      <div class="specbox" id="f-spec"></div>
+      <ol class="tui-code" id="f-code" aria-label="The method under test"></ol>
+
+      <div class="stephead"><span class="n">1</span>Choose an input you think exposes the bug</div>
+      <p class="small" style="margin-top:0">Predict what this code returns <em>before</em> running it. An input exposes the bug only if the code and the specification disagree on it.</p>
+      <form id="f-form" novalidate></form>
+      <div id="f-log" aria-live="polite"></div>
+
+      <div id="f-found" class="hidden">
+        <div class="stephead"><span class="n">2</span>Why those inputs?</div>
+        <div id="f-set"></div>
+        <div class="stephead"><span class="n">3</span>Repair it</div>
+        <form id="r-form" novalidate></form>
+        <div id="r-feedback" role="status"></div>
+      </div>
     </div>
   </section>
 
   <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
     <div class="panel">
-      <div class="seg" id="compare" role="group" aria-label="Explore"><button type="button" id="m-one" aria-pressed="true">One loop</button><button type="button" id="m-cmp" aria-pressed="false">Compare two loops</button></div>
-      <div id="one-mode">
-      <label class="field">Program <span class="hint">(<code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>, arrays; <code>for</code>, <code>while</code>, enhanced <code>for</code>, <code>if</code>/<code>else</code>; <code>System.out.println</code>)</span>
-        <textarea class="tui-codein" id="e-code" spellcheck="false"></textarea>
-      </label>
-      <div class="small">Try:</div>
-      <div class="presets" id="e-presets"></div>
-      <div class="toolbar2"><button class="btn" type="button" id="e-convert">Show the equivalent while loop</button><span class="small" id="e-convnote"></span></div>
-      <div id="e-view"></div>
+      <p class="small" style="margin-top:0">Put two versions of a method side by side, for example your attempt and a trusted one. The tool calls both on every input in a range and lists the inputs where they disagree. Parameters must be <code>int</code>.</p>
+      <div class="small">Try:</div><div class="presets" id="x-presets"></div>
+      <div class="cmpgrid" style="margin-top:10px">
+        <label class="field">Method A <span class="hint">(the one being tested)</span><textarea class="code" id="x-a" spellcheck="false"></textarea></label>
+        <label class="field">Method B <span class="hint">(the specification: same name and parameters)</span><textarea class="code" id="x-b" spellcheck="false"></textarea></label>
       </div>
-      <div id="cmp-mode" class="hidden">
-        <p class="small" style="margin-top:0">Run two versions from the same starting point and compare what they print, what their variables hold at the end, how much looping they do, and how they end. If the setup declares <code>int n = …;</code>, both are run for each value of <code>n</code> you list.</p>
-        <div class="small">Try:</div><div class="presets" id="c-presets"></div>
-        <label class="field" style="margin-top:10px">Shared setup <span class="hint">(runs before each loop)</span><textarea class="code" id="c-setup" spellcheck="false" style="min-height:4em"></textarea></label>
-        <div class="cmpgrid">
-          <label class="field">Loop A<textarea class="code" id="c-a" spellcheck="false"></textarea></label>
-          <label class="field">Loop B<textarea class="code" id="c-b" spellcheck="false"></textarea></label>
-        </div>
-        <label class="field">Values of n to try <span class="hint">(whole numbers separated by commas, up to 8)</span><input type="text" class="strin" id="c-vals" autocomplete="off" spellcheck="false" style="max-width:20em"></label>
-        <div id="c-view"></div>
-      </div>
+      <div id="x-ranges" class="inrow"></div>
+      <div id="x-view"></div>
     </div>
   </section>
 
   <section id="mode-transfer" role="tabpanel" aria-labelledby="tab-transfer" class="hidden">
     <div class="panel">
-      <p class="small" style="margin-top:0">No tracer here. Make your own trace table on paper, then check.</p>
-      <div class="row"><span class="qmeta" id="t-count"></span><span class="spacer"></span><button class="btn" id="t-prev">← Previous</button><button class="btn" id="t-next">Next question →</button></div>
-      <p class="qprompt" id="t-ask"></p>
-      <div class="tui-codebox" id="t-code" aria-label="Java code"></div>
+      <p class="small" style="margin-top:0">Nothing runs until you check. Work out the input on paper first.</p>
+      <div class="row"><span class="qmeta" id="t-count"></span><span class="spacer"></span><button class="btn" id="t-prev">← Previous</button><button class="btn" id="t-next">Next item →</button></div>
+      <h2 id="t-title" style="margin:.6rem 0 0;font-size:1.25rem"></h2>
+      <div class="specbox" id="t-spec"></div>
+      <div class="tui-codebox" id="t-code" aria-label="The method under test"></div>
       <form id="t-form" novalidate></form>
-      <div id="t-after" class="hidden"><div id="t-feedback" class="feedback" role="status"></div><div class="note" id="t-model"></div></div>
+      <div id="t-feedback" role="status"></div>
     </div>
   </section>
 </main>
@@ -768,7 +797,8 @@ function runJava(declSrc, stmtSrc) {
   return { ok: true, steps, stmt, env, type, value, label: `${type}:${asText(type, value)}` };
 }
 // EXPR ENGINE END
-// MINIJAVA START (copied from lib/minijava.js by visualizers/tests/sync-expr-engine.mjs; do not edit here)
+
+// MINIJAVA START
 // A small Java interpreter for teaching traces. It follows the JLS for the subset it accepts:
 // the whole program is parsed and type-checked first (as javac does), then run one step at a time,
 // recording a snapshot of every step for the visualizers.
@@ -1896,7 +1926,8 @@ const MJ = (function () {
   return { run, label, parse, loopsOf, forToWhile, CompileError, Unsupported };
 })();
 // MINIJAVA END
-// TRACE UI START (copied from lib/trace-ui.js by visualizers/tests/sync-expr-engine.mjs; do not edit here)
+
+// TRACE UI START
 // Shared pieces for the trace visualizers: code panel, stepping controls, variable table, call frames
 // with arrows to objects, console, tabs, and Predict/Transfer question sets. Styles use each page's
 // color tokens (--ink, --line, --accent and so on).
@@ -2205,343 +2236,369 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
 // TRACE UI END
 
 // ENGINE START
-// Loop-specific reading of an interpreter run: which loop a step belongs to, and its phase.
-const PHASES = ['The loop body runs', 'The update runs', 'The condition is checked', 'The first statement after the loop runs'];
-function lineOfPos(src, pos) { return src.slice(0, pos).split('\n').length; }
-function phaseOf(run, src, k, loopIndex = 0) {
-  const loops = MJ.loopsOf(run.prog), L = loops[loopIndex], s = run.steps[k];
-  if (!s) return 3;
-  if (s.phase === 'update' && s.line === L.line) return 1;
-  if (s.kind === 'cond' && s.loop === L.id) return 2;
-  if (s.line > L.line && s.line <= lineOfPos(src, L.endPos)) return 0;
-  return 3;
+// A "method under test" is a static method with int parameters. Each call runs the whole method in the
+// interpreter, so results (including exceptions) follow Java's rules.
+// Bounds that keep every call quick: a loop over a huge input would hit the tool's step limit, and a
+// wide range runs the method many times.
+const MAX_INPUT = 10000, MAX_COMBOS = 800;
+const values = ([lo, hi, step = 1]) => { const v = []; for (let x = lo; x <= hi; x += step) v.push(x); return v; };
+// Every combination of the ranges, in order (the first parameter changes slowest).
+const inputGrid = ranges => ranges.map(values).reduce((acc, vs) => acc.flatMap(a => vs.map(v => [...a, v])), [[]]);
+function runCall(method, name, args) {
+  const r = MJ.run(`${method}\nSystem.out.println(${name}(${args.join(', ')}));`);
+  if (r.compileError) return 'compile error: ' + r.compileError;
+  if (r.unsupported) return 'not supported here: ' + r.unsupported;
+  if (r.limit) return 'never stops (the tool gave up)';
+  return MJ.label(r).replace(/\n$/, '').replace('|throws:', 'throws ');
 }
-function bodyCount(run, loopIndex = 0) {
-  const L = MJ.loopsOf(run.prog)[loopIndex];
-  return run.steps.filter(s => s.loop === L.id && (s.kind === 'foreach' || (s.kind === 'cond' && s.value))).length;
+// The buggy method with the lines the repair replaces swapped for another text.
+function withFix(item, text) {
+  const lines = item.buggy.slice();
+  lines.splice(item.fix.from, item.fix.to - item.fix.from + 1, ...text.split('\n'));
+  return lines.join('\n');
 }
-// Two programs run from the same setup and compared on what they did: output, the variables left at the
-// end, how much looping happened, and how the run ended.
-const cmpValue = (v, type, heap) => v === null ? 'null' : v && typeof v === 'object' && 'ref' in v ? '[' + ((heap[v.ref] || { values: [] }).values.join(', ')) + ']' : type === 'double' ? javaDouble(v) : typeof v === 'string' ? JSON.stringify(v) : String(v);
-function summarizeRun(src) {
-  const run = MJ.run(src);
-  if (run.compileError) return { problem: 'does not compile: ' + run.compileError };
-  if (run.unsupported) return { problem: 'is not supported here: ' + run.unsupported };
-  const last = run.steps[run.steps.length - 1], loopSteps = run.steps.filter(s => s.kind === 'cond' && s.loop !== undefined);
-  const endless = !!run.limit;
-  return {
-    out: run.out,
-    vars: last ? last.frames[0].vars.map(v => `${v.name} = ${cmpValue(v.v, v.type, last.heap)}`).join('; ') || '(none)' : '(none)',
-    checks: endless ? null : loopSteps.length,
-    iterations: endless ? null : run.steps.filter(s => s.kind === 'foreach' || (s.kind === 'cond' && s.loop !== undefined && s.value)).length,
-    end: endless ? 'never stops (the tool gave up)' : run.crashed ? `throws ${run.crashed}` : 'finishes normally',
-  };
+const buggyText = item => item.buggy.join('\n');
+const specText = item => withFix(item, item.fixes[item.answer]);
+const specCache = new Map();
+function specAt(item, args) {
+  const key = item.id + ':' + args.join(',');
+  if (!specCache.has(key)) specCache.set(key, runCall(specText(item), item.name, args));
+  return specCache.get(key);
 }
-const N_DECL = /\bint\s+n\s*=\s*-?\d+\s*;/;
-function parseValues(text) {
-  const parts = text.split(',').map(x => x.trim()).filter(Boolean);
-  if (!parts.length) return { error: 'List at least one value of n.' };
-  if (parts.length > 8) return { error: 'Try at most 8 values.' };
-  if (!parts.every(x => /^[−-]?\d{1,4}$/.test(x))) return { error: 'The values of n must be whole numbers with at most four digits: a loop over a bigger n would hit the tool\'s step limit and look endless.' };
-  return { values: parts.map(x => parseInt(x.replace('−', '-'), 10)) };
-}
-function compareLoops(setup, a, b, values) {
-  const hasN = N_DECL.test(setup);
-  const runs = (hasN ? values : [null]).map(v => {
-    const s = v === null ? setup : setup.replace(N_DECL, `int n = ${v};`);
-    const A = summarizeRun(`${s}\n${a}`), B = summarizeRun(`${s}\n${b}`);
-    const row = { n: v, A, B };
-    if (!A.problem && !B.problem) Object.assign(row, { out: A.out === B.out, vars: A.vars === B.vars, work: A.checks === B.checks && A.iterations === B.iterations, end: A.end === B.end });
-    return row;
-  });
-  return { hasN, runs, problem: runs.find(r => r.A.problem || r.B.problem) || null };
+// The inputs (in the item's range) where a version of the method disagrees with the specification.
+function exposing(item, method) { return inputGrid(item.ranges).filter(a => runCall(method, item.name, a) !== specAt(item, a)); }
+const argText = (item, args) => args.map((a, i) => (item.params.length > 1 ? item.params[i] + ' = ' : '') + a).join(', ');
+// Two methods compared on a range of inputs.
+function compareMethods(a, b, ranges) {
+  const sig = /static\s+(int|boolean|double|String)\s+(\w+)\s*\(([^)]*)\)/.exec(a);
+  if (!sig) return { error: 'Method A needs a header such as: static int name(int x)' };
+  const params = sig[3].trim() ? sig[3].split(',').map(p => p.trim().split(/\s+/)) : [];
+  if (params.some(p => p[0] !== 'int')) return { error: 'Only int parameters are supported here.' };
+  const name = sig[2], sigB = new RegExp(`static\\s+(int|boolean|double|String)\\s+${name}\\s*\\(`).exec(b);
+  if (!sigB) return { error: `Method B must be called ${name} as well, so the same call works on both.` };
+  const rs = params.map((_, i) => ranges[i] || [-5, 15]);
+  if (rs.some(r => !r.every(Number.isInteger) || r[0] > r[1])) return { error: 'Each range needs whole numbers with the smaller one first.' };
+  const total = rs.reduce((n, [lo, hi]) => n * (hi - lo + 1), 1);
+  if (rs.some(r => Math.max(Math.abs(r[0]), Math.abs(r[1])) > MAX_INPUT)) return { error: `Keep every value between −${MAX_INPUT.toLocaleString()} and ${MAX_INPUT.toLocaleString()}: a loop with a bigger input takes too long to run here.` };
+  if (total > MAX_COMBOS) return { error: `That is ${total.toLocaleString()} inputs. Narrow the ranges to ${MAX_COMBOS} or fewer.` };
+  const rows = inputGrid(rs).map(args => { const ra = runCall(a, name, args), rb = runCall(b, name, args); return { args, a: ra, b: rb, same: ra === rb }; });
+  return { name, params: params.map(p => p[1]), rows, diffs: rows.filter(r => !r.same), total };
 }
 // ENGINE END
 
 // DATA START
-const NEXT = PHASES.map(text => ({ text }));
-const PREDICT = [
-  { code: 'int count = 0;\nfor (int i = 0; i < 5; i++) {\n    count++;\n}\nSystem.out.println(count);', ask: 'count', tests: 'The condition is checked six times (i = 0 to 5), but the body runs only when it is true: five times.' },
-  { code: 'int x = 2;\nwhile (x < 100) {\n    x *= 5;\n}\nSystem.out.println(x);', ask: 'output', tests: 'The condition is checked only before each iteration, so x can end well past 100.' },
-  { code: 'for (int i = 1; i <= 10; i += 3) {\n    System.out.print(i + " ");\n}', ask: 'output', tests: 'Count the updates: 1, 4, 7, 10. The next value, 13, fails the condition.' },
-  { code: 'for (int i = 1; i <= 10; i += 3) {\n    System.out.print(i + " ");\n}', ask: 'next', after: 3, state: 'The body has just printed "1 ".', choices: NEXT, tests: 'In a for loop, the update runs after the body and before the next check.' },
-  { code: 'int i = 0;\nint last = 0;\nwhile (i < 4) {\n    last = i;\n    i++;\n}\nSystem.out.println(last + " " + i);', ask: 'output', tests: 'The last value used in the body is not the final value of the loop variable. The loop stops when i reaches 4.' },
-  { code: 'int n = 10;\nwhile (n < 5) {\n    n++;\n}\nSystem.out.println(n);', ask: 'output', tests: 'A false condition on the first check means zero iterations. That is allowed.' },
-  { code: 'int sum = 0;\nfor (int k = 1; k <= 5; k++) {\n    sum += k * k;\n}\nSystem.out.println(sum);', ask: 'output', tests: 'Accumulate: 1 + 4 + 9 + 16 + 25.' },
-  { code: 'int count = 0;\nfor (int j = 10; j > 0; j -= 3) {\n    count++;\n}\nSystem.out.println(count);', ask: 'count', tests: 'j takes 10, 7, 4 and 1. The next value, −2, fails the condition.' },
-  { code: 'int i = 5;\nwhile (i > 0) {\n    i -= 2;\n}\nSystem.out.println(i);', ask: 'next', after: 8, state: 'The condition i > 0 has just been checked with i = −1: false.', choices: NEXT, tests: 'When the condition is false, the loop ends and execution continues with the next statement.' },
-  { code: 'int x = 0;\nwhile (x < 100) {\n    x *= 3;\n}', ask: 'mc', choices: [{ text: 'It stops with x = 100.', match: '#stops100' }, { text: 'It stops with x = 243.', match: '#stops243' }, { text: 'It never stops: an infinite loop.', match: 'limit' }, { text: 'It does not compile.', match: 'compile-error' }], tests: '0 × 3 is still 0, so the condition never becomes false.' },
-  { code: 'String s = "banana";\nint count = 0;\nfor (int i = 0; i < s.length(); i++) {\n    if (s.substring(i, i + 1).equals("a")) {\n        count++;\n    }\n}\nSystem.out.println(count);', ask: 'output', tests: 'A String scan: one index at a time, from 0 to length() − 1.' },
-  { code: 'int c = 0;\nfor (int r = 0; r < 3; r++) {\n    for (int k = 0; k < 4; k++) {\n        c++;\n    }\n}\nSystem.out.println(c);', ask: 'output', tests: 'The inner loop runs completely for every outer iteration: 3 rows × 4 = 12.' },
-  { code: 'for (int r = 1; r <= 4; r++) {\n    for (int k = 1; k <= r; k++) {\n        System.out.print("*");\n    }\n    System.out.println();\n}', ask: 'output', tests: 'The inner loop\'s limit depends on r, so each row is longer: a triangle.' },
+const L = (...lines) => lines.join('\n');
+// Each item: a buggy method (as lines), the lines a repair replaces (fix.from..fix.to, zero-based),
+// the candidate replacements (fixes), which one is right (answer), and the input ranges to test.
+const ITEMS = [
+  { id: 'grade', title: 'Letter grades', name: 'grade', params: ['score'], ret: 'String', ranges: [[70, 100]],
+    spec: 'grade(score) returns "A" for 90 or more, "B" for 80 through 89, and "C" for anything lower.',
+    buggy: ['static String grade(int score) {', '    if (score > 90) {', '        return "A";', '    } else if (score >= 80) {', '        return "B";', '    }', '    return "C";', '}'],
+    fix: { from: 1, to: 1 }, fixes: ['    if (score >= 91) {', '    if (score >= 90) {', '    if (score == 90) {', '    if (score >= 89) {'], answer: 1,
+    insight: 'The buggy code and the specification differ only at 90. Every other score is on the same side of "> 90" and ">= 90". The value where the comparison changes sides is the one to test, along with its neighbors, 89 and 91.' },
+  { id: 'teen', title: 'Teenagers', name: 'isTeen', params: ['age'], ret: 'boolean', ranges: [[8, 24]],
+    spec: 'isTeen(age) is true for ages 13 through 19, including both ends, and false otherwise.',
+    buggy: ['static boolean isTeen(int age) {', '    return age > 13 && age < 19;', '}'],
+    fix: { from: 1, to: 1 }, fixes: ['    return age >= 13 && age < 19;', '    return age > 13 && age <= 19;', '    return age >= 13 || age <= 19;', '    return age >= 13 && age <= 19;'], answer: 3,
+    insight: 'A range has two boundaries, so it can fail at both: here 13 and 19. Fixing one end leaves the other broken, so each end needs its own test.' },
+  { id: 'month', title: 'Valid months', name: 'validMonth', params: ['m'], ret: 'boolean', ranges: [[-3, 16]],
+    spec: 'validMonth(m) is true for 1 through 12 and false for every other number.',
+    buggy: ['static boolean validMonth(int m) {', '    return m >= 1 || m <= 12;', '}'],
+    fix: { from: 1, to: 1 }, fixes: ['    return m > 1 && m < 12;', '    return m >= 1 && m < 12;', '    return m >= 1 && m <= 12;', '    return m <= 1 || m >= 12;'], answer: 2,
+    insight: '|| is true when either side is true, and every integer is at least 1 or at most 12, so the code always returns true. Inputs inside 1 to 12 cannot expose this, because the right answer there is also true. Only inputs outside the range can.' },
+  { id: 'bonus', title: 'Sales bonus', name: 'bonus', params: ['sales'], ret: 'int', ranges: [[0, 1500, 50]], exploreRanges: [[450, 1050]],
+    spec: 'bonus(sales) is 100 for sales of 1000 or more, 50 for 500 through 999, and 0 below 500.',
+    buggy: ['static int bonus(int sales) {', '    int b = 0;', '    if (sales >= 1000) {', '        b = 100;', '    }', '    if (sales >= 500) {', '        b = 50;', '    }', '    return b;', '}'],
+    fix: { from: 5, to: 5 }, fixes: ['    else if (sales > 500) {', '    if (sales == 500) {', '    else if (sales >= 500) {', '    if (sales >= 500 || sales < 1000) {'], answer: 2,
+    insight: 'Two separate ifs are separate decisions. For sales of 1000 or more, the first if sets 100 and then the second if also runs and overwrites it with 50. The bug appears everywhere the first condition is true, so the useful input is one that is true for both conditions.' },
+  { id: 'sumto', title: 'Sum 1 through n', name: 'sumTo', params: ['n'], ret: 'int', ranges: [[-3, 10]],
+    spec: 'sumTo(n) adds the integers from 1 through n, including n. It returns 0 when n is less than 1.',
+    buggy: ['static int sumTo(int n) {', '    int total = 0;', '    for (int i = 1; i < n; i++) {', '        total += i;', '    }', '    return total;', '}'],
+    fix: { from: 2, to: 2 }, fixes: ['    for (int i = 1; i < n + 2; i++) {', '    for (int i = 1; i <= n - 1; i++) {', '    for (int i = 1; i <= n; i++) {', '    for (int i = 1; i <= n + 1; i++) {'], answer: 2,
+    insight: 'The loop stops one value early, so the last value n is never added. That only matters when n is 1 or more. For 0 and negative numbers the loop never runs in either version, so they agree, and they are poor tests of this bug.' },
+  { id: 'threes', title: 'Count the multiples of 3', name: 'countThrees', params: ['n'], ret: 'int', ranges: [[-3, 12]],
+    spec: 'countThrees(n) counts how many of the numbers 1 through n are multiples of 3.',
+    buggy: ['static int countThrees(int n) {', '    int count = 0;', '    for (int i = 0; i <= n; i++) {', '        if (i % 3 == 0) {', '            count++;', '        }', '    }', '    return count;', '}'],
+    fix: { from: 2, to: 2 }, fixes: ['    for (int i = 0; i < n; i++) {', '    for (int i = 1; i < n; i++) {', '    for (int i = 1; i <= n; i += 3) {', '    for (int i = 1; i <= n; i++) {'], answer: 3,
+    insight: 'The loop starts at 0, and 0 is a multiple of 3, so every call with n of 0 or more counts one extra. Even n = 0 exposes it: the correct loop does not run, but this one does, once. A loop that starts one value too early shows up on the smallest valid input.' },
+  { id: 'ride', title: 'Roller coaster', name: 'canRide', params: ['age', 'height'], ret: 'boolean', ranges: [[8, 12], [110, 130, 5]],
+    spec: 'canRide(age, height) is true only when age is 10 or more and height is 120 or more.',
+    buggy: ['static boolean canRide(int age, int height) {', '    return age > 10 && height >= 120;', '}'],
+    fix: { from: 1, to: 1 }, fixes: ['    return age >= 10 || height >= 120;', '    return age >= 10 && height > 120;', '    return age > 10 && height > 120;', '    return age >= 10 && height >= 120;'], answer: 3,
+    insight: 'With && both halves must be true for the answer to be true, so to expose a bug in one half you must make the other half true. Age 10 with height 100 gives false in both versions, because the height check fails first. Age 10 with height 120 or more is where they disagree.' },
+  { id: 'size', title: 'Sizes in the wrong order', name: 'size', params: ['n'], ret: 'String', ranges: [[-3, 120]],
+    spec: 'size(n) returns "small" below 10, "medium" for 10 through 99, and "large" for 100 or more.',
+    buggy: ['static String size(int n) {', '    if (n < 100) {', '        return "medium";', '    } else if (n < 10) {', '        return "small";', '    }', '    return "large";', '}'],
+    fix: { from: 1, to: 4 }, fixes: ['    if (n < 100) {\n        return "small";\n    } else if (n < 10) {\n        return "medium";', '    if (n < 10) {\n        return "medium";\n    } else if (n < 100) {\n        return "small";', '    if (n < 10) {\n        return "small";\n    } else if (n < 100) {\n        return "medium";', '    if (n <= 10) {\n        return "small";\n    } else if (n <= 100) {\n        return "medium";'], answer: 2,
+    insight: 'An else-if chain stops at the first true condition, so the order of the checks matters. Every number below 10 is also below 100, so the first check catches it and "small" is never returned. The bug is not at a boundary at all: any input below 10 exposes it.' },
 ];
+// Transfer: fresh methods. Nothing runs until the student checks an input.
 const TRANSFER = [
-  { code: 'int count = 0;\nfor (int i = 3; i < 12; i += 2) {\n    count++;\n}\nSystem.out.println(count);', ask: 'count' },
-  { code: 'int x = 1;\nwhile (x <= 50) {\n    x = x * 2 + 1;\n}\nSystem.out.println(x);', ask: 'output' },
-  { code: 'int p = 1;\nfor (int k = 0; k < 4; k++) {\n    p *= 2;\n}\nSystem.out.println(p + " " + k);', ask: 'mc', choices: [{ text: 'It prints 16 4', match: '16 4\n' }, { text: 'It prints 16 3', match: '16 3\n' }, { text: 'It does not compile.', match: 'compile-error' }, { text: 'It prints 16', match: '16\n' }] },
-  { code: 'for (int i = 10; i >= 0; i -= 4) {\n    System.out.print(i + ",");\n}', ask: 'output' },
-  { code: 'String w = "loop";\nString r = "";\nfor (int i = w.length() - 1; i >= 0; i--) {\n    r += w.substring(i, i + 1);\n}\nSystem.out.println(r);', ask: 'output' },
-  { code: 'int c = 0;\nfor (int a = 1; a <= 3; a++) {\n    for (int b = a; b <= 3; b++) {\n        c++;\n    }\n}\nSystem.out.println(c);', ask: 'output' },
-  { code: 'int x = 20;\nwhile (x > 1) {\n    x /= 3;\n}\nSystem.out.println(x);', ask: 'output' },
-  { code: 'int total = 0;\nfor (int i = 0; i < 6; i++) {\n    for (int j = i; j < 6; j++) {\n        total++;\n    }\n}\nSystem.out.println(total);', ask: 'output' },
-];
-const PRESETS = [
-  { label: 'Count to 5', code: PREDICT[0].code },
-  { label: 'Grow by ×5', code: PREDICT[1].code },
-  { label: 'Step by 3', code: PREDICT[2].code },
-  { label: 'Last value vs final i', code: PREDICT[4].code },
-  { label: 'Zero iterations', code: PREDICT[5].code },
-  { label: 'Infinite loop', code: PREDICT[9].code },
-  { label: 'String scan', code: PREDICT[10].code },
-  { label: 'Rectangle (nested)', code: PREDICT[11].code },
-  { label: 'Triangle (nested)', code: PREDICT[12].code },
-  { label: 'Array total', code: 'int[] scores = {8, 5, 9, 6};\nint total = 0;\nfor (int s : scores) {\n    total += s;\n}\nSystem.out.println(total);' },
-];
-const COMPARE_PRESETS = [
-  { label: 'for vs while', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'int i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '0, 1, 5, 6', note: 'The same output and the same looping. The difference: i still exists after the while loop, because it was declared outside it.' },
-  { label: 'Up vs down', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'for (int i = n; i >= 1; i--) {\n    total += i;\n}\nSystem.out.println(total);', values: '0, 1, 5, 6', note: 'Different loops, same results: the values are added in a different order, which does not change a sum.' },
-  { label: 'Shifted start and bound', setup: 'int n = 5;\nint total = 0;', a: 'int i = 0;\nwhile (i < n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', b: 'int i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '1, 3, 5', note: 'The same number of passes, but A adds 0 through n − 1 and B adds 1 through n. Different output, same amount of looping.' },
-  { label: 'First item outside the loop', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'total = 1;\nfor (int i = 2; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', values: '1, 2, 5, 0', note: 'They agree for 1, 2 and 5, so matching runs look convincing. Then n = 0 breaks it: B adds the 1 before checking anything. One different result is proof that two loops are not equivalent.' },
-  { label: 'Never ends for some n', setup: 'int n = 3;\nint total = 0;', a: 'for (int i = 0; i < n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'int i = 0;\nwhile (i != n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '3, 0, -2', note: 'i < n and i != n agree while n is 0 or more. For a negative n, i never equals n, so B counts up forever.' },
+  { id: 'hour', title: 'Valid hours', name: 'isValidHour', params: ['h'], ret: 'boolean', ranges: [[-2, 26]],
+    spec: 'isValidHour(h) is true for the hours 0 through 23.',
+    buggy: ['static boolean isValidHour(int h) {', '    return h > 0 && h < 23;', '}'],
+    fix: { from: 1, to: 1 }, fixes: ['    return h >= 0 && h <= 23;'], answer: 0,
+    insight: 'Both comparisons exclude their end value, so the code is wrong at both ends: 0 and 23.' },
+  { id: 'discount', title: 'Bulk discount', name: 'discount', params: ['items'], ret: 'int', ranges: [[0, 20]],
+    spec: 'discount(items) is 20 (percent) when a customer buys 10 or more items, and 0 otherwise.',
+    buggy: ['static int discount(int items) {', '    if (items > 10) {', '        return 20;', '    }', '    return 0;', '}'],
+    fix: { from: 1, to: 1 }, fixes: ['    if (items >= 10) {'], answer: 0,
+    insight: '"10 or more" includes 10, but "> 10" does not. Only 10 itself exposes the difference.' },
+  { id: 'sumodd', title: 'Sum the odd numbers', name: 'sumOdd', params: ['n'], ret: 'int', ranges: [[0, 9]],
+    spec: 'sumOdd(n) adds the odd numbers from 1 up to n, including n when n is odd.',
+    buggy: ['static int sumOdd(int n) {', '    int total = 0;', '    for (int i = 1; i < n; i += 2) {', '        total += i;', '    }', '    return total;', '}'],
+    fix: { from: 2, to: 2 }, fixes: ['    for (int i = 1; i <= n; i += 2) {'], answer: 0,
+    insight: 'The loop stops before n, so n is left out. That changes the total only when n is itself odd: an even n is never added anyway, so those inputs agree.' },
+  { id: 'borrow', title: 'Library checkout', name: 'canCheckout', params: ['age', 'books'], ret: 'boolean', ranges: [[10, 14], [3, 7]],
+    spec: 'canCheckout(age, books) is true only when age is at least 12 and books is fewer than 5.',
+    buggy: ['static boolean canCheckout(int age, int books) {', '    return age >= 12 && books <= 5;', '}'],
+    fix: { from: 1, to: 1 }, fixes: ['    return age >= 12 && books < 5;'], answer: 0,
+    insight: 'The bug is the books boundary: 5 books should be refused. To see it, the age check has to pass, so the age must be 12 or more.' },
 ];
 // DATA END
 
 TUI.injectCSS();
 const { el, $ } = TUI;
+const INT = /^\s*[−-]?\d+\s*$/;
+const num = s => parseInt(String(s).replace('−', '-'), 10);
+// A paragraph made of text and elements (el() takes text only).
+const wrapTable = t => { const w = el('div', 'tablewrap'); w.append(t); return w; };
+const para = (...nodes) => { const p = el('p'); p.append(...nodes); return p; };
+const verdictText = (item, args, got, want) => `${item.name}(${args.join(', ')}) returns ${got}, but the specification says ${want}.`;
 
-/* ---------- Loop runner ---------- */
-class LoopRunner {
-  constructor(host) {
-    this.host = host;
-    host.innerHTML = `<div class="tui-err hidden"></div><div class="rbody"><div class="runner-grid">
-      <div><ol class="tui-code" aria-label="Program"></ol><div class="stepbar"></div>
-        <div class="tui-note" aria-live="polite"><div class="phase"></div><p class="text"></p></div>
-        <div class="colhead">Console</div><div class="tui-console" role="log" aria-label="Console output"></div></div>
-      <div><div class="colhead tracehead">Trace table</div><div class="tracesel"></div><div class="tracewrap"><table class="trace" aria-label="Trace table"></table></div>
-        <div class="gridbox hidden"><div class="colhead">Nested loops: one cell per inner-body run</div><div class="grid2" aria-label="Nested loop grid"></div><p class="gnote"></p></div>
-        <div class="colhead">Variables now</div><table class="tui-vars"></table></div>
-    </div></div>`;
-    this.err = host.querySelector('.tui-err'); this.body = host.querySelector('.rbody');
-    this.step = TUI.stepper(host.querySelector('.stepbar'), i => this.render(i));
-    this.step.keys(this.body);
-    this.sel = 0;
+// An input row for a method's parameters (and, optionally, a prediction of the returned value).
+function inputRow(form, item, withPredict) {
+  form.textContent = '';
+  const row = el('div', 'inrow');
+  item.params.forEach((p, i) => {
+    const l = el('label', 'field'); l.append(p + ' ');
+    const inp = el('input', 'num'); inp.type = 'text'; inp.inputMode = 'numeric'; inp.id = form.id + '-a' + i; inp.autocomplete = 'off'; inp.spellcheck = false;
+    l.append(inp); row.append(l);
+  });
+  if (withPredict) {
+    const l = el('label', 'field'); l.append(`Predict: what does ${item.name} return? `);
+    let inp;
+    if (item.ret === 'boolean') { inp = el('select', 'pick'); ['', 'true', 'false'].forEach(v => inp.append(new Option(v || 'choose…', v))); }
+    else { inp = el('input', item.ret === 'String' ? 'strin' : 'num'); inp.type = 'text'; inp.autocomplete = 'off'; inp.spellcheck = false; if (item.ret === 'int') inp.inputMode = 'numeric'; }
+    inp.id = form.id + '-pred'; l.append(inp); row.append(l);
   }
-  set(src, { showAll = false } = {}) {
-    this.src = src; this.run = MJ.run(src);
-    const bad = this.run.compileError || this.run.unsupported;
-    this.err.classList.toggle('hidden', !bad); this.body.classList.toggle('hidden', !!bad);
-    if (bad) { TUI.errorBox(this.err, this.run); return; }
-    this.loops = MJ.loopsOf(this.run.prog);
-    this.sel = 0;
-    const box = this.host.querySelector('.tracesel'); box.textContent = '';
-    if (this.loops.length > 1) {
-      const s = el('select'); s.setAttribute('aria-label', 'Which loop the trace table follows');
-      this.loops.forEach((L, i) => s.append(new Option(`Loop on line ${L.line}${L.parent !== null ? ' (inner)' : ''}`, i)));
-      s.addEventListener('change', () => { this.sel = +s.value; this.render(this.step.i); });
-      box.append(s);
-    }
-    this.step.set(this.run.steps.length, showAll ? this.run.steps.length : 0);
+  form.append(row);
+  const w = el('label', 'field'); w.append('Why this input? '); const why = el('textarea'); why.id = form.id + '-why'; why.rows = 2; w.append(why); form.append(w);
+  const b = el('div', 'row'); const go = el('button', 'btn primary', withPredict ? 'Run the code' : 'Check this input'); go.type = 'submit';
+  const err = el('span', 'formerr'); err.id = form.id + '-err'; err.setAttribute('role', 'alert'); b.append(go, err); form.append(b);
+}
+// Reads and checks the form; returns { args, pred, why } or null after showing a message.
+function readInputs(form, item, withPredict) {
+  const err = $(form.id + '-err');
+  const args = [];
+  for (let i = 0; i < item.params.length; i++) {
+    const v = $(form.id + '-a' + i).value;
+    if (!INT.test(v)) { err.textContent = `Enter a whole number for ${item.params[i]}.`; return null; }
+    if (Math.abs(num(v)) > MAX_INPUT) { err.textContent = `Use a value between −${MAX_INPUT.toLocaleString()} and ${MAX_INPUT.toLocaleString()}.`; return null; }
+    args.push(num(v));
   }
-  render(i) {
-    const run = this.run, steps = run.steps, s = i > 0 ? steps[i - 1] : null;
-    const done = new Set(steps.slice(0, Math.max(0, i - 1)).map(x => x.line));
-    TUI.renderCode(this.host.querySelector('.tui-code'), this.src, s ? s.line : 0, done, s && (s.kind === 'error' || s.kind === 'limit') ? 'err' : 'on');
-    const note = this.host.querySelector('.tui-note');
-    note.classList.toggle('err', !!(s && (s.kind === 'error' || s.kind === 'limit')));
-    note.querySelector('.phase').textContent = s ? this.phaseLabel(s) : 'Ready';
-    note.querySelector('.text').textContent = s ? s.note : 'Nothing has run yet. Press Next, or use the arrow keys.';
-    if (i === steps.length && run.truncated) note.querySelector('.text').textContent += ` (Showing the first ${steps.length} steps.)`;
-    this.host.querySelector('.tui-console').textContent = s ? s.out : '';
-    TUI.renderVars(this.host.querySelector('.tui-vars'), s ? s.frames[s.frames.length - 1] : null, s ? s.heap : {}, s ? s.changed || [] : []);
-    this.renderTrace(i);
-    this.renderGrid(i);
-  }
-  phaseLabel(s) {
-    if (s.kind === 'error') return 'Exception';
-    if (s.kind === 'limit') return 'Stopped';
-    if (s.phase === 'init') return 'Initialize (runs once)';
-    if (s.phase === 'update') return 'Update';
-    if (s.kind === 'cond' && s.loop !== undefined) return s.value ? 'Check the condition: true' : 'Check the condition: false';
-    if (s.kind === 'foreach') return 'Next element';
-    if (s.kind === 'cond') return 'if condition';
-    const inLoop = this.loops.find(L => s.line > L.line && s.line <= lineOfPos(this.src, L.endPos));
-    return inLoop ? 'Loop body' : 'Statement';
-  }
-  renderTrace(i) {
-    const L = this.loops[this.sel], tbl = this.host.querySelector('table.trace');
-    tbl.textContent = '';
-    if (!L) { tbl.append(el('caption', 'small', 'This program has no loop.')); return; }
-    const rows = this.run.steps.map((s, k) => [s, k]).filter(([s]) => s.loop === L.id && (s.kind === 'cond' || s.kind === 'foreach'));
-    const names = [];
-    this.run.steps.forEach(s => (s.frames[s.frames.length - 1].vars || []).forEach(v => { if (!names.includes(v.name) && !v.type.startsWith('ArrayList') && !v.type.endsWith('[]')) names.push(v.name); }));
-    const head = el('tr'); ['Check', ...names, L.k === 'foreach' ? 'Element?' : 'Condition'].forEach(h => head.append(el('th', null, h)));
-    const thead = el('thead'); thead.append(head); tbl.append(thead);
-    const tb = el('tbody');
-    const shown = rows.filter(([, k]) => k < i);
-    let missing = false;
-    shown.forEach(([s, k], n) => {
-      const tr = el('tr', k === i - 1 ? 'now' : '');
-      tr.append(el('td', null, String(n + 1)));
-      const vars = s.frames[s.frames.length - 1].vars;
-      names.forEach(nm => {
-        const v = vars.find(x => x.name === nm);
-        if (v) tr.append(el('td', null, TUI.valueText(v.v, v.type, s.heap)));
-        else { const td = el('td', 'na', '—'); td.title = `${nm} does not exist at this check`; tr.append(td); missing = true; }
-      });
-      const val = s.kind === 'foreach' ? 'yes' : s.done ? 'no more' : String(s.value);
-      tr.append(el('td', s.value === false || s.done ? 'f' : 't', val));
-      tb.append(tr);
-    });
-    if (!shown.length) { const tr = el('tr'); const td = el('td', null, 'The loop has not been reached yet.'); td.colSpan = names.length + 2; tr.append(td); tb.append(tr); }
-    tbl.append(tb);
-    if (missing) tbl.prepend(el('caption', 'small key', '— means the variable does not exist at that check.'));
-  }
-  renderGrid(i) {
-    const box = this.host.querySelector('.gridbox');
-    const inner = this.loops.find(L => L.parent !== null), outer = inner && this.loops.find(L => L.id === inner.parent);
-    box.classList.toggle('hidden', !inner);
-    if (!inner) return;
-    const cells = []; let row = -1, total = 0;
-    this.run.steps.forEach((s, k) => {
-      if (s.loop === outer.id && ((s.kind === 'cond' && s.value) || s.kind === 'foreach')) row++;
-      if (s.loop === inner.id && ((s.kind === 'cond' && s.value) || s.kind === 'foreach')) {
-        const col = cells.filter(c => c.row === row).length;
-        const v = inner.var ? s.frames[s.frames.length - 1].vars.find(x => x.name === inner.var) : null;
-        const ov = outer.var ? s.frames[s.frames.length - 1].vars.find(x => x.name === outer.var) : null;
-        cells.push({ row, col, k, label: v ? TUI.valueText(v.v, v.type) : String(col + 1), rowLabel: ov ? `${outer.var} = ${TUI.valueText(ov.v, ov.type)}` : `outer ${row + 1}` });
-        total++;
-      }
-    });
-    const rows = Math.max(0, ...cells.map(c => c.row + 1)), cols = Math.max(1, ...cells.map(c => c.col + 1));
-    const g = this.host.querySelector('.grid2'); g.textContent = '';
-    g.style.gridTemplateColumns = `auto repeat(${cols}, minmax(30px, 1fr))`;
-    let shown = 0, cur = null;
-    for (let r = 0; r < rows; r++) {
-      const rc = cells.filter(c => c.row === r);
-      g.append(el('div', 'grow', rc.length ? rc[0].rowLabel : `outer ${r + 1}`));
-      for (let c = 0; c < cols; c++) {
-        const cell = rc.find(x => x.col === c);
-        const d = el('div', 'gcell');
-        if (cell && cell.k < i) { d.classList.add('on'); d.textContent = inner.var ? `${inner.var}=${cell.label}` : '✓'; shown++; if (cell.k === Math.max(...cells.filter(x => x.k < i).map(x => x.k))) cur = d; }
-        else if (!cell) d.style.visibility = 'hidden';
-        g.append(d);
-      }
-    }
-    if (cur) cur.classList.add('cur');
-    this.host.querySelector('.gnote').textContent = `The inner loop's body has run ${shown} time${shown === 1 ? '' : 's'} so far, out of ${total} in total. Each row is one run of the outer loop.`;
-  }
+  const pred = withPredict ? $(form.id + '-pred').value.trim() : '';
+  if (withPredict && pred === '') { err.textContent = 'Predict the returned value before running.'; return null; }
+  const why = $(form.id + '-why').value;
+  if (why.trim().length < 3) { err.textContent = 'Write a short reason for choosing this input.'; return null; }
+  err.textContent = '';
+  return { args, pred, why };
+}
+function setChips(item, set, total) {
+  const box = el('div');
+  const chips = el('div', 'setchips');
+  if (!set.length) chips.append(el('span', 'small', 'None.'));
+  set.slice(0, 40).forEach(a => chips.append(el('span', 'chip hit', item.params.length > 1 ? `${a.join(', ')}` : String(a[0]))));
+  box.append(chips);
+  if (set.length > 40) box.append(el('p', 'small', `…and ${set.length - 40} more.`));
+  box.append(el('p', 'small', `${set.length} of the ${total} inputs tried expose it` + (item.params.length > 1 ? ` (shown as ${item.params.join(', ')}).` : '.')));
+  return box;
 }
 
-/* ---------- Predict and Transfer ---------- */
-const select = TUI.tabs(['predict', 'explore', 'transfer']);
-function expected(it) {
-  const run = MJ.run(it.code);
-  if (it.ask === 'output') return run.out;
-  if (it.ask === 'count') return bodyCount(run);
-  if (it.ask === 'next') return phaseOf(run, it.code, it.after);
-  return it.choices.findIndex(c => c.match === MJ.label(run));
+/* ---------- Find the bug ---------- */
+const select = TUI.tabs(['find', 'explore', 'transfer']);
+let fi = 0;
+const fstate = ITEMS.map(() => ({ attempts: [], found: false, hint: false, repair: null }));
+function renderFind() {
+  const it = ITEMS[fi], st = fstate[fi];
+  $('f-count').textContent = `Item ${fi + 1} of ${ITEMS.length}`;
+  $('f-prev').disabled = fi === 0; $('f-next').disabled = fi === ITEMS.length - 1;
+  $('f-title').textContent = it.title;
+  $('f-spec').textContent = ''; $('f-spec').append(el('b', null, 'Specification: '), it.spec);
+  TUI.renderCode($('f-code'), buggyText(it), 0, null, 'on', st.hint ? { [it.fix.from + 1]: 'called' } : {});
+  const form = $('f-form');
+  inputRow(form, it, true);
+  renderLog();
+  $('f-found').classList.toggle('hidden', !st.found);
+  if (st.found) renderFound();
 }
-const askText = it => it.ask === 'output' ? 'What exactly does this print?' : it.ask === 'count' ? 'How many times does the loop body run?' : it.ask === 'next' ? `${it.state} What happens next?` : 'What happens when this runs?';
-const predictRunner = new LoopRunner($('p-view'));
-TUI.questions('p', PREDICT, {
-  submitLabel: 'Check my prediction', reasonPrompt: 'Why? Make a quick trace table: the values at each check.',
-  askText, expected,
-  onReveal(it) { $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests; predictRunner.set(it.code); if (it.ask === 'next') predictRunner.step.go(it.after); },
+function renderLog() {
+  const it = ITEMS[fi], st = fstate[fi], box = $('f-log');
+  box.textContent = '';
+  if (!st.attempts.length) return;
+  const t = el('table', 'tt'), h = el('tr');
+  [...it.params, 'Your prediction', 'Code returns', 'Specification says', 'Result'].forEach(x => h.append(el('th', null, x)));
+  t.append(h);
+  st.attempts.forEach(a => {
+    const tr = el('tr', a.exposes ? 'hit' : '');
+    a.args.forEach(v => tr.append(el('td', null, String(v))));
+    tr.append(el('td', null, a.pred + (a.predOk ? ' ✓' : ' ✗')), el('td', null, a.buggy), el('td', null, a.spec), el('td', null, a.exposes ? 'EXPOSES THE BUG' : 'agree'));
+    t.append(tr);
+  });
+  box.append(wrapTable(t));
+  const last = st.attempts[st.attempts.length - 1], fb = el('div', 'feedback ' + (last.exposes ? 'good' : 'part'));
+  fb.append(el('p', null, last.predOk ? 'Your prediction of the code was right.' : `Your prediction was off: the code returns ${last.buggy}.`));
+  fb.append(el('p', null, last.exposes ? `This input exposes the bug. ${verdictText(it, last.args, last.buggy, last.spec)}` : `The code and the specification agree here (${last.buggy}), so this input cannot reveal the bug. Try another.`));
+  box.append(fb);
+  if (!st.found && st.attempts.length >= 2) {
+    const hb = el('button', 'btn', st.hint ? 'The hint is on line ' + (it.fix.from + 1) : 'Give me a hint'); hb.type = 'button'; hb.disabled = st.hint;
+    hb.addEventListener('click', () => { st.hint = true; renderFind(); });
+    box.append(el('p', 'small', `${st.attempts.length} inputs tried, none exposing the bug yet. `), hb);
+  }
+}
+function renderFound() {
+  const it = ITEMS[fi], st = fstate[fi], box = $('f-set');
+  box.textContent = '';
+  const set = exposing(it, buggyText(it)), total = inputGrid(it.ranges).length;
+  const info = el('div', 'note'); info.append(el('b', null, 'All inputs that expose it. '), `Every input in the range below was run on both versions. The bug appears on exactly these:`);
+  box.append(info, setChips(it, set, total));
+  box.append(el('p', 'small', 'Range tried: ' + it.ranges.map((r, i) => `${it.params[i]} from ${r[0]} to ${r[1]}${r[2] ? ' in steps of ' + r[2] : ''}`).join('; ') + '.'));
+  const why = el('div', 'note'); why.append(el('b', null, 'Why those: '), it.insight); box.append(why);
+  // Repair
+  const form = $('r-form'); form.textContent = '';
+  const fs = el('fieldset', 'cands'); fs.style.border = '0'; fs.style.padding = '0'; fs.append(el('legend', 'small', `Which replacement for line${it.fix.to > it.fix.from ? 's ' + (it.fix.from + 1) + ' to ' + (it.fix.to + 1) : ' ' + (it.fix.from + 1)} fixes the method?`));
+  it.fixes.forEach((f, i) => { const l = el('label', 'cand'); const r = el('input'); r.type = 'radio'; r.name = 'repair'; r.value = i; if (st.repair && st.repair.choice === i) r.checked = true; r.disabled = !!(st.repair && st.repair.ok); const pre = el('pre', null, f); l.append(r, pre); fs.append(l); });
+  form.append(fs);
+  const row = el('div', 'row'), b = el('button', 'btn primary', 'Check my repair'); b.type = 'submit'; b.disabled = !!(st.repair && st.repair.ok);
+  const err = el('span', 'formerr'); err.id = 'r-err'; err.setAttribute('role', 'alert'); row.append(b, err); form.append(row);
+  renderRepairFeedback();
+}
+function renderRepairFeedback() {
+  const it = ITEMS[fi], st = fstate[fi], fb = $('r-feedback');
+  fb.textContent = ''; fb.className = '';
+  if (!st.repair) return;
+  const r = st.repair;
+  fb.className = 'feedback ' + (r.ok ? 'good' : 'bad');
+  if (r.ok) {
+    const n = inputGrid(it.ranges).length;
+    fb.append(para(el('span', 'tag', 'Correct. '), `The repaired method agrees with the specification on all ${n} inputs tried. That is strong evidence rather than a proof: the inputs not tried could still hide a bug.`));
+  } else {
+    fb.append(para(el('span', 'tag', 'Not quite. '), `With this replacement, ${verdictText(it, r.counter.args, r.counter.got, r.counter.want)} ` + r.note));
+  }
+}
+$('f-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const it = ITEMS[fi], st = fstate[fi], v = readInputs($('f-form'), it, true);
+  if (!v) return;
+  const buggy = runCall(buggyText(it), it.name, v.args), spec = specAt(it, v.args);
+  const predOk = v.pred.replace('−', '-').replace(/^"|"$/g, '') === buggy;
+  st.attempts.push({ args: v.args, pred: v.pred, predOk, buggy, spec, exposes: buggy !== spec, why: v.why });
+  if (buggy !== spec) st.found = true;
+  renderFind();
 });
-TUI.questions('t', TRANSFER, {
-  submitLabel: 'Check', reasonPrompt: 'Explain it: list the loop variable at each condition check.',
-  askText, expected,
-  onReveal(it) {
-    const run = MJ.run(it.code), m = $('t-model'); m.textContent = '';
-    if (run.compileError) m.append(el('b', null, 'Model working: '), `It does not compile. ${run.compileError}`);
-    else {
-      const checks = run.steps.filter(s => s.kind === 'cond' && s.loop !== undefined && MJ.loopsOf(run.prog)[0].id === s.loop);
-      m.append(el('b', null, 'Model working: '), `The first loop's condition is checked ${checks.length} time${checks.length === 1 ? '' : 's'}: ${checks.map(c => c.value).join(', ')}. Its body runs ${bodyCount(run)} time${bodyCount(run) === 1 ? '' : 's'}.` + (run.out ? ` Output: ${JSON.stringify(run.out)}.` : ''));
-    }
-    m.append(el('p', 'small', 'Compare with your trace table. Did you include the final false check?'));
-  },
+$('r-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const it = ITEMS[fi], st = fstate[fi], pick = $('r-form').querySelector('input:checked');
+  if (!pick) { $('r-err').textContent = 'Choose a replacement first.'; return; }
+  const choice = +pick.value, method = withFix(it, it.fixes[choice]), grid = inputGrid(it.ranges);
+  const bad = exposing(it, method);
+  if (!bad.length) st.repair = { choice, ok: true };
+  else {
+    const was = new Set(exposing(it, buggyText(it)).map(String));
+    const first = bad[0], broke = bad.filter(a => !was.has(String(a))), same = bad.length === was.size && bad.every(a => was.has(String(a)));
+    st.repair = { choice, ok: false, counter: { args: first, got: runCall(method, it.name, first), want: specAt(it, first) },
+      note: same ? 'It still fails on exactly the same inputs as the original: the behavior did not change where it matters.' : broke.length ? `It also breaks ${broke.length === 1 ? 'an input' : broke.length + ' inputs'} that the original got right, such as ${argText(it, broke[0])}.` : 'It fixes some inputs but leaves others wrong.' };
+  }
+  renderFind();
 });
+$('f-prev').addEventListener('click', () => { fi--; renderFind(); });
+$('f-next').addEventListener('click', () => { fi++; renderFind(); });
 
 /* ---------- Explore ---------- */
-const exploreRunner = new LoopRunner($('e-view'));
-const ecode = $('e-code');
-function exploreUpdate() {
-  exploreRunner.set(ecode.value);
-  let w = null; try { w = MJ.forToWhile(ecode.value); } catch (e) { w = null; }
-  $('e-convert').disabled = !w; $('e-convnote').textContent = '';
+const xv = $('x-view');
+function rangeInputs(count, old) {
+  const host = $('x-ranges'); host.textContent = '';
+  for (let i = 0; i < count; i++) {
+    const lo = old[i] ? old[i][0] : -5, hi = old[i] ? old[i][1] : 15;
+    const l = el('label', 'field'); l.append(`Parameter ${i + 1} from `);
+    const a = el('input', 'mini'), b = el('input', 'mini'); [a, b].forEach(x => { x.type = 'text'; x.inputMode = 'numeric'; x.autocomplete = 'off'; });
+    a.value = lo; b.value = hi; a.id = 'x-lo' + i; b.id = 'x-hi' + i; a.addEventListener('input', exploreUpdate); b.addEventListener('input', exploreUpdate);
+    l.append(a, ' to ', b); host.append(l);
+  }
 }
-$('e-convert').addEventListener('click', () => {
-  const w = MJ.forToWhile(ecode.value);
-  if (!w) return;
-  ecode.value = w; exploreUpdate();
-  $('e-convnote').textContent = 'Rewritten as a while loop inside its own block, so the loop variable still exists only for the loop. The steps and output are the same.';
-});
-PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => { ecode.value = p.code; exploreUpdate(); }); $('e-presets').append(c); });
-ecode.value = PRESETS[0].code;
-ecode.addEventListener('input', exploreUpdate);
-exploreUpdate();
-const params = new URLSearchParams(location.search);
-if (params.has('code')) { ecode.value = params.get('code'); exploreUpdate(); select('explore'); }
+let xCount = -1;
+function exploreUpdate(opts = {}) {
+  const a = $('x-a').value, b = $('x-b').value;
+  const sig = /static\s+\w+\s+\w+\s*\(([^)]*)\)/.exec(a), count = sig && sig[1].trim() ? sig[1].split(',').length : 0;
+  if (count !== xCount || opts.ranges) {
+    const old = opts.ranges || Array.from({ length: xCount > 0 ? xCount : 0 }, (_, i) => $('x-lo' + i) && [num($('x-lo' + i).value), num($('x-hi' + i).value)]).filter(Boolean);
+    rangeInputs(count, old); xCount = count;
+  }
+  const ranges = Array.from({ length: count }, (_, i) => [num($('x-lo' + i).value), num($('x-hi' + i).value)]);
+  const c = compareMethods(a, b, ranges);
+  xv.textContent = '';
+  if (c.error) { xv.append(el('div', 'tui-err', c.error)); return; }
+  const v = el('p', 'verdict ' + (c.diffs.length ? 'no' : 'ok'), c.diffs.length ? `They disagree on ${c.diffs.length} of ${c.total} inputs.` : `They agree on all ${c.total} inputs tried.`);
+  xv.append(v);
+  xv.append(el('p', 'small', c.diffs.length ? 'The inputs where they disagree are the ones worth keeping as tests. Look for where the disagreement starts and stops: that is the boundary.' : 'Agreeing on these inputs is evidence, not a proof for every int. Widen the ranges, and test the boundary values of every comparison and loop.'));
+  if (!c.diffs.length) return;
+  const t = el('table', 'tt'), h = el('tr');
+  [...c.params, 'Method A returns', 'Method B returns'].forEach(x => h.append(el('th', null, x)));
+  t.append(h);
+  c.diffs.slice(0, 20).forEach(r => { const tr = el('tr', 'hit'); r.args.forEach(x => tr.append(el('td', null, String(x)))); tr.append(el('td', null, r.a), el('td', null, r.b)); t.append(tr); });
+  xv.append(wrapTable(t));
+  if (c.diffs.length > 20) xv.append(el('p', 'small', `Showing the first 20 of ${c.diffs.length} disagreements.`));
+}
+ITEMS.forEach(it => { const c = el('button', 'chip', it.title); c.type = 'button'; c.addEventListener('click', () => { $('x-a').value = buggyText(it); $('x-b').value = specText(it); exploreUpdate({ ranges: (it.exploreRanges || it.ranges).map(r => [r[0], r[1]]) }); }); $('x-presets').append(c); });
+$('x-a').value = buggyText(ITEMS[0]); $('x-b').value = specText(ITEMS[0]);
+['x-a', 'x-b'].forEach(id => $(id).addEventListener('input', () => exploreUpdate()));
+exploreUpdate({ ranges: ITEMS[0].ranges.map(r => [r[0], r[1]]) });
 
-/* ---------- Compare two loops ---------- */
-function exploreMode(m) {
-  $('m-one').setAttribute('aria-pressed', m === 'one'); $('m-cmp').setAttribute('aria-pressed', m === 'cmp');
-  $('one-mode').classList.toggle('hidden', m !== 'one'); $('cmp-mode').classList.toggle('hidden', m !== 'cmp');
-}
-$('m-one').addEventListener('click', () => exploreMode('one')); $('m-cmp').addEventListener('click', () => exploreMode('cmp'));
-let cmpPick = 0, cmpNote = '';
-const wrapTable = t => { const w = el('div', 'tablewrap'); w.append(t); return w; };
-const cmpOut = t => TUI.visible(t.replace(/\n$/, '')) || '(nothing)';
-function renderCompare() {
-  const box = $('c-view'); box.textContent = '';
-  const setup = $('c-setup').value, hasN = N_DECL.test(setup), pv = parseValues($('c-vals').value);
-  if (hasN && pv.error) { box.append(el('div', 'tui-err', pv.error)); return; }
-  const c = compareLoops(setup, $('c-a').value, $('c-b').value, hasN ? pv.values : []);
-  if (c.problem) {
-    const r = c.problem, which = r.A.problem ? ['Loop A', r.A.problem] : ['Loop B', r.B.problem];
-    box.append(el('div', 'tui-err', `${which[0]} ${which[1]}`)); return;
+/* ---------- Transfer ---------- */
+let ti = 0;
+const tstate = TRANSFER.map(() => ({ done: false, args: null, why: '' }));
+function renderTransfer() {
+  const it = TRANSFER[ti], st = tstate[ti];
+  $('t-count').textContent = `Item ${ti + 1} of ${TRANSFER.length}`;
+  $('t-prev').disabled = ti === 0; $('t-next').disabled = ti === TRANSFER.length - 1;
+  $('t-title').textContent = it.title;
+  $('t-spec').textContent = ''; $('t-spec').append(el('b', null, 'Specification: '), it.spec);
+  $('t-code').textContent = buggyText(it);
+  const form = $('t-form'); inputRow(form, it, false);
+  $('t-feedback').textContent = ''; $('t-feedback').className = '';
+  if (st.done) {
+    st.args.forEach((a, i) => { $('t-form-a' + i).value = a; }); $('t-form-why').value = st.why;
+    form.querySelectorAll('input, textarea, button').forEach(x => { x.disabled = true; });
+    renderTransferFeedback();
   }
-  if (cmpNote) box.append(el('div', 'qstate', cmpNote));
-  const runs = c.runs, label = r => r.n === null ? 'this run' : 'n = ' + r.n;
-  const list = rs => rs.map(label).join(', ');
-  const outDiff = runs.filter(r => !r.out), varDiff = runs.filter(r => !r.vars), workDiff = runs.filter(r => !r.work), endDiff = runs.filter(r => !r.end);
-  box.append(el('p', 'verdict ' + (outDiff.length ? 'no' : 'ok'), outDiff.length ? `The outputs differ for ${list(outDiff)}.` : `The outputs match on ${runs.length === 1 ? 'this run' : 'all ' + runs.length + ' runs'}.`));
-  const facts = el('ul', 'small');
-  [['Variables left at the end', varDiff], ['Amount of looping (condition checks and body runs)', workDiff], ['How the run ended', endDiff]].forEach(([name, d]) => facts.append(el('li', null, d.length ? `${name}: different for ${list(d)}.` : `${name}: the same.`)));
-  box.append(facts);
-  box.append(el('p', 'small', outDiff.length || endDiff.length ? 'A single difference in the results proves the two loops are not equivalent.' : 'Matching on the values tried is evidence, not proof: two loops can agree on every value you pick and still differ on one you did not. Try the boundary values, such as 0 and negative numbers.'));
-  cmpPick = Math.min(cmpPick, runs.length - 1);
-  if (runs.length > 1) {
-    const t = el('table', 'cmp'), h = el('tr');
-    ['Value', 'Output', 'Variables at the end', 'Looping', 'Ending'].forEach(x => h.append(el('th', null, x)));
-    t.append(h);
-    runs.forEach((r, k) => {
-      const tr = el('tr', k === cmpPick ? 'pick' : '');
-      const td = el('td'), b = el('button', 'link', label(r)); b.type = 'button'; b.addEventListener('click', () => { cmpPick = k; renderCompare(); }); td.append(b); tr.append(td);
-      [r.out, r.vars, r.work, r.end].forEach(same => tr.append(el('td', same ? 'same' : 'diff', same ? 'same' : 'different')));
-      t.append(tr);
-    });
-    box.append(el('div', 'colhead', 'Every value tried (select one to see the details)'), wrapTable(t));
-  }
-  const r = runs[cmpPick], d = el('table', 'cmp'), hd = el('tr');
-  ['', 'Loop A', 'Loop B'].forEach(x => hd.append(el('th', null, x)));
-  d.append(hd);
-  const row = (name, a, b, same) => { const tr = el('tr'); tr.append(el('th', null, name), el('td', same ? 'same' : 'diff', a), el('td', same ? 'same' : 'diff', b)); d.append(tr); };
-  const work = x => x.checks === null ? '—' : `${x.checks} condition check${x.checks === 1 ? '' : 's'}, ${x.iterations} body run${x.iterations === 1 ? '' : 's'}`;
-  row('Output', cmpOut(r.A.out), cmpOut(r.B.out), r.out);
-  row('Variables at the end', r.A.vars, r.B.vars, r.vars);
-  row('Looping', work(r.A), work(r.B), r.work);
-  row('How it ended', r.A.end, r.B.end, r.end);
-  box.append(el('div', 'colhead', `Details for ${label(r)}`), wrapTable(d));
 }
-function setCompare(p) {
-  $('c-setup').value = p.setup; $('c-a').value = p.a; $('c-b').value = p.b; $('c-vals').value = p.values; cmpPick = 0; cmpNote = p.note || '';
-  renderCompare();
+function renderTransferFeedback() {
+  const it = TRANSFER[ti], st = tstate[ti], fb = $('t-feedback');
+  const got = runCall(buggyText(it), it.name, st.args), want = specAt(it, st.args), ok = got !== want;
+  const set = exposing(it, buggyText(it)), total = inputGrid(it.ranges).length;
+  fb.className = 'feedback ' + (ok ? 'good' : 'bad'); fb.textContent = '';
+  fb.append(para(el('span', 'tag', ok ? 'Yes, that input exposes the bug. ' : 'Not quite. '), ok ? verdictText(it, st.args, got, want) : `The code and the specification agree here (both give ${got}), so this input cannot expose the bug.`));
+  fb.append(el('p', null, 'Your reasoning: “' + st.why.trim() + '”'));
+  const note = el('div', 'note'); note.append(el('b', null, 'Every input that exposes it: '), setChips(it, set, total), el('p', null, it.insight));
+  fb.append(note);
 }
-COMPARE_PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => setCompare(p)); $('c-presets').append(c); });
-['c-setup', 'c-a', 'c-b', 'c-vals'].forEach(id => $(id).addEventListener('input', () => { cmpNote = ''; renderCompare(); }));
-setCompare(COMPARE_PRESETS[0]);
-if (location.hash === '#compare') { exploreMode('cmp'); select('explore'); }
+$('t-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const it = TRANSFER[ti], v = readInputs($('t-form'), it, false);
+  if (!v) return;
+  Object.assign(tstate[ti], { done: true, args: v.args, why: v.why });
+  renderTransfer();
+});
+$('t-prev').addEventListener('click', () => { ti--; renderTransfer(); });
+$('t-next').addEventListener('click', () => { ti++; renderTransfer(); });
+
+renderFind(); renderTransfer();
+// Deep links: ?item=grade opens that Find item, ?item=hour opens that Transfer item.
+const params = new URLSearchParams(location.search);
+if (params.has('item')) {
+  const f = ITEMS.findIndex(x => x.id === params.get('item')), t = TRANSFER.findIndex(x => x.id === params.get('item'));
+  if (f >= 0) { fi = f; renderFind(); select('find'); } else if (t >= 0) { ti = t; renderTransfer(); select('transfer'); }
+}
 </script>
 </body>
 </html>

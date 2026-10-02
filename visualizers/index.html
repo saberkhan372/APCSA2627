@@ -106,12 +106,22 @@ h2 { font-family: var(--serif); font-weight: 600; font-size: 1.2rem; margin: 0; 
     <li>
       <h2><a href="boolean.html">Boolean and Short-Circuit Explorer</a></h2>
       <span class="status live">New</span>
-      <p>Evaluate a condition one part at a time: skipped operands stay visibly unevaluated, a null guard works only in the right order, De Morgan equivalence, and dangling <code>else</code>.</p>
+      <p>Evaluate a condition one part at a time: skipped operands stay visibly unevaluated, a null guard works only in the right order, De Morgan equivalence, and dangling <code>else</code>. <a href="boolean.html#branching">Branching view</a>: which branch runs, which conditions are false, and which are never checked.</p>
     </li>
     <li>
       <h2><a href="loops.html">Loop Tracer</a></h2>
       <span class="status live">New</span>
-      <p>Initialize, check, body, update: a trace table for every loop, the equivalent <code>while</code> loop, and a grid for nested loops.</p>
+      <p>Initialize, check, body, update: a trace table for every loop, the equivalent <code>while</code> loop, and a grid for nested loops. <a href="loops.html#compare">Compare two loops</a>: output, final variables, amount of looping and how each run ends.</p>
+    </li>
+    <li>
+      <h2><a href="boundary.html">Boundary-Case Tester</a></h2>
+      <span class="status live">New</span>
+      <p>Choose the input that exposes a bug, predict what the buggy code returns, then repair it. Comparison boundaries, <code>&amp;&amp;</code> versus <code>||</code>, and loop bounds.</p>
+    </li>
+    <li>
+      <h2><a href="construct.html">Loop Construction Workbench</a></h2>
+      <span class="status live">New</span>
+      <p>Choose the start, condition and update of a loop, predict what it prints, and read a trace table of the accumulator, counter or flag after each pass.</p>
     </li>
   </ul>
 

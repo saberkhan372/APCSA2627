@@ -368,6 +368,730 @@ public class LoopsCheck {
         }
     }
 
+    static class C38 {
+
+        static void run() {
+            int n = 0;
+            int total = 0;
+            for (int i = 1; i <= n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C39 {
+
+        static void run() {
+            int visits = 0;
+            int n = 0;
+            int total = 0;
+            for (int i = 1; i <= n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C40 {
+
+        static void run() {
+            int n = 0;
+            int total = 0;
+            int i = 1;
+            while (i <= n) {
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C41 {
+
+        static void run() {
+            int visits = 0;
+            int n = 0;
+            int total = 0;
+            int i = 1;
+            while (i <= n) { visits++;
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C42 {
+
+        static void run() {
+            int n = 1;
+            int total = 0;
+            for (int i = 1; i <= n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C43 {
+
+        static void run() {
+            int visits = 0;
+            int n = 1;
+            int total = 0;
+            for (int i = 1; i <= n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C44 {
+
+        static void run() {
+            int n = 1;
+            int total = 0;
+            int i = 1;
+            while (i <= n) {
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C45 {
+
+        static void run() {
+            int visits = 0;
+            int n = 1;
+            int total = 0;
+            int i = 1;
+            while (i <= n) { visits++;
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C46 {
+
+        static void run() {
+            int n = 5;
+            int total = 0;
+            for (int i = 1; i <= n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C47 {
+
+        static void run() {
+            int visits = 0;
+            int n = 5;
+            int total = 0;
+            for (int i = 1; i <= n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C48 {
+
+        static void run() {
+            int n = 5;
+            int total = 0;
+            int i = 1;
+            while (i <= n) {
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C49 {
+
+        static void run() {
+            int visits = 0;
+            int n = 5;
+            int total = 0;
+            int i = 1;
+            while (i <= n) { visits++;
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C50 {
+
+        static void run() {
+            int n = 6;
+            int total = 0;
+            for (int i = 1; i <= n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C51 {
+
+        static void run() {
+            int visits = 0;
+            int n = 6;
+            int total = 0;
+            for (int i = 1; i <= n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C52 {
+
+        static void run() {
+            int n = 6;
+            int total = 0;
+            int i = 1;
+            while (i <= n) {
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C53 {
+
+        static void run() {
+            int visits = 0;
+            int n = 6;
+            int total = 0;
+            int i = 1;
+            while (i <= n) { visits++;
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C54 {
+
+        static void run() {
+            int n = 0;
+            int total = 0;
+            for (int i = n; i >= 1; i--) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C55 {
+
+        static void run() {
+            int visits = 0;
+            int n = 0;
+            int total = 0;
+            for (int i = n; i >= 1; i--) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C56 {
+
+        static void run() {
+            int n = 1;
+            int total = 0;
+            for (int i = n; i >= 1; i--) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C57 {
+
+        static void run() {
+            int visits = 0;
+            int n = 1;
+            int total = 0;
+            for (int i = n; i >= 1; i--) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C58 {
+
+        static void run() {
+            int n = 5;
+            int total = 0;
+            for (int i = n; i >= 1; i--) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C59 {
+
+        static void run() {
+            int visits = 0;
+            int n = 5;
+            int total = 0;
+            for (int i = n; i >= 1; i--) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C60 {
+
+        static void run() {
+            int n = 6;
+            int total = 0;
+            for (int i = n; i >= 1; i--) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C61 {
+
+        static void run() {
+            int visits = 0;
+            int n = 6;
+            int total = 0;
+            for (int i = n; i >= 1; i--) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C62 {
+
+        static void run() {
+            int n = 1;
+            int total = 0;
+            int i = 0;
+            while (i < n) {
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C63 {
+
+        static void run() {
+            int visits = 0;
+            int n = 1;
+            int total = 0;
+            int i = 0;
+            while (i < n) { visits++;
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C64 {
+
+        static void run() {
+            int n = 3;
+            int total = 0;
+            int i = 0;
+            while (i < n) {
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C65 {
+
+        static void run() {
+            int visits = 0;
+            int n = 3;
+            int total = 0;
+            int i = 0;
+            while (i < n) { visits++;
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C66 {
+
+        static void run() {
+            int n = 3;
+            int total = 0;
+            int i = 1;
+            while (i <= n) {
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C67 {
+
+        static void run() {
+            int visits = 0;
+            int n = 3;
+            int total = 0;
+            int i = 1;
+            while (i <= n) { visits++;
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C68 {
+
+        static void run() {
+            int n = 5;
+            int total = 0;
+            int i = 0;
+            while (i < n) {
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C69 {
+
+        static void run() {
+            int visits = 0;
+            int n = 5;
+            int total = 0;
+            int i = 0;
+            while (i < n) { visits++;
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C70 {
+
+        static void run() {
+            int n = 1;
+            int total = 0;
+            total = 1;
+            for (int i = 2; i <= n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C71 {
+
+        static void run() {
+            int visits = 0;
+            int n = 1;
+            int total = 0;
+            total = 1;
+            for (int i = 2; i <= n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C72 {
+
+        static void run() {
+            int n = 2;
+            int total = 0;
+            for (int i = 1; i <= n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C73 {
+
+        static void run() {
+            int visits = 0;
+            int n = 2;
+            int total = 0;
+            for (int i = 1; i <= n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C74 {
+
+        static void run() {
+            int n = 2;
+            int total = 0;
+            total = 1;
+            for (int i = 2; i <= n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C75 {
+
+        static void run() {
+            int visits = 0;
+            int n = 2;
+            int total = 0;
+            total = 1;
+            for (int i = 2; i <= n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C76 {
+
+        static void run() {
+            int n = 5;
+            int total = 0;
+            total = 1;
+            for (int i = 2; i <= n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C77 {
+
+        static void run() {
+            int visits = 0;
+            int n = 5;
+            int total = 0;
+            total = 1;
+            for (int i = 2; i <= n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C78 {
+
+        static void run() {
+            int n = 0;
+            int total = 0;
+            total = 1;
+            for (int i = 2; i <= n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C79 {
+
+        static void run() {
+            int visits = 0;
+            int n = 0;
+            int total = 0;
+            total = 1;
+            for (int i = 2; i <= n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C80 {
+
+        static void run() {
+            int n = 3;
+            int total = 0;
+            for (int i = 0; i < n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C81 {
+
+        static void run() {
+            int visits = 0;
+            int n = 3;
+            int total = 0;
+            for (int i = 0; i < n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C82 {
+
+        static void run() {
+            int n = 3;
+            int total = 0;
+            int i = 0;
+            while (i != n) {
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C83 {
+
+        static void run() {
+            int visits = 0;
+            int n = 3;
+            int total = 0;
+            int i = 0;
+            while (i != n) { visits++;
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C84 {
+
+        static void run() {
+            int n = 0;
+            int total = 0;
+            for (int i = 0; i < n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C85 {
+
+        static void run() {
+            int visits = 0;
+            int n = 0;
+            int total = 0;
+            for (int i = 0; i < n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C86 {
+
+        static void run() {
+            int n = 0;
+            int total = 0;
+            int i = 0;
+            while (i != n) {
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C87 {
+
+        static void run() {
+            int visits = 0;
+            int n = 0;
+            int total = 0;
+            int i = 0;
+            while (i != n) { visits++;
+                total += i;
+                i++;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
+    static class C88 {
+
+        static void run() {
+            int n = -2;
+            int total = 0;
+            for (int i = 0; i < n; i++) {
+                total += i;
+            }
+            System.out.println(total);
+        }
+    }
+
+    static class C89 {
+
+        static void run() {
+            int visits = 0;
+            int n = -2;
+            int total = 0;
+            for (int i = 0; i < n; i++) { visits++;
+                total += i;
+            }
+            System.out.println(total);
+            System.out.println("visits=" + visits);
+        }
+    }
+
     static int passed = 0, failed = 0;
     static String capture(Runnable r) {
         PrintStream old = System.out;
@@ -424,6 +1148,58 @@ public class LoopsCheck {
         check("boolean done = false;\nint n = 1;\nwhile (!done) {\n    n *= 2;\n    if (n > 20) {\n        done = true;\n    }\n}\nSystem.out.println(n);", "32\n", C29::run);
         check("int[] a = {3, 1, 2};\nSystem.out.println(a[3]);", "|throws:ArrayIndexOutOfBoundsException", C30::run);
         check("String s = \"abc\";\nfor (int i = 0; i <= s.length(); i++) {\n    System.out.print(s.substring(i, i + 1));\n}", "abc|throws:StringIndexOutOfBoundsException", C31::run);
+        check("int n = 0;\nint total = 0;\nfor (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "0\n", C38::run);
+        check("int visits = 0;\nint n = 0;\nint total = 0;\nfor (int i = 1; i <= n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "0\nvisits=0\n", C39::run);
+        check("int n = 0;\nint total = 0;\nint i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "0\n", C40::run);
+        check("int visits = 0;\nint n = 0;\nint total = 0;\nint i = 1;\nwhile (i <= n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "0\nvisits=0\n", C41::run);
+        check("int n = 1;\nint total = 0;\nfor (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "1\n", C42::run);
+        check("int visits = 0;\nint n = 1;\nint total = 0;\nfor (int i = 1; i <= n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "1\nvisits=1\n", C43::run);
+        check("int n = 1;\nint total = 0;\nint i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "1\n", C44::run);
+        check("int visits = 0;\nint n = 1;\nint total = 0;\nint i = 1;\nwhile (i <= n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "1\nvisits=1\n", C45::run);
+        check("int n = 5;\nint total = 0;\nfor (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "15\n", C46::run);
+        check("int visits = 0;\nint n = 5;\nint total = 0;\nfor (int i = 1; i <= n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "15\nvisits=5\n", C47::run);
+        check("int n = 5;\nint total = 0;\nint i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "15\n", C48::run);
+        check("int visits = 0;\nint n = 5;\nint total = 0;\nint i = 1;\nwhile (i <= n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "15\nvisits=5\n", C49::run);
+        check("int n = 6;\nint total = 0;\nfor (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "21\n", C50::run);
+        check("int visits = 0;\nint n = 6;\nint total = 0;\nfor (int i = 1; i <= n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "21\nvisits=6\n", C51::run);
+        check("int n = 6;\nint total = 0;\nint i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "21\n", C52::run);
+        check("int visits = 0;\nint n = 6;\nint total = 0;\nint i = 1;\nwhile (i <= n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "21\nvisits=6\n", C53::run);
+        check("int n = 0;\nint total = 0;\nfor (int i = n; i >= 1; i--) {\n    total += i;\n}\nSystem.out.println(total);", "0\n", C54::run);
+        check("int visits = 0;\nint n = 0;\nint total = 0;\nfor (int i = n; i >= 1; i--) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "0\nvisits=0\n", C55::run);
+        check("int n = 1;\nint total = 0;\nfor (int i = n; i >= 1; i--) {\n    total += i;\n}\nSystem.out.println(total);", "1\n", C56::run);
+        check("int visits = 0;\nint n = 1;\nint total = 0;\nfor (int i = n; i >= 1; i--) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "1\nvisits=1\n", C57::run);
+        check("int n = 5;\nint total = 0;\nfor (int i = n; i >= 1; i--) {\n    total += i;\n}\nSystem.out.println(total);", "15\n", C58::run);
+        check("int visits = 0;\nint n = 5;\nint total = 0;\nfor (int i = n; i >= 1; i--) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "15\nvisits=5\n", C59::run);
+        check("int n = 6;\nint total = 0;\nfor (int i = n; i >= 1; i--) {\n    total += i;\n}\nSystem.out.println(total);", "21\n", C60::run);
+        check("int visits = 0;\nint n = 6;\nint total = 0;\nfor (int i = n; i >= 1; i--) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "21\nvisits=6\n", C61::run);
+        check("int n = 1;\nint total = 0;\nint i = 0;\nwhile (i < n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "0\n", C62::run);
+        check("int visits = 0;\nint n = 1;\nint total = 0;\nint i = 0;\nwhile (i < n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "0\nvisits=1\n", C63::run);
+        check("int n = 3;\nint total = 0;\nint i = 0;\nwhile (i < n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "3\n", C64::run);
+        check("int visits = 0;\nint n = 3;\nint total = 0;\nint i = 0;\nwhile (i < n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "3\nvisits=3\n", C65::run);
+        check("int n = 3;\nint total = 0;\nint i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "6\n", C66::run);
+        check("int visits = 0;\nint n = 3;\nint total = 0;\nint i = 1;\nwhile (i <= n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "6\nvisits=3\n", C67::run);
+        check("int n = 5;\nint total = 0;\nint i = 0;\nwhile (i < n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "10\n", C68::run);
+        check("int visits = 0;\nint n = 5;\nint total = 0;\nint i = 0;\nwhile (i < n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "10\nvisits=5\n", C69::run);
+        check("int n = 1;\nint total = 0;\ntotal = 1;\nfor (int i = 2; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "1\n", C70::run);
+        check("int visits = 0;\nint n = 1;\nint total = 0;\ntotal = 1;\nfor (int i = 2; i <= n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "1\nvisits=0\n", C71::run);
+        check("int n = 2;\nint total = 0;\nfor (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "3\n", C72::run);
+        check("int visits = 0;\nint n = 2;\nint total = 0;\nfor (int i = 1; i <= n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "3\nvisits=2\n", C73::run);
+        check("int n = 2;\nint total = 0;\ntotal = 1;\nfor (int i = 2; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "3\n", C74::run);
+        check("int visits = 0;\nint n = 2;\nint total = 0;\ntotal = 1;\nfor (int i = 2; i <= n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "3\nvisits=1\n", C75::run);
+        check("int n = 5;\nint total = 0;\ntotal = 1;\nfor (int i = 2; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "15\n", C76::run);
+        check("int visits = 0;\nint n = 5;\nint total = 0;\ntotal = 1;\nfor (int i = 2; i <= n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "15\nvisits=4\n", C77::run);
+        check("int n = 0;\nint total = 0;\ntotal = 1;\nfor (int i = 2; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "1\n", C78::run);
+        check("int visits = 0;\nint n = 0;\nint total = 0;\ntotal = 1;\nfor (int i = 2; i <= n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "1\nvisits=0\n", C79::run);
+        check("int n = 3;\nint total = 0;\nfor (int i = 0; i < n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "3\n", C80::run);
+        check("int visits = 0;\nint n = 3;\nint total = 0;\nfor (int i = 0; i < n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "3\nvisits=3\n", C81::run);
+        check("int n = 3;\nint total = 0;\nint i = 0;\nwhile (i != n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "3\n", C82::run);
+        check("int visits = 0;\nint n = 3;\nint total = 0;\nint i = 0;\nwhile (i != n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "3\nvisits=3\n", C83::run);
+        check("int n = 0;\nint total = 0;\nfor (int i = 0; i < n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "0\n", C84::run);
+        check("int visits = 0;\nint n = 0;\nint total = 0;\nfor (int i = 0; i < n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "0\nvisits=0\n", C85::run);
+        check("int n = 0;\nint total = 0;\nint i = 0;\nwhile (i != n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "0\n", C86::run);
+        check("int visits = 0;\nint n = 0;\nint total = 0;\nint i = 0;\nwhile (i != n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "0\nvisits=0\n", C87::run);
+        check("int n = -2;\nint total = 0;\nfor (int i = 0; i < n; i++) {\n    total += i;\n}\nSystem.out.println(total);", "0\n", C88::run);
+        check("int visits = 0;\nint n = -2;\nint total = 0;\nfor (int i = 0; i < n; i++) { visits++;\n    total += i;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "0\nvisits=0\n", C89::run);
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         if (javac == null) throw new IllegalStateException("A JDK is needed to check compile claims.");
         compileCheck(javac, "int x = 0;\nwhile (x < 100) {\n    x *= 3;\n}", "import java.util.ArrayList;\npublic class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\n\nstatic void run() {\nint x = 0;\nwhile (x < 100) {\n    x *= 3;\n}\n}\n}", true);
@@ -434,6 +1210,8 @@ public class LoopsCheck {
         compileCheck(javac, "int i = 0;\nwhile (i) {\n    i++;\n}", "import java.util.ArrayList;\npublic class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\n\nstatic void run() {\nint i = 0;\nwhile (i) {\n    i++;\n}\n}\n}", false);
         compileCheck(javac, "int i = 0;\nwhile (i < 3) {\n    i++;\n    break;\n}", "import java.util.ArrayList;\npublic class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\n\nstatic void run() {\nint i = 0;\nwhile (i < 3) {\n    i++;\n    break;\n}\n}\n}", true);
         compileCheck(javac, "int i = 0;\ndo {\n    i++;\n} while (i < 3);", "import java.util.ArrayList;\npublic class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\n\nstatic void run() {\nint i = 0;\ndo {\n    i++;\n} while (i < 3);\n}\n}", true);
+        compileCheck(javac, "int n = -2;\nint total = 0;\nint i = 0;\nwhile (i != n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);", "import java.util.ArrayList;\npublic class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\n\nstatic void run() {\nint n = -2;\nint total = 0;\nint i = 0;\nwhile (i != n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);\n}\n}", true);
+        compileCheck(javac, "int visits = 0;\nint n = -2;\nint total = 0;\nint i = 0;\nwhile (i != n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);", "import java.util.ArrayList;\npublic class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\n\nstatic void run() {\nint visits = 0;\nint n = -2;\nint total = 0;\nint i = 0;\nwhile (i != n) { visits++;\n    total += i;\n    i++;\n}\nSystem.out.println(total);\nSystem.out.println(\"visits=\" + visits);\n}\n}", true);
         System.out.println(failed == 0 ? "PASS: " + passed + " programs match Java " + System.getProperty("java.version") : failed + " of " + (passed + failed) + " programs differ");
     }
 }

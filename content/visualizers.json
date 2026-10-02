@@ -74,6 +74,28 @@
     "tests": "loops"
   },
   {
+    "id": "boundary",
+    "title": "Boundary-Case Tester",
+    "file": "boundary.html",
+    "dates": [
+      "2026-10-06",
+      "2026-10-08",
+      "2026-11-03"
+    ],
+    "tests": "boundary"
+  },
+  {
+    "id": "construct",
+    "title": "Loop Construction Workbench",
+    "file": "construct.html",
+    "dates": [
+      "2026-10-20",
+      "2026-10-23",
+      "2026-11-03"
+    ],
+    "tests": "construct"
+  },
+  {
     "id": "boolean",
     "title": "Boolean and Short-Circuit Explorer",
     "file": "boolean.html",

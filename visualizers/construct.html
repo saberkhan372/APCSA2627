@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Loop Tracer</title>
+<title>Loop Construction Workbench</title>
 <style>
 /* Palette and chrome match the course site (web/site.css). */
 :root {
@@ -216,43 +216,74 @@ details.ref summary { cursor: pointer; font-weight: 600; font-size: 14px; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
   .col-current .tile { transform: none; }
 }
-/* ---- Loop Tracer ---- */
+/* ---- Boolean Explorer ---- */
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+.seg button { appearance: none; font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 3px; padding: 6px 12px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+input.condin { font: 17px var(--mono); }
+textarea.declin { font: 15px var(--mono); min-height: 4em; }
+.tree { margin-top: 14px; overflow-x: auto; padding: 4px 2px 8px; }
+.bx { display: inline-flex; align-items: stretch; gap: 6px; border: 2px solid var(--line); border-radius: 8px; padding: 6px; vertical-align: top; }
+.bx.and, .bx.or { background: var(--panel); }
+.bx .opx { align-self: center; font: 700 16px var(--mono); color: var(--accent); padding: 0 2px; }
+.leaf { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; border: 1.5px solid var(--line); border-radius: 6px; padding: 5px 8px; font: 15px var(--mono); background: var(--panel); vertical-align: top; white-space: pre; }
+.chip { font: 700 12px var(--mono); border-radius: 999px; padding: 1px 8px; }
+.chip.t { background: var(--same-bg); color: var(--same-ink); border: 1px solid var(--same-line); }
+.chip.f { background: var(--diff-bg); color: var(--diff-ink); border: 1px solid var(--diff-line); }
+.chip.n { background: var(--soft); color: var(--muted); border: 1px solid var(--line); }
+.chip.x { background: var(--diff-line); color: #fff; }
+.skipped { opacity: .45; border-style: dashed !important; }
+.threw { border-color: var(--diff-line) !important; box-shadow: 0 0 0 3px var(--diff-bg); }
+.cur { box-shadow: 0 0 0 3px var(--accent); }
+.valrow { display: flex; align-items: center; justify-content: flex-end; }
+.valrow .chip, .leaf .chip { white-space: nowrap; }
+.equiv { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+table.tt { border-collapse: collapse; font: 13px var(--mono); margin-top: 6px; }
+table.tt th, table.tt td { border: 1px solid var(--line); padding: 3px 8px; text-align: center; }
+table.tt th { background: var(--soft); font: 600 12px var(--sans); color: var(--muted); }
+table.tt tr.bad td { background: var(--diff-bg); }
+.verdict { font-weight: 700; margin-top: 6px; }
+.verdict.ok { color: var(--same-ink); } .verdict.no { color: var(--diff-ink); }
 .runner-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; margin-top: 12px; }
 @media (max-width: 820px) { .runner-grid { grid-template-columns: minmax(0, 1fr); } }
 .colhead { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 12px 0 6px; }
-.tracewrap { overflow-x: auto; }
-table.trace { border-collapse: collapse; font: 13px var(--mono); min-width: 100%; }
-table.trace th, table.trace td { border: 1px solid var(--line); padding: 3px 7px; text-align: center; white-space: nowrap; }
-table.trace th { font: 600 12px var(--sans); color: var(--muted); background: var(--soft); }
-table.trace tr.now td { background: var(--accent-soft); font-weight: 700; }
-table.trace td.f { color: var(--diff-ink); font-weight: 700; }
-table.trace td.t { color: var(--same-ink); }
-table.trace td.na { color: var(--muted); }
-table.trace caption.key { caption-side: bottom; text-align: left; padding-top: 4px; font-family: var(--sans); }
-.tracesel select { font: 15px var(--sans); padding: 5px 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--bg); color: var(--ink); }
-.grid2 { display: grid; gap: 3px; margin-top: 4px; overflow-x: auto; }
-.gcell { min-width: 30px; height: 28px; border: 1.5px dashed var(--line); border-radius: 4px; font: 12px var(--mono); display: flex; align-items: center; justify-content: center; }
-.gcell.on { border-style: solid; border-color: var(--same-line); background: var(--same-bg); color: var(--same-ink); }
-.gcell.cur { box-shadow: 0 0 0 3px var(--accent); }
-.grow { font: 600 12px var(--mono); color: var(--muted); display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; white-space: nowrap; }
-.gnote { font-size: 14px; margin-top: 6px; }
-.toolbar2 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
-.qstate { font-size: 15px; background: var(--soft); border-radius: 8px; padding: 8px 12px; margin: 6px 0; }
-.seg { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
-.seg button { appearance: none; font: 600 14px var(--sans); border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 3px; padding: 6px 12px; cursor: pointer; }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.reindent { font: 14px/1.6 var(--mono); background: var(--soft); border-radius: 8px; padding: 10px 14px; white-space: pre; overflow-x: auto; }
+.entry { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 10px; margin: 0 0 18px; }
+.entry a { display: block; text-decoration: none; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+.entry a:hover, .entry a:focus-visible { border-color: var(--accent); }
+.entry a[aria-current="true"] { border-color: var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
+.entry b { display: block; color: var(--accent); }
+.entry span { font-size: 14px; color: var(--muted); }
+.bmap { display: grid; gap: 4px; }
+.brow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 4px 8px; font: 14px var(--mono); }
+.brow .btxt { white-space: pre-wrap; }
+.brow.cur { box-shadow: 0 0 0 3px var(--accent-soft); border-color: var(--accent); }
+.brow.never { border-style: dashed; background: var(--soft); }
+.brow .why { flex-basis: 100%; font: 14px var(--sans); color: var(--muted); }
+.brow .chip.w { background: var(--extra-bg); color: var(--extra-ink); border: 1px solid var(--extra-line); }
+.bkey { font-size: 14px; color: var(--muted); margin: 6px 0 0; }
+.specbox { background: var(--soft); border-left: 4px solid var(--accent); border-radius: 4px; padding: 10px 14px; margin: 10px 0; }
+.specbox b { color: var(--accent); }
+.inrow { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 8px; }
+.inrow label.field { margin-bottom: 0; }
+.inrow input.num { width: 7em; }
+select.pick { font: 16px var(--mono); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); margin-top: 4px; display: block; }
+.stephead { font: 700 15px var(--sans); margin: 18px 0 6px; }
+.stephead .n { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--accent); color: var(--accent-ink); margin-right: 6px; font-size: 13px; }
+.setchips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.setchips .chip { cursor: default; font: 600 13px var(--mono); }
+.setchips .chip.hit { background: var(--diff-bg); border-color: var(--diff-line); color: var(--diff-ink); }
+table.tt td.l, table.tt th.l { text-align: left; }
+table.tt tr.hit td { background: var(--diff-bg); }
+.cands { display: grid; gap: 6px; margin: 8px 0; }
+.cand { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+.cand pre { margin: 0; font: 14px/1.5 var(--mono); white-space: pre-wrap; }
+.mini { width: 6em; display: inline-block; margin: 0 6px; font: 15px var(--mono); }
 .cmpgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 @media (max-width: 760px) { .cmpgrid { grid-template-columns: 1fr; } }
-textarea.code { font: 14px/1.5 var(--mono); min-height: 8em; white-space: pre; }
-table.cmp { border-collapse: collapse; font: 13px var(--mono); margin-top: 8px; width: 100%; }
-table.cmp th, table.cmp td { border: 1px solid var(--line); padding: 4px 8px; text-align: left; vertical-align: top; white-space: pre-wrap; }
-table.cmp th { font: 600 12px var(--sans); color: var(--muted); background: var(--soft); }
-table.cmp td.diff { background: var(--diff-bg); color: var(--diff-ink); font-weight: 700; }
-table.cmp td.same { color: var(--same-ink); }
-table.cmp tr.pick td { background: var(--accent-soft); }
-table.cmp button.link { appearance: none; border: 0; background: none; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; padding: 0; }
-.verdict { font-weight: 700; margin: 8px 0 2px; }
-.verdict.ok { color: var(--same-ink); } .verdict.no { color: var(--diff-ink); }
+textarea.code { font: 14px/1.5 var(--mono); min-height: 9em; white-space: pre; }
+select.blank { font: 14px var(--mono); padding: 1px 4px; margin: 0 2px; display: inline-block; }
+.tui-code li select { vertical-align: baseline; }
 .tablewrap { overflow-x: auto; max-width: 100%; }
 </style>
 </head>
@@ -262,60 +293,41 @@ table.cmp button.link { appearance: none; border: 0; background: none; color: va
 <main id="main" class="wrap" tabindex="-1">
   <header class="page-heading">
     <p class="kicker"><a href="index.html">Visualizers</a> · Unit 2 · Iteration</p>
-    <h1>Loop Tracer</h1>
-    <p class="lede">A loop repeats four parts in a fixed order: <b>initialize</b> once, then <b>check the condition</b>, run the <b>body</b>, <b>update</b>, and check again. Step through it with a trace table, and see nested loops as a grid.</p>
+    <h1>Loop Construction Workbench</h1>
+    <p class="lede">A loop is built from three decisions: where the variable starts, when the loop keeps going, and how it changes each pass. Choose those parts yourself, predict what your loop prints, then watch a trace table show what the accumulator, counter or flag holds after every pass.</p>
   </header>
 
   <div class="tabs" role="tablist" aria-label="Mode">
-    <button class="tab" role="tab" id="tab-predict" aria-controls="mode-predict" aria-selected="true">Predict</button>
-    <button class="tab" role="tab" id="tab-explore" aria-controls="mode-explore" aria-selected="false" tabindex="-1">Explore</button>
+    <button class="tab" role="tab" id="tab-build" aria-controls="mode-build" aria-selected="true">Build</button>
     <button class="tab" role="tab" id="tab-transfer" aria-controls="mode-transfer" aria-selected="false" tabindex="-1">Transfer</button>
   </div>
 
-  <section id="mode-predict" role="tabpanel" aria-labelledby="tab-predict">
+  <section id="mode-build" role="tabpanel" aria-labelledby="tab-build">
     <div class="panel">
-      <div class="row"><span class="qmeta" id="p-count"></span><span class="spacer"></span><button class="btn" id="p-prev">← Previous</button><button class="btn" id="p-next">Next question →</button></div>
-      <p class="qprompt" id="p-ask"></p>
-      <div class="tui-codebox" id="p-code" aria-label="Java code"></div>
-      <form id="p-form" novalidate></form>
-      <div id="p-after" class="hidden"><div id="p-feedback" class="feedback" role="status"></div><div class="note" id="p-tests"></div><div id="p-view"></div></div>
-    </div>
-  </section>
-
-  <section id="mode-explore" role="tabpanel" aria-labelledby="tab-explore" class="hidden">
-    <div class="panel">
-      <div class="seg" id="compare" role="group" aria-label="Explore"><button type="button" id="m-one" aria-pressed="true">One loop</button><button type="button" id="m-cmp" aria-pressed="false">Compare two loops</button></div>
-      <div id="one-mode">
-      <label class="field">Program <span class="hint">(<code>int</code>, <code>double</code>, <code>boolean</code>, <code>String</code>, arrays; <code>for</code>, <code>while</code>, enhanced <code>for</code>, <code>if</code>/<code>else</code>; <code>System.out.println</code>)</span>
-        <textarea class="tui-codein" id="e-code" spellcheck="false"></textarea>
-      </label>
-      <div class="small">Try:</div>
-      <div class="presets" id="e-presets"></div>
-      <div class="toolbar2"><button class="btn" type="button" id="e-convert">Show the equivalent while loop</button><span class="small" id="e-convnote"></span></div>
-      <div id="e-view"></div>
-      </div>
-      <div id="cmp-mode" class="hidden">
-        <p class="small" style="margin-top:0">Run two versions from the same starting point and compare what they print, what their variables hold at the end, how much looping they do, and how they end. If the setup declares <code>int n = …;</code>, both are run for each value of <code>n</code> you list.</p>
-        <div class="small">Try:</div><div class="presets" id="c-presets"></div>
-        <label class="field" style="margin-top:10px">Shared setup <span class="hint">(runs before each loop)</span><textarea class="code" id="c-setup" spellcheck="false" style="min-height:4em"></textarea></label>
-        <div class="cmpgrid">
-          <label class="field">Loop A<textarea class="code" id="c-a" spellcheck="false"></textarea></label>
-          <label class="field">Loop B<textarea class="code" id="c-b" spellcheck="false"></textarea></label>
-        </div>
-        <label class="field">Values of n to try <span class="hint">(whole numbers separated by commas, up to 8)</span><input type="text" class="strin" id="c-vals" autocomplete="off" spellcheck="false" style="max-width:20em"></label>
-        <div id="c-view"></div>
-      </div>
+      <div class="row"><span class="qmeta" id="b-count"></span><span class="spacer"></span><button class="btn" id="b-prev">← Previous</button><button class="btn" id="b-next">Next item →</button></div>
+      <h2 id="b-title" style="margin:.6rem 0 0;font-size:1.25rem"></h2>
+      <div class="specbox" id="b-goal"></div>
+      <div class="small" id="b-pattern"></div>
+      <div class="stephead"><span class="n">1</span>Choose the parts of the loop</div>
+      <div class="small" id="b-tests-label">Test data:</div>
+      <div class="presets" id="b-testpick" role="group" aria-label="Test data"></div>
+      <ol class="tui-code" id="b-code" aria-label="The loop, with choices to make"></ol>
+      <form id="b-form" novalidate></form>
+      <div id="b-result" aria-live="polite"></div>
+      <div id="b-explain" class="hidden"></div>
     </div>
   </section>
 
   <section id="mode-transfer" role="tabpanel" aria-labelledby="tab-transfer" class="hidden">
     <div class="panel">
-      <p class="small" style="margin-top:0">No tracer here. Make your own trace table on paper, then check.</p>
-      <div class="row"><span class="qmeta" id="t-count"></span><span class="spacer"></span><button class="btn" id="t-prev">← Previous</button><button class="btn" id="t-next">Next question →</button></div>
-      <p class="qprompt" id="t-ask"></p>
-      <div class="tui-codebox" id="t-code" aria-label="Java code"></div>
+      <p class="small" style="margin-top:0">Nothing runs until you check. Trace your choices on paper first.</p>
+      <div class="row"><span class="qmeta" id="t-count"></span><span class="spacer"></span><button class="btn" id="t-prev">← Previous</button><button class="btn" id="t-next">Next item →</button></div>
+      <h2 id="t-title" style="margin:.6rem 0 0;font-size:1.25rem"></h2>
+      <div class="specbox" id="t-goal"></div>
+      <div class="small">Test data used when you check: <span id="t-tests"></span></div>
+      <ol class="tui-code" id="t-code" aria-label="The loop, with choices to make"></ol>
       <form id="t-form" novalidate></form>
-      <div id="t-after" class="hidden"><div id="t-feedback" class="feedback" role="status"></div><div class="note" id="t-model"></div></div>
+      <div id="t-result" aria-live="polite"></div>
     </div>
   </section>
 </main>
@@ -768,7 +780,8 @@ function runJava(declSrc, stmtSrc) {
   return { ok: true, steps, stmt, env, type, value, label: `${type}:${asText(type, value)}` };
 }
 // EXPR ENGINE END
-// MINIJAVA START (copied from lib/minijava.js by visualizers/tests/sync-expr-engine.mjs; do not edit here)
+
+// MINIJAVA START
 // A small Java interpreter for teaching traces. It follows the JLS for the subset it accepts:
 // the whole program is parsed and type-checked first (as javac does), then run one step at a time,
 // recording a snapshot of every step for the visualizers.
@@ -1896,7 +1909,8 @@ const MJ = (function () {
   return { run, label, parse, loopsOf, forToWhile, CompileError, Unsupported };
 })();
 // MINIJAVA END
-// TRACE UI START (copied from lib/trace-ui.js by visualizers/tests/sync-expr-engine.mjs; do not edit here)
+
+// TRACE UI START
 // Shared pieces for the trace visualizers: code panel, stepping controls, variable table, call frames
 // with arrows to objects, console, tabs, and Predict/Transfer question sets. Styles use each page's
 // color tokens (--ink, --line, --accent and so on).
@@ -2205,343 +2219,431 @@ textarea.tui-outin { font: 15px/1.5 var(--mono); min-height: 3.5em; }
 // TRACE UI END
 
 // ENGINE START
-// Loop-specific reading of an interpreter run: which loop a step belongs to, and its phase.
-const PHASES = ['The loop body runs', 'The update runs', 'The condition is checked', 'The first statement after the loop runs'];
-function lineOfPos(src, pos) { return src.slice(0, pos).split('\n').length; }
-function phaseOf(run, src, k, loopIndex = 0) {
-  const loops = MJ.loopsOf(run.prog), L = loops[loopIndex], s = run.steps[k];
-  if (!s) return 3;
-  if (s.phase === 'update' && s.line === L.line) return 1;
-  if (s.kind === 'cond' && s.loop === L.id) return 2;
-  if (s.line > L.line && s.line <= lineOfPos(src, L.endPos)) return 0;
-  return 3;
-}
-function bodyCount(run, loopIndex = 0) {
-  const L = MJ.loopsOf(run.prog)[loopIndex];
-  return run.steps.filter(s => s.loop === L.id && (s.kind === 'foreach' || (s.kind === 'cond' && s.value))).length;
-}
-// Two programs run from the same setup and compared on what they did: output, the variables left at the
-// end, how much looping happened, and how the run ended.
-const cmpValue = (v, type, heap) => v === null ? 'null' : v && typeof v === 'object' && 'ref' in v ? '[' + ((heap[v.ref] || { values: [] }).values.join(', ')) + ']' : type === 'double' ? javaDouble(v) : typeof v === 'string' ? JSON.stringify(v) : String(v);
-function summarizeRun(src) {
-  const run = MJ.run(src);
-  if (run.compileError) return { problem: 'does not compile: ' + run.compileError };
-  if (run.unsupported) return { problem: 'is not supported here: ' + run.unsupported };
-  const last = run.steps[run.steps.length - 1], loopSteps = run.steps.filter(s => s.kind === 'cond' && s.loop !== undefined);
-  const endless = !!run.limit;
-  return {
-    out: run.out,
-    vars: last ? last.frames[0].vars.map(v => `${v.name} = ${cmpValue(v.v, v.type, last.heap)}`).join('; ') || '(none)' : '(none)',
-    checks: endless ? null : loopSteps.length,
-    iterations: endless ? null : run.steps.filter(s => s.kind === 'foreach' || (s.kind === 'cond' && s.loop !== undefined && s.value)).length,
-    end: endless ? 'never stops (the tool gave up)' : run.crashed ? `throws ${run.crashed}` : 'finishes normally',
-  };
-}
-const N_DECL = /\bint\s+n\s*=\s*-?\d+\s*;/;
-function parseValues(text) {
-  const parts = text.split(',').map(x => x.trim()).filter(Boolean);
-  if (!parts.length) return { error: 'List at least one value of n.' };
-  if (parts.length > 8) return { error: 'Try at most 8 values.' };
-  if (!parts.every(x => /^[−-]?\d{1,4}$/.test(x))) return { error: 'The values of n must be whole numbers with at most four digits: a loop over a bigger n would hit the tool\'s step limit and look endless.' };
-  return { values: parts.map(x => parseInt(x.replace('−', '-'), 10)) };
-}
-function compareLoops(setup, a, b, values) {
-  const hasN = N_DECL.test(setup);
-  const runs = (hasN ? values : [null]).map(v => {
-    const s = v === null ? setup : setup.replace(N_DECL, `int n = ${v};`);
-    const A = summarizeRun(`${s}\n${a}`), B = summarizeRun(`${s}\n${b}`);
-    const row = { n: v, A, B };
-    if (!A.problem && !B.problem) Object.assign(row, { out: A.out === B.out, vars: A.vars === B.vars, work: A.checks === B.checks && A.iterations === B.iterations, end: A.end === B.end });
-    return row;
+// An item is a program template with blanks, [[key]], and a placeholder, {{data}}, for the test data.
+// A "build" is the chosen option index for each blank. Every build is assembled into a complete Java
+// program and run in the interpreter on each test; a build is right only if every test prints what the
+// item says it should.
+const RUN_OPTS = { maxOps: 30000, maxSteps: 800 };
+const optText = (item, b, i) => item.blanks[b].options[i].text;
+function assemble(item, build, test) {
+  return item.template.replace('{{data}}', test.data).replace(/\[\[(\w+)\]\]/g, (_, key) => {
+    const b = item.blanks.findIndex(x => x.key === key);
+    return optText(item, b, build[b]);
   });
-  return { hasN, runs, problem: runs.find(r => r.A.problem || r.B.problem) || null };
 }
+function runBuild(item, build, test) {
+  const src = assemble(item, build, test), run = MJ.run(src, RUN_OPTS);
+  return { src, run, label: MJ.label(run) };
+}
+// How a test result reads for a student.
+function describeLabel(label) {
+  if (label === 'compile-error') return 'does not compile';
+  if (label === 'limit') return 'never stops (an infinite loop)';
+  if (label === 'unsupported') return 'not supported here';
+  const m = /^([\s\S]*)\|throws:(\w+)$/.exec(label);
+  if (m) return `crashes with ${m[2]}` + (m[1] ? ` after printing ${JSON.stringify(m[1].replace(/\n$/, ''))}` : '');
+  return JSON.stringify(label.replace(/\n$/, ''));
+}
+function judge(item, build) {
+  const results = item.tests.map(test => { const r = runBuild(item, build, test); return { test, ...r, ok: r.label === test.want + '\n' }; });
+  return { results, ok: results.every(r => r.ok) };
+}
+// The blanks whose choice, changed alone, would make every test pass: the likely culprits.
+function culprits(item, build) {
+  const found = [];
+  item.blanks.forEach((bl, b) => {
+    const fixes = bl.options.map((_, i) => i).filter(i => i !== build[b] && judge(item, build.map((x, k) => k === b ? i : x)).ok);
+    if (fixes.length) found.push({ blank: b, fixes });
+  });
+  return found;
+}
+const sameBuild = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+// The trace of the first loop on a test: one row per check of its condition, with the variables that matter.
+const showValue = (v, type) => v === null ? 'null' : type === 'double' ? javaDouble(v) : typeof v === 'string' ? JSON.stringify(v) : String(v);
+function traceRows(run) {
+  const loops = MJ.loopsOf(run.prog), L = loops[0];
+  if (!L) return null;
+  const checks = run.steps.filter(s => s.kind === 'cond' && s.loop === L.id);
+  const vars = s => s.frames[s.frames.length - 1].vars.filter(v => !v.type.endsWith('[]') && v.name !== 'word');
+  const names = [];
+  run.steps.forEach(s => vars(s).forEach(v => { if (!names.includes(v.name)) names.push(v.name); }));
+  const rows = checks.map(s => ({ vals: Object.fromEntries(vars(s).map(v => [v.name, showValue(v.v, v.type)])), value: s.value }));
+  // Keep the columns that change, plus the loop variable.
+  const keep = names.filter(n => n === L.var || new Set(rows.map(r => r.vals[n])).size > 1);
+  return { rows, names: keep, loop: L };
+}
+// What a variable holds right after the loop body has run k times: the value at check k + 1.
+function valueAfterPasses(run, name, k) {
+  const t = traceRows(run);
+  if (!t || k + 1 > t.rows.length) return null;
+  return t.rows[k].vals[name];
+}
+const passCount = run => { const t = traceRows(run); return t ? t.rows.filter(r => r.value).length : 0; };
 // ENGINE END
 
 // DATA START
-const NEXT = PHASES.map(text => ({ text }));
-const PREDICT = [
-  { code: 'int count = 0;\nfor (int i = 0; i < 5; i++) {\n    count++;\n}\nSystem.out.println(count);', ask: 'count', tests: 'The condition is checked six times (i = 0 to 5), but the body runs only when it is true: five times.' },
-  { code: 'int x = 2;\nwhile (x < 100) {\n    x *= 5;\n}\nSystem.out.println(x);', ask: 'output', tests: 'The condition is checked only before each iteration, so x can end well past 100.' },
-  { code: 'for (int i = 1; i <= 10; i += 3) {\n    System.out.print(i + " ");\n}', ask: 'output', tests: 'Count the updates: 1, 4, 7, 10. The next value, 13, fails the condition.' },
-  { code: 'for (int i = 1; i <= 10; i += 3) {\n    System.out.print(i + " ");\n}', ask: 'next', after: 3, state: 'The body has just printed "1 ".', choices: NEXT, tests: 'In a for loop, the update runs after the body and before the next check.' },
-  { code: 'int i = 0;\nint last = 0;\nwhile (i < 4) {\n    last = i;\n    i++;\n}\nSystem.out.println(last + " " + i);', ask: 'output', tests: 'The last value used in the body is not the final value of the loop variable. The loop stops when i reaches 4.' },
-  { code: 'int n = 10;\nwhile (n < 5) {\n    n++;\n}\nSystem.out.println(n);', ask: 'output', tests: 'A false condition on the first check means zero iterations. That is allowed.' },
-  { code: 'int sum = 0;\nfor (int k = 1; k <= 5; k++) {\n    sum += k * k;\n}\nSystem.out.println(sum);', ask: 'output', tests: 'Accumulate: 1 + 4 + 9 + 16 + 25.' },
-  { code: 'int count = 0;\nfor (int j = 10; j > 0; j -= 3) {\n    count++;\n}\nSystem.out.println(count);', ask: 'count', tests: 'j takes 10, 7, 4 and 1. The next value, −2, fails the condition.' },
-  { code: 'int i = 5;\nwhile (i > 0) {\n    i -= 2;\n}\nSystem.out.println(i);', ask: 'next', after: 8, state: 'The condition i > 0 has just been checked with i = −1: false.', choices: NEXT, tests: 'When the condition is false, the loop ends and execution continues with the next statement.' },
-  { code: 'int x = 0;\nwhile (x < 100) {\n    x *= 3;\n}', ask: 'mc', choices: [{ text: 'It stops with x = 100.', match: '#stops100' }, { text: 'It stops with x = 243.', match: '#stops243' }, { text: 'It never stops: an infinite loop.', match: 'limit' }, { text: 'It does not compile.', match: 'compile-error' }], tests: '0 × 3 is still 0, so the condition never becomes false.' },
-  { code: 'String s = "banana";\nint count = 0;\nfor (int i = 0; i < s.length(); i++) {\n    if (s.substring(i, i + 1).equals("a")) {\n        count++;\n    }\n}\nSystem.out.println(count);', ask: 'output', tests: 'A String scan: one index at a time, from 0 to length() − 1.' },
-  { code: 'int c = 0;\nfor (int r = 0; r < 3; r++) {\n    for (int k = 0; k < 4; k++) {\n        c++;\n    }\n}\nSystem.out.println(c);', ask: 'output', tests: 'The inner loop runs completely for every outer iteration: 3 rows × 4 = 12.' },
-  { code: 'for (int r = 1; r <= 4; r++) {\n    for (int k = 1; k <= r; k++) {\n        System.out.print("*");\n    }\n    System.out.println();\n}', ask: 'output', tests: 'The inner loop\'s limit depends on r, so each row is longer: a triangle.' },
+const O = (text, why) => ({ text, why });
+const B = (key, label, options) => ({ key, label, options });
+// Each item: goal, template, blanks (options with a "why" for the wrong ones), ref (the intended build),
+// tests (the data and the exact expected output), watch (the variable to follow), meaning (a question).
+const ITEMS = [
+  { id: 'sum', title: 'Add 1 through n', pattern: 'Accumulator: a running total',
+    goal: 'Print the sum of the whole numbers from 1 through n. For n = 0 the sum is 0.',
+    template: '{{data}}\nint sum = [[init]];\nfor (int i = [[start]]; [[cond]]; [[update]]) {\n    sum += i;\n}\nSystem.out.println(sum);',
+    blanks: [
+      B('init', 'where sum starts', [O('0'), O('1', 'Starting the total at 1 adds an extra 1 to every answer.'), O('n', 'Starting the total at n adds n to every answer.')]),
+      B('start', 'where i starts', [O('0'), O('1'), O('2', 'Starting at 2 skips the value 1.')]),
+      B('cond', 'when the loop keeps going', [O('i < n', 'The loop stops before n, so n itself is never added.'), O('i <= n'), O('i <= n + 1', 'The loop runs one pass too many and adds n + 1.'), O('i != n', 'It stops one value early, and if i starts past n it never stops.')]),
+      B('update', 'how i changes', [O('i++'), O('i += 2', 'Counting by 2 skips every other value.'), O('i--', 'i counts down, so i <= n stays true and the loop never ends.')]),
+    ],
+    ref: [0, 1, 1, 0],
+    tests: [{ data: 'int n = 5;', want: '15' }, { data: 'int n = 0;', want: '0' }, { data: 'int n = 1;', want: '1' }, { data: 'int n = 6;', want: '21' }],
+    watch: { name: 'sum', label: 'sum' },
+    meaning: { q: 'After each pass through the loop, what does sum mean?', choices: ['The total of the values added so far.', 'How many passes the loop has made.', 'The current value of i.'], answer: 0 } },
+  { id: 'count3', title: 'Count the multiples of 3', pattern: 'Counter: how many items match',
+    goal: 'Print how many of the numbers from 1 through n are multiples of 3.',
+    template: '{{data}}\nint count = [[init]];\nfor (int i = [[start]]; [[cond]]; [[update]]) {\n    if (i % 3 == 0) {\n        count++;\n    }\n}\nSystem.out.println(count);',
+    blanks: [
+      B('init', 'where count starts', [O('0'), O('1', 'Nothing has been counted yet, so the count starts at 0.'), O('n', 'The count should start at 0, not at n.')]),
+      B('start', 'where i starts', [O('0', '0 is a multiple of 3 but it is not in 1 through n, so it adds one extra.'), O('1'), O('3')]),
+      B('cond', 'when the loop keeps going', [O('i < n', 'It misses n itself: for n = 3 the 3 is never examined.'), O('i <= n'), O('i <= n / 3', 'It compares i with a third of n, so the loop stops far too early.')]),
+      B('update', 'how i changes', [O('i++'), O('i += 3', 'Stepping by 3 only finds multiples of 3 when i also starts on one.'), O('i--', 'Counting down never reaches the end.')]),
+    ],
+    ref: [0, 1, 1, 0],
+    tests: [{ data: 'int n = 10;', want: '3' }, { data: 'int n = 0;', want: '0' }, { data: 'int n = 3;', want: '1' }, { data: 'int n = 9;', want: '3' }, { data: 'int n = 2;', want: '0' }],
+    watch: { name: 'count', label: 'count' },
+    meaning: { q: 'After each pass, what does count mean?', choices: ['The number of multiples of 3 found so far.', 'The most recent multiple of 3 found.', 'How many passes the loop has made.'], answer: 0 } },
+  { id: 'evens', title: 'Add the even numbers', pattern: 'Accumulator that changes by a step',
+    goal: 'Print the sum of the even numbers from 2 through n. If there are none, print 0.',
+    template: '{{data}}\nint total = [[init]];\nfor (int i = [[start]]; [[cond]]; [[update]]) {\n    total += i;\n}\nSystem.out.println(total);',
+    blanks: [
+      B('init', 'where total starts', [O('0'), O('2', 'The total should start at 0: with n below 2 there is nothing to add.')]),
+      B('start', 'where i starts', [O('0'), O('1', 'Starting at 1 gives odd numbers (or every number, if the step is 1).'), O('2')]),
+      B('cond', 'when the loop keeps going', [O('i < n', 'It leaves out n itself when n is even.'), O('i <= n')]),
+      B('update', 'how i changes', [O('i++', 'Stepping by 1 adds every number, not only the even ones.'), O('i += 2')]),
+    ],
+    ref: [0, 2, 1, 1],
+    tests: [{ data: 'int n = 10;', want: '30' }, { data: 'int n = 7;', want: '12' }, { data: 'int n = 1;', want: '0' }, { data: 'int n = 2;', want: '2' }, { data: 'int n = 0;', want: '0' }],
+    watch: { name: 'total', label: 'total' },
+    meaning: { q: 'After each pass, what does total mean?', choices: ['The sum of the even numbers added so far.', 'The sum of every number up to i.', 'The number of even numbers found.'], answer: 0 } },
+  { id: 'max', title: 'Find the largest', pattern: 'Maximum: the best so far',
+    goal: 'Print the largest value in the array a. The array may contain only negative numbers.',
+    template: '{{data}}\nint max = [[init]];\nfor (int i = [[start]]; [[cond]]; [[update]]) {\n    if (a[i] > max) {\n        max = a[i];\n    }\n}\nSystem.out.println(max);',
+    blanks: [
+      B('init', 'where max starts', [O('0', 'If every element is negative, 0 is bigger than all of them and max never changes. Start from an element of the array.'), O('a[0]'), O('a.length', 'a.length is a count, not an element, so it can be bigger than every element.')]),
+      B('start', 'where i starts', [O('0'), O('1'), O('2', 'It skips elements that could be the largest.')]),
+      B('cond', 'when the loop keeps going', [O('i < a.length'), O('i <= a.length', 'a[a.length] is past the end of the array, which throws an exception.'), O('i < a.length - 1', 'It skips the last element.')]),
+      B('update', 'how i changes', [O('i++'), O('i += 2', 'It skips every other element.')]),
+    ],
+    ref: [1, 1, 0, 0],
+    tests: [{ data: 'int[] a = {-7, -3, -9};', want: '-3' }, { data: 'int[] a = {4, 9, 2};', want: '9' }, { data: 'int[] a = {5};', want: '5' }, { data: 'int[] a = {2, 8};', want: '8' }, { data: 'int[] a = {6, 1, 3};', want: '6' }, { data: 'int[] a = {1, 2, 3, 4, 5};', want: '5' }],
+    watch: { name: 'max', label: 'max' },
+    meaning: { q: 'After each pass, what does max mean?', choices: ['The largest element examined so far.', 'The element at index i.', 'The position of the largest element.'], answer: 0 } },
+  { id: 'flag', title: 'Is there a z?', pattern: 'Flag: has something happened yet?',
+    goal: 'Print true if the String contains the letter z, and false if it does not.',
+    template: '{{data}}\nboolean found = [[init]];\nfor (int i = 0; [[cond]]; i++) {\n    if (word.substring(i, i + 1).equals("z")) {\n        found = [[set]];\n    }\n}\nSystem.out.println(found);',
+    blanks: [
+      B('init', 'where found starts', [O('false'), O('true', 'The flag would already say "found" before any letter has been looked at.')]),
+      B('cond', 'when the loop keeps going', [O('i < word.length()'), O('i <= word.length()', 'substring past the end of the String throws an exception.'), O('i < word.length() - 1', 'It never looks at the last letter.')]),
+      B('set', 'what found becomes at a z', [O('true'), O('false', 'Setting the flag to false at a z cancels the search.'), O('!found', 'It flips the flag, so a second z turns it back off. The flag should only ever change to true.')]),
+    ],
+    ref: [0, 0, 0],
+    tests: [{ data: 'String word = "pizza";', want: 'true' }, { data: 'String word = "plain";', want: 'false' }, { data: 'String word = "z";', want: 'true' }, { data: 'String word = "fizz";', want: 'true' }, { data: 'String word = "az";', want: 'true' }],
+    watch: { name: 'found', label: 'found' },
+    meaning: { q: 'After each pass, what does found mean?', choices: ['A z has been seen in the letters checked so far.', 'The letter just checked is a z.', 'Where the first z is.'], answer: 0 } },
+  { id: 'reverse', title: 'Reverse a word', pattern: 'String builder: build a result letter by letter',
+    goal: 'Print the String word written backwards.',
+    template: '{{data}}\nString rev = [[init]];\nfor (int i = [[start]]; [[cond]]; [[update]]) {\n    rev += word.substring(i, i + 1);\n}\nSystem.out.println(rev);',
+    blanks: [
+      B('init', 'where rev starts', [O('""'), O('word', 'It would start with the whole word, and the reversed letters would be added after it.')]),
+      B('start', 'where i starts', [O('0', 'Reversing has to begin at the last letter, not the first.'), O('word.length() - 1'), O('word.length()', 'word.length() is one past the last index, so substring throws an exception.')]),
+      B('cond', 'when the loop keeps going', [O('i < word.length()', 'While i counts down it is always below the length, so it runs past the front and throws an exception.'), O('i >= 0'), O('i > 0', 'It stops before index 0, so the first letter is left out.')]),
+      B('update', 'how i changes', [O('i++', 'Counting up moves away from the start of the reversal.'), O('i--')]),
+    ],
+    ref: [0, 1, 1, 1],
+    tests: [{ data: 'String word = "loop";', want: 'pool' }, { data: 'String word = "abc";', want: 'cba' }, { data: 'String word = "a";', want: 'a' }, { data: 'String word = "ab";', want: 'ba' }],
+    watch: { name: 'rev', label: 'rev' },
+    meaning: { q: 'After each pass, what does rev mean?', choices: ['The letters taken so far, in the order they were taken.', 'The last letter of word.', 'The whole word, reversed, from the start.'], answer: 0 } },
+  { id: 'power2', title: 'The next power of 2', pattern: 'While loop: grow until big enough',
+    goal: 'Print the smallest power of 2 that is at least n (n is 0 or more). The powers of 2 are 1, 2, 4, 8, 16 and so on.',
+    template: '{{data}}\nint p = [[init]];\nwhile ([[cond]]) {\n    p = [[update]];\n}\nSystem.out.println(p);',
+    blanks: [
+      B('init', 'where p starts', [O('0', 'Doubling 0 gives 0 again, so p never grows.'), O('1'), O('2', 'It starts above 1, so n = 1 would print 2 instead of 1.')]),
+      B('cond', 'when the loop keeps going', [O('p < n'), O('p <= n', 'It also doubles when p equals n, so an exact power of 2 goes one step too far.'), O('p > n', 'This is true only when p is already too big, so the logic is backwards.')]),
+      B('update', 'how p changes', [O('p + 2', 'It adds 2 instead of doubling, so p is not a power of 2.'), O('p * 2'), O('p * p', 'Squaring 1 gives 1 again, so p never grows.')]),
+    ],
+    ref: [1, 0, 1],
+    tests: [{ data: 'int n = 10;', want: '16' }, { data: 'int n = 16;', want: '16' }, { data: 'int n = 1;', want: '1' }, { data: 'int n = 17;', want: '32' }, { data: 'int n = 0;', want: '1' }],
+    watch: { name: 'p', label: 'p' },
+    meaning: { q: 'After each pass, what does p mean?', choices: ['The latest power of 2 reached.', 'How many times the loop has run.', 'The difference between p and n.'], answer: 0 } },
+  { id: 'digits', title: 'Count the digits', pattern: 'While loop: change the input until it is used up',
+    goal: 'Print how many digits the positive whole number n has. The loop may change n.',
+    template: '{{data}}\nint count = [[init]];\nwhile ([[cond]]) {\n    n [[update]];\n    count++;\n}\nSystem.out.println(count);',
+    blanks: [
+      B('init', 'where count starts', [O('0'), O('1', 'The count starts at 0. Starting at 1 is only right if the loop skips one digit.')]),
+      B('cond', 'when the loop keeps going', [O('n > 0'), O('n >= 0', 'n reaches 0 and 0 >= 0 is still true, so the loop never ends.'), O('n > 10', 'It stops while a digit is still left, so numbers like 10 and 100 come out one short.')]),
+      B('update', 'what happens to n', [O('/= 10'), O('-= 10', 'Subtracting 10 does not remove a digit; it only lowers n a little.'), O('%= 10', 'The remainder keeps only the last digit, so the loop ends after one or two passes.')]),
+    ],
+    ref: [0, 0, 0],
+    tests: [{ data: 'int n = 4721;', want: '4' }, { data: 'int n = 5;', want: '1' }, { data: 'int n = 10;', want: '2' }, { data: 'int n = 100;', want: '3' }, { data: 'int n = 999;', want: '3' }],
+    watch: { name: 'count', label: 'count' },
+    meaning: { q: 'After each pass, what does count mean?', choices: ['How many digits have been removed from n so far.', 'The value of the last digit.', 'How many digits n has now.'], answer: 0 } },
 ];
+// Transfer: fresh items, with the same kind of choices. Nothing runs until Check.
 const TRANSFER = [
-  { code: 'int count = 0;\nfor (int i = 3; i < 12; i += 2) {\n    count++;\n}\nSystem.out.println(count);', ask: 'count' },
-  { code: 'int x = 1;\nwhile (x <= 50) {\n    x = x * 2 + 1;\n}\nSystem.out.println(x);', ask: 'output' },
-  { code: 'int p = 1;\nfor (int k = 0; k < 4; k++) {\n    p *= 2;\n}\nSystem.out.println(p + " " + k);', ask: 'mc', choices: [{ text: 'It prints 16 4', match: '16 4\n' }, { text: 'It prints 16 3', match: '16 3\n' }, { text: 'It does not compile.', match: 'compile-error' }, { text: 'It prints 16', match: '16\n' }] },
-  { code: 'for (int i = 10; i >= 0; i -= 4) {\n    System.out.print(i + ",");\n}', ask: 'output' },
-  { code: 'String w = "loop";\nString r = "";\nfor (int i = w.length() - 1; i >= 0; i--) {\n    r += w.substring(i, i + 1);\n}\nSystem.out.println(r);', ask: 'output' },
-  { code: 'int c = 0;\nfor (int a = 1; a <= 3; a++) {\n    for (int b = a; b <= 3; b++) {\n        c++;\n    }\n}\nSystem.out.println(c);', ask: 'output' },
-  { code: 'int x = 20;\nwhile (x > 1) {\n    x /= 3;\n}\nSystem.out.println(x);', ask: 'output' },
-  { code: 'int total = 0;\nfor (int i = 0; i < 6; i++) {\n    for (int j = i; j < 6; j++) {\n        total++;\n    }\n}\nSystem.out.println(total);', ask: 'output' },
-];
-const PRESETS = [
-  { label: 'Count to 5', code: PREDICT[0].code },
-  { label: 'Grow by ×5', code: PREDICT[1].code },
-  { label: 'Step by 3', code: PREDICT[2].code },
-  { label: 'Last value vs final i', code: PREDICT[4].code },
-  { label: 'Zero iterations', code: PREDICT[5].code },
-  { label: 'Infinite loop', code: PREDICT[9].code },
-  { label: 'String scan', code: PREDICT[10].code },
-  { label: 'Rectangle (nested)', code: PREDICT[11].code },
-  { label: 'Triangle (nested)', code: PREDICT[12].code },
-  { label: 'Array total', code: 'int[] scores = {8, 5, 9, 6};\nint total = 0;\nfor (int s : scores) {\n    total += s;\n}\nSystem.out.println(total);' },
-];
-const COMPARE_PRESETS = [
-  { label: 'for vs while', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'int i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '0, 1, 5, 6', note: 'The same output and the same looping. The difference: i still exists after the while loop, because it was declared outside it.' },
-  { label: 'Up vs down', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'for (int i = n; i >= 1; i--) {\n    total += i;\n}\nSystem.out.println(total);', values: '0, 1, 5, 6', note: 'Different loops, same results: the values are added in a different order, which does not change a sum.' },
-  { label: 'Shifted start and bound', setup: 'int n = 5;\nint total = 0;', a: 'int i = 0;\nwhile (i < n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', b: 'int i = 1;\nwhile (i <= n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '1, 3, 5', note: 'The same number of passes, but A adds 0 through n − 1 and B adds 1 through n. Different output, same amount of looping.' },
-  { label: 'First item outside the loop', setup: 'int n = 5;\nint total = 0;', a: 'for (int i = 1; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'total = 1;\nfor (int i = 2; i <= n; i++) {\n    total += i;\n}\nSystem.out.println(total);', values: '1, 2, 5, 0', note: 'They agree for 1, 2 and 5, so matching runs look convincing. Then n = 0 breaks it: B adds the 1 before checking anything. One different result is proof that two loops are not equivalent.' },
-  { label: 'Never ends for some n', setup: 'int n = 3;\nint total = 0;', a: 'for (int i = 0; i < n; i++) {\n    total += i;\n}\nSystem.out.println(total);', b: 'int i = 0;\nwhile (i != n) {\n    total += i;\n    i++;\n}\nSystem.out.println(total);', values: '3, 0, -2', note: 'i < n and i != n agree while n is 0 or more. For a negative n, i never equals n, so B counts up forever.' },
+  { id: 'factorial', title: 'Multiply 1 through n', pattern: 'Accumulator: a running product',
+    goal: 'Print the product of the whole numbers from 1 through n. For n = 0 the product is 1.',
+    template: '{{data}}\nint product = [[init]];\nfor (int i = [[start]]; [[cond]]; i++) {\n    product *= i;\n}\nSystem.out.println(product);',
+    blanks: [
+      B('init', 'where product starts', [O('0', 'Anything times 0 is 0: the product could never leave 0.'), O('1'), O('n', 'It would multiply an extra n into every answer.')]),
+      B('start', 'where i starts', [O('0', 'Multiplying by 0 makes the whole product 0.'), O('1'), O('2')]),
+      B('cond', 'when the loop keeps going', [O('i < n', 'It leaves out n itself.'), O('i <= n'), O('i <= n + 1', 'It multiplies in n + 1 as well.')]),
+    ],
+    ref: [1, 1, 1],
+    tests: [{ data: 'int n = 5;', want: '120' }, { data: 'int n = 0;', want: '1' }, { data: 'int n = 1;', want: '1' }, { data: 'int n = 3;', want: '6' }],
+    watch: { name: 'product', label: 'product' } },
+  { id: 'negatives', title: 'Count the negatives', pattern: 'Counter over an array',
+    goal: 'Print how many elements of the array a are negative.',
+    template: '{{data}}\nint count = [[init]];\nfor (int i = [[start]]; [[cond]]; i++) {\n    if (a[i] < 0) {\n        count++;\n    }\n}\nSystem.out.println(count);',
+    blanks: [
+      B('init', 'where count starts', [O('0'), O('1', 'Nothing has been counted yet, so the count starts at 0.')]),
+      B('start', 'where i starts', [O('0'), O('1', 'It never looks at the first element.')]),
+      B('cond', 'when the loop keeps going', [O('i < a.length'), O('i <= a.length', 'a[a.length] is past the end of the array.'), O('i < a.length - 1', 'It never looks at the last element.')]),
+    ],
+    ref: [0, 0, 0],
+    tests: [{ data: 'int[] a = {-2, 5, -1};', want: '2' }, { data: 'int[] a = {3, 4};', want: '0' }, { data: 'int[] a = {-4};', want: '1' }, { data: 'int[] a = {-1, -1, -1};', want: '3' }],
+    watch: { name: 'count', label: 'count' } },
+  { id: 'allpos', title: 'Are all positive?', pattern: 'Flag that starts true',
+    goal: 'Print true if every element of a is greater than 0, and false if any element is 0 or negative.',
+    template: '{{data}}\nboolean allPos = [[init]];\nfor (int i = 0; [[cond]]; i++) {\n    if (a[i] <= 0) {\n        allPos = [[set]];\n    }\n}\nSystem.out.println(allPos);',
+    blanks: [
+      B('init', 'where allPos starts', [O('true'), O('false', 'The flag could never become true again, so the answer would always be false.')]),
+      B('cond', 'when the loop keeps going', [O('i < a.length'), O('i <= a.length', 'a[a.length] is past the end of the array.'), O('i < a.length - 1', 'It never looks at the last element.')]),
+      B('set', 'what allPos becomes at a bad element', [O('false'), O('true', 'It sets the flag to true exactly when a bad element is found.'), O('!allPos', 'It flips the flag, so a second bad element turns it back to true.')]),
+    ],
+    ref: [0, 0, 0],
+    tests: [{ data: 'int[] a = {3, 5, 1};', want: 'true' }, { data: 'int[] a = {3, -1, 2};', want: 'false' }, { data: 'int[] a = {0};', want: 'false' }, { data: 'int[] a = {-1, -2};', want: 'false' }, { data: 'int[] a = {4, -3};', want: 'false' }],
+    watch: { name: 'allPos', label: 'allPos' } },
+  { id: 'halves', title: 'How many halvings?', pattern: 'While loop: shrink until done',
+    goal: 'Print how many times n can be divided by 2 (whole-number division) before it is 1 or less. For n = 1 that is 0 times.',
+    template: '{{data}}\nint steps = [[init]];\nwhile ([[cond]]) {\n    n [[update]];\n    steps++;\n}\nSystem.out.println(steps);',
+    blanks: [
+      B('init', 'where steps starts', [O('0'), O('1', 'No halving has happened yet, so steps starts at 0.')]),
+      B('cond', 'when the loop keeps going', [O('n > 0', 'It also halves 1, so it counts one step too many.'), O('n > 1'), O('n >= 1', 'It also halves 1, so it counts one step too many.')]),
+      B('update', 'what happens to n', [O('/= 2'), O('-= 2', 'Subtracting 2 is not halving.'), O('/= 10', 'Dividing by 10 is not halving.')]),
+    ],
+    ref: [0, 1, 0],
+    tests: [{ data: 'int n = 8;', want: '3' }, { data: 'int n = 1;', want: '0' }, { data: 'int n = 10;', want: '3' }, { data: 'int n = 2;', want: '1' }],
+    watch: { name: 'steps', label: 'steps' } },
 ];
 // DATA END
 
 TUI.injectCSS();
 const { el, $ } = TUI;
-
-/* ---------- Loop runner ---------- */
-class LoopRunner {
-  constructor(host) {
-    this.host = host;
-    host.innerHTML = `<div class="tui-err hidden"></div><div class="rbody"><div class="runner-grid">
-      <div><ol class="tui-code" aria-label="Program"></ol><div class="stepbar"></div>
-        <div class="tui-note" aria-live="polite"><div class="phase"></div><p class="text"></p></div>
-        <div class="colhead">Console</div><div class="tui-console" role="log" aria-label="Console output"></div></div>
-      <div><div class="colhead tracehead">Trace table</div><div class="tracesel"></div><div class="tracewrap"><table class="trace" aria-label="Trace table"></table></div>
-        <div class="gridbox hidden"><div class="colhead">Nested loops: one cell per inner-body run</div><div class="grid2" aria-label="Nested loop grid"></div><p class="gnote"></p></div>
-        <div class="colhead">Variables now</div><table class="tui-vars"></table></div>
-    </div></div>`;
-    this.err = host.querySelector('.tui-err'); this.body = host.querySelector('.rbody');
-    this.step = TUI.stepper(host.querySelector('.stepbar'), i => this.render(i));
-    this.step.keys(this.body);
-    this.sel = 0;
-  }
-  set(src, { showAll = false } = {}) {
-    this.src = src; this.run = MJ.run(src);
-    const bad = this.run.compileError || this.run.unsupported;
-    this.err.classList.toggle('hidden', !bad); this.body.classList.toggle('hidden', !!bad);
-    if (bad) { TUI.errorBox(this.err, this.run); return; }
-    this.loops = MJ.loopsOf(this.run.prog);
-    this.sel = 0;
-    const box = this.host.querySelector('.tracesel'); box.textContent = '';
-    if (this.loops.length > 1) {
-      const s = el('select'); s.setAttribute('aria-label', 'Which loop the trace table follows');
-      this.loops.forEach((L, i) => s.append(new Option(`Loop on line ${L.line}${L.parent !== null ? ' (inner)' : ''}`, i)));
-      s.addEventListener('change', () => { this.sel = +s.value; this.render(this.step.i); });
-      box.append(s);
-    }
-    this.step.set(this.run.steps.length, showAll ? this.run.steps.length : 0);
-  }
-  render(i) {
-    const run = this.run, steps = run.steps, s = i > 0 ? steps[i - 1] : null;
-    const done = new Set(steps.slice(0, Math.max(0, i - 1)).map(x => x.line));
-    TUI.renderCode(this.host.querySelector('.tui-code'), this.src, s ? s.line : 0, done, s && (s.kind === 'error' || s.kind === 'limit') ? 'err' : 'on');
-    const note = this.host.querySelector('.tui-note');
-    note.classList.toggle('err', !!(s && (s.kind === 'error' || s.kind === 'limit')));
-    note.querySelector('.phase').textContent = s ? this.phaseLabel(s) : 'Ready';
-    note.querySelector('.text').textContent = s ? s.note : 'Nothing has run yet. Press Next, or use the arrow keys.';
-    if (i === steps.length && run.truncated) note.querySelector('.text').textContent += ` (Showing the first ${steps.length} steps.)`;
-    this.host.querySelector('.tui-console').textContent = s ? s.out : '';
-    TUI.renderVars(this.host.querySelector('.tui-vars'), s ? s.frames[s.frames.length - 1] : null, s ? s.heap : {}, s ? s.changed || [] : []);
-    this.renderTrace(i);
-    this.renderGrid(i);
-  }
-  phaseLabel(s) {
-    if (s.kind === 'error') return 'Exception';
-    if (s.kind === 'limit') return 'Stopped';
-    if (s.phase === 'init') return 'Initialize (runs once)';
-    if (s.phase === 'update') return 'Update';
-    if (s.kind === 'cond' && s.loop !== undefined) return s.value ? 'Check the condition: true' : 'Check the condition: false';
-    if (s.kind === 'foreach') return 'Next element';
-    if (s.kind === 'cond') return 'if condition';
-    const inLoop = this.loops.find(L => s.line > L.line && s.line <= lineOfPos(this.src, L.endPos));
-    return inLoop ? 'Loop body' : 'Statement';
-  }
-  renderTrace(i) {
-    const L = this.loops[this.sel], tbl = this.host.querySelector('table.trace');
-    tbl.textContent = '';
-    if (!L) { tbl.append(el('caption', 'small', 'This program has no loop.')); return; }
-    const rows = this.run.steps.map((s, k) => [s, k]).filter(([s]) => s.loop === L.id && (s.kind === 'cond' || s.kind === 'foreach'));
-    const names = [];
-    this.run.steps.forEach(s => (s.frames[s.frames.length - 1].vars || []).forEach(v => { if (!names.includes(v.name) && !v.type.startsWith('ArrayList') && !v.type.endsWith('[]')) names.push(v.name); }));
-    const head = el('tr'); ['Check', ...names, L.k === 'foreach' ? 'Element?' : 'Condition'].forEach(h => head.append(el('th', null, h)));
-    const thead = el('thead'); thead.append(head); tbl.append(thead);
-    const tb = el('tbody');
-    const shown = rows.filter(([, k]) => k < i);
-    let missing = false;
-    shown.forEach(([s, k], n) => {
-      const tr = el('tr', k === i - 1 ? 'now' : '');
-      tr.append(el('td', null, String(n + 1)));
-      const vars = s.frames[s.frames.length - 1].vars;
-      names.forEach(nm => {
-        const v = vars.find(x => x.name === nm);
-        if (v) tr.append(el('td', null, TUI.valueText(v.v, v.type, s.heap)));
-        else { const td = el('td', 'na', '—'); td.title = `${nm} does not exist at this check`; tr.append(td); missing = true; }
-      });
-      const val = s.kind === 'foreach' ? 'yes' : s.done ? 'no more' : String(s.value);
-      tr.append(el('td', s.value === false || s.done ? 'f' : 't', val));
-      tb.append(tr);
-    });
-    if (!shown.length) { const tr = el('tr'); const td = el('td', null, 'The loop has not been reached yet.'); td.colSpan = names.length + 2; tr.append(td); tb.append(tr); }
-    tbl.append(tb);
-    if (missing) tbl.prepend(el('caption', 'small key', '— means the variable does not exist at that check.'));
-  }
-  renderGrid(i) {
-    const box = this.host.querySelector('.gridbox');
-    const inner = this.loops.find(L => L.parent !== null), outer = inner && this.loops.find(L => L.id === inner.parent);
-    box.classList.toggle('hidden', !inner);
-    if (!inner) return;
-    const cells = []; let row = -1, total = 0;
-    this.run.steps.forEach((s, k) => {
-      if (s.loop === outer.id && ((s.kind === 'cond' && s.value) || s.kind === 'foreach')) row++;
-      if (s.loop === inner.id && ((s.kind === 'cond' && s.value) || s.kind === 'foreach')) {
-        const col = cells.filter(c => c.row === row).length;
-        const v = inner.var ? s.frames[s.frames.length - 1].vars.find(x => x.name === inner.var) : null;
-        const ov = outer.var ? s.frames[s.frames.length - 1].vars.find(x => x.name === outer.var) : null;
-        cells.push({ row, col, k, label: v ? TUI.valueText(v.v, v.type) : String(col + 1), rowLabel: ov ? `${outer.var} = ${TUI.valueText(ov.v, ov.type)}` : `outer ${row + 1}` });
-        total++;
-      }
-    });
-    const rows = Math.max(0, ...cells.map(c => c.row + 1)), cols = Math.max(1, ...cells.map(c => c.col + 1));
-    const g = this.host.querySelector('.grid2'); g.textContent = '';
-    g.style.gridTemplateColumns = `auto repeat(${cols}, minmax(30px, 1fr))`;
-    let shown = 0, cur = null;
-    for (let r = 0; r < rows; r++) {
-      const rc = cells.filter(c => c.row === r);
-      g.append(el('div', 'grow', rc.length ? rc[0].rowLabel : `outer ${r + 1}`));
-      for (let c = 0; c < cols; c++) {
-        const cell = rc.find(x => x.col === c);
-        const d = el('div', 'gcell');
-        if (cell && cell.k < i) { d.classList.add('on'); d.textContent = inner.var ? `${inner.var}=${cell.label}` : '✓'; shown++; if (cell.k === Math.max(...cells.filter(x => x.k < i).map(x => x.k))) cur = d; }
-        else if (!cell) d.style.visibility = 'hidden';
-        g.append(d);
-      }
-    }
-    if (cur) cur.classList.add('cur');
-    this.host.querySelector('.gnote').textContent = `The inner loop's body has run ${shown} time${shown === 1 ? '' : 's'} so far, out of ${total} in total. Each row is one run of the outer loop.`;
-  }
-}
-
-/* ---------- Predict and Transfer ---------- */
-const select = TUI.tabs(['predict', 'explore', 'transfer']);
-function expected(it) {
-  const run = MJ.run(it.code);
-  if (it.ask === 'output') return run.out;
-  if (it.ask === 'count') return bodyCount(run);
-  if (it.ask === 'next') return phaseOf(run, it.code, it.after);
-  return it.choices.findIndex(c => c.match === MJ.label(run));
-}
-const askText = it => it.ask === 'output' ? 'What exactly does this print?' : it.ask === 'count' ? 'How many times does the loop body run?' : it.ask === 'next' ? `${it.state} What happens next?` : 'What happens when this runs?';
-const predictRunner = new LoopRunner($('p-view'));
-TUI.questions('p', PREDICT, {
-  submitLabel: 'Check my prediction', reasonPrompt: 'Why? Make a quick trace table: the values at each check.',
-  askText, expected,
-  onReveal(it) { $('p-tests').innerHTML = '<b>What this one tests:</b> ' + it.tests; predictRunner.set(it.code); if (it.ask === 'next') predictRunner.step.go(it.after); },
-});
-TUI.questions('t', TRANSFER, {
-  submitLabel: 'Check', reasonPrompt: 'Explain it: list the loop variable at each condition check.',
-  askText, expected,
-  onReveal(it) {
-    const run = MJ.run(it.code), m = $('t-model'); m.textContent = '';
-    if (run.compileError) m.append(el('b', null, 'Model working: '), `It does not compile. ${run.compileError}`);
-    else {
-      const checks = run.steps.filter(s => s.kind === 'cond' && s.loop !== undefined && MJ.loopsOf(run.prog)[0].id === s.loop);
-      m.append(el('b', null, 'Model working: '), `The first loop's condition is checked ${checks.length} time${checks.length === 1 ? '' : 's'}: ${checks.map(c => c.value).join(', ')}. Its body runs ${bodyCount(run)} time${bodyCount(run) === 1 ? '' : 's'}.` + (run.out ? ` Output: ${JSON.stringify(run.out)}.` : ''));
-    }
-    m.append(el('p', 'small', 'Compare with your trace table. Did you include the final false check?'));
-  },
-});
-
-/* ---------- Explore ---------- */
-const exploreRunner = new LoopRunner($('e-view'));
-const ecode = $('e-code');
-function exploreUpdate() {
-  exploreRunner.set(ecode.value);
-  let w = null; try { w = MJ.forToWhile(ecode.value); } catch (e) { w = null; }
-  $('e-convert').disabled = !w; $('e-convnote').textContent = '';
-}
-$('e-convert').addEventListener('click', () => {
-  const w = MJ.forToWhile(ecode.value);
-  if (!w) return;
-  ecode.value = w; exploreUpdate();
-  $('e-convnote').textContent = 'Rewritten as a while loop inside its own block, so the loop variable still exists only for the loop. The steps and output are the same.';
-});
-PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => { ecode.value = p.code; exploreUpdate(); }); $('e-presets').append(c); });
-ecode.value = PRESETS[0].code;
-ecode.addEventListener('input', exploreUpdate);
-exploreUpdate();
-const params = new URLSearchParams(location.search);
-if (params.has('code')) { ecode.value = params.get('code'); exploreUpdate(); select('explore'); }
-
-/* ---------- Compare two loops ---------- */
-function exploreMode(m) {
-  $('m-one').setAttribute('aria-pressed', m === 'one'); $('m-cmp').setAttribute('aria-pressed', m === 'cmp');
-  $('one-mode').classList.toggle('hidden', m !== 'one'); $('cmp-mode').classList.toggle('hidden', m !== 'cmp');
-}
-$('m-one').addEventListener('click', () => exploreMode('one')); $('m-cmp').addEventListener('click', () => exploreMode('cmp'));
-let cmpPick = 0, cmpNote = '';
 const wrapTable = t => { const w = el('div', 'tablewrap'); w.append(t); return w; };
-const cmpOut = t => TUI.visible(t.replace(/\n$/, '')) || '(nothing)';
-function renderCompare() {
-  const box = $('c-view'); box.textContent = '';
-  const setup = $('c-setup').value, hasN = N_DECL.test(setup), pv = parseValues($('c-vals').value);
-  if (hasN && pv.error) { box.append(el('div', 'tui-err', pv.error)); return; }
-  const c = compareLoops(setup, $('c-a').value, $('c-b').value, hasN ? pv.values : []);
-  if (c.problem) {
-    const r = c.problem, which = r.A.problem ? ['Loop A', r.A.problem] : ['Loop B', r.B.problem];
-    box.append(el('div', 'tui-err', `${which[0]} ${which[1]}`)); return;
-  }
-  if (cmpNote) box.append(el('div', 'qstate', cmpNote));
-  const runs = c.runs, label = r => r.n === null ? 'this run' : 'n = ' + r.n;
-  const list = rs => rs.map(label).join(', ');
-  const outDiff = runs.filter(r => !r.out), varDiff = runs.filter(r => !r.vars), workDiff = runs.filter(r => !r.work), endDiff = runs.filter(r => !r.end);
-  box.append(el('p', 'verdict ' + (outDiff.length ? 'no' : 'ok'), outDiff.length ? `The outputs differ for ${list(outDiff)}.` : `The outputs match on ${runs.length === 1 ? 'this run' : 'all ' + runs.length + ' runs'}.`));
-  const facts = el('ul', 'small');
-  [['Variables left at the end', varDiff], ['Amount of looping (condition checks and body runs)', workDiff], ['How the run ended', endDiff]].forEach(([name, d]) => facts.append(el('li', null, d.length ? `${name}: different for ${list(d)}.` : `${name}: the same.`)));
-  box.append(facts);
-  box.append(el('p', 'small', outDiff.length || endDiff.length ? 'A single difference in the results proves the two loops are not equivalent.' : 'Matching on the values tried is evidence, not proof: two loops can agree on every value you pick and still differ on one you did not. Try the boundary values, such as 0 and negative numbers.'));
-  cmpPick = Math.min(cmpPick, runs.length - 1);
-  if (runs.length > 1) {
-    const t = el('table', 'cmp'), h = el('tr');
-    ['Value', 'Output', 'Variables at the end', 'Looping', 'Ending'].forEach(x => h.append(el('th', null, x)));
-    t.append(h);
-    runs.forEach((r, k) => {
-      const tr = el('tr', k === cmpPick ? 'pick' : '');
-      const td = el('td'), b = el('button', 'link', label(r)); b.type = 'button'; b.addEventListener('click', () => { cmpPick = k; renderCompare(); }); td.append(b); tr.append(td);
-      [r.out, r.vars, r.work, r.end].forEach(same => tr.append(el('td', same ? 'same' : 'diff', same ? 'same' : 'different')));
-      t.append(tr);
+const para = (...nodes) => { const p = el('p'); p.append(...nodes); return p; };
+const stepHead = (n, text) => { const h = el('div', 'stephead'); h.append(el('span', 'n', String(n)), text); return h; };
+const select = TUI.tabs(['build', 'transfer']);
+
+// The loop with a <select> for each blank, shown as code. Returns the selects in blank order.
+function codePanel(ol, item, test, build, disabled, onChange) {
+  ol.textContent = '';
+  const selects = [];
+  assembleLines(item, test).forEach(parts => {
+    const li = el('li');
+    parts.forEach(p => {
+      if (typeof p === 'string') { li.append(p); return; }
+      const b = p.blank, s = el('select', 'pick blank');
+      s.setAttribute('aria-label', `Choose ${item.blanks[b].label}`);
+      s.append(new Option('choose…', ''));
+      item.blanks[b].options.forEach((o, i) => s.append(new Option(o.text, i)));
+      s.value = build[b] === -1 ? '' : String(build[b]);
+      s.disabled = disabled;
+      s.addEventListener('change', () => onChange(b, s.value === '' ? -1 : +s.value));
+      selects[b] = s; li.append(s);
     });
-    box.append(el('div', 'colhead', 'Every value tried (select one to see the details)'), wrapTable(t));
+    ol.append(li);
+  });
+  return selects;
+}
+// The template as lines, each a list of text and blank markers, with the test data filled in.
+function assembleLines(item, test) {
+  return item.template.replace('{{data}}', test.data).split('\n').map(line => {
+    const parts = []; let last = 0;
+    for (const m of line.matchAll(/\[\[(\w+)\]\]/g)) {
+      parts.push(line.slice(last, m.index)); parts.push({ blank: item.blanks.findIndex(x => x.key === m[1]) }); last = m.index + m[0].length;
+    }
+    parts.push(line.slice(last));
+    return parts.filter(p => p !== '');
+  });
+}
+function resultsTable(results) {
+  const t = el('table', 'tt'), h = el('tr');
+  ['Test data', 'Expected', 'Your loop', ''].forEach(x => h.append(el('th', null, x)));
+  t.append(h);
+  results.forEach(r => {
+    const tr = el('tr', r.ok ? '' : 'hit');
+    tr.append(el('td', 'l', r.test.data.replace(/^(int|String|int\[\]) /, '')), el('td', null, r.test.want), el('td', null, describeLabel(r.label).replace(/^"|"$/g, '')), el('td', null, r.ok ? '✓' : '✗'));
+    t.append(tr);
+  });
+  return wrapTable(t);
+}
+function traceTable(item, build, test) {
+  const { run } = runBuild(item, build, test), t = traceRows(run), box = el('div');
+  box.append(el('div', 'colhead', `Trace table for ${test.data.replace(/^(int|String|int\[\]) /, '').replace(/;$/, '')}`));
+  if (!t || !t.rows.length) { box.append(el('p', 'small', 'The loop is never reached.')); return box; }
+  const tbl = el('table', 'tt'), h = el('tr');
+  ['Check', ...t.names, 'Keep going?'].forEach(x => h.append(el('th', null, x)));
+  tbl.append(h);
+  t.rows.slice(0, 30).forEach((r, k) => {
+    const tr = el('tr'); tr.append(el('td', null, String(k + 1)));
+    t.names.forEach(n => tr.append(el('td', null, r.vals[n] === undefined ? '—' : r.vals[n])));
+    tr.append(el('td', null, String(r.value))); tbl.append(tr);
+  });
+  box.append(wrapTable(tbl));
+  if (t.rows.length > 30) box.append(el('p', 'small', `Showing the first 30 of ${t.rows.length} checks.`));
+  box.append(el('p', 'small', 'Each row is one check of the loop condition. The last row, where it is false, ends the loop.'));
+  return box;
+}
+
+/* ---------- Build ---------- */
+let bi = 0;
+const bstate = ITEMS.map(it => ({ build: it.blanks.map(() => -1), predicted: '', why: '', ran: null, test: 0, explain: { k: '', kOk: null, meaning: null } }));
+function renderBuild() {
+  const it = ITEMS[bi], st = bstate[bi];
+  $('b-count').textContent = `Item ${bi + 1} of ${ITEMS.length}`;
+  $('b-prev').disabled = bi === 0; $('b-next').disabled = bi === ITEMS.length - 1;
+  $('b-title').textContent = it.title;
+  $('b-goal').textContent = ''; $('b-goal').append(el('b', null, 'Goal: '), it.goal);
+  $('b-pattern').textContent = 'Pattern: ' + it.pattern;
+  const pick = $('b-testpick'); pick.textContent = '';
+  it.tests.forEach((t, i) => { const c = el('button', 'chip', t.data.replace(/^(int|String|int\[\]) /, '').replace(/;$/, '')); c.type = 'button'; c.setAttribute('aria-pressed', i === st.test); if (i === st.test) c.style.borderColor = 'var(--accent)'; c.addEventListener('click', () => { st.test = i; renderBuild(); }); pick.append(c); });
+  codePanel($('b-code'), it, it.tests[st.test], st.build, false, (b, v) => { st.build[b] = v; st.ran = null; st.explain = { k: '', kOk: null, meaning: null }; renderResult(); });
+  const form = $('b-form'); form.textContent = '';
+  const l = el('label', 'field'); l.append(`Predict: what does your loop print for ${it.tests[0].data.replace(/^(int|String|int\[\]) /, '').replace(/;$/, '')}? `);
+  const inp = el('input', 'strin'); inp.type = 'text'; inp.id = 'b-pred'; inp.autocomplete = 'off'; inp.spellcheck = false; inp.value = st.predicted; l.append(inp);
+  const w = el('label', 'field'); w.append('Why did you choose these parts? '); const why = el('textarea'); why.id = 'b-why'; why.rows = 2; why.value = st.why; w.append(why);
+  const row = el('div', 'row'), go = el('button', 'btn primary', 'Run my loop'); go.type = 'submit';
+  const err = el('span', 'formerr'); err.id = 'b-err'; err.setAttribute('role', 'alert'); row.append(go, err);
+  form.append(l, w, row);
+  renderResult();
+}
+function renderResult() {
+  const it = ITEMS[bi], st = bstate[bi], box = $('b-result'), ex = $('b-explain');
+  box.textContent = ''; ex.textContent = ''; ex.classList.add('hidden');
+  if (!st.ran) return;
+  const { results, ok } = st.ran;
+  box.append(stepHead(2, 'What your loop does'));
+  const first = results[0];
+  const normal = !/^(compile-error|limit|unsupported)$/.test(first.label) && !first.label.includes('|throws:');
+  const predOk = normal ? st.predicted.trim().replace(/^"|"$/g, '') === first.label.replace(/\n$/, '') : /loop|never|infinite|forever|crash|exception|error|compile/i.test(st.predicted);
+  const actual = describeLabel(first.label).replace(/^"|"$/g, '');
+  box.append(para(`Your prediction for the first test was ${predOk ? 'right' : 'off'}: your loop ${/^(does not|never|crashes|not supported)/.test(actual) ? actual : 'prints ' + actual}.`));
+  box.append(resultsTable(results));
+  const fb = el('div', 'feedback ' + (ok ? 'good' : 'bad'));
+  if (ok) {
+    const same = sameBuild(st.build, it.ref);
+    fb.append(para(el('span', 'tag', 'Every test passes. '), same ? 'This is the standard way to build it.' : `This also works, though it is not the standard build: the standard one is ${it.blanks.map((b, k) => b.options[it.ref[k]].text).join(' · ')}. Use the trace table to see why yours still gets the right answers.`));
+  } else {
+    fb.append(para(el('span', 'tag', 'Not yet. '), `${results.filter(r => !r.ok).length} of ${results.length} tests fail.`));
+    // Blanks where changing only that choice would make every test pass. Show the ones whose choice is wrong
+    // on its own (it has an explanation); if there are none, the choices only fail in combination.
+    const cs = culprits(it, st.build), own = cs.filter(c => it.blanks[c.blank].options[st.build[c.blank]].why);
+    if (own.length) own.forEach(c => { const opt = it.blanks[c.blank].options[st.build[c.blank]]; fb.append(para(`Look at ${it.blanks[c.blank].label}: `, el('code', null, opt.text), ' — ' + opt.why)); });
+    else if (cs.length) fb.append(para(`These choices do not work together. One of these needs to change: ${cs.map(c => it.blanks[c.blank].label).join('; ')}.`));
+    else fb.append(para('More than one part needs changing. Fix the part you are most sure of, then run again. The trace table below shows where the values go wrong.'));
   }
-  const r = runs[cmpPick], d = el('table', 'cmp'), hd = el('tr');
-  ['', 'Loop A', 'Loop B'].forEach(x => hd.append(el('th', null, x)));
-  d.append(hd);
-  const row = (name, a, b, same) => { const tr = el('tr'); tr.append(el('th', null, name), el('td', same ? 'same' : 'diff', a), el('td', same ? 'same' : 'diff', b)); d.append(tr); };
-  const work = x => x.checks === null ? '—' : `${x.checks} condition check${x.checks === 1 ? '' : 's'}, ${x.iterations} body run${x.iterations === 1 ? '' : 's'}`;
-  row('Output', cmpOut(r.A.out), cmpOut(r.B.out), r.out);
-  row('Variables at the end', r.A.vars, r.B.vars, r.vars);
-  row('Looping', work(r.A), work(r.B), r.work);
-  row('How it ended', r.A.end, r.B.end, r.end);
-  box.append(el('div', 'colhead', `Details for ${label(r)}`), wrapTable(d));
+  box.append(fb);
+  // The trace for the selected test (or the first failing one).
+  const tr = traceTable(it, st.build, it.tests[st.test]); box.append(tr);
+  if (ok) renderExplain();
 }
-function setCompare(p) {
-  $('c-setup').value = p.setup; $('c-a').value = p.a; $('c-b').value = p.b; $('c-vals').value = p.values; cmpPick = 0; cmpNote = p.note || '';
-  renderCompare();
+function renderExplain() {
+  const it = ITEMS[bi], st = bstate[bi], ex = $('b-explain');
+  ex.classList.remove('hidden'); ex.textContent = '';
+  ex.append(stepHead(3, 'Explain what the loop is doing'));
+  const test = it.tests[0], run = runBuild(it, st.build, test).run, passes = passCount(run), k = Math.min(3, passes);
+  const state = st.explain;
+  if (k >= 1) {
+    const want = valueAfterPasses(run, it.watch.name, k);
+    const f = el('form'); f.noValidate = true;
+    const l = el('label', 'field'); l.append(`With ${test.data.replace(/^(int|String|int\[\]) /, '').replace(/;$/, '')}: after the loop body has run ${k} time${k === 1 ? '' : 's'}, what does ${it.watch.label} hold? `);
+    const inp = el('input', 'strin'); inp.type = 'text'; inp.id = 'x-k'; inp.autocomplete = 'off'; inp.spellcheck = false; inp.value = state.k; inp.disabled = state.kOk !== null; l.append(inp);
+    const b = el('button', 'btn', 'Check'); b.type = 'submit'; b.disabled = state.kOk !== null;
+    f.append(l, b); ex.append(f);
+    const out = el('div', 'feedback ' + (state.kOk ? 'good' : 'bad')); out.setAttribute('role', 'status');
+    if (state.kOk !== null) { out.append(para(el('span', 'tag', state.kOk ? 'Correct. ' : 'Not quite. '), `After ${k} pass${k === 1 ? '' : 'es'}, ${it.watch.label} is ${want}. Find that value in row ${k + 1} of the trace table: it is the state at the next check.`)); ex.append(out); }
+    f.addEventListener('submit', e => { e.preventDefault(); const v = $('x-k').value.trim().replace(/^"|"$/g, ''); if (!v) return; state.k = v; state.kOk = v === String(want).replace(/^"|"$/g, ''); renderExplain(); });
+  }
+  const q = it.meaning, f2 = el('fieldset', 'cands'); f2.style.border = '0'; f2.style.padding = '0'; f2.append(el('legend', 'small', q.q));
+  q.choices.forEach((c, i) => { const l = el('label', 'cand'), r = el('input'); r.type = 'radio'; r.name = 'meaning'; r.value = i; r.checked = state.meaning === i; r.disabled = state.meaningDone; l.append(r, el('span', null, c)); f2.append(l); });
+  const f3 = el('form'); f3.noValidate = true; f3.append(f2);
+  const bb = el('button', 'btn', 'Check'); bb.type = 'submit'; bb.disabled = !!state.meaningDone; f3.append(bb); ex.append(f3);
+  if (state.meaningDone) { const out = el('div', 'feedback ' + (state.meaning === q.answer ? 'good' : 'bad')); out.append(para(el('span', 'tag', state.meaning === q.answer ? 'Correct. ' : 'Not quite. '), `${it.watch.label} means: ${q.choices[q.answer]}`)); ex.append(out); }
+  f3.addEventListener('submit', e => { e.preventDefault(); const c = f3.querySelector('input:checked'); if (!c) return; state.meaning = +c.value; state.meaningDone = true; renderExplain(); });
+  if (state.kOk !== null && state.meaningDone || (k < 1 && state.meaningDone)) ex.append(el('p', 'verdict ok', 'Item complete.'));
 }
-COMPARE_PRESETS.forEach(p => { const c = el('button', 'chip', p.label); c.type = 'button'; c.addEventListener('click', () => setCompare(p)); $('c-presets').append(c); });
-['c-setup', 'c-a', 'c-b', 'c-vals'].forEach(id => $(id).addEventListener('input', () => { cmpNote = ''; renderCompare(); }));
-setCompare(COMPARE_PRESETS[0]);
-if (location.hash === '#compare') { exploreMode('cmp'); select('explore'); }
+$('b-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const it = ITEMS[bi], st = bstate[bi], err = $('b-err');
+  st.predicted = $('b-pred').value; st.why = $('b-why').value;
+  if (st.build.some(x => x === -1)) { err.textContent = 'Choose every part of the loop first.'; return; }
+  if (!st.predicted.trim()) { err.textContent = 'Predict what your loop prints first.'; return; }
+  if (st.why.trim().length < 3) { err.textContent = 'Write a short reason for your choices.'; return; }
+  err.textContent = '';
+  st.ran = judge(it, st.build); st.explain = { k: '', kOk: null, meaning: null };
+  renderResult();
+});
+$('b-prev').addEventListener('click', () => { bi--; renderBuild(); });
+$('b-next').addEventListener('click', () => { bi++; renderBuild(); });
+
+/* ---------- Transfer ---------- */
+let ti = 0;
+const tstate = TRANSFER.map(it => ({ build: it.blanks.map(() => -1), why: '', done: false, res: null }));
+function renderTransfer() {
+  const it = TRANSFER[ti], st = tstate[ti];
+  $('t-count').textContent = `Item ${ti + 1} of ${TRANSFER.length}`;
+  $('t-prev').disabled = ti === 0; $('t-next').disabled = ti === TRANSFER.length - 1;
+  $('t-title').textContent = it.title;
+  $('t-goal').textContent = ''; $('t-goal').append(el('b', null, 'Goal: '), it.goal);
+  $('t-tests').textContent = it.tests.map(t => t.data.replace(/^(int|String|int\[\]) /, '').replace(/;$/, '')).join('   ');
+  codePanel($('t-code'), it, it.tests[0], st.build, st.done, (b, v) => { st.build[b] = v; });
+  const form = $('t-form'); form.textContent = '';
+  const w = el('label', 'field'); w.append('Why did you choose these parts? '); const why = el('textarea'); why.id = 't-why'; why.rows = 2; why.value = st.why; why.disabled = st.done; w.append(why);
+  const row = el('div', 'row'), go = el('button', 'btn primary', 'Check'); go.type = 'submit'; go.disabled = st.done;
+  const err = el('span', 'formerr'); err.id = 't-err'; err.setAttribute('role', 'alert'); row.append(go, err);
+  form.append(w, row);
+  const box = $('t-result'); box.textContent = '';
+  if (!st.done) return;
+  const { results, ok } = st.res;
+  box.append(resultsTable(results));
+  const fb = el('div', 'feedback ' + (ok ? 'good' : 'bad'));
+  if (ok) fb.append(para(el('span', 'tag', 'Correct. '), sameBuild(st.build, it.ref) ? 'Every test passes, with the standard build.' : `Every test passes. The standard build is ${it.blanks.map((b, k) => b.options[it.ref[k]].text).join(' · ')}.`));
+  else {
+    fb.append(para(el('span', 'tag', 'Not quite. '), `${results.filter(r => !r.ok).length} of ${results.length} tests fail. The standard build is ${it.blanks.map((b, k) => b.options[it.ref[k]].text).join(' · ')}.`));
+    it.blanks.forEach((b, k) => { const o = b.options[st.build[k]]; if (st.build[k] !== it.ref[k] && o.why) fb.append(para(`${b.label}: `, el('code', null, o.text), ' — ' + o.why)); });
+  }
+  fb.append(para('Your reasoning: “' + st.why.trim() + '”'));
+  box.append(fb);
+}
+$('t-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const it = TRANSFER[ti], st = tstate[ti], err = $('t-err');
+  st.why = $('t-why').value;
+  if (st.build.some(x => x === -1)) { err.textContent = 'Choose every part of the loop first.'; return; }
+  if (st.why.trim().length < 3) { err.textContent = 'Write a short reason for your choices.'; return; }
+  st.res = judge(it, st.build); st.done = true; renderTransfer();
+});
+$('t-prev').addEventListener('click', () => { ti--; renderTransfer(); });
+$('t-next').addEventListener('click', () => { ti++; renderTransfer(); });
+
+renderBuild(); renderTransfer();
+// Deep links: ?item=sum opens that Build item, ?item=factorial opens that Transfer item.
+const params = new URLSearchParams(location.search);
+if (params.has('item')) {
+  const f = ITEMS.findIndex(x => x.id === params.get('item')), t = TRANSFER.findIndex(x => x.id === params.get('item'));
+  if (f >= 0) { bi = f; renderBuild(); select('build'); } else if (t >= 0) { ti = t; renderTransfer(); select('transfer'); }
+}
 </script>
 </body>
 </html>

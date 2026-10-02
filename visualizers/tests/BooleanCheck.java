@@ -475,6 +475,441 @@ public class BooleanCheck {
         }
     }
 
+    static class C42 {
+
+        static void run() {
+            int score = 95;
+            String grade = "";
+            if (score >= 90) {
+                grade = "A";
+            } else if (score >= 80) {
+                grade = "B";
+            } else if (score >= 70) {
+                grade = "C";
+            } else {
+                grade = "F";
+            }
+            System.out.println(grade);
+        }
+    }
+
+    static class C43 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int score = 95;
+            String grade = "";
+            if (t("L0", score >= 90)) {
+                grade = "A";
+            } else if (t("L1", score >= 80)) {
+                grade = "B";
+            } else if (t("L2", score >= 70)) {
+                grade = "C";
+            } else {
+                grade = "F";
+            }
+            System.out.println(grade);
+        }
+    }
+
+    static class C44 {
+
+        static void run() {
+            int score = 85;
+            String grade = "F";
+            if (score >= 90) {
+                grade = "A";
+            }
+            if (score >= 80) {
+                grade = "B";
+            }
+            if (score >= 70) {
+                grade = "C";
+            }
+            System.out.println(grade);
+        }
+    }
+
+    static class C45 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int score = 85;
+            String grade = "F";
+            if (t("L0", score >= 90)) {
+                grade = "A";
+            }
+            if (t("L1", score >= 80)) {
+                grade = "B";
+            }
+            if (t("L2", score >= 70)) {
+                grade = "C";
+            }
+            System.out.println(grade);
+        }
+    }
+
+    static class C46 {
+
+        static void run() {
+            int score = 85;
+            if (score >= 90) {
+                System.out.println("A");
+            } else if (score >= 80) {
+                System.out.println("B");
+            } else if (score >= 70) {
+                System.out.println("C");
+            }
+        }
+    }
+
+    static class C47 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int score = 85;
+            if (t("L0", score >= 90)) {
+                System.out.println("A");
+            } else if (t("L1", score >= 80)) {
+                System.out.println("B");
+            } else if (t("L2", score >= 70)) {
+                System.out.println("C");
+            }
+        }
+    }
+
+    static class C48 {
+
+        static void run() {
+            int score = 60;
+            if (score >= 90) {
+                System.out.println("A");
+            } else if (score >= 80) {
+                System.out.println("B");
+            } else if (score >= 70) {
+                System.out.println("C");
+            } else {
+                System.out.println("F");
+            }
+        }
+    }
+
+    static class C49 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int score = 60;
+            if (t("L0", score >= 90)) {
+                System.out.println("A");
+            } else if (t("L1", score >= 80)) {
+                System.out.println("B");
+            } else if (t("L2", score >= 70)) {
+                System.out.println("C");
+            } else {
+                System.out.println("F");
+            }
+        }
+    }
+
+    static class C50 {
+
+        static void run() {
+            int a = -2;
+            int b = 5;
+            if (a > 0) {
+                if (b > 0) {
+                    System.out.println("both positive");
+                }
+            }
+            System.out.println("done");
+        }
+    }
+
+    static class C51 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int a = -2;
+            int b = 5;
+            if (t("L0", a > 0)) {
+                if (t("L1", b > 0)) {
+                    System.out.println("both positive");
+                }
+            }
+            System.out.println("done");
+        }
+    }
+
+    static class C52 {
+
+        static void run() {
+            int n = 12;
+            if (n % 2 == 0) {
+                System.out.println("even");
+            } else if (n % 3 == 0) {
+                System.out.println("multiple of 3");
+            }
+            if (n % 4 == 0) {
+                System.out.println("multiple of 4");
+            }
+        }
+    }
+
+    static class C53 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int n = 12;
+            if (t("L0", n % 2 == 0)) {
+                System.out.println("even");
+            } else if (t("L1", n % 3 == 0)) {
+                System.out.println("multiple of 3");
+            }
+            if (t("L2", n % 4 == 0)) {
+                System.out.println("multiple of 4");
+            }
+        }
+    }
+
+    static class C54 {
+
+        static void run() {
+            int t = 55;
+            if (t >= 80) {
+                System.out.println("hot");
+            } else if (t >= 60) {
+                System.out.println("mild");
+            } else if (t >= 40) {
+                System.out.println("cool");
+            } else {
+                System.out.println("cold");
+            }
+        }
+    }
+
+    static class C55 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int t = 55;
+            if (t("L0", t >= 80)) {
+                System.out.println("hot");
+            } else if (t("L1", t >= 60)) {
+                System.out.println("mild");
+            } else if (t("L2", t >= 40)) {
+                System.out.println("cool");
+            } else {
+                System.out.println("cold");
+            }
+        }
+    }
+
+    static class C56 {
+
+        static void run() {
+            int age = 15;
+            boolean member = true;
+            if (age >= 18) {
+                if (member) {
+                    System.out.println("adult member");
+                }
+            } else {
+                System.out.println("minor");
+            }
+        }
+    }
+
+    static class C57 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int age = 15;
+            boolean member = true;
+            if (t("L0", age >= 18)) {
+                if (t("L1", member)) {
+                    System.out.println("adult member");
+                }
+            } else {
+                System.out.println("minor");
+            }
+        }
+    }
+
+    static class C58 {
+
+        static void run() {
+            int n = 9;
+            if (n % 2 == 0) {
+                System.out.println("even");
+            } else if (n % 3 == 0) {
+                System.out.println("multiple of 3");
+            }
+            if (n % 4 == 0) {
+                System.out.println("multiple of 4");
+            }
+        }
+    }
+
+    static class C59 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int n = 9;
+            if (t("L0", n % 2 == 0)) {
+                System.out.println("even");
+            } else if (t("L1", n % 3 == 0)) {
+                System.out.println("multiple of 3");
+            }
+            if (t("L2", n % 4 == 0)) {
+                System.out.println("multiple of 4");
+            }
+        }
+    }
+
+    static class C60 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int a = 0;
+            int b = 5;
+            if (t("L0", a > 0))
+                if (t("L1", b < 0))
+                    System.out.println("x");
+            else
+                System.out.println("y");
+            System.out.println("done");
+        }
+    }
+
+    static class C61 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int score = 95;
+            String grade = "F";
+            if (t("L0", score >= 90)) {
+                grade = "A";
+            }
+            if (t("L1", score >= 80)) {
+                grade = "B";
+            }
+            if (t("L2", score >= 70)) {
+                grade = "C";
+            }
+            System.out.println(grade);
+        }
+    }
+
+    static class C62 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int score = 95;
+            String grade = "F";
+            if (t("L0", score >= 90)) {
+                grade = "A";
+            } else if (t("L1", score >= 80)) {
+                grade = "B";
+            } else if (t("L2", score >= 70)) {
+                grade = "C";
+            }
+            System.out.println(grade);
+        }
+    }
+
+    static class C63 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int t = 75;
+            if (t("L0", t >= 80)) {
+                System.out.println("hot");
+            } else if (t("L1", t >= 60)) {
+                System.out.println("mild");
+            } else {
+                System.out.println("cold");
+            }
+        }
+    }
+
+    static class C64 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int n = 15;
+            if (t("L0", n % 3 == 0)) {
+                System.out.print("Fizz");
+            }
+            if (t("L1", n % 5 == 0)) {
+                System.out.print("Buzz");
+            }
+            System.out.println();
+        }
+    }
+
+    static class C65 {
+
+        static void run() {
+            int pos = 0;
+            int neg = 0;
+            for (int x = -2; x <= 2; x++) {
+                if (x > 0) {
+                    pos++;
+                } else if (x < 0) {
+                    neg++;
+                }
+            }
+            System.out.println(pos + " " + neg);
+        }
+    }
+
+    static class C66 {
+        static boolean t(String label, boolean r) {
+            System.out.println(label);
+            return r;
+        }
+        static void run() {
+            int pos = 0;
+            int neg = 0;
+            for (int x = -2; x <= 2; x++) {
+                if (t("L0", x > 0)) {
+                    pos++;
+                } else if (t("L1", x < 0)) {
+                    neg++;
+                }
+            }
+            System.out.println(pos + " " + neg);
+        }
+    }
+
     static int passed = 0, failed = 0;
     static String capture(Runnable r) {
         PrintStream old = System.out;
@@ -537,6 +972,31 @@ public class BooleanCheck {
         check("static boolean t(String s) {\n    System.out.print(s);\n    return true;\n}\n\nstatic boolean f(String s) {\n    System.out.print(s);\n    return false;\n}\n\nif (t(\"a\") && t(\"b\") || t(\"c\")) {\n    System.out.print(\"X\");\n}\nSystem.out.println();", "abX\n", C33::run);
         check("static boolean t(String s) {\n    System.out.print(s);\n    return true;\n}\n\nstatic boolean f(String s) {\n    System.out.print(s);\n    return false;\n}\n\nif (!f(\"a\") && t(\"b\")) {\n    System.out.print(\"X\");\n}\nSystem.out.println();", "abX\n", C34::run);
         check("static boolean t(String s) {\n    System.out.print(s);\n    return true;\n}\n\nstatic boolean f(String s) {\n    System.out.print(s);\n    return false;\n}\n\nboolean r = f(\"a\") && t(\"b\") || f(\"c\") && t(\"d\");\nSystem.out.println(r);", "acfalse\n", C35::run);
+        check("int score = 95;\nString grade = \"\";\nif (score >= 90) {\n    grade = \"A\";\n} else if (score >= 80) {\n    grade = \"B\";\n} else if (score >= 70) {\n    grade = \"C\";\n} else {\n    grade = \"F\";\n}\nSystem.out.println(grade);", "A\n", C42::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint score = 95;\nString grade = \"\";\nif (t(\"L0\", score >= 90)) {\n    grade = \"A\";\n} else if (t(\"L1\", score >= 80)) {\n    grade = \"B\";\n} else if (t(\"L2\", score >= 70)) {\n    grade = \"C\";\n} else {\n    grade = \"F\";\n}\nSystem.out.println(grade);", "L0\nA\n", C43::run);
+        check("int score = 85;\nString grade = \"F\";\nif (score >= 90) {\n    grade = \"A\";\n}\nif (score >= 80) {\n    grade = \"B\";\n}\nif (score >= 70) {\n    grade = \"C\";\n}\nSystem.out.println(grade);", "C\n", C44::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint score = 85;\nString grade = \"F\";\nif (t(\"L0\", score >= 90)) {\n    grade = \"A\";\n}\nif (t(\"L1\", score >= 80)) {\n    grade = \"B\";\n}\nif (t(\"L2\", score >= 70)) {\n    grade = \"C\";\n}\nSystem.out.println(grade);", "L0\nL1\nL2\nC\n", C45::run);
+        check("int score = 85;\nif (score >= 90) {\n    System.out.println(\"A\");\n} else if (score >= 80) {\n    System.out.println(\"B\");\n} else if (score >= 70) {\n    System.out.println(\"C\");\n}", "B\n", C46::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint score = 85;\nif (t(\"L0\", score >= 90)) {\n    System.out.println(\"A\");\n} else if (t(\"L1\", score >= 80)) {\n    System.out.println(\"B\");\n} else if (t(\"L2\", score >= 70)) {\n    System.out.println(\"C\");\n}", "L0\nL1\nB\n", C47::run);
+        check("int score = 60;\nif (score >= 90) {\n    System.out.println(\"A\");\n} else if (score >= 80) {\n    System.out.println(\"B\");\n} else if (score >= 70) {\n    System.out.println(\"C\");\n} else {\n    System.out.println(\"F\");\n}", "F\n", C48::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint score = 60;\nif (t(\"L0\", score >= 90)) {\n    System.out.println(\"A\");\n} else if (t(\"L1\", score >= 80)) {\n    System.out.println(\"B\");\n} else if (t(\"L2\", score >= 70)) {\n    System.out.println(\"C\");\n} else {\n    System.out.println(\"F\");\n}", "L0\nL1\nL2\nF\n", C49::run);
+        check("int a = -2;\nint b = 5;\nif (a > 0) {\n    if (b > 0) {\n        System.out.println(\"both positive\");\n    }\n}\nSystem.out.println(\"done\");", "done\n", C50::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint a = -2;\nint b = 5;\nif (t(\"L0\", a > 0)) {\n    if (t(\"L1\", b > 0)) {\n        System.out.println(\"both positive\");\n    }\n}\nSystem.out.println(\"done\");", "L0\ndone\n", C51::run);
+        check("int n = 12;\nif (n % 2 == 0) {\n    System.out.println(\"even\");\n} else if (n % 3 == 0) {\n    System.out.println(\"multiple of 3\");\n}\nif (n % 4 == 0) {\n    System.out.println(\"multiple of 4\");\n}", "even\nmultiple of 4\n", C52::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint n = 12;\nif (t(\"L0\", n % 2 == 0)) {\n    System.out.println(\"even\");\n} else if (t(\"L1\", n % 3 == 0)) {\n    System.out.println(\"multiple of 3\");\n}\nif (t(\"L2\", n % 4 == 0)) {\n    System.out.println(\"multiple of 4\");\n}", "L0\neven\nL2\nmultiple of 4\n", C53::run);
+        check("int t = 55;\nif (t >= 80) {\n    System.out.println(\"hot\");\n} else if (t >= 60) {\n    System.out.println(\"mild\");\n} else if (t >= 40) {\n    System.out.println(\"cool\");\n} else {\n    System.out.println(\"cold\");\n}", "cool\n", C54::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint t = 55;\nif (t(\"L0\", t >= 80)) {\n    System.out.println(\"hot\");\n} else if (t(\"L1\", t >= 60)) {\n    System.out.println(\"mild\");\n} else if (t(\"L2\", t >= 40)) {\n    System.out.println(\"cool\");\n} else {\n    System.out.println(\"cold\");\n}", "L0\nL1\nL2\ncool\n", C55::run);
+        check("int age = 15;\nboolean member = true;\nif (age >= 18) {\n    if (member) {\n        System.out.println(\"adult member\");\n    }\n} else {\n    System.out.println(\"minor\");\n}", "minor\n", C56::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint age = 15;\nboolean member = true;\nif (t(\"L0\", age >= 18)) {\n    if (t(\"L1\", member)) {\n        System.out.println(\"adult member\");\n    }\n} else {\n    System.out.println(\"minor\");\n}", "L0\nminor\n", C57::run);
+        check("int n = 9;\nif (n % 2 == 0) {\n    System.out.println(\"even\");\n} else if (n % 3 == 0) {\n    System.out.println(\"multiple of 3\");\n}\nif (n % 4 == 0) {\n    System.out.println(\"multiple of 4\");\n}", "multiple of 3\n", C58::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint n = 9;\nif (t(\"L0\", n % 2 == 0)) {\n    System.out.println(\"even\");\n} else if (t(\"L1\", n % 3 == 0)) {\n    System.out.println(\"multiple of 3\");\n}\nif (t(\"L2\", n % 4 == 0)) {\n    System.out.println(\"multiple of 4\");\n}", "L0\nL1\nmultiple of 3\nL2\n", C59::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint a = 0;\nint b = 5;\nif (t(\"L0\", a > 0))\n    if (t(\"L1\", b < 0))\n        System.out.println(\"x\");\nelse\n    System.out.println(\"y\");\nSystem.out.println(\"done\");", "L0\ndone\n", C60::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint score = 95;\nString grade = \"F\";\nif (t(\"L0\", score >= 90)) {\n    grade = \"A\";\n}\nif (t(\"L1\", score >= 80)) {\n    grade = \"B\";\n}\nif (t(\"L2\", score >= 70)) {\n    grade = \"C\";\n}\nSystem.out.println(grade);", "L0\nL1\nL2\nC\n", C61::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint score = 95;\nString grade = \"F\";\nif (t(\"L0\", score >= 90)) {\n    grade = \"A\";\n} else if (t(\"L1\", score >= 80)) {\n    grade = \"B\";\n} else if (t(\"L2\", score >= 70)) {\n    grade = \"C\";\n}\nSystem.out.println(grade);", "L0\nA\n", C62::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint t = 75;\nif (t(\"L0\", t >= 80)) {\n    System.out.println(\"hot\");\n} else if (t(\"L1\", t >= 60)) {\n    System.out.println(\"mild\");\n} else {\n    System.out.println(\"cold\");\n}", "L0\nL1\nmild\n", C63::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint n = 15;\nif (t(\"L0\", n % 3 == 0)) {\n    System.out.print(\"Fizz\");\n}\nif (t(\"L1\", n % 5 == 0)) {\n    System.out.print(\"Buzz\");\n}\nSystem.out.println();", "L0\nFizzL1\nBuzz\n", C64::run);
+        check("int pos = 0;\nint neg = 0;\nfor (int x = -2; x <= 2; x++) {\n    if (x > 0) {\n        pos++;\n    } else if (x < 0) {\n        neg++;\n    }\n}\nSystem.out.println(pos + \" \" + neg);", "2 2\n", C65::run);
+        check("static boolean t(String label, boolean r) {\n    System.out.println(label);\n    return r;\n}\nint pos = 0;\nint neg = 0;\nfor (int x = -2; x <= 2; x++) {\n    if (t(\"L0\", x > 0)) {\n        pos++;\n    } else if (t(\"L1\", x < 0)) {\n        neg++;\n    }\n}\nSystem.out.println(pos + \" \" + neg);", "L0\nL1\nL0\nL1\nL0\nL1\nL0\nL0\n2 2\n", C66::run);
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         if (javac == null) throw new IllegalStateException("A JDK is needed to check compile claims.");
         compileCheck(javac, "int x = 5;\nSystem.out.println(x > 3 && 7);", "import java.util.ArrayList;\npublic class Snip {\nstatic class Player {\n    private String name;\n    private int score;\n    public Player(String startName, int startScore) { name = startName; score = startScore; }\n    public String getName() { return name; }\n    public int getScore() { return score; }\n    public void addScore(int amount) { score += amount; }\n}\n\nstatic void run() {\nint x = 5;\nSystem.out.println(x > 3 && 7);\n}\n}", false);
